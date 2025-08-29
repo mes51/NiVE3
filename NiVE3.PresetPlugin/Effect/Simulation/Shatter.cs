@@ -122,12 +122,17 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         int LastSimulationRandomSeed { get; set; }
 
+        int LastRealWidth { get; set; }
+
+        int LastRealHeight { get; set; }
+
         static Shatter()
         {
-            ForceCircles = new Vector256<double>[3][];
-            ForceCircles[0] = new Vector256<double>[ForceCirclePointCount];
-            ForceCircles[1] = new Vector256<double>[ForceCirclePointCount];
-            ForceCircles[2] = new Vector256<double>[ForceCirclePointCount];
+            ForceCircles = [
+                new Vector256<double>[ForceCirclePointCount],
+                new Vector256<double>[ForceCirclePointCount],
+                new Vector256<double>[ForceCirclePointCount]
+            ];
 
             for (var i = 0; i < ForceCirclePointCount; i++)
             {
@@ -235,12 +240,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 p.CalcValuesHash(hash);
             }
             var propertyHash = hash.ToInt128();
-            if (LastSimulateFrameRate != composition.FrameRate || LastSimulationRate != simulationRate || LastSimulationRandomSeed != simulationRandomSeed || LastPropertyHash != propertyHash)
+            if (LastRealWidth != realWidth || LastRealHeight != realHeight || LastSimulateFrameRate != composition.FrameRate || LastSimulationRate != simulationRate || LastSimulationRandomSeed != simulationRandomSeed || LastPropertyHash != propertyHash)
             {
                 CurrentShapes = GenerateShapes(realWidth, realHeight, roi.OriginalImageSize, roi.OriginalImagePosition, shapeGroup, layerTime);
                 SimulatedShapes.Clear();
                 SimulatedShapeTimes.Clear();
                 LastSimulateTime = Time.Zero;
+                LastRealWidth = realWidth;
+                LastRealHeight = realHeight;
                 LastSimulateFrameRate = composition.FrameRate;
                 LastSimulationRate = simulationRate;
                 LastSimulationRandomSeed = simulationRandomSeed;
@@ -250,7 +257,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             if (LastSimulateTime <= layerTime)
             {
                 var size = Math.Max(realWidth, realHeight);
-                SimulateShatter(size, layerTime + new Time(1, composition.FrameRate), composition.FrameRate, forces, worldGroup, simulationRate, simulationRandomSeed);
+                SimulateShatter(size, new Vector2d(roi.OriginalImagePosition.X, roi.OriginalImagePosition.Y), layerTime + new Time(1, composition.FrameRate), composition.FrameRate, forces, worldGroup, simulationRate, simulationRandomSeed);
 
                 LastSimulateTime = layerTime;
             }
@@ -361,7 +368,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         public void Dispose() { }
 
-        void SimulateShatter(int size, Time toTime, double frameRate, IReadOnlyCollection<IPropertyObject> forces, IReadOnlyCollection<IPropertyObject> worldGroup, int simulationRate, int simulationRandomSeed)
+        void SimulateShatter(int size, Vector2d originalImagePosition, Time toTime, double frameRate, IReadOnlyCollection<IPropertyObject> forces, IReadOnlyCollection<IPropertyObject> worldGroup, int simulationRate, int simulationRandomSeed)
         {
             if (toTime <= 0.0)
             {
@@ -375,7 +382,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var forceValues = forces.Where(p => p.IsEnable).Select(p =>
             {
                 var forceProperties = p.GetChildren() ?? [];
-                var position = forceProperties.GetValue(PropertyForcePositionId, toTime, Vector3d.Zero).AsVector256() / size;
+                var position = (forceProperties.GetValue(PropertyForcePositionId, toTime, Vector3d.Zero).AsVector256() + originalImagePosition.AsVector256()) / size;
                 var radius = forceProperties.GetValue(PropertyForceRadiusId, toTime, 0.0) / size;
                 var power = forceProperties.GetValue(PropertyForcePowerId, toTime, 0.0) / size;
                 var startTime = forceProperties.GetValue(PropertyForceStartTimeId, toTime, 0.0);

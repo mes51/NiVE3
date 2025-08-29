@@ -38,18 +38,20 @@ namespace NiVE3.PresetPlugin.Effect.Util
             var originalWidth = roi.OriginalImageSize.Width * downSamplingRateX;
             var originalHeight = roi.OriginalImageSize.Height * downSamplingRateY;
             var fov = 0.0;
-            // TODO: ROI変更分のズレを合わせる
+            var size = Math.Max(realWidth, realHeight);
+
             if (useCompositionCamera)
             {
-                var size = Math.Max(realWidth, realHeight);
+                var offsetX = ((composition.Width - originalWidth) * 0.5 - (realWidth - originalWidth) * 0.5) / size;
+                var offsetY = ((composition.Height - originalHeight) * 0.5 - (realHeight - originalHeight) * 0.5) / size;
                 var cameraSetting = composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint);
                 fov = Math.Atan(realWidth / cameraSetting.Zoom * 0.5) * 2.0;
-                var offsetX = (composition.Width - originalWidth) * 0.5 / size;
-                var offsetY = (composition.Height - originalHeight) * 0.5 / size;
                 return (Transform3D.Calc3DViewMatrix(cameraSetting, realWidth, realHeight) * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0), fov);
             }
             else
             {
+                var offsetX = -(realWidth - originalWidth) * 0.5 / size;
+                var offsetY = -(realHeight - originalHeight) * 0.5 / size;
                 var zoom = cameraProperties.GetValue(PropertyCameraZoomId, layerTime, 0.0);
                 fov = Math.Atan(realWidth / zoom * 0.5) * 2.0;
                 return (Transform3D.Calc3DViewMatrix(
@@ -65,7 +67,7 @@ namespace NiVE3.PresetPlugin.Effect.Util
                     ),
                     realWidth,
                     realHeight
-                ), fov);
+                ) * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0), fov);
             }
         }
     }
