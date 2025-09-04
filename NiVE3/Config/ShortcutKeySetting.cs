@@ -487,6 +487,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty PrecomposeGestureProperty = DependencyProperty.Register(
+            nameof(PrecomposeGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture PrecomposeGesture
+        {
+            get { return (InputGesture)GetValue(PrecomposeGestureProperty); }
+            set { SetValue(PrecomposeGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture LoadPresetGesture

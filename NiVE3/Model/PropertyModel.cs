@@ -465,6 +465,16 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void ClearProperty()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ResetPropertyValue));
+
+            ClearKeyFrame();
+            CommitProperty(Property.DefaultValue, RawValue);
+
+            HistoryModel.EndGroup();
+        }
+
         PropertyValueGroup? IPropertyObject.GetValues(Time layerTime, bool withoutDisableProperty)
         {
             return null;

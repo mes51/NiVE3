@@ -175,10 +175,17 @@ namespace NiVE3.Model
             };
         }
 
-        public void AddComposition(CompositionModel composition)
+        public Guid? AddComposition(CompositionModel composition)
         {
             var compositionInput = new CompositionInput(composition);
-            LoadFile(compositionInput, "", null, null, CompositionInput.PluginId, true);
+            var loaded = LoadFile(compositionInput, "", null, null, CompositionInput.PluginId, true);
+
+            return loaded.Footage switch
+            {
+                FootageModel solid => (Guid?)solid.FootageId,
+                FootageFolderModel folder => (Guid?)Flatten(folder.Children).First().FootageId,
+                _ => null,
+            };
         }
 
         public void AddFolder()

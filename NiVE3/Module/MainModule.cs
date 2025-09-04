@@ -90,6 +90,7 @@ namespace NiVE3.Module
             containerRegistry.RegisterDialog<ShortcutKeySettingView, ShortcutKeySettingViewModel>();
             containerRegistry.RegisterDialog<AboutView, AboutViewModel>();
             containerRegistry.RegisterDialog<PlayRateSettingView, PlayRateSettingViewModel>();
+            containerRegistry.RegisterDialog<PrecomposeSettingView, PrecomposeSettingViewModel>();
         }
     }
 }

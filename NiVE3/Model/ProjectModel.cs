@@ -165,6 +165,30 @@ namespace NiVE3.Model
             OnOpenCompositionTimeline(composition);
         }
 
+        public FootageModel? CreateCompositionFromData(CompositionData data)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_Precompose));
+
+            var conversionResult = CompositionModel.ConvertDataForImport(data, []);
+            var composition = new CompositionModel(data.RendererPluginId, data.ToneMapperPluginId, FootageListModel, EffectListModel, RenderQueueModel, TextPropertyModel, RendererListModel, ToneMapperListModel, this, HistoryModel, AcceleratorModel, data.CompositionId);
+            composition.LoadData(data);
+            composition.UpdatePropertyForImport(conversionResult.LayerIdMap, conversionResult.EffectIdMaps, conversionResult.MaskIdMaps);
+            HistoryModel.Add(new AddCompositionHistoryCommand(this, composition));
+            AddCompositionModel(composition);
+            var footageId = FootageListModel.AddComposition(composition);
+
+            HistoryModel.EndGroup();
+
+            if (footageId.HasValue)
+            {
+                return FootageListModel.GetFootages(footageId.Value).FirstOrDefault();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public void RemovePreview(PreviewModelBase previewModel)
         {
             PreviewModels.Remove(previewModel);

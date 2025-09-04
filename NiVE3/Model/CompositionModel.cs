@@ -1055,8 +1055,8 @@ namespace NiVE3.Model
                 TimeBarRange = TimeBarRange,
                 TimeBarRangeStart = TimeBarRangeStart,
                 CurrentTime = CurrentTime,
-                Layers = Layers.Select(l => l.SaveData()).ToArray(),
-                CompositionMarkers = CompositionMarkers.Select(m => new MarkerData { MarkerId = m.MarkerId, Time = m.Time, Name = m.Name }).ToArray()
+                Layers = [..Layers.Select(l => l.SaveData())],
+                CompositionMarkers = [..CompositionMarkers.Select(m => new MarkerData { MarkerId = m.MarkerId, Time = m.Time, Name = m.Name })]
             };
         }
 
@@ -1736,6 +1736,110 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeMarkerNameHistoryCommand(this, oldMarker, newMarker, index));
         }
 
+        public void Precompose(Guid[] layerIds, string compositionName, bool isMoveAll, bool alignDuration, bool copyParent, Guid? insertTargetId)
+        {
+            var layers = Layers.Where(l => layerIds.Contains(l.LayerId)).ToArray();
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_Precompose));
+
+            if (layers.Length == 1 && !isMoveAll)
+            {
+                var compositionData = SaveTargetLayerOnly(layers);
+                compositionData.Name = compositionName;
+                if (layers[0].IsVideo || layers[0].HasAudio)
+                {
+                    compositionData.Duration = layers[0].Duration;
+                    compositionData.Layers[0].SourceStartPoint = Time.Zero;
+                    compositionData.Layers[0].InPoint = Time.Zero;
+                    compositionData.Layers[0].OutPoint = layers[0].Duration;
+                    compositionData.WorkareaBegin = Time.Zero;
+                    compositionData.WorkareaEnd = layers[0].Duration;
+                }
+                else
+                {
+                    compositionData.Layers[0].SourceStartPoint = Time.Zero;
+                    compositionData.Layers[0].InPoint = Time.Zero;
+                    compositionData.Layers[0].OutPoint = compositionData.Duration;
+                    compositionData.WorkareaBegin = Time.Zero;
+                    compositionData.WorkareaEnd = compositionData.Duration;
+                }
+                compositionData.TimeBarRangeStart = Time.Zero;
+                compositionData.TimeBarRange = compositionData.Duration;
+
+                if (layers[0].FootageWidth != 0)
+                {
+                    compositionData.Width = layers[0].FootageWidth;
+                    compositionData.Height = layers[0].FootageHeight;
+                }
+                var compositionFootage = ProjectModel.CreateCompositionFromData(compositionData);
+                if (compositionFootage != null)
+                {
+                    (compositionFootage.InputModel.Input as CompositionInput)?.Composition?.RemoveAllLayerAttribute();
+                    layers[0].ReplaceFootage(compositionFootage);
+                }
+                else
+                {
+                    HistoryModel.AbortGroup();
+                }
+            }
+            else
+            {
+                CompositionData compositionData;
+                if (copyParent)
+                {
+                    var parentIds = layers.Select(l => l.ParentLayerId).NonNull().ToArray();
+                    var parents = Layers.Where(l => parentIds.Contains(l.LayerId)).ToArray();
+                    var combinedLayers = layers.Concat(parents).OrderBy(Layers.IndexOf).ToArray();
+                    compositionData = SaveTargetLayerOnly(combinedLayers);
+                    foreach (var layerData in compositionData.Layers.Where(ld => parentIds.Contains(ld.LayerId)))
+                    {
+                        layerData.IsEnableVideo = false;
+                        layerData.IsEnableAudio = false;
+                    }
+                }
+                else
+                {
+                    compositionData = SaveTargetLayerOnly(layers);
+                }
+                compositionData.Name = compositionName;
+                compositionData.WorkareaBegin = Time.Zero;
+
+                var sourceStartPoint = Time.Zero;
+                if (alignDuration)
+                {
+                    sourceStartPoint = layers.Min(l => l.SourceStartPoint + l.InPoint);
+                    var duration = layers.Max(l => l.SourceStartPoint + l.OutPoint) - sourceStartPoint;
+                    compositionData.Duration = duration;
+                    compositionData.WorkareaEnd = duration;
+
+                    for (var i = 0; i < compositionData.Layers.Length; i++)
+                    {
+                        compositionData.Layers[i].SourceStartPoint -= sourceStartPoint;
+                    }
+                }
+                else
+                {
+                    compositionData.WorkareaEnd = compositionData.Duration;
+                }
+                compositionData.TimeBarRangeStart = Time.Zero;
+                compositionData.TimeBarRange = compositionData.Duration;
+
+                var compositionFootage = ProjectModel.CreateCompositionFromData(compositionData);
+                if (compositionFootage == null)
+                {
+                    HistoryModel.AbortGroup();
+                    return;
+                }
+
+                var insertTargetIndex = Layers.FindIndex(l => l.LayerId == insertTargetId);
+                DeleteLayers(layerIds);
+                insertTargetIndex = Math.Clamp(insertTargetIndex, 0, Layers.Count);
+                InsertLayers(compositionFootage.FootageId, insertTargetIndex, sourceStartPoint);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public ILayerObject? GetLayer(Guid layerId)
         {
             return Layers.FirstOrDefault(l => l.LayerId == layerId);
@@ -2291,6 +2395,49 @@ namespace NiVE3.Model
             }
 
             return gpuImage;
+        }
+
+        CompositionData SaveTargetLayerOnly(LayerModel[] layers)
+        {
+            return new CompositionData
+            {
+                CompositionId = CompositionId,
+                Name = Name,
+                Width = Width,
+                Height = Height,
+                FrameRate = FrameRate,
+                Duration = Duration,
+                IsRetentionFrameRate = IsRetentionFrameRate,
+                ApplyToneMappingWhenNested = ApplyToneMappingWhenNested,
+                ShutterAngle = ShutterAngle,
+                ShutterPhase = ShutterPhase,
+                MotionBlurSampleCount = MotionBlurSampleCount,
+                WorkareaBegin = WorkareaBegin,
+                WorkareaEnd = WorkareaEnd,
+                IsEnableShy = IsEnableShy,
+                IsEnableFrameBlend = IsEnableFrameBlend,
+                IsEnableMotionBlur = IsEnableMotionBlur,
+                RendererPluginId = RendererPluginId,
+                ToneMapperPluginId = ToneMapperPluginId,
+                RendererSetting = Renderer.SaveSetting(),
+                ToneMapperSetting = ToneMapper.SaveSetting(),
+                TimeBarRange = TimeBarRange,
+                TimeBarRangeStart = TimeBarRangeStart,
+                CurrentTime = CurrentTime,
+                Layers = [..layers.Select(l => l.SaveData())],
+                CompositionMarkers = [..CompositionMarkers.Select(m => new MarkerData { MarkerId = m.MarkerId, Time = m.Time, Name = m.Name })]
+            };
+        }
+
+        void RemoveAllLayerAttribute()
+        {
+            foreach (var layer in Layers)
+            {
+                layer.TransformProperties?.ClearAllChildren();
+                layer.AudioOptionProperties?.ClearAllChildren();
+                layer.DeleteMask([..layer.Masks.Select(m => m.MaskId)]);
+                layer.DeleteEffect([..layer.Effects.Select(e => e.EffectId)]);
+            }
         }
 
         public static CompositionDataImportConvertionResult ConvertDataForImport(CompositionData compositionData, Dictionary<Guid, Guid> footageIdMap)

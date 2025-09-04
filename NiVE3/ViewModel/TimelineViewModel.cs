@@ -92,6 +92,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(PlayOrStopCommand), nameof(ShortcutKeySetting.PlayOrStopGesture))]
     [CommandHandling(nameof(SavePresetCommand), nameof(ShortcutKeySetting.SavePresetGesture))]
     [CommandHandling(nameof(LoadPresetCommand), nameof(ShortcutKeySetting.LoadPresetGesture))]
+    [CommandHandling(nameof(PrecomposeCommand), nameof(ShortcutKeySetting.PrecomposeGesture))]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
         private Guid compositionId;
@@ -587,6 +588,8 @@ namespace NiVE3.ViewModel
         public ICommand SavePresetCommand { get; }
 
         public ICommand LoadPresetCommand { get; }
+
+        public ICommand PrecomposeCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
@@ -1411,6 +1414,33 @@ namespace NiVE3.ViewModel
                     }
                 }
             }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
+
+            PrecomposeCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                var param = new DialogParameters
+                {
+                    { nameof(PrecomposeSettingViewModel.LayerName), SelectedLayers[0].Name },
+                    { nameof(PrecomposeSettingViewModel.HasParent), SelectedLayers.Any(l => l.ParentLayerId.HasValue) },
+                    { nameof(PrecomposeSettingViewModel.TargetIsSingleLayer), SelectedLayers.Count == 1 }
+                };
+                IDialogResult? result = null;
+                DialogService.ShowDialog(nameof(PrecomposeSettingView), param, r => result = r);
+                if (result != null && result.Result == ButtonResult.OK)
+                {
+                    var compositionName = result.Parameters.GetValue<string>(nameof(PrecomposeSettingViewModel.NewCompositionName));
+                    var mode = result.Parameters.GetValue<PrecomposeMode>(nameof(PrecomposeSettingViewModel.Mode));
+                    var alignDuration = result.Parameters.GetValue<bool>(nameof(PrecomposeSettingViewModel.AlignDurationToLayer));
+                    var copyParent = result.Parameters.GetValue<bool>(nameof(PrecomposeSettingViewModel.CopyParent));
+                    CompositionModel.Precompose([..SelectedLayers.Select(l => l.LayerId)], compositionName, mode == PrecomposeMode.MoveAll, alignDuration, copyParent, LastSelectedLayerId);
+                }
+            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers);
 
             AudioPlayerModel = audioPlayerModel;
         }

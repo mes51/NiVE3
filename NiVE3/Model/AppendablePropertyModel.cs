@@ -295,6 +295,11 @@ namespace NiVE3.Model
             ResetProperties([.. Children.OfType<PropertyGroupModel>().Select(c => c.InstanceId)]);
         }
 
+        public void ClearAllChildren()
+        {
+            DeleteChildren([..Children.OfType<PropertyGroupModel>().Select(c => c.InstanceId)]);
+        }
+
         public void AddChild(AppendablePropertyItem item)
         {
             var child = AddChildInternal(item, null);

@@ -473,6 +473,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト/マスクプリセットの適用(_G)...")]
         public static readonly string Timeline_ContextMenu_LoadEffectOrMaskPreset = nameof(Timeline_ContextMenu_LoadEffectOrMaskPreset);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("プリコンポーズ...(_H)")]
+        public static readonly string Timeline_ContextMenu_Precompose = nameof(Timeline_ContextMenu_Precompose);
+
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
@@ -977,6 +980,24 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("マーカーを名前の変更(_N)...")]
         public static readonly string MarkerCollection_ContextMenu_EditMarkerName = nameof(MarkerCollection_ContextMenu_EditMarkerName);
 
+        [DefaultValue("プリコンポーズ")]
+        public static readonly string PrecomposeSettingView_Title = nameof(PrecomposeSettingView_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション名:")]
+        public static readonly string PrecomposeSettingView_NewCompositionName_Label = nameof(PrecomposeSettingView_NewCompositionName_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("全ての属性を元のコンポジションに残す")]
+        public static readonly string PrecomposeSettingView_Mode_LeaveAll = nameof(PrecomposeSettingView_Mode_LeaveAll);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("全ての属性を新規のコンポジションに移動する")]
+        public static readonly string PrecomposeSettingView_Mode_MoveAll = nameof(PrecomposeSettingView_Mode_MoveAll);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジションの長さをレイヤーに合わせる")]
+        public static readonly string PrecomposeSettingView_AlignDurationToLayer = nameof(PrecomposeSettingView_AlignDurationToLayer);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("親レイヤーを非表示で新規のコンポジションにコピーする")]
+        public static readonly string PrecomposeSettingView_CopyParent = nameof(PrecomposeSettingView_CopyParent);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
@@ -1259,6 +1280,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("マーカーの名前の変更")]
         public static readonly string History_ChangeCompositionMarkerName = nameof(History_ChangeCompositionMarkerName);
+
+        [DefaultValue("プリコンポーズ")]
+        public static readonly string History_Precompose = nameof(History_Precompose);
 
         // Dialog
 

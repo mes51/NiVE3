@@ -393,6 +393,29 @@ namespace NiVE3.Model
             ResetProperties([.. Children.Select(c => c.Property.Id)]);
         }
 
+        public void ClearAllChildren()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ResetPropertyValue));
+
+            foreach (var c in Children)
+            {
+                switch (c)
+                {
+                    case PropertyModel p:
+                        p.ClearProperty();
+                        break;
+                    case PropertyGroupModel pg:
+                        pg.ClearAllChildren();
+                        break;
+                    case AppendablePropertyModel ap:
+                        ap.ClearAllChildren();
+                        break;
+                }
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public IPropertyModel? FindProperty(string propertyId)
         {
             var child = Children.FirstOrDefault(c => c.Property.Id == propertyId);
