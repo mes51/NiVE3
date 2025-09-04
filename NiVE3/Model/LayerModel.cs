@@ -352,17 +352,17 @@ namespace NiVE3.Model
             }
         }
 
-        public PropertyGroupModel? TransformProperties { get; }
+        public PropertyGroupModel? TransformProperties { get; set; }
 
-        public PropertyGroupModel? LayerOptionProperties { get; }
+        public PropertyGroupModel? LayerOptionProperties { get; set; }
 
-        public PropertyGroupModel? TextProperties { get; }
+        public PropertyGroupModel? TextProperties { get; set; }
 
-        public PropertyGroupModel? ShapeProperties { get; }
+        public PropertyGroupModel? ShapeProperties { get; set; }
 
-        public PropertyGroupModel? SourceOptionProperties { get; }
+        public PropertyGroupModel? SourceOptionProperties { get; set; }
 
-        public PropertyGroupModel? AudioOptionProperties { get; }
+        public PropertyGroupModel? AudioOptionProperties { get; set; }
 
         public IReadOnlyCollection<Guid> EffectIdentifiers => [..Effects.Select(e => e.EffectId)];
 
@@ -518,96 +518,11 @@ namespace NiVE3.Model
                     ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     break;
                 default:
-                    if (footageModel.InputModel.Input is TextInput)
-                    {
-                        TextProperties = new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.ResourceKeys.Layer_TextOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
-                    }
-                    else if (footageModel.InputModel.Input is ShapeInput)
-                    {
-                        ShapeProperties = new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.ResourceKeys.Layer_ShapeOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
-                    }
-                    else if (footageModel.IsCustomizableFootageSource)
-                    {
-                        SourceOptionProperties = new PropertyGroupModel(new PropertyGroup(SourceOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_SourceOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
-                    }
-                    if (footageModel.InputType.HasFlag(SourceType.Audio))
-                    {
-                        AudioOptionProperties = new PropertyGroupModel(new PropertyGroup(AudioOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_AudioOption,
-                        [
-                            new Vector3dProperty(
-                                ILayerObject.AudioLevelId,
-                                LanguageResourceDictionary.ResourceKeys.Layer_AudioOption_AudioLevel,
-                                new Vector3d(),
-                                new Vector3d(-192.0),
-                                new Vector3d(24.0),
-                                digit: 2,
-                                unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Decibel,
-                                separator: ",",
-                                useLinkRatio: true
-                            )
-                        ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
-                    }
-                    if (footageModel.InputType.HasFlag(SourceType.Video) || footageModel.InputType.HasFlag(SourceType.Image))
-                    {
-                        TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, LanguageResourceDictionary.ResourceKeys.Layer_Transform,
-                        [
-                            new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.TransformProperty_AnchorPoint, new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), digit: 2),
-                            new Vector2DOr3DProperty(ILayerObject.TransformPositionId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Translate, new Vector3d(compositionModel.Width * 0.5, compositionModel.Height * 0.5, 0.0), digit: 2),
-                            new Scale2DOr3DProperty(ILayerObject.TransformScaleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Scale, new Vector3d(100.0, 100.0, 100.0), digit: 2),
-                            new Direction3DProperty(ILayerObject.TransformDirectionId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Direction, new Vector3d(), digit: 2),
-                            new Angle3DElementProperty(ILayerObject.TransformXAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_XAngle3D, 0.0, digit: 2),
-                            new Angle3DElementProperty(ILayerObject.TransformYAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_YAngle3D, 0.0, digit: 2),
-                            new ZAngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle2D, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2),
-                            new DoubleProperty(ILayerObject.TransformPropertyOpacityId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
-                        ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
-                        LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer,
-                        [
-                            new EnumProperty(ILayerObject.ImageLayerOptionIsCastShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsCastShadow, typeof(ShadowCastMode), typeof(LanguageResourceDictionary), ShadowCastMode.None, selectBoxWidth: 100),
-                            new DoubleProperty(ILayerObject.ImageLayerOptionLightTransmissionId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_LightTransmission, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                            new CheckBoxProperty(ILayerObject.ImageLayerOptionIsAcceptShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsAcceptShadow, true),
-                            new CheckBoxProperty(ILayerObject.ImageLayerOptionIsAcceptLightId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsAcceptLight, true),
-                            new DoubleProperty(ILayerObject.ImageLayerOptionAmbientId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Ambient, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                            new DoubleProperty(ILayerObject.ImageLayerOptionDiffuseId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Diffuse, 50.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                            new DoubleProperty(ILayerObject.ImageLayerOptionSpecularIntensityId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_SpecularIntensity, 50.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                            new DoubleProperty(ILayerObject.ImageLayerOptionSpecularShininessId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_SpecularShininess, 5.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                            new DoubleProperty(ILayerObject.ImageLayerOptionMetalId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Metal, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                        ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
-                    }
+                    LoadProperty(footageModel);
                     break;
             }
 
             FootageModel.FootageUpdated += FootageModel_FootageUpdated;
-
-            if (TransformProperties != null)
-            {
-                TransformProperties.ValueUpdated += Properties_ValueUpdated;
-                TransformProperties.ValueCommited += Properties_ValueCommited;
-            }
-            if (LayerOptionProperties != null)
-            {
-                LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
-                LayerOptionProperties.ValueCommited += Properties_ValueCommited;
-            }
-            if (TextProperties != null)
-            {
-                TextProperties.ValueUpdated += Properties_ValueUpdated;
-                TextProperties.ValueCommited += Properties_ValueCommited;
-            }
-            if (ShapeProperties != null)
-            {
-                ShapeProperties.ValueUpdated += Properties_ValueUpdated;
-                ShapeProperties.ValueCommited += Properties_ValueCommited;
-            }
-            if (SourceOptionProperties != null)
-            {
-                SourceOptionProperties.ValueUpdated += Properties_ValueUpdated;
-                SourceOptionProperties.ValueCommited += Properties_ValueCommited;
-            }
-            if (AudioOptionProperties != null)
-            {
-                AudioOptionProperties.ValueUpdated += Properties_ValueUpdated;
-                AudioOptionProperties.ValueCommited += Properties_ValueCommited;
-            }
             PropertyChanged += LayerModel_PropertyChanged;
         }
 
@@ -1744,7 +1659,27 @@ namespace NiVE3.Model
             SourceDuration = footageModel.Duration;
             SourceType = footageModel.InputType;
 
-            HistoryModel.Add(new ReplaceFootageHistoryCommand(this, oldFootage, footageModel));
+            var (oldTextProperties, oldShapeProperties, oldSourceOptionProperties, oldAudioOptionProperties, oldTransformProperties, oldLayerOptionProperties) = LoadProperty(footageModel);
+
+            HistoryModel.Add(
+                new ReplaceFootageHistoryCommand(
+                    this,
+                    oldFootage,
+                    oldTextProperties,
+                    oldShapeProperties,
+                    oldSourceOptionProperties,
+                    oldAudioOptionProperties,
+                    oldTransformProperties,
+                    oldLayerOptionProperties,
+                    footageModel,
+                    TextProperties,
+                    ShapeProperties,
+                    SourceOptionProperties,
+                    AudioOptionProperties,
+                    TransformProperties,
+                    LayerOptionProperties
+                )
+            );
 
             RaisePropertyChanged(nameof(SourceName));
             RaisePropertyChanged(nameof(IsComposition));
@@ -2610,6 +2545,111 @@ namespace NiVE3.Model
                     managedAddFrame.Dispose();
                 }
             }
+        }
+
+        (PropertyGroupModel? oldTextProperties, PropertyGroupModel? oldShapeProperties, PropertyGroupModel? oldSourceOptionProperties, PropertyGroupModel? oldAudioOptionProperties, PropertyGroupModel? oldTransformProperties, PropertyGroupModel? oldLayerOptionProperties) LoadProperty(FootageModel footageModel)
+        {
+            var oldTextProperties = TextProperties;
+            var oldShapeProperties = ShapeProperties;
+            var oldSourceOptionProperties = SourceOptionProperties;
+            var oldAudioOptionProperties = AudioOptionProperties;
+            var oldTransformProperties = TransformProperties;
+            var oldLayerOptionProperties = LayerOptionProperties;
+
+            TextProperties = null;
+            ShapeProperties = null;
+            SourceOptionProperties = null;
+            AudioOptionProperties = null;
+            TransformProperties = null;
+            LayerOptionProperties = null;
+            if (footageModel.InputModel.Input is TextInput)
+            {
+                TextProperties = new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.ResourceKeys.Layer_TextOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+            }
+            else if (footageModel.InputModel.Input is ShapeInput)
+            {
+                ShapeProperties = new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.ResourceKeys.Layer_ShapeOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+            }
+            else if (footageModel.IsCustomizableFootageSource)
+            {
+                SourceOptionProperties = new PropertyGroupModel(new PropertyGroup(SourceOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_SourceOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+            }
+            if (footageModel.InputType.HasFlag(SourceType.Audio))
+            {
+                AudioOptionProperties = new PropertyGroupModel(new PropertyGroup(AudioOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_AudioOption,
+                [
+                    new Vector3dProperty(
+                                ILayerObject.AudioLevelId,
+                                LanguageResourceDictionary.ResourceKeys.Layer_AudioOption_AudioLevel,
+                                new Vector3d(),
+                                new Vector3d(-192.0),
+                                new Vector3d(24.0),
+                                digit: 2,
+                                unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Decibel,
+                                separator: ",",
+                                useLinkRatio: true
+                            )
+                ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+            }
+            if (footageModel.InputType.HasFlag(SourceType.Video) || footageModel.InputType.HasFlag(SourceType.Image))
+            {
+                TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, LanguageResourceDictionary.ResourceKeys.Layer_Transform,
+                [
+                    new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.TransformProperty_AnchorPoint, new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), digit: 2),
+                            new Vector2DOr3DProperty(ILayerObject.TransformPositionId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Translate, new Vector3d(CompositionModel.Width * 0.5, CompositionModel.Height * 0.5, 0.0), digit: 2),
+                            new Scale2DOr3DProperty(ILayerObject.TransformScaleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Scale, new Vector3d(100.0, 100.0, 100.0), digit: 2),
+                            new Direction3DProperty(ILayerObject.TransformDirectionId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Direction, new Vector3d(), digit: 2),
+                            new Angle3DElementProperty(ILayerObject.TransformXAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_XAngle3D, 0.0, digit: 2),
+                            new Angle3DElementProperty(ILayerObject.TransformYAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_YAngle3D, 0.0, digit: 2),
+                            new ZAngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle2D, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2),
+                            new DoubleProperty(ILayerObject.TransformPropertyOpacityId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
+                ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+                LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer,
+                [
+                    new EnumProperty(ILayerObject.ImageLayerOptionIsCastShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsCastShadow, typeof(ShadowCastMode), typeof(LanguageResourceDictionary), ShadowCastMode.None, selectBoxWidth: 100),
+                            new DoubleProperty(ILayerObject.ImageLayerOptionLightTransmissionId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_LightTransmission, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new CheckBoxProperty(ILayerObject.ImageLayerOptionIsAcceptShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsAcceptShadow, true),
+                            new CheckBoxProperty(ILayerObject.ImageLayerOptionIsAcceptLightId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsAcceptLight, true),
+                            new DoubleProperty(ILayerObject.ImageLayerOptionAmbientId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Ambient, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new DoubleProperty(ILayerObject.ImageLayerOptionDiffuseId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Diffuse, 50.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new DoubleProperty(ILayerObject.ImageLayerOptionSpecularIntensityId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_SpecularIntensity, 50.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new DoubleProperty(ILayerObject.ImageLayerOptionSpecularShininessId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_SpecularShininess, 5.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                            new DoubleProperty(ILayerObject.ImageLayerOptionMetalId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_Metal, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+            }
+
+            if (TransformProperties != null)
+            {
+                TransformProperties.ValueUpdated += Properties_ValueUpdated;
+                TransformProperties.ValueCommited += Properties_ValueCommited;
+            }
+            if (LayerOptionProperties != null)
+            {
+                LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                LayerOptionProperties.ValueCommited += Properties_ValueCommited;
+            }
+            if (TextProperties != null)
+            {
+                TextProperties.ValueUpdated += Properties_ValueUpdated;
+                TextProperties.ValueCommited += Properties_ValueCommited;
+            }
+            if (ShapeProperties != null)
+            {
+                ShapeProperties.ValueUpdated += Properties_ValueUpdated;
+                ShapeProperties.ValueCommited += Properties_ValueCommited;
+            }
+            if (SourceOptionProperties != null)
+            {
+                SourceOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                SourceOptionProperties.ValueCommited += Properties_ValueCommited;
+            }
+            if (AudioOptionProperties != null)
+            {
+                AudioOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                AudioOptionProperties.ValueCommited += Properties_ValueCommited;
+            }
+
+            return (oldTextProperties, oldShapeProperties, oldSourceOptionProperties, oldAudioOptionProperties, oldTransformProperties, oldLayerOptionProperties);
         }
 
         public static (Guid oldId, Guid newId, Dictionary<Guid, Guid> effectIdMa, Dictionary<Guid, Guid> maskIdMapp) ConvertDataForImport(LayerData layerData, Dictionary<Guid, Guid> footageIdMap)

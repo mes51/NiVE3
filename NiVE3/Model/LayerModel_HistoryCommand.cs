@@ -628,13 +628,65 @@ namespace NiVE3.Model
 
             FootageModel OldFootage { get; }
 
+            PropertyGroupModel? OldTextProperties { get; }
+
+            PropertyGroupModel? OldShapeProperties { get; }
+
+            PropertyGroupModel? OldSourceOptionProperties { get; }
+
+            PropertyGroupModel? OldAudioOptionProperties { get; }
+
+            PropertyGroupModel? OldTransformProperties { get; }
+
+            PropertyGroupModel? OldLayerOptionProperties { get; }
+
             FootageModel NewFootage { get; }
 
-            public ReplaceFootageHistoryCommand(LayerModel model, FootageModel oldFootage, FootageModel newFootage)
+            PropertyGroupModel? NewTextProperties { get; }
+
+            PropertyGroupModel? NewShapeProperties { get; }
+
+            PropertyGroupModel? NewSourceOptionProperties { get; }
+
+            PropertyGroupModel? NewAudioOptionProperties { get; }
+
+            PropertyGroupModel? NewTransformProperties { get; }
+
+            PropertyGroupModel? NewLayerOptionProperties { get; }
+
+            public ReplaceFootageHistoryCommand(
+                LayerModel model,
+                FootageModel oldFootage,
+                PropertyGroupModel? oldTextProperties,
+                PropertyGroupModel? oldShapeProperties,
+                PropertyGroupModel? oldSourceOptionProperties,
+                PropertyGroupModel? oldAudioOptionProperties,
+                PropertyGroupModel? oldTransformProperties,
+                PropertyGroupModel? oldLayerOptionProperties,
+                FootageModel newFootage,
+                PropertyGroupModel? newTextProperties,
+                PropertyGroupModel? newShapeProperties,
+                PropertyGroupModel? newSourceOptionProperties,
+                PropertyGroupModel? newAudioOptionProperties,
+                PropertyGroupModel? newTransformProperties,
+                PropertyGroupModel? newLayerOptionProperties
+            )
             {
                 Model = model;
                 OldFootage = oldFootage;
+                OldTextProperties = oldTextProperties;
+                OldShapeProperties = oldShapeProperties;
+                OldSourceOptionProperties = oldSourceOptionProperties;
+                OldAudioOptionProperties = oldAudioOptionProperties;
+                OldTransformProperties = oldTransformProperties;
+                OldLayerOptionProperties = oldLayerOptionProperties;
                 NewFootage = newFootage;
+                NewTextProperties = newTextProperties;
+                NewShapeProperties = newShapeProperties;
+                NewSourceOptionProperties = newSourceOptionProperties;
+                NewAudioOptionProperties = newAudioOptionProperties;
+                NewTransformProperties = newTransformProperties;
+                NewLayerOptionProperties = newLayerOptionProperties;
             }
 
             public void Redo()
@@ -645,6 +697,12 @@ namespace NiVE3.Model
 
                 Model.SourceDuration = NewFootage.Duration;
                 Model.SourceType = NewFootage.InputType;
+                Model.TextProperties = NewTextProperties;
+                Model.ShapeProperties = NewShapeProperties;
+                Model.SourceOptionProperties = NewSourceOptionProperties;
+                Model.AudioOptionProperties = NewAudioOptionProperties;
+                Model.TransformProperties = NewTransformProperties;
+                Model.LayerOptionProperties = NewLayerOptionProperties;
 
                 Model.RaisePropertyChanged(nameof(SourceName));
                 Model.RaisePropertyChanged(nameof(IsComposition));
@@ -672,6 +730,12 @@ namespace NiVE3.Model
 
                 Model.SourceDuration = OldFootage.Duration;
                 Model.SourceType = OldFootage.InputType;
+                Model.TextProperties = OldTextProperties;
+                Model.ShapeProperties = OldShapeProperties;
+                Model.SourceOptionProperties = OldSourceOptionProperties;
+                Model.AudioOptionProperties = OldAudioOptionProperties;
+                Model.TransformProperties = OldTransformProperties;
+                Model.LayerOptionProperties = OldLayerOptionProperties;
 
                 Model.RaisePropertyChanged(nameof(SourceName));
                 Model.RaisePropertyChanged(nameof(IsComposition));

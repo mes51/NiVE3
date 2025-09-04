@@ -568,17 +568,47 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref lastSelectedMask, value); }
         }
 
-        public PropertyGroupViewModel? TransformProperties { get; }
+        private PropertyGroupViewModel? transformProperties;
+        public PropertyGroupViewModel? TransformProperties
+        {
+            get { return transformProperties; }
+            set { SetProperty(ref transformProperties, value); }
+        }
 
-        public PropertyGroupViewModel? LayerOptionProperties { get; }
+        private PropertyGroupViewModel? layerOptionProperties;
+        public PropertyGroupViewModel? LayerOptionProperties
+        {
+            get { return layerOptionProperties; }
+            set { SetProperty(ref layerOptionProperties, value); }
+        }
 
-        public PropertyGroupViewModel? TextProperties { get; }
+        private PropertyGroupViewModel? textProperties;
+        public PropertyGroupViewModel? TextProperties
+        {
+            get { return textProperties; }
+            set { SetProperty(ref textProperties, value); }
+        }
 
-        public PropertyGroupViewModel? ShapeProperties { get; }
+        private PropertyGroupViewModel? shapeProperties;
+        public PropertyGroupViewModel? ShapeProperties
+        {
+            get { return shapeProperties; }
+            set { SetProperty(ref shapeProperties, value); }
+        }
 
-        public PropertyGroupViewModel? SourceOptionProperties { get; }
+        private PropertyGroupViewModel? sourceOptionProperties;
+        public PropertyGroupViewModel? SourceOptionProperties
+        {
+            get { return sourceOptionProperties; }
+            set { SetProperty(ref sourceOptionProperties, value); }
+        }
 
-        public PropertyGroupViewModel? AudioOptionProperties { get; }
+        private PropertyGroupViewModel? audioOptionProperties;
+        public PropertyGroupViewModel? AudioOptionProperties
+        {
+            get { return audioOptionProperties; }
+            set { SetProperty(ref audioOptionProperties, value); }
+        }
 
         public bool IsComposition { get; }
 
@@ -789,42 +819,7 @@ namespace NiVE3.ViewModel
                 return vm;
             });
 
-            if (layerModel.TransformProperties != null)
-            {
-                TransformProperties = new PropertyGroupViewModel(layerModel.TransformProperties, viewState);
-                TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                TransformProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
-            }
-            if (layerModel.LayerOptionProperties != null)
-            {
-                LayerOptionProperties = new PropertyGroupViewModel(layerModel.LayerOptionProperties, viewState);
-                LayerOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                LayerOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
-            }
-            if (layerModel.TextProperties != null)
-            {
-                TextProperties = new PropertyGroupViewModel(layerModel.TextProperties, viewState);
-                TextProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                TextProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
-            }
-            if (layerModel.ShapeProperties != null)
-            {
-                ShapeProperties = new PropertyGroupViewModel(layerModel.ShapeProperties, viewState);
-                ShapeProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                ShapeProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
-            }
-            if (layerModel.SourceOptionProperties != null)
-            {
-                SourceOptionProperties = new PropertyGroupViewModel(layerModel.SourceOptionProperties, viewState);
-                SourceOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                SourceOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
-            }
-            if (layerModel.AudioOptionProperties != null)
-            {
-                AudioOptionProperties = new PropertyGroupViewModel(layerModel.AudioOptionProperties, viewState);
-                AudioOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
-                AudioOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
-            }
+            UpdatePropertyGroupViewModels();
 
             WiringModel();
             RefreshLayerProxies();
@@ -1370,6 +1365,7 @@ namespace NiVE3.ViewModel
                 }
             });
 
+            layerModel.FootageReplaced += LayerModel_FootageReplaced;
             PropertyChanged += LayerViewModel_PropertyChanged;
         }
 
@@ -1534,7 +1530,93 @@ namespace NiVE3.ViewModel
             SelectedMasks.Clear();
         }
 
+        void UpdatePropertyGroupViewModels()
+        {
+            if (LayerModel.TransformProperties != null)
+            {
+                TransformProperties = new PropertyGroupViewModel(LayerModel.TransformProperties, ViewState);
+                TransformProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                TransformProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            else if (TransformProperties != null)
+            {
+                TransformProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                TransformProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
+                TransformProperties = null;
+            }
+
+            if (LayerModel.LayerOptionProperties != null)
+            {
+                LayerOptionProperties = new PropertyGroupViewModel(LayerModel.LayerOptionProperties, ViewState);
+                LayerOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                LayerOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            else if (LayerOptionProperties != null)
+            {
+                LayerOptionProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                LayerOptionProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
+                LayerOptionProperties = null;
+            }
+
+            if (LayerModel.TextProperties != null)
+            {
+                TextProperties = new PropertyGroupViewModel(LayerModel.TextProperties, ViewState);
+                TextProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                TextProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            else if (TextProperties != null)
+            {
+                TextProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                TextProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
+                TextProperties = null;
+            }
+
+            if (LayerModel.ShapeProperties != null)
+            {
+                ShapeProperties = new PropertyGroupViewModel(LayerModel.ShapeProperties, ViewState);
+                ShapeProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                ShapeProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            else if (ShapeProperties != null)
+            {
+                ShapeProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                ShapeProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
+                ShapeProperties = null;
+            }
+
+            if (LayerModel.SourceOptionProperties != null)
+            {
+                SourceOptionProperties = new PropertyGroupViewModel(LayerModel.SourceOptionProperties, ViewState);
+                SourceOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                SourceOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            else if (SourceOptionProperties != null)
+            {
+                SourceOptionProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                SourceOptionProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
+                SourceOptionProperties = null;
+            }
+
+            if (LayerModel.AudioOptionProperties != null)
+            {
+                AudioOptionProperties = new PropertyGroupViewModel(LayerModel.AudioOptionProperties, ViewState);
+                AudioOptionProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged;
+                AudioOptionProperties.PropertyValueCommited += PropertyGroupViewModel_PropertyValueCommited;
+            }
+            else if (AudioOptionProperties != null)
+            {
+                AudioOptionProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                AudioOptionProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
+                AudioOptionProperties = null;
+            }
+        }
+
         partial void WiringModel();
+
+        private void LayerModel_FootageReplaced(object? sender, EventArgs e)
+        {
+            UpdatePropertyGroupViewModels();
+        }
 
         private void LayerViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
