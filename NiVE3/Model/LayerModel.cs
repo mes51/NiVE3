@@ -370,6 +370,13 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? LayerUpdated;
 
+        WeakEventPublisher<EventArgs> FootageReplacedPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> FootageReplaced
+        {
+            add { FootageReplacedPublisher.Subscribe(value); }
+            remove { FootageReplacedPublisher.Unsubscribe(value); }
+        }
+
         FootageModel FootageModel { get; set; }
 
         EffectListModel EffectListModel { get; }
@@ -1734,7 +1741,27 @@ namespace NiVE3.Model
             FootageModel = footageModel;
             FootageModel.FootageUpdated += FootageModel_FootageUpdated;
 
+            SourceDuration = footageModel.Duration;
+            SourceType = footageModel.InputType;
+
             HistoryModel.Add(new ReplaceFootageHistoryCommand(this, oldFootage, footageModel));
+
+            RaisePropertyChanged(nameof(SourceName));
+            RaisePropertyChanged(nameof(IsComposition));
+            RaisePropertyChanged(nameof(IsSpecial));
+            RaisePropertyChanged(nameof(IsText));
+            RaisePropertyChanged(nameof(HasImage));
+            RaisePropertyChanged(nameof(HasAudio));
+            RaisePropertyChanged(nameof(IsImage));
+            RaisePropertyChanged(nameof(IsVideo));
+            RaisePropertyChanged(nameof(IsCustomizableFootageSource));
+            RaisePropertyChanged(nameof(SourceWidth));
+            RaisePropertyChanged(nameof(SourceHeight));
+            RaisePropertyChanged(nameof(FootageWidth));
+            RaisePropertyChanged(nameof(FootageHeight));
+            RaisePropertyChanged(nameof(FootageId));
+
+            FootageReplacedPublisher.Publish(this, EventArgs.Empty);
         }
 
         public void UpdateTextProperty(string propertyId, object? value, object? prevValue, Time layerTime)

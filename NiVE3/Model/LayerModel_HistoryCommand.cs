@@ -642,6 +642,26 @@ namespace NiVE3.Model
                 Model.FootageModel.FootageUpdated -= Model.FootageModel_FootageUpdated;
                 Model.FootageModel = NewFootage;
                 Model.FootageModel.FootageUpdated += Model.FootageModel_FootageUpdated;
+
+                Model.SourceDuration = NewFootage.Duration;
+                Model.SourceType = NewFootage.InputType;
+
+                Model.RaisePropertyChanged(nameof(SourceName));
+                Model.RaisePropertyChanged(nameof(IsComposition));
+                Model.RaisePropertyChanged(nameof(IsSpecial));
+                Model.RaisePropertyChanged(nameof(IsText));
+                Model.RaisePropertyChanged(nameof(HasImage));
+                Model.RaisePropertyChanged(nameof(HasAudio));
+                Model.RaisePropertyChanged(nameof(IsImage));
+                Model.RaisePropertyChanged(nameof(IsVideo));
+                Model.RaisePropertyChanged(nameof(IsCustomizableFootageSource));
+                Model.RaisePropertyChanged(nameof(SourceWidth));
+                Model.RaisePropertyChanged(nameof(SourceHeight));
+                Model.RaisePropertyChanged(nameof(FootageWidth));
+                Model.RaisePropertyChanged(nameof(FootageHeight));
+                Model.RaisePropertyChanged(nameof(FootageId));
+
+                Model.FootageReplacedPublisher.Publish(this, EventArgs.Empty);
             }
 
             public void Undo()
@@ -649,6 +669,26 @@ namespace NiVE3.Model
                 Model.FootageModel.FootageUpdated -= Model.FootageModel_FootageUpdated;
                 Model.FootageModel = OldFootage;
                 Model.FootageModel.FootageUpdated += Model.FootageModel_FootageUpdated;
+
+                Model.SourceDuration = OldFootage.Duration;
+                Model.SourceType = OldFootage.InputType;
+
+                Model.RaisePropertyChanged(nameof(SourceName));
+                Model.RaisePropertyChanged(nameof(IsComposition));
+                Model.RaisePropertyChanged(nameof(IsSpecial));
+                Model.RaisePropertyChanged(nameof(IsText));
+                Model.RaisePropertyChanged(nameof(HasImage));
+                Model.RaisePropertyChanged(nameof(HasAudio));
+                Model.RaisePropertyChanged(nameof(IsImage));
+                Model.RaisePropertyChanged(nameof(IsVideo));
+                Model.RaisePropertyChanged(nameof(IsCustomizableFootageSource));
+                Model.RaisePropertyChanged(nameof(SourceWidth));
+                Model.RaisePropertyChanged(nameof(SourceHeight));
+                Model.RaisePropertyChanged(nameof(FootageWidth));
+                Model.RaisePropertyChanged(nameof(FootageHeight));
+                Model.RaisePropertyChanged(nameof(FootageId));
+
+                Model.FootageReplacedPublisher.Publish(this, EventArgs.Empty);
             }
 
             public void Dispose() { }
