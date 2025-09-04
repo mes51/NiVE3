@@ -1417,7 +1417,7 @@ namespace NiVE3.ViewModel
 
             PrecomposeCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers.Count < 1 || SelectedLayers.All(l => l.IsNotRenderable))
                 {
                     return;
                 }
@@ -1438,7 +1438,7 @@ namespace NiVE3.ViewModel
                     var copyParent = result.Parameters.GetValue<bool>(nameof(PrecomposeSettingViewModel.CopyParent));
                     CompositionModel.Precompose([..SelectedLayers.Select(l => l.LayerId)], compositionName, mode == PrecomposeMode.MoveAll, alignDuration, copyParent, LastSelectedLayerId);
                 }
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.Any(l => !l.IsNotRenderable))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
 
