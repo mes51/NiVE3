@@ -424,7 +424,7 @@ namespace NiVE3.Model
         {
             CompositionModels.Remove(composition);
             var preview = PreviewModels.OfType<CompositionPreviewModel>().FirstOrDefault();
-            if (preview != null)
+            if (preview != null && preview.Composition == composition)
             {
                 preview.Composition = null;
             }
