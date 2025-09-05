@@ -20,6 +20,7 @@ using System.Xml;
 using AvalonDock.Layout;
 using AvalonDock.Layout.Serialization;
 using NiVE3.Config;
+using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Dock;
 using NiVE3.ViewModel;
@@ -54,22 +55,22 @@ namespace NiVE3.Windows
             var timelinePanels = serializedLayoutDoc.SelectNodes($"//*[@ContentId=\"{typeof(TimelineViewModel).Name}\"]");
             if (timelinePanels != null && timelinePanels.Count > 1)
             {
-                var parent = timelinePanels[0]?.ParentNode;
-                if (parent != null)
+                foreach (var node in timelinePanels.OfType<XmlNode>().Skip(1))
                 {
-                    var nodes = new List<XmlNode>();
-                    for (var i = 1; i < timelinePanels.Count; i++)
+                    var currentParent = node.ParentNode;
+                    var currentChild = node;
+                    while (currentParent != null)
                     {
-                        var node = timelinePanels[i];
-                        if (node != null)
+                        currentParent.RemoveChild(currentChild);
+                        if (!currentParent.HasChildNodes)
                         {
-                            nodes.Add(node);
+                            currentChild = currentParent;
+                            currentParent = currentParent.ParentNode;
                         }
-                    }
-
-                    foreach (var node in nodes)
-                    {
-                        parent.RemoveChild(node);
+                        else
+                        {
+                            break;
+                        }
                     }
                 }
 
