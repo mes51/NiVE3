@@ -194,9 +194,12 @@ namespace NiVE3.ViewModel
             FrameRate = footage.FrameRate;
             Duration = footage.Duration;
             FilePath = footage.FilePath;
-            FileExtension = Path.GetExtension(footage.FilePath);
             Comment = footage.Comment;
             InputType = footage.InputType;
+            if (!footage.InputModel.IsInternalInput)
+            {
+                FileExtension = Path.GetExtension(footage.FilePath);
+            }
 
             WiringModel();
 
