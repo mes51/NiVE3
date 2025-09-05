@@ -24,7 +24,14 @@ namespace NiVE3.ViewModel
         public bool IsActive
         {
             get { return isActive; }
-            set { SetProperty(ref isActive, value); }
+            set
+            {
+                SetProperty(ref isActive, value);
+                if (value)
+                {
+                    PaneSelectedPublisher.Publish(this, EventArgs.Empty);
+                }
+            }
         }
 
         private bool isSelected;
