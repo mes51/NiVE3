@@ -1787,11 +1787,25 @@ namespace NiVE3.Model
                 CompositionData compositionData;
                 if (copyParent)
                 {
-                    var parentIds = layers.Select(l => l.ParentLayerId).NonNull().ToArray();
-                    var parents = Layers.Where(l => parentIds.Contains(l.LayerId)).ToArray();
+                    var parents = new List<LayerModel>();
+                    var parentQueue = new Queue<Guid>(layers.Select(l => l.ParentLayerId).NonNull());
+                    while (parentQueue.Count > 0)
+                    {
+                        var parentId = parentQueue.Dequeue();
+                        var parent = Layers.FirstOrDefault(l => l.LayerId == parentId);
+                        if (parent != null && !parents.Contains(parent))
+                        {
+                            parents.Add(parent);
+                            if (parent.ParentLayerId.HasValue)
+                            {
+                                parentQueue.Enqueue(parent.ParentLayerId.Value);
+                            }
+                        }
+                    }
+
                     var combinedLayers = layers.Concat(parents).OrderBy(Layers.IndexOf).ToArray();
                     compositionData = SaveTargetLayerOnly(combinedLayers);
-                    foreach (var layerData in compositionData.Layers.Where(ld => parentIds.Contains(ld.LayerId)))
+                    foreach (var layerData in compositionData.Layers.Where(ld => parents.Any(p => p.LayerId == ld.LayerId)))
                     {
                         layerData.IsEnableVideo = false;
                         layerData.IsEnableAudio = false;
