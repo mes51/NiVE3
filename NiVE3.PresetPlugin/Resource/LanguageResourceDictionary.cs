@@ -599,6 +599,26 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Stylize_LongShadow_BlendMode = nameof(Stylize_LongShadow_BlendMode);
 
+        // ExtractEdge
+
+        [DefaultValue("輪郭抽出")]
+        public const string Stylize_ExtractEdge_Name = nameof(Stylize_ExtractEdge_Name);
+
+        [DefaultValue("画像の輪郭を抽出します")]
+        public const string Stylize_ExtractEdge_Description = nameof(Stylize_ExtractEdge_Description);
+
+        [LanguageKey, DefaultValue("太さ")]
+        public const string Stylize_ExtractEdge_Width = nameof(Stylize_ExtractEdge_Width);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Stylize_ExtractEdge_Invert = nameof(Stylize_ExtractEdge_Invert);
+
+        [LanguageKey, DefaultValue("モノクロ")]
+        public const string Stylize_ExtractEdge_Monochrome = nameof(Stylize_ExtractEdge_Monochrome);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string Stylize_ExtractEdge_BlendOriginal = nameof(Stylize_ExtractEdge_BlendOriginal);
+
         // Level
 
         [DefaultValue("レベル")]

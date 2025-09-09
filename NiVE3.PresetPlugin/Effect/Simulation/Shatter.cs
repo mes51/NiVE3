@@ -333,7 +333,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                                     g.Render(antialias, antialias);
                                     var device = AcceleratorObject.CurrentDevice;
                                     var gpuImage = image.ToGpu(device);
-                                    ImageBlendProcessor.TransferImageGpu(device, gpuImage, (NGPUImage)canvas, roi);
+                                    ImageBlendProcessor.TransferSameSizeGpu(device, gpuImage, (NGPUImage)canvas, roi);
 
                                     return gpuImage;
                                 }
@@ -341,7 +341,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                                 {
                                     c.Render(antialias, antialias);
                                     var managedImage = image.ToManaged();
-                                    ImageBlendProcessor.TransferImageCpu(managedImage, (NManagedImage)canvas, roi);
+                                    ImageBlendProcessor.TransferSameSizeCpu(managedImage, (NManagedImage)canvas, roi);
 
                                     return managedImage;
                                 }
@@ -782,7 +782,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var managedImage = image.ToManaged();
-            ImageBlendProcessor.TransferImageCpu(managedImage, canvas, roi);
+            ImageBlendProcessor.TransferSameSizeCpu(managedImage, canvas, roi);
 
             return managedImage;
         }
@@ -807,7 +807,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var managedImage = image.ToManaged();
-            ImageBlendProcessor.TransferImageCpu(managedImage, canvas, roi);
+            ImageBlendProcessor.TransferSameSizeCpu(managedImage, canvas, roi);
 
             return managedImage;
         }
@@ -827,7 +827,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var gpuImage = image.ToGpu(device);
-            ImageBlendProcessor.TransferImageGpu(device, gpuImage, canvas, roi);
+            ImageBlendProcessor.TransferSameSizeGpu(device, gpuImage, canvas, roi);
 
             return gpuImage;
         }
@@ -852,7 +852,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var gpuImage = image.ToGpu(device);
-            ImageBlendProcessor.TransferImageGpu(device, gpuImage, canvas, roi);
+            ImageBlendProcessor.TransferSameSizeGpu(device, gpuImage, canvas, roi);
 
             return gpuImage;
         }
