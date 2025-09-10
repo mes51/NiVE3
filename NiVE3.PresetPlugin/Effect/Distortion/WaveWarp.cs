@@ -136,8 +136,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             using var sourceImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
             gpuImage.CopyTo(sourceImage);
 
-            var centerX = (roi.OriginalImagePosition.X + (roi.OriginalImageSize.Width * 0.5F)) / downSamplingRateX;
-            var centerY = (roi.OriginalImagePosition.Y + (roi.OriginalImageSize.Height * 0.5F)) / downSamplingRateY;
+            var centerX = (roi.OriginalImagePosition.X + (roi.OriginalImageSize.Width * 0.5F)) * downSamplingRateX;
+            var centerY = (roi.OriginalImagePosition.Y + (roi.OriginalImageSize.Height * 0.5F)) * downSamplingRateY;
             var transform = Matrix3x3.CreateRotateAt(angle, centerX, centerY);
             var iTransform = Matrix3x3.CreateRotateAt(-angle, centerX, centerY);
 

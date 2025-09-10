@@ -1223,6 +1223,50 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Generate_AudioSpectrum_BlendMode = nameof(Generate_AudioSpectrum_BlendMode);
 
+        // MultiColorGradient
+
+        [DefaultValue("多色グラデーション")]
+        public const string Generate_MultiColorGradient_Name = nameof(Generate_MultiColorGradient_Name);
+
+        [DefaultValue("複数の色でのグラデーションを描画します")]
+        public const string Generate_MultiColorGradient_Description = nameof(Generate_MultiColorGradient_Description);
+
+        [LanguageKey, DefaultValue("ポイント1")]
+        public const string Generate_MultiColorGradient_Point1_Point = nameof(Generate_MultiColorGradient_Point1_Point);
+
+        [LanguageKey, DefaultValue("カラー1")]
+        public const string Generate_MultiColorGradient_Point1_Color = nameof(Generate_MultiColorGradient_Point1_Color);
+
+        [LanguageKey, DefaultValue("ポイント2")]
+        public const string Generate_MultiColorGradient_Point2_Point = nameof(Generate_MultiColorGradient_Point2_Point);
+
+        [LanguageKey, DefaultValue("カラー2")]
+        public const string Generate_MultiColorGradient_Point2_Color = nameof(Generate_MultiColorGradient_Point2_Color);
+
+        [LanguageKey, DefaultValue("他のカラー")]
+        public const string Generate_MultiColorGradient_ColorPoints = nameof(Generate_MultiColorGradient_ColorPoints);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Generate_MultiColorGradient_ColorPoints_ColorPoint = nameof(Generate_MultiColorGradient_ColorPoints_ColorPoint);
+
+        [LanguageKey, DefaultValue("ポイント")]
+        public const string Generate_MultiColorGradient_ColorPoints_ColorPoint_Point = nameof(Generate_MultiColorGradient_ColorPoints_ColorPoint_Point);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Generate_MultiColorGradient_ColorPoints_ColorPoint_Color = nameof(Generate_MultiColorGradient_ColorPoints_ColorPoint_Color);
+
+        [LanguageKey, DefaultValue("OKLab色空間で補間する")]
+        public const string Generate_MultiColorGradient_UseOkLabInterpolation = nameof(Generate_MultiColorGradient_UseOkLabInterpolation);
+
+        [LanguageKey, DefaultValue("ブレンド")]
+        public const string Generate_MultiColorGradient_Blend = nameof(Generate_MultiColorGradient_Blend);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Generate_MultiColorGradient_Opacity = nameof(Generate_MultiColorGradient_Opacity);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Generate_MultiColorGradient_BlendMode = nameof(Generate_MultiColorGradient_BlendMode);
+
         // Unmult
 
         [DefaultValue("Unmult")]
