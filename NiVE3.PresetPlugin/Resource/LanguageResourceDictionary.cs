@@ -619,6 +619,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string Stylize_ExtractEdge_BlendOriginal = nameof(Stylize_ExtractEdge_BlendOriginal);
 
+        // Posterization
+
+        [DefaultValue("ポスタリゼーション")]
+        public const string Stylize_Posterization_Name = nameof(Stylize_Posterization_Name);
+
+        [DefaultValue("画像の色の階調を変更します")]
+        public const string Stylize_Posterization_Description = nameof(Stylize_Posterization_Description);
+
+        [LanguageKey, DefaultValue("階調")]
+        public const string Stylize_Posterization_Gradation = nameof(Stylize_Posterization_Gradation);
+
+        [LanguageKey, DefaultValue("輝度による階調変更")]
+        public const string Stylize_Posterization_ChangeByLuminance = nameof(Stylize_Posterization_ChangeByLuminance);
+
         // Level
 
         [DefaultValue("レベル")]
