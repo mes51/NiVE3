@@ -1709,6 +1709,23 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("柔らかさ")]
         public const string Keying_LuminanceKey_Softness = nameof(Keying_LuminanceKey_Softness);
 
+        // LinearWipe
+
+        [DefaultValue("リニアワイプ")]
+        public const string Transition_LinearWipe_Name = nameof(Transition_LinearWipe_Name);
+
+        [DefaultValue("指定された方向に直線的なワイプを適用します")]
+        public const string Transition_LinearWipe_Description = nameof(Transition_LinearWipe_Description);
+
+        [LanguageKey, DefaultValue("変換終了")]
+        public const string Transition_LinearWipe_Transform = nameof(Transition_LinearWipe_Transform);
+
+        [LanguageKey, DefaultValue("ワイプ角度")]
+        public const string Transition_LinearWipe_Angle = nameof(Transition_LinearWipe_Angle);
+
+        [LanguageKey, DefaultValue("境界をぼかす")]
+        public const string Transition_LinearWipe_Blur = nameof(Transition_LinearWipe_Blur);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]

@@ -1033,6 +1033,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("スタイライズ")]
         public static readonly string EffectCategory_Stylize = DefaultLanguageResourceNames.EffectCategory_Stylize;
 
+        [DefaultValue("トランジション")]
+        public static readonly string EffectCategory_Transition = DefaultLanguageResourceNames.EffectCategory_Transition;
+
         [DefaultValue("ユーティリティ")]
         public static readonly string EffectCategory_Utility = DefaultLanguageResourceNames.EffectCategory_Utility;
 

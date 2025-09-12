@@ -79,6 +79,12 @@ namespace NiVE3.Plugin.Resource
         public const string EffectCategory_Stylize = nameof(EffectCategory_Stylize);
 
         /// <summary>
+        /// エフェクトのトランジションカテゴリを表します
+        /// </summary>
+        [EffectCategory]
+        public const string EffectCategory_Transition = nameof(EffectCategory_Transition);
+
+        /// <summary>
         /// エフェクトのユーティリティカテゴリを表します
         /// </summary>
         [EffectCategory]
