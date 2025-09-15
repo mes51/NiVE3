@@ -1726,6 +1726,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("境界をぼかす")]
         public const string Transition_LinearWipe_Blur = nameof(Transition_LinearWipe_Blur);
 
+        // RadialWipe
+
+        [DefaultValue("放射状ワイプ")]
+        public const string Transition_RadialWipe_Name = nameof(Transition_RadialWipe_Name);
+
+        [DefaultValue("指定された中心点から放射状に伸びるワイプを適用します")]
+        public const string Transition_RadialWipe_Description = nameof(Transition_RadialWipe_Description);
+
+        [LanguageKey, DefaultValue("中心点")]
+        public const string Transition_RadialWipe_Center = nameof(Transition_RadialWipe_Center);
+
+        [LanguageKey, DefaultValue("ワイプ角度")]
+        public const string Transition_RadialWipe_Angle = nameof(Transition_RadialWipe_Angle);
+
+        [LanguageKey, DefaultValue("変換終了")]
+        public const string Transition_RadialWipe_Transform = nameof(Transition_RadialWipe_Transform);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Transition_RadialWipe_Mode = nameof(Transition_RadialWipe_Mode);
+
+        [LanguageKey, DefaultValue("境界をぼかす")]
+        public const string Transition_RadialWipe_Blur = nameof(Transition_RadialWipe_Blur);
+
         // Renderers
 
         [DefaultValue("デフォルトレンダラ")]
@@ -2414,6 +2437,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("レンダリング")]
         public const string ShatterDisplayType_Rendering = nameof(ShatterDisplayType_Rendering);
+
+        [DefaultValue("時計回り")]
+        public const string RadialWipeMode_Clock = nameof(RadialWipeMode_Clock);
+
+        [DefaultValue("反時計回り")]
+        public const string RadialWipeMode_CounterClock = nameof(RadialWipeMode_CounterClock);
+
+        [DefaultValue("両側")]
+        public const string RadialWipeMode_Both = nameof(RadialWipeMode_Both);
 
         // unit
 
