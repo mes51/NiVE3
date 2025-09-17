@@ -464,6 +464,11 @@ namespace NiVE3.Model
                         new ZAngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle2D, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2)
                     ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
                     LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer, []), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
+
+                    TransformProperties.ValueUpdated += Properties_ValueUpdated;
+                    TransformProperties.ValueCommited += Properties_ValueCommited;
+                    LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                    LayerOptionProperties.ValueCommited += Properties_ValueCommited;
                     break;
                 case CameraInput:
                     var zoom = compositionModel.Width / Const.DefaultCameraFov * 0.5;
@@ -481,6 +486,11 @@ namespace NiVE3.Model
                     [
                         new DoubleProperty(ILayerObject.CameraLayerOptionZoomId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_CameraZoom, zoom, 0.01, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel)
                     ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
+
+                    TransformProperties.ValueUpdated += Properties_ValueUpdated;
+                    TransformProperties.ValueCommited += Properties_ValueCommited;
+                    LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                    LayerOptionProperties.ValueCommited += Properties_ValueCommited;
                     break;
                 case LightInput:
                     IsEnableVideo = true;
@@ -516,6 +526,11 @@ namespace NiVE3.Model
                         new DoubleProperty(ILayerObject.LightLayerOptionShadowStrengthId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_ShadowStrength, 100.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(ILayerObject.LightLayerOptionShadowScatterSizeId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_ShadowScatterSize, 0.0, 0.0, double.MaxValue, slideChangeValue: 0.1, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Pixel)
                     ]), LayerId.ToInt128(), projectModel, compositionModel, this, historyModel);
+
+                    TransformProperties.ValueUpdated += Properties_ValueUpdated;
+                    TransformProperties.ValueCommited += Properties_ValueCommited;
+                    LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
+                    LayerOptionProperties.ValueCommited += Properties_ValueCommited;
                     break;
                 default:
                     LoadProperty(footageModel);
