@@ -633,6 +633,59 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("輝度による階調変更")]
         public const string Stylize_Posterization_ChangeByLuminance = nameof(Stylize_Posterization_ChangeByLuminance);
 
+        // SpotLight
+
+        [DefaultValue("スポットライト")]
+        public const string Stylize_SpotLight_Name = nameof(Stylize_SpotLight_Name);
+
+        [DefaultValue("画像にスポットライトを当てたような効果を適用します")]
+        public const string Stylize_SpotLight_Description = nameof(Stylize_SpotLight_Description);
+
+        [LanguageKey, DefaultValue("ライト")]
+        public const string Stylize_SpotLight_Lights = nameof(Stylize_SpotLight_Lights);
+
+        [LanguageKey, DefaultValue("ライト")]
+        public const string Stylize_SpotLight_Light = nameof(Stylize_SpotLight_Light);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Stylize_SpotLight_Light_Position = nameof(Stylize_SpotLight_Light_Position);
+
+        [LanguageKey, DefaultValue("目標点")]
+        public const string Stylize_SpotLight_Light_PointOfInterest = nameof(Stylize_SpotLight_Light_PointOfInterest);
+
+        [LanguageKey, DefaultValue("強度")]
+        public const string Stylize_SpotLight_Light_Intensity = nameof(Stylize_SpotLight_Light_Intensity);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Stylize_SpotLight_Light_Color = nameof(Stylize_SpotLight_Light_Color);
+
+        [LanguageKey, DefaultValue("円錐頂角")]
+        public const string Stylize_SpotLight_Light_ConeAngle = nameof(Stylize_SpotLight_Light_ConeAngle);
+
+        [LanguageKey, DefaultValue("円錐ぼかし")]
+        public const string Stylize_SpotLight_Light_ConeAttenuation = nameof(Stylize_SpotLight_Light_ConeAttenuation);
+
+        [LanguageKey, DefaultValue("フォールオフの種類")]
+        public const string Stylize_SpotLight_Light_FalloffType = nameof(Stylize_SpotLight_Light_FalloffType);
+
+        [LanguageKey, DefaultValue("フォールオフの開始")]
+        public const string Stylize_SpotLight_Light_FalloffStart = nameof(Stylize_SpotLight_Light_FalloffStart);
+
+        [LanguageKey, DefaultValue("フォールオフの距離")]
+        public const string Stylize_SpotLight_Light_FalloffLength = nameof(Stylize_SpotLight_Light_FalloffLength);
+
+        [LanguageKey, DefaultValue("環境光")]
+        public const string Stylize_SpotLight_AmbientLights = nameof(Stylize_SpotLight_AmbientLights);
+
+        [LanguageKey, DefaultValue("環境光")]
+        public const string Stylize_SpotLight_AmbientLight = nameof(Stylize_SpotLight_AmbientLight);
+
+        [LanguageKey, DefaultValue("強度")]
+        public const string Stylize_SpotLight_AmbientLight_Intensity = nameof(Stylize_SpotLight_AmbientLight_Intensity);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Stylize_SpotLight_AmbientLight_Color = nameof(Stylize_SpotLight_AmbientLight_Color);
+
         // Level
 
         [DefaultValue("レベル")]
@@ -2041,6 +2094,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("輝度")]
         public const string BlendMode_Luminance = nameof(BlendMode_Luminance);
+
+        [DefaultValue("なし")]
+        public const string LightFalloffType_None = nameof(LightFalloffType_None);
+
+        [DefaultValue("リニア")]
+        public const string LightFalloffType_Linear = nameof(LightFalloffType_Linear);
+
+        [DefaultValue("逆二乗クランプ")]
+        public const string LightFalloffType_Exponential = nameof(LightFalloffType_Exponential);
 
         [DefaultValue("水平&垂直")]
         public const string BlurDirection_HorizontalAndVertical = nameof(BlurDirection_HorizontalAndVertical);
