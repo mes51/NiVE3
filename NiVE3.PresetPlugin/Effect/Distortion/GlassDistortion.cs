@@ -66,19 +66,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             var rate = (float)properties.GetValue(PropertyRateId, layerTime, 0.0) * 0.01F;
             var displacement = (float)properties.GetValue(PropertyDisplacementAmountId, layerTime, 0.0);
 
-            var targetLayer = targetLayerId != UseLayerImageTarget.Empty ? composition.GetLayer(targetLayerId.LayerId) : null;
-            if (targetLayer == null || rate == 0.0 || displacement == 0.0)
-            {
-                return image;
-            }
-
             var globalTime = layerTime + layer.SourceStartPoint;
-            using var sourceImage = targetLayerId.ImageProcessType switch
-            {
-                LayerImageProcessType.Masked => targetLayer.GetMaskedImage(globalTime, downSamplingRateX, useGpu),
-                LayerImageProcessType.Effected => targetLayer.GetEffectedImage(globalTime, downSamplingRateX, useGpu),
-                _ => targetLayer.GetRawImage(globalTime, downSamplingRateX, useGpu)
-            };
+            using var sourceImage = targetLayerId.GetImage(composition, globalTime, downSamplingRateX, useGpu);
             if (sourceImage == null)
             {
                 return image;

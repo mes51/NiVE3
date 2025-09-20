@@ -62,19 +62,8 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             var sourceOpacity = (float)properties.GetValue(PropertySourceOpacityId, layerTime, 0.0) * 0.01F;
             var sourceLayerPositionType = properties.GetValue(PropertySourceLayerPositionId, layerTime, SourceLayerPositionType.Center);
 
-            var targetLayer = targetLayerId != UseLayerImageTarget.Empty ? composition.GetLayer(targetLayerId.LayerId) : null;
-            if (targetLayer == null || sourceOpacity <= 0.0F)
-            {
-                return image;
-            }
-
             var globalTime = layerTime + layer.SourceStartPoint;
-            using var sourceImage = targetLayerId.ImageProcessType switch
-            {
-                LayerImageProcessType.Masked => targetLayer.GetMaskedImage(globalTime, downSamplingRateX, useGpu),
-                LayerImageProcessType.Effected => targetLayer.GetEffectedImage(globalTime, downSamplingRateX, useGpu),
-                _ => targetLayer.GetRawImage(globalTime, downSamplingRateX, useGpu)
-            };
+            using var sourceImage = targetLayerId.GetImage(composition, globalTime, downSamplingRateX, useGpu);
             if (sourceImage == null)
             {
                 return image;

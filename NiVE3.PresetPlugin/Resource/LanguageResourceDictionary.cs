@@ -47,6 +47,33 @@ namespace NiVE3.PresetPlugin.Resource
         public const string ToneCurvePropertyControl_EditViewSize_S = nameof(ToneCurvePropertyControl_EditViewSize_S);
 
         // Effects
+        // General Controls
+
+        [LanguageKey, DefaultValue("コンポジションカメラを使用する")]
+        public const string Effect_General_Camera_UseComposition = nameof(Effect_General_Camera_UseComposition);
+
+        [LanguageKey, DefaultValue("目標点")]
+        public const string Effect_General_Camera_PointOfInterest = nameof(Effect_General_Camera_PointOfInterest);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Effect_General_Camera_Position = nameof(Effect_General_Camera_Position);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Effect_General_Camera_Orientation = nameof(Effect_General_Camera_Orientation);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Effect_General_Camera_XAngle = nameof(Effect_General_Camera_XAngle);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Effect_General_Camera_YAngle = nameof(Effect_General_Camera_YAngle);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Effect_General_Camera_ZAngle = nameof(Effect_General_Camera_ZAngle);
+
+        [LanguageKey, DefaultValue("ズーム")]
+        public const string Effect_General_Camera_Zoom = nameof(Effect_General_Camera_Zoom);
+
+        // ExpressionControls
 
         [DefaultValue("ポイント制御")]
         public const string ExpressionControl_PointControl_Name = nameof(ExpressionControl_PointControl_Name);
@@ -1567,30 +1594,6 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("カメラ")]
         public const string Simulation_Particle_Camera = nameof(Simulation_Particle_Camera);
 
-        [LanguageKey, DefaultValue("コンポジションカメラを使用する")]
-        public const string Simulation_Particle_Camera_UseComposition = nameof(Simulation_Particle_Camera_UseComposition);
-
-        [LanguageKey, DefaultValue("目標点")]
-        public const string Simulation_Particle_Camera_PointOfInterest = nameof(Simulation_Particle_Camera_PointOfInterest);
-
-        [LanguageKey, DefaultValue("位置")]
-        public const string Simulation_Particle_Camera_Position = nameof(Simulation_Particle_Camera_Position);
-
-        [LanguageKey, DefaultValue("方向")]
-        public const string Simulation_Particle_Camera_Orientation = nameof(Simulation_Particle_Camera_Orientation);
-
-        [LanguageKey, DefaultValue("X回転")]
-        public const string Simulation_Particle_Camera_XAngle = nameof(Simulation_Particle_Camera_XAngle);
-
-        [LanguageKey, DefaultValue("Y回転")]
-        public const string Simulation_Particle_Camera_YAngle = nameof(Simulation_Particle_Camera_YAngle);
-
-        [LanguageKey, DefaultValue("Z回転")]
-        public const string Simulation_Particle_Camera_ZAngle = nameof(Simulation_Particle_Camera_ZAngle);
-
-        [LanguageKey, DefaultValue("ズーム")]
-        public const string Simulation_Particle_Camera_Zoom = nameof(Simulation_Particle_Camera_Zoom);
-
         [LanguageKey, DefaultValue("ソースレイヤー")]
         public const string Simulation_Particle_SourceLayer = nameof(Simulation_Particle_SourceLayer);
 
@@ -1686,30 +1689,6 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("カメラ")]
         public const string Simulation_Shatter_Camera = nameof(Simulation_Shatter_Camera);
 
-        [LanguageKey, DefaultValue("コンポジションカメラを使用する")]
-        public const string Simulation_Shatter_Camera_UseComposition = nameof(Simulation_Shatter_Camera_UseComposition);
-
-        [LanguageKey, DefaultValue("目標点")]
-        public const string Simulation_Shatter_Camera_PointOfInterest = nameof(Simulation_Shatter_Camera_PointOfInterest);
-
-        [LanguageKey, DefaultValue("位置")]
-        public const string Simulation_Shatter_Camera_Position = nameof(Simulation_Shatter_Camera_Position);
-
-        [LanguageKey, DefaultValue("方向")]
-        public const string Simulation_Shatter_Camera_Orientation = nameof(Simulation_Shatter_Camera_Orientation);
-
-        [LanguageKey, DefaultValue("X回転")]
-        public const string Simulation_Shatter_Camera_XAngle = nameof(Simulation_Shatter_Camera_XAngle);
-
-        [LanguageKey, DefaultValue("Y回転")]
-        public const string Simulation_Shatter_Camera_YAngle = nameof(Simulation_Shatter_Camera_YAngle);
-
-        [LanguageKey, DefaultValue("Z回転")]
-        public const string Simulation_Shatter_Camera_ZAngle = nameof(Simulation_Shatter_Camera_ZAngle);
-
-        [LanguageKey, DefaultValue("ズーム")]
-        public const string Simulation_Shatter_Camera_Zoom = nameof(Simulation_Shatter_Camera_Zoom);
-
         [LanguageKey, DefaultValue("レンダリング")]
         public const string Simulation_Shatter_Rendering = nameof(Simulation_Shatter_Rendering);
 
@@ -1727,6 +1706,77 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Simulation_Shatter_Option_RandomSeed = nameof(Simulation_Shatter_Option_RandomSeed);
+
+        // CardDance
+
+        [DefaultValue("カードダンス")]
+        public const string Simulation_CardDance_Name = nameof(Simulation_CardDance_Name);
+
+        [DefaultValue("画像を指定した行と列に分割し、3D空間上でアニメーションします")]
+        public const string Simulation_CardDance_Description = nameof(Simulation_CardDance_Description);
+
+        [LanguageKey, DefaultValue("行")]
+        public const string Simulation_CardDance_RowCount = nameof(Simulation_CardDance_RowCount);
+
+        [LanguageKey, DefaultValue("列")]
+        public const string Simulation_CardDance_ColumnCount = nameof(Simulation_CardDance_ColumnCount);
+
+        [LanguageKey, DefaultValue("ソースレイヤー1")]
+        public const string Simulation_CardDance_SourceLayer1 = nameof(Simulation_CardDance_SourceLayer1);
+
+        [LanguageKey, DefaultValue("ソースレイヤー2")]
+        public const string Simulation_CardDance_SourceLayer2 = nameof(Simulation_CardDance_SourceLayer2);
+
+        [LanguageKey, DefaultValue("回転順序")]
+        public const string Simulation_CardDance_RotateOrderType = nameof(Simulation_CardDance_RotateOrderType);
+
+        [LanguageKey, DefaultValue("トランスフォーム順序")]
+        public const string Simulation_CardDance_TransformOrderType = nameof(Simulation_CardDance_TransformOrderType);
+
+        [LanguageKey, DefaultValue("ソースレイヤー番号")]
+        public const string Simulation_CardDance_Values_SourceLayerIndex = nameof(Simulation_CardDance_Values_SourceLayerIndex);
+
+        [LanguageKey, DefaultValue("ソース")]
+        public const string Simulation_CardDance_Values_SourceType = nameof(Simulation_CardDance_Values_SourceType);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Simulation_CardDance_Values_IsInvert = nameof(Simulation_CardDance_Values_IsInvert);
+
+        [LanguageKey, DefaultValue("乗数")]
+        public const string Simulation_CardDance_Values_Multiply = nameof(Simulation_CardDance_Values_Multiply);
+
+        [LanguageKey, DefaultValue("オフセット")]
+        public const string Simulation_CardDance_Values_Offset = nameof(Simulation_CardDance_Values_Offset);
+
+        [LanguageKey, DefaultValue("X位置")]
+        public const string Simulation_CardDance_PositionX = nameof(Simulation_CardDance_PositionX);
+
+        [LanguageKey, DefaultValue("Y位置")]
+        public const string Simulation_CardDance_PositionY = nameof(Simulation_CardDance_PositionY);
+
+        [LanguageKey, DefaultValue("Z位置")]
+        public const string Simulation_CardDance_PositionZ = nameof(Simulation_CardDance_PositionZ);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Simulation_CardDance_RotateX = nameof(Simulation_CardDance_RotateX);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Simulation_CardDance_RotateY = nameof(Simulation_CardDance_RotateY);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Simulation_CardDance_RotateZ = nameof(Simulation_CardDance_RotateZ);
+
+        [LanguageKey, DefaultValue("Xスケール")]
+        public const string Simulation_CardDance_ScaleX = nameof(Simulation_CardDance_ScaleX);
+
+        [LanguageKey, DefaultValue("Yスケール")]
+        public const string Simulation_CardDance_ScaleY = nameof(Simulation_CardDance_ScaleY);
+
+        [LanguageKey, DefaultValue("カメラ")]
+        public const string Simulation_CardDance_Camera = nameof(Simulation_CardDance_Camera);
+
+        [LanguageKey, DefaultValue("アンチエイリアス")]
+        public const string Simulation_CardDance_RenderingAntiAlias = nameof(Simulation_CardDance_RenderingAntiAlias);
 
         // ColorKey
 
@@ -2508,6 +2558,48 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("両側")]
         public const string RadialWipeMode_Both = nameof(RadialWipeMode_Both);
+
+        [DefaultValue("XYZ")]
+        public const string CardDanceRotateOrderType_XYZ = nameof(CardDanceRotateOrderType_XYZ);
+
+        [DefaultValue("XZY")]
+        public const string CardDanceRotateOrderType_XZY = nameof(CardDanceRotateOrderType_XZY);
+
+        [DefaultValue("YXZ")]
+        public const string CardDanceRotateOrderType_YXZ = nameof(CardDanceRotateOrderType_YXZ);
+
+        [DefaultValue("YZX")]
+        public const string CardDanceRotateOrderType_YZX = nameof(CardDanceRotateOrderType_YZX);
+
+        [DefaultValue("ZXY")]
+        public const string CardDanceRotateOrderType_ZXY = nameof(CardDanceRotateOrderType_ZXY);
+
+        [DefaultValue("ZYX")]
+        public const string CardDanceRotateOrderType_ZYX = nameof(CardDanceRotateOrderType_ZYX);
+
+        [DefaultValue("移動->回転->スケール")]
+        public const string CardDanceTransformOrderType_TranslateRotateScale = nameof(CardDanceTransformOrderType_TranslateRotateScale);
+
+        [DefaultValue("移動->スケール->回転")]
+        public const string CardDanceTransformOrderType_TranslateScaleRotate = nameof(CardDanceTransformOrderType_TranslateScaleRotate);
+
+        [DefaultValue("回転->移動->スケール")]
+        public const string CardDanceTransformOrderType_RotateTranslateScale = nameof(CardDanceTransformOrderType_RotateTranslateScale);
+
+        [DefaultValue("回転->スケール->移動")]
+        public const string CardDanceTransformOrderType_RotateScaleTranslate = nameof(CardDanceTransformOrderType_RotateScaleTranslate);
+
+        [DefaultValue("スケール->移動->回転")]
+        public const string CardDanceTransformOrderType_ScaleTranslateRotate = nameof(CardDanceTransformOrderType_ScaleTranslateRotate);
+
+        [DefaultValue("スケール->回転->移動")]
+        public const string CardDanceTransformOrderType_ScaleRotateTranslate = nameof(CardDanceTransformOrderType_ScaleRotateTranslate);
+
+        [DefaultValue("1")]
+        public const string CardDanceSourceLayerIndex_Index1 = nameof(CardDanceSourceLayerIndex_Index1);
+
+        [DefaultValue("2")]
+        public const string CardDanceSourceLayerIndex_Index2 = nameof(CardDanceSourceLayerIndex_Index2);
 
         // unit
 

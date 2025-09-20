@@ -93,19 +93,8 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var verticalAmount = (float)(properties.GetValue(PropertyVerticalAmountId, layerTime, 0.0) / downSamplingRateY);
             var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
 
-            var targetLayer = targetLayerId != UseLayerImageTarget.Empty ? composition.GetLayer(targetLayerId.LayerId) : null;
-            if (targetLayer == null || (horizontalAmount <= 0.0F && verticalAmount <= 0.0F))
-            {
-                return image;
-            }
-
             var globalTime = layerTime + layer.SourceStartPoint;
-            using var sourceImage = targetLayerId.ImageProcessType switch
-            {
-                LayerImageProcessType.Masked => targetLayer.GetMaskedImage(globalTime, downSamplingRateX, useGpu),
-                LayerImageProcessType.Effected => targetLayer.GetEffectedImage(globalTime, downSamplingRateX, useGpu),
-                _ => targetLayer.GetRawImage(globalTime, downSamplingRateX, useGpu)
-            };
+            using var sourceImage = targetLayerId.GetImage(composition, globalTime, downSamplingRateX, useGpu);
             if (sourceImage == null)
             {
                 return image;

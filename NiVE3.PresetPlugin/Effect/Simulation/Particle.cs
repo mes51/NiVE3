@@ -292,14 +292,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     PropertyCameraGroupId,
                     LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera,
                     [
-                        new CheckBoxProperty(CameraProperties.PropertyCameraUseCompositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_UseComposition, false),
-                        new Vector3dProperty(CameraProperties.PropertyCameraPointOfInterestId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_PointOfInterest, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true, useInteraction : true),
-                        new Vector3dProperty(CameraProperties.PropertyCameraPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Position, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, -cameraZoom), digit: 2, is3D: true, useInteraction : true),
-                        new DirectionProperty(CameraProperties.PropertyCameraOrientationId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Orientation, Vector3d.Zero, digit: 2),
-                        new AngleProperty(CameraProperties.PropertyCameraXAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_XAngle, 0.0, digit: 2),
-                        new AngleProperty(CameraProperties.PropertyCameraYAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_YAngle, 0.0, digit: 2),
-                        new AngleProperty(CameraProperties.PropertyCameraZAngleId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_ZAngle, 0.0, digit: 2),
-                        new DoubleProperty(CameraProperties.PropertyCameraZoomId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Camera_Zoom, cameraZoom, 0.01, double.MaxValue, digit: 2)
+                        new CheckBoxProperty(CameraProperties.PropertyCameraUseCompositionId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_UseComposition, false),
+                        new Vector3dProperty(CameraProperties.PropertyCameraPointOfInterestId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_PointOfInterest, new Vector3d(sourceSize.Width, sourceSize.Height, 0.0) * 0.5, digit: 2, is3D: true, useInteraction : true),
+                        new Vector3dProperty(CameraProperties.PropertyCameraPositionId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_Position, new Vector3d(sourceSize.Width * 0.5, sourceSize.Height * 0.5, -cameraZoom), digit: 2, is3D: true, useInteraction : true),
+                        new DirectionProperty(CameraProperties.PropertyCameraOrientationId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_Orientation, Vector3d.Zero, digit: 2),
+                        new AngleProperty(CameraProperties.PropertyCameraXAngleId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_XAngle, 0.0, digit: 2),
+                        new AngleProperty(CameraProperties.PropertyCameraYAngleId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_YAngle, 0.0, digit: 2),
+                        new AngleProperty(CameraProperties.PropertyCameraZAngleId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_ZAngle, 0.0, digit: 2),
+                        new DoubleProperty(CameraProperties.PropertyCameraZoomId, LanguageResourceDictionary.ResourceKeys.Effect_General_Camera_Zoom, cameraZoom, 0.01, double.MaxValue, digit: 2)
                     ]
                 ),
                 new PropertyGroup(
