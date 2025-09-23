@@ -1778,6 +1778,26 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アンチエイリアス")]
         public const string Simulation_CardDance_RenderingAntiAlias = nameof(Simulation_CardDance_RenderingAntiAlias);
 
+        // Panorama
+
+        [DefaultValue("パノラマ")]
+        public const string Simulation_Panorama_Name = nameof(Simulation_Panorama_Name);
+
+        [DefaultValue("指定した画像を、コンポジションカメラを中心とした360°のパノラマ画像として表示します。")]
+        public const string Simulation_Panorama_Description = nameof(Simulation_Panorama_Description);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Simulation_Panorama_SourceLayer = nameof(Simulation_Panorama_SourceLayer);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Simulation_Panorama_RotateX = nameof(Simulation_Panorama_RotateX);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Simulation_Panorama_RotateY = nameof(Simulation_Panorama_RotateY);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Simulation_Panorama_RotateZ = nameof(Simulation_Panorama_RotateZ);
+
         // ColorKey
 
         [DefaultValue("カラーキー")]

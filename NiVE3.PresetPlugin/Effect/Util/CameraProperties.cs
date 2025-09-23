@@ -70,5 +70,20 @@ namespace NiVE3.PresetPlugin.Effect.Util
                 ) * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0), fov);
             }
         }
+
+        public static (Matrix4x4d viewMatrix, double fov) GetActiveCameraViewMatrixAndFov(ICompositionObject composition, ILayerObject layer, Time layerTime, ROI roi, int imageWidth, int imageHeight, double downSamplingRateX, double downSamplingRateY)
+        {
+            var realWidth = (int)Math.Round(imageWidth * downSamplingRateX);
+            var realHeight = (int)Math.Round(imageHeight * downSamplingRateY);
+            var originalWidth = roi.OriginalImageSize.Width * downSamplingRateX;
+            var originalHeight = roi.OriginalImageSize.Height * downSamplingRateY;
+            var size = Math.Max(realWidth, realHeight);
+
+            var offsetX = ((composition.Width - originalWidth) * 0.5 - (realWidth - originalWidth) * 0.5) / size;
+            var offsetY = ((composition.Height - originalHeight) * 0.5 - (realHeight - originalHeight) * 0.5) / size;
+            var cameraSetting = composition.GetActiveCameraSetting(layerTime + layer.SourceStartPoint);
+            var fov = Math.Atan(realWidth / cameraSetting.Zoom * 0.5) * 2.0;
+            return (Transform3D.Calc3DViewMatrix(cameraSetting, realWidth, realHeight) * Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0), fov);
+        }
     }
 }

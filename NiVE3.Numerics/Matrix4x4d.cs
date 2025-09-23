@@ -15,6 +15,8 @@ namespace NiVE3.Numerics
     // copy from Matrix4x4
     public struct Matrix4x4d
     {
+        const double InvertEpsilon = 1E-308;
+
         static readonly Matrix4x4d _Identity = new Matrix4x4d(
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
@@ -407,7 +409,7 @@ namespace NiVE3.Numerics
             var det = Vector256.Dot(C0, vTemp2);
 
             // Check determinate is not zero
-            if (Math.Abs(det) < double.Epsilon)
+            if (Math.Abs(det) < InvertEpsilon)
             {
                 result = new Matrix4x4d(double.NaN, double.NaN, double.NaN, double.NaN,
                             double.NaN, double.NaN, double.NaN, double.NaN,
