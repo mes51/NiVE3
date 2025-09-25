@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
@@ -106,8 +107,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var imageData = managedImage.Data;
             var sourceWidth = managedSourceImage.Width;
             var sourceHeight = managedSourceImage.Height;
-            var gapFilledWidth = sourceWidth - 1;
-            var gapFilledHeight = sourceHeight - 1;
             var sourceData = managedSourceImage.Data;
             Parallel.For(roi.Top, roi.Bottom, y =>
             {
@@ -130,10 +129,10 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     }
 
                     var dir = Vector3.Normalize((farPoint - nearPoint).AsVector3());
-                    var u = (MathF.Atan2(dir.X, dir.Z) + MathF.PI) / (MathF.PI * 2.0F) * gapFilledWidth;
-                    var v = (MathF.PI * 0.5F - MathF.Asin(Math.Clamp(dir.Y, -1.0F, 1.0F))) / MathF.PI * gapFilledHeight;
+                    var u = (MathF.Atan2(dir.X, dir.Z) + MathF.PI) / (MathF.PI * 2.0F) * sourceWidth;
+                    var v = (MathF.PI * 0.5F - MathF.Asin(Math.Clamp(dir.Y, -1.0F, 1.0F))) / MathF.PI * sourceHeight;
 
-                    imageDataSpan[x] = ImageInterpolation.Bilinear(sourceData, sourceWidth, sourceHeight, u, v);
+                    imageDataSpan[x] = BilinearPanorama(sourceData, sourceWidth, sourceHeight, u, v);
                 }
             });
 
@@ -159,16 +158,41 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             return gpuImage;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector4 BilinearPanorama(ReadOnlySpan<Vector4> texture, int width, int height, float x, float y)
+        {
+            var ix = (int)Math.Floor(x);
+            var iy = (int)Math.Floor(y);
+
+            if (ix == x && iy == y)
+            {
+                return texture[CoordWrap.Wrap(iy, height) * width + CoordWrap.Repeat(ix, width)];
+            }
+
+            var c1 = texture[CoordWrap.Wrap(iy, height) * width + CoordWrap.Repeat(ix, width)];
+            var c2 = texture[CoordWrap.Wrap(iy, height) * width + CoordWrap.Repeat(ix + 1, width)];
+            var c3 = texture[CoordWrap.Wrap(iy + 1, height) * width + CoordWrap.Repeat(ix, width)];
+            var c4 = texture[CoordWrap.Wrap(iy + 1, height) * width + CoordWrap.Repeat(ix + 1, width)];
+
+            var pp = x - ix;
+            var qq = y - iy;
+            var ta = Vector4.Lerp(Vector4.Lerp(c1, c3, qq), Vector4.Lerp(c2, c4, qq), pp).W;
+            if (ta <= 0.0F)
+            {
+                return Const.EmptyPixel;
+            }
+            var t = Vector4.Lerp(Vector4.Lerp(c1 * c1.W, c3 * c3.W, qq), Vector4.Lerp(c2 * c2.W, c4 * c4.W, qq), pp) / ta;
+            t.W = ta;
+
+            return t;
+        }
     }
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
     readonly partial struct PanoramaProcess(ReadWriteBuffer<Float4> image, int width, int height, ReadWriteBuffer<Float4> sourceImage, int sourceWidth, int sourceHeight, Float4x4 matrix, int startX, int startY) : IComputeShader
     {
-        readonly int GapFilledWidth = sourceWidth - 1;
-
-        readonly int GapFilledHeight = sourceHeight - 1;
-
         public void Execute()
         {
             var x = ThreadIds.X + startX;
@@ -189,8 +213,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var dir = Hlsl.Normalize((farPoint - nearPoint).XYZ);
-            var u = (Hlsl.Atan2(dir.X, dir.Z) + MathF.PI) / (MathF.PI * 2.0F) * GapFilledWidth;
-            var v = (MathF.PI * 0.5F - Hlsl.Asin(Hlsl.Clamp(dir.Y, -1.0F, 1.0F))) / MathF.PI * GapFilledHeight;
+            var u = (Hlsl.Atan2(dir.X, dir.Z) + MathF.PI) / (MathF.PI * 2.0F) * sourceWidth;
+            var v = (MathF.PI * 0.5F - Hlsl.Asin(Hlsl.Clamp(dir.Y, -1.0F, 1.0F))) / MathF.PI * sourceHeight;
 
             image[y * width + x] = SourceImageBilinear(u, v);
         }
@@ -199,91 +223,18 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         {
             var ix = (int)Hlsl.Floor(x);
             var iy = (int)Hlsl.Floor(y);
-
             if (ix == x && iy == y)
             {
-                if (ix > -1 && iy > -1 && ix < sourceWidth && iy < sourceHeight)
-                {
-                    return sourceImage[iy * sourceWidth + ix];
-                }
-                else
-                {
-                    return Const.EmptyPixelFloat4;
-                }
+                return sourceImage[CoordWrapGpu.Wrap(iy, sourceHeight) * sourceWidth + CoordWrapGpu.Wrap(ix, sourceWidth)];
             }
-            else if (ix < -1 || iy < -1 || ix >= sourceWidth || iy >= sourceHeight)
-            {
-                return Const.EmptyPixelFloat4;
-            }
+
+            var c1 = sourceImage[CoordWrapGpu.Wrap(iy, sourceHeight) * sourceWidth + CoordWrapGpu.Repeat(ix, sourceWidth)];
+            var c2 = sourceImage[CoordWrapGpu.Wrap(iy, sourceHeight) * sourceWidth + CoordWrapGpu.Repeat(ix + 1, sourceWidth)];
+            var c3 = sourceImage[CoordWrapGpu.Wrap(iy + 1, sourceHeight) * sourceWidth + CoordWrapGpu.Repeat(ix, sourceWidth)];
+            var c4 = sourceImage[CoordWrapGpu.Wrap(iy + 1, sourceHeight) * sourceWidth + CoordWrapGpu.Repeat(ix + 1, sourceWidth)];
 
             var pp = x - ix;
             var qq = y - iy;
-            var ip = 1.0F - pp;
-            var iq = 1.0F - qq;
-            var mw = sourceWidth - 1;
-            var mh = sourceHeight - 1;
-
-            var c1 = Const.EmptyPixelFloat4;
-            var c2 = Const.EmptyPixelFloat4;
-            var c3 = Const.EmptyPixelFloat4;
-            var c4 = Const.EmptyPixelFloat4;
-            var pos = iy * sourceWidth + ix;
-
-            if (ix > -1)
-            {
-                if (ix < mw)
-                {
-                    if (iy > -1)
-                    {
-                        c1 = sourceImage[pos];
-                        c2 = sourceImage[pos + 1];
-                        if (iy < mh)
-                        {
-                            pos += sourceWidth;
-                            c3 = sourceImage[pos];
-                            c4 = sourceImage[pos + 1];
-                        }
-                    }
-                    else
-                    {
-                        pos += sourceWidth;
-                        c3 = sourceImage[pos];
-                        c4 = sourceImage[pos + 1];
-                    }
-                }
-                else
-                {
-                    if (iy > -1)
-                    {
-                        c1 = sourceImage[pos];
-                        if (iy < mh)
-                        {
-                            c3 = sourceImage[pos + sourceWidth];
-                        }
-                    }
-                    else
-                    {
-                        c3 = sourceImage[pos + sourceWidth];
-                    }
-                }
-            }
-            else
-            {
-                pos++;
-                if (iy > -1)
-                {
-                    c2 = sourceImage[pos];
-                    if (iy < mh)
-                    {
-                        c4 = sourceImage[pos + sourceWidth];
-                    }
-                }
-                else
-                {
-                    c4 = sourceImage[pos + sourceWidth];
-                }
-            }
-
             var ta = Hlsl.Lerp(Hlsl.Lerp(c1, c3, qq), Hlsl.Lerp(c2, c4, qq), pp).W;
             if (ta <= 0.0F)
             {
