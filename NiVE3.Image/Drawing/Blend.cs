@@ -32,7 +32,7 @@ namespace NiVE3.Image.Drawing
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Process(BlendMode blendMode, in Vector4 back, in Vector4 front)
         {
-            if (back.W <= 0.0F)
+            if (back.W <= 0.0F || blendMode == BlendMode.ReplaceForce)
             {
                 return front;
             }
@@ -44,6 +44,7 @@ namespace NiVE3.Image.Drawing
             return blendMode switch
             {
                 BlendMode.Replace => front,
+                BlendMode.ReplaceForce => front,
                 BlendMode.Add => Add(back, front),
                 BlendMode.Subtract => Subtract(back, front),
                 BlendMode.Multiply => Multiply(back, front),
@@ -88,6 +89,7 @@ namespace NiVE3.Image.Drawing
             return blendMode switch
             {
                 BlendMode.Replace => front,
+                BlendMode.ReplaceForce => front,
                 BlendMode.Add => Add(back, front),
                 BlendMode.Subtract => Subtract(back, front),
                 BlendMode.Multiply => Multiply(back, front),
@@ -439,6 +441,7 @@ namespace NiVE3.Image.Drawing
     {
         Normal,
         Replace,
+        ReplaceForce,
         Add,
         Subtract,
         Multiply,

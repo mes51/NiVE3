@@ -1361,6 +1361,50 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Generate_MultiColorGradient_BlendMode = nameof(Generate_MultiColorGradient_BlendMode);
 
+        // GridLine
+
+        [DefaultValue("グリッド")]
+        public const string Generate_GridLine_Name = nameof(Generate_GridLine_Name);
+
+        [DefaultValue("格子を描画します")]
+        public const string Generate_GridLine_Description = nameof(Generate_GridLine_Description);
+
+        [LanguageKey, DefaultValue("アンカーポイント")]
+        public const string Generate_GridLine_AnchorPoint = nameof(Generate_GridLine_AnchorPoint);
+
+        [LanguageKey, DefaultValue("グリッドサイズ")]
+        public const string Generate_GridLine_GridSize = nameof(Generate_GridLine_GridSize);
+
+        [LanguageKey, DefaultValue("グリッドサイズの種類")]
+        public const string Generate_GridLine_GridSize_Type = nameof(Generate_GridLine_GridSize_Type);
+
+        [LanguageKey, DefaultValue("コーナーポイント")]
+        public const string Generate_GridLine_GridSize_CornerPoint = nameof(Generate_GridLine_GridSize_CornerPoint);
+
+        [LanguageKey, DefaultValue("幅")]
+        public const string Generate_GridLine_GridSize_Width = nameof(Generate_GridLine_GridSize_Width);
+
+        [LanguageKey, DefaultValue("高さ")]
+        public const string Generate_GridLine_GridSize_Height = nameof(Generate_GridLine_GridSize_Height);
+
+        [LanguageKey, DefaultValue("太さ")]
+        public const string Generate_GridLine_Thickness = nameof(Generate_GridLine_Thickness);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Generate_GridLine_Invert = nameof(Generate_GridLine_Invert);
+
+        [LanguageKey, DefaultValue("色")]
+        public const string Generate_GridLine_Color = nameof(Generate_GridLine_Color);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Generate_GridLine_Opacity = nameof(Generate_GridLine_Opacity);
+
+        [LanguageKey, DefaultValue("ぼかし")]
+        public const string Generate_GridLine_Blur = nameof(Generate_GridLine_Blur);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Generate_GridLine_BlendMode = nameof(Generate_GridLine_BlendMode);
+
         // Unmult
 
         [DefaultValue("Unmult")]
@@ -2099,6 +2143,9 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("置換")]
         public const string BlendMode_Replace = nameof(BlendMode_Replace);
 
+        [DefaultValue("置換(強制)")]
+        public const string BlendMode_ReplaceForce = nameof(BlendMode_ReplaceForce);
+
         [DefaultValue("加算")]
         public const string BlendMode_Add = nameof(BlendMode_Add);
 
@@ -2620,6 +2667,15 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("2")]
         public const string CardDanceSourceLayerIndex_Index2 = nameof(CardDanceSourceLayerIndex_Index2);
+
+        [DefaultValue("コーナーポイント")]
+        public const string GridLineGridSizeType_CornerPoint = nameof(GridLineGridSizeType_CornerPoint);
+
+        [DefaultValue("幅")]
+        public const string GridLineGridSizeType_Width = nameof(GridLineGridSizeType_Width);
+
+        [DefaultValue("幅と高さ")]
+        public const string GridLineGridSizeType_WidthAndHeight = nameof(GridLineGridSizeType_WidthAndHeight);
 
         // unit
 

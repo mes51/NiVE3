@@ -13,7 +13,7 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
 
         public static Float4 Process(int blendMode, Float4 back, Float4 front)
         {
-            if (back.W <= 0.0F)
+            if (back.W <= 0.0F || blendMode == 2)
             {
                 return front;
             }
@@ -25,50 +25,51 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
             switch (blendMode)
             {
                 case 1:
-                    return front;
                 case 2:
-                    return Add(back, front);
+                    return front;
                 case 3:
-                    return Subtract(back, front);
+                    return Add(back, front);
                 case 4:
-                    return Multiply(back, front);
+                    return Subtract(back, front);
                 case 5:
-                    return Screen(back, front);
+                    return Multiply(back, front);
                 case 6:
-                    return Overlay(back, front);
+                    return Screen(back, front);
                 case 7:
-                    return HardLight(back, front);
+                    return Overlay(back, front);
                 case 8:
-                    return SoftLight(back, front);
+                    return HardLight(back, front);
                 case 9:
-                    return VividLight(back, front);
+                    return SoftLight(back, front);
                 case 10:
-                    return LinearLight(back, front);
+                    return VividLight(back, front);
                 case 11:
-                    return PinLight(back, front);
+                    return LinearLight(back, front);
                 case 12:
-                    return ColorDodge(back, front);
+                    return PinLight(back, front);
                 case 13:
-                    return LinearDodge(back, front);
+                    return ColorDodge(back, front);
                 case 14:
-                    return ColorBurn(back, front);
+                    return LinearDodge(back, front);
                 case 15:
-                    return LinearBurn(back, front);
+                    return ColorBurn(back, front);
                 case 16:
-                    return Darken(back, front);
+                    return LinearBurn(back, front);
                 case 17:
-                    return Lighten(back, front);
+                    return Darken(back, front);
                 case 18:
-                    return Difference(back, front);
+                    return Lighten(back, front);
                 case 19:
-                    return Exclusion(back, front);
+                    return Difference(back, front);
                 case 20:
-                    return Hue(back, front);
+                    return Exclusion(back, front);
                 case 21:
-                    return Saturation(back, front);
+                    return Hue(back, front);
                 case 22:
-                    return Color(back, front);
+                    return Saturation(back, front);
                 case 23:
+                    return Color(back, front);
+                case 24:
                     return Luminance(back, front);
                 default:
                     return Normal(back, front);
@@ -85,50 +86,51 @@ namespace NiVE3.PresetPlugin.Internal.ComputeShader
             switch (blendMode)
             {
                 case 1:
-                    return front;
                 case 2:
-                    return Add(back, front);
+                    return front;
                 case 3:
-                    return Subtract(back, front);
+                    return Add(back, front);
                 case 4:
-                    return Multiply(back, front);
+                    return Subtract(back, front);
                 case 5:
-                    return Screen(back, front);
+                    return Multiply(back, front);
                 case 6:
-                    return Overlay(back, front);
+                    return Screen(back, front);
                 case 7:
-                    return HardLight(back, front);
+                    return Overlay(back, front);
                 case 8:
-                    return SoftLight(back, front);
+                    return HardLight(back, front);
                 case 9:
-                    return VividLight(back, front);
+                    return SoftLight(back, front);
                 case 10:
-                    return LinearLight(back, front);
+                    return VividLight(back, front);
                 case 11:
-                    return PinLight(back, front);
+                    return LinearLight(back, front);
                 case 12:
-                    return ColorDodge(back, front);
+                    return PinLight(back, front);
                 case 13:
-                    return LinearDodge(back, front);
+                    return ColorDodge(back, front);
                 case 14:
-                    return ColorBurn(back, front);
+                    return LinearDodge(back, front);
                 case 15:
-                    return LinearBurn(back, front);
+                    return ColorBurn(back, front);
                 case 16:
-                    return Darken(back, front);
+                    return LinearBurn(back, front);
                 case 17:
-                    return Lighten(back, front);
+                    return Darken(back, front);
                 case 18:
-                    return Difference(back, front);
+                    return Lighten(back, front);
                 case 19:
-                    return Exclusion(back, front);
+                    return Difference(back, front);
                 case 20:
-                    return Hue(back, front);
+                    return Exclusion(back, front);
                 case 21:
-                    return Saturation(back, front);
+                    return Hue(back, front);
                 case 22:
-                    return Color(back, front);
+                    return Saturation(back, front);
                 case 23:
+                    return Color(back, front);
+                case 24:
                     return Luminance(back, front);
                 default:
                     return Normal(back, front);
