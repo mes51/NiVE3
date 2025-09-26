@@ -440,6 +440,7 @@ namespace NiVE3.Model
                 foreach (var layer in Layers)
                 {
                     layer.UpdateCompositionDependProperties();
+                    layer.ClearCacheByLayerUpdated();
                 }
                 HistoryModel.Add(new MoveLayersHistoryCommand(this, layers, prevIndices, [..newOrderedLayers]));
 
@@ -1253,6 +1254,7 @@ namespace NiVE3.Model
                 }
                 layer.UpdateCompositionDependProperties();
                 layer.UpdateLayerDependProperties();
+                layer.ClearCacheByLayerUpdated();
             }
             HistoryModel.Add(new SplitLayersHistoryCommand(this, layers, addedLayer, oldOutPoint, newOutPoint));
 
@@ -2139,6 +2141,7 @@ namespace NiVE3.Model
             foreach (var layer in layers)
             {
                 layer.UpdateCompositionDependProperties();
+                layer.ClearCacheByLayerUpdated();
             }
             HistoryModel.Add(new AddLayersHistoryCommand(this, layers, insertIndex));
 
@@ -2172,6 +2175,7 @@ namespace NiVE3.Model
             foreach (var layer in Layers)
             {
                 layer.UpdateCompositionDependProperties();
+                layer.ClearCacheByLayerUpdated();
             }
             HistoryModel.Add(new DeleteLayersHistoryCommand(this, removeLayers, oldIndices, isCut));
 
@@ -2272,6 +2276,7 @@ namespace NiVE3.Model
                 }
                 layer.UpdateCompositionDependProperties();
                 layer.UpdateLayerDependProperties();
+                layer.ClearCacheByLayerUpdated();
             }
             HistoryModel.Add(new PasteLayersHistoryCommand(this, [.. addedLayer], insertStartIndex, isDuplicate));
 

@@ -24,6 +24,13 @@ namespace NiVE3.Model
             set { SetProperty(ref redoCommands, value); }
         }
 
+        private bool isChanging;
+        public bool IsChanging
+        {
+            get { return isChanging; }
+            set { SetProperty(ref isChanging, value); }
+        }
+
         GroupedHistoryCommand? CurrentGroup { get; set; }
 
         int GroupNestCount { get; set; }
@@ -57,8 +64,10 @@ namespace NiVE3.Model
                 return;
             }
 
+            IsChanging = true;
             var command = UndoCommands.Pop();
             command.Undo();
+            IsChanging = false;
 
             RedoCommands.Push(command);
 
@@ -78,8 +87,10 @@ namespace NiVE3.Model
                 return;
             }
 
+            IsChanging = true;
             var command = RedoCommands.Pop();
             command.Redo();
+            IsChanging = false;
 
             UndoCommands.Push(command);
 
@@ -105,6 +116,7 @@ namespace NiVE3.Model
 
             CurrentGroup ??= new GroupedHistoryCommand(name);
             GroupNestCount++;
+            IsChanging = true;
 
             HistoryGroupChangingPublisher.Publish(this, EventArgs.Empty);
         }
@@ -125,6 +137,7 @@ namespace NiVE3.Model
             GroupNestCount--;
             if (GroupNestCount < 1 && CurrentGroup != null)
             {
+                IsChanging = false;
                 if (CurrentGroup.HasCommand)
                 {
                     AddInternal(CurrentGroup);

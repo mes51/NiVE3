@@ -199,6 +199,14 @@ namespace NiVE3.ViewModel
             set { SetProperty(ref isPlaying, value); }
         }
 
+        private bool historyIsChanging;
+        [NeedWire(nameof(HistoryModel), BindTargetName = nameof(HistoryModel.IsChanging), IsOneWay = true)]
+        public bool HistoryIsChanging
+        {
+            get { return historyIsChanging; }
+            set { SetProperty(ref historyIsChanging, value); }
+        }
+
         private double realFrameRate;
         public double RealFrameRate
         {
@@ -387,6 +395,8 @@ namespace NiVE3.ViewModel
 
         EventHubModel EventHubModel { get; }
 
+        HistoryModel HistoryModel { get; }
+
         IDialogService DialogService { get; }
 
         ColoredPreviewBoundingBox[] BoundingBoxesBuffer { get; set; } = [];
@@ -427,7 +437,19 @@ namespace NiVE3.ViewModel
 
         List<int[]> CachedRamPreviewFrames { get; set; } = [];
 
-        public PreviewViewModel(PreviewModelBase previewModel, ViewStateModel viewState, ApplicationModel applicationModel, ProceduralInputListModel proceduralInputListModel, PlayControllerModel playControllerModel, AudioPlayerModel audioPlayerModel, AudioInformationModel audioInformationModel, AcceleratorModel acceleratorModel, EventHubModel eventHubModel, IDialogService dialogService)
+        public PreviewViewModel(
+            PreviewModelBase previewModel,
+            ViewStateModel viewState,
+            ApplicationModel applicationModel,
+            ProceduralInputListModel proceduralInputListModel,
+            PlayControllerModel playControllerModel,
+            AudioPlayerModel audioPlayerModel,
+            AudioInformationModel audioInformationModel,
+            AcceleratorModel acceleratorModel,
+            EventHubModel eventHubModel,
+            HistoryModel historyModel,
+            IDialogService dialogService
+        )
         {
             PreviewModel = previewModel;
             ViewState = viewState;
@@ -437,6 +459,7 @@ namespace NiVE3.ViewModel
             AudioInformationModel = audioInformationModel;
             AcceleratorModel = acceleratorModel;
             EventHubModel = eventHubModel;
+            HistoryModel = historyModel;
             DialogService = dialogService;
 
             ProceduralInputItems = proceduralInputListModel.ProceduralFootageItems;
@@ -727,7 +750,7 @@ namespace NiVE3.ViewModel
                     CurrentFrame.WritePixels(BufferImageSize, ImageBuffer, BufferImageSize.Width * 4, 0);
                     IsDirtyImageBuffer = false;
                 }
-                if (ViewState.IsIgnoreUpdatePreview)
+                if (ViewState.IsIgnoreUpdatePreview || HistoryIsChanging)
                 {
                     return;
                 }
@@ -834,7 +857,7 @@ namespace NiVE3.ViewModel
 
         void UpdateCurrentFrame()
         {
-            if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || IsCurrentFrameUpdating || !PreviewModel.CanRendering)
+            if (IsDirtyImageBuffer || IsIgnoreUpdatePreview || HistoryIsChanging || IsCurrentFrameUpdating || !PreviewModel.CanRendering)
             {
                 NeedUpdateFrameNextTick = true;
                 return;

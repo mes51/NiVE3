@@ -373,6 +373,12 @@ namespace NiVE3.Model
                     CompositionModel.Layers.Insert(index, l);
                     index++;
                 }
+
+                foreach (var l in CompositionModel.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
+                }
             }
 
             public void Undo()
@@ -380,6 +386,12 @@ namespace NiVE3.Model
                 foreach (var l in Layers.Reverse())
                 {
                     CompositionModel.Layers.Remove(l);
+                }
+
+                foreach (var l in CompositionModel.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
                 }
             }
 
@@ -415,6 +427,12 @@ namespace NiVE3.Model
             public void Redo()
             {
                 CompositionModel.Layers.SortBy(l => Array.IndexOf(NewOrderedLayers, l));
+
+                foreach (var l in CompositionModel.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
+                }
             }
 
             public void Undo()
@@ -427,6 +445,12 @@ namespace NiVE3.Model
                 foreach (var (l, i) in Layers.Zip(PrevIndices))
                 {
                     CompositionModel.Layers.Insert(i, l);
+                }
+
+                foreach (var l in CompositionModel.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
                 }
             }
 
@@ -664,6 +688,12 @@ namespace NiVE3.Model
                 {
                     CompositionModel.Layers.Remove(l);
                 }
+
+                foreach (var l in CompositionModel.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
+                }
             }
 
             public void Undo()
@@ -671,6 +701,12 @@ namespace NiVE3.Model
                 foreach (var (l, i) in Layers.Zip(Indices))
                 {
                     CompositionModel.Layers.Insert(i, l);
+                }
+
+                foreach (var l in CompositionModel.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
                 }
             }
 
@@ -705,6 +741,12 @@ namespace NiVE3.Model
                     Model.Layers.Insert(index, l);
                     index++;
                 }
+
+                foreach (var l in Model.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
+                }
             }
 
             public void Undo()
@@ -712,6 +754,12 @@ namespace NiVE3.Model
                 foreach (var l in NewLayers)
                 {
                     Model.Layers.Remove(l);
+                }
+
+                foreach (var l in Model.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
                 }
             }
 
@@ -758,6 +806,12 @@ namespace NiVE3.Model
                 {
                     l.OutPoint = o;
                 }
+
+                foreach (var l in Model.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
+                }
             }
 
             public void Undo()
@@ -769,6 +823,12 @@ namespace NiVE3.Model
                 foreach (var (l, o) in TargetLayers.Zip(OldOutPoints))
                 {
                     l.OutPoint = o;
+                }
+
+                foreach (var l in Model.Layers)
+                {
+                    l.UpdateCompositionDependProperties();
+                    l.ClearCacheByLayerUpdated();
                 }
             }
 
