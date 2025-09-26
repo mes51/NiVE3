@@ -53,7 +53,7 @@ namespace NiVE3.Model
 
         public string EffectName => Metadata.Name;
 
-        public bool IsRenderEveryFrame => Metadata.IsRenderEveryFrame;
+        public bool IsRenderEveryFrame => Metadata.IsRenderEveryFrame || UseCompositionCamera; // TODO: アクティブカメラが変わったときのみ再レンダリングするようにする
 
         public bool IsDummyEffect => Metadata.IsDummyEffect;
 
