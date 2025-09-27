@@ -31,10 +31,33 @@ namespace NiVE3.PresetPlugin.Effect.Util.General
             });
         }
 
+        public static void SameSizeNoSkipTransparentFrontCpu(NManagedImage backImage, NManagedImage frontImage, ROI roi, BlendMode blendMode)
+        {
+            var imageWidth = backImage.Width;
+            var imageData = backImage.Data;
+            var frontImageData = frontImage.Data;
+            Parallel.For(roi.Top, roi.Bottom, y =>
+            {
+                var backImageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                var frontImageDataSpan = frontImageData.AsSpan(y * imageWidth, imageWidth);
+
+                for (var x = roi.Left; x < roi.Right; x++)
+                {
+                    backImageDataSpan[x] = Blend.ProcessNoSkipTransparentFront(blendMode, backImageDataSpan[x], frontImageDataSpan[x]);
+                }
+            });
+        }
+
         public static void SameSizeGpu(GraphicsDevice device, NGPUImage backImage, NGPUImage frontImage, ROI roi, BlendMode blendMode)
         {
             using var context = device.CreateComputeContext();
             context.For(roi.Width, roi.Height, new SameSizeBlendProcess(backImage.Data, frontImage.Data, backImage.Width, (int)blendMode, roi.Left, roi.Top));
+        }
+
+        public static void SameSizeNoSkipTransparentFrontGpu(GraphicsDevice device, NGPUImage backImage, NGPUImage frontImage, ROI roi, BlendMode blendMode)
+        {
+            using var context = device.CreateComputeContext();
+            context.For(roi.Width, roi.Height, new SameSizeBlendNoSkipTransparentFrontProcess(backImage.Data, frontImage.Data, backImage.Width, (int)blendMode, roi.Left, roi.Top));
         }
 
         public static void TransferSameSizeCpu(NManagedImage backImage, NManagedImage frontImage, ROI roi)
@@ -90,6 +113,18 @@ namespace NiVE3.PresetPlugin.Effect.Util.General
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
 
             back[pos] = BlendMethods.Process(blendMode, back[pos], front[pos]);
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct SameSizeBlendNoSkipTransparentFrontProcess(ReadWriteBuffer<Float4> back, ReadWriteBuffer<Float4> front, int width, int blendMode, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+
+            back[pos] = BlendMethods.ProcessNoSkipTransparentFront(blendMode, back[pos], front[pos]);
         }
     }
 

@@ -2143,9 +2143,6 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("置換")]
         public const string BlendMode_Replace = nameof(BlendMode_Replace);
 
-        [DefaultValue("置換(強制)")]
-        public const string BlendMode_ReplaceForce = nameof(BlendMode_ReplaceForce);
-
         [DefaultValue("加算")]
         public const string BlendMode_Add = nameof(BlendMode_Add);
 

@@ -81,7 +81,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 new ColorProperty(PropertyColorId, LanguageResourceDictionary.ResourceKeys.Generate_GridLine_Color, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, Vector4.One),
                 new DoubleProperty(PropertyOpacityId, LanguageResourceDictionary.ResourceKeys.Generate_GridLine_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                 new Vector3dProperty(PropertyBlurId, LanguageResourceDictionary.ResourceKeys.Generate_GridLine_Blur, Vector3d.Zero, Vector3d.Zero, new Vector3d(10000.0), digit: 2, useLinkRatio: true),
-                new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Generate_GridLine_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.ReplaceForce, selectBoxWidth: 90.0)
+                new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Generate_GridLine_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Replace, selectBoxWidth: 90.0)
             ];
         }
 
@@ -201,7 +201,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 BoxBlurProcessor.ProcessCpu(canvas, roi, blur.X, blur.Y, 3, EdgeRepeatMode.Wrap);
             }
 
-            ImageBlendProcessor.SameSizeCpu(managedImage, canvas, roi, blendMode);
+            ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, canvas, roi, blendMode);
 
             return managedImage;
         }
@@ -218,7 +218,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 BoxBlurProcessor.ProcessGpu(device, canvas, roi, blur.X, blur.Y, 3, EdgeRepeatMode.Wrap);
             }
 
-            ImageBlendProcessor.SameSizeGpu(device, gpuImage, canvas, roi, blendMode);
+            ImageBlendProcessor.SameSizeNoSkipTransparentFrontGpu(device, gpuImage, canvas, roi, blendMode);
 
             return gpuImage;
         }
