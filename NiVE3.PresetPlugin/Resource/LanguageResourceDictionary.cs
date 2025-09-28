@@ -713,6 +713,41 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("カラー")]
         public const string Stylize_SpotLight_AmbientLight_Color = nameof(Stylize_SpotLight_AmbientLight_Color);
 
+        // Halftone
+
+        [DefaultValue("ハーフトーン")]
+        public const string Stylize_Halftone_Name = nameof(Stylize_Halftone_Name);
+
+        [DefaultValue("画像の輝度、または各チャンネルの値に応じて網点のパターンで描画します")]
+        public const string Stylize_Halftone_Description = nameof(Stylize_Halftone_Description);
+
+        [LanguageKey, DefaultValue("ソースチャンネル")]
+        public const string Stylize_Halftone_SourceChannelType = nameof(Stylize_Halftone_SourceChannelType);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Stylize_Halftone_Invert = nameof(Stylize_Halftone_Invert);
+
+        [LanguageKey, DefaultValue("ドットサイズ")]
+        public const string Stylize_Halftone_DotSize = nameof(Stylize_Halftone_DotSize);
+
+        [LanguageKey, DefaultValue("オフセット")]
+        public const string Stylize_Halftone_AnchorPoint = nameof(Stylize_Halftone_AnchorPoint);
+
+        [LanguageKey, DefaultValue("角度")]
+        public const string Stylize_Halftone_Angle = nameof(Stylize_Halftone_Angle);
+
+        [LanguageKey, DefaultValue("ドットのカラー")]
+        public const string Stylize_Halftone_DotColor = nameof(Stylize_Halftone_DotColor);
+
+        [LanguageKey, DefaultValue("背景色")]
+        public const string Stylize_Halftone_BackgroundColor = nameof(Stylize_Halftone_BackgroundColor);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Stylize_Halftone_Opacity = nameof(Stylize_Halftone_Opacity);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Stylize_Halftone_BlendMode = nameof(Stylize_Halftone_BlendMode);
+
         // Level
 
         [DefaultValue("レベル")]
