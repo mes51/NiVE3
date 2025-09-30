@@ -248,6 +248,24 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アイリスの角度")]
         public const string Blur_LensBlur_Iris_Angle = nameof(Blur_LensBlur_Iris_Angle);
 
+        [LanguageKey, DefaultValue("深度マップ")]
+        public const string Blur_LensBlur_DepthMap = nameof(Blur_LensBlur_DepthMap);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Blur_LensBlur_DepthMap_SourceLayer = nameof(Blur_LensBlur_DepthMap_SourceLayer);
+
+        [LanguageKey, DefaultValue("ソースチャンネル")]
+        public const string Blur_LensBlur_DepthMap_SourceChannelType = nameof(Blur_LensBlur_DepthMap_SourceChannelType);
+
+        [LanguageKey, DefaultValue("深度マップの配置")]
+        public const string Blur_LensBlur_DepthMap_SourceLayerPosition = nameof(Blur_LensBlur_DepthMap_SourceLayerPosition);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Blur_LensBlur_DepthMap_Invert = nameof(Blur_LensBlur_DepthMap_Invert);
+
+        [LanguageKey, DefaultValue("ブラーの焦点距離")]
+        public const string Blur_LensBlur_DepthMap_Focus = nameof(Blur_LensBlur_DepthMap_Focus);
+
         [LanguageKey, DefaultValue("ハイライト")]
         public const string Blur_LensBlur_Highlight = nameof(Blur_LensBlur_Highlight);
 

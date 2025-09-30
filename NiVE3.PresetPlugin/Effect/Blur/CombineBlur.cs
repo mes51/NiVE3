@@ -691,24 +691,20 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         int startY
     ) : IComputeShader
     {
+        readonly float SourceStartX = sourceLayerPosition == 1 ? 0.0F : (sourceImageWidth - width) * 0.5F;
+
+        readonly float SourceStartY = sourceLayerPosition == 1 ? 0.0F : (sourceImageHeight - height) * 0.5F;
+
+        readonly float SourceDiffX = sourceLayerPosition == 1 ? (sourceImageWidth - 1) / (float)(width - 1) : 1.0F;
+
+        readonly float SourceDiffY = sourceLayerPosition == 1 ? (sourceImageHeight - 1) / (float)(height - 1) : 1.0F;
+
         public void Execute()
         {
-            var sourceStartX = (sourceImageWidth - width) * 0.5F;
-            var sourceStartY = (sourceImageHeight - height) * 0.5F;
-            var sourceDiffX = 1.0F;
-            var sourceDiffY = 1.0F;
-            if (sourceLayerPosition == 1)
-            {
-                sourceStartX = 0.0F;
-                sourceStartY = 0.0F;
-                sourceDiffX = (sourceImageWidth - 1) / (float)(width - 1);
-                sourceDiffY = (sourceImageHeight - 1) / (float)(height - 1);
-            }
-
             var x = ThreadIds.X + startX;
             var y = ThreadIds.Y + startY;
-            var sourceX = sourceStartX + sourceDiffX * x;
-            var sourceY = sourceStartY + sourceDiffY * y;
+            var sourceX = SourceStartX + SourceDiffX * x;
+            var sourceY = SourceStartY + SourceDiffY * y;
 
             var mapColor = Float4.Zero;
             if (sourceLayerPosition == 2)
