@@ -9,12 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
 using NiVE3.Image;
+using NiVE3.PresetPlugin.Effect.Distortion;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.PresetPlugin.Effect.Distortion
+namespace NiVE3.PresetPlugin.Effect.Util.Distortion
 {
     static class DisplacementMapGenerator
     {

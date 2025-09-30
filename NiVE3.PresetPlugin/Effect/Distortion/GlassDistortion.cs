@@ -16,6 +16,7 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Effect.Util.Distortion;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Drawing;
