@@ -40,13 +40,17 @@ namespace NiVE3.PresetPlugin.Property
         public static GraphValueParameter? Deserialize(object? serializedValue)
         {
             if (serializedValue is not IDictionary<string, object?> dictionary ||
-                !dictionary.TryGetValue(nameof(Values), out var values) ||
-                values is not float[] v)
+                !dictionary.TryGetValue(nameof(Values), out var values))
             {
                 return null;
             }
 
-            return new GraphValueParameter(v);
+            return values switch
+            {
+                float[] fv => new GraphValueParameter(fv),
+                object[] ov => new GraphValueParameter([..ov.Select(Convert.ToSingle)]),
+                _ => null,
+            };
         }
 
         static float[] CoerceValues(float[] values)
