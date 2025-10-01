@@ -142,6 +142,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyRenderingParticleBlendModeId = nameof(PropertyRenderingParticleBlendModeId);
 
+        const string PropertyRenderingParticleOnlyId = nameof(PropertyRenderingParticleOnlyId);
+
         const string PropertyRenderingBlendModeId = nameof(PropertyRenderingBlendModeId);
 
         const string PropertyRenderingCompositeOrderId = nameof(PropertyRenderingCompositeOrderId);
@@ -317,6 +319,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     [
                         new CheckBoxProperty(PropertyRenderingAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_AntiAlias, true),
                         new EnumProperty(PropertyRenderingParticleBlendModeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_ParticleBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0),
+                        new CheckBoxProperty(PropertyRenderingParticleOnlyId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_ParticleOnly, false),
                         new EnumProperty(PropertyRenderingBlendModeId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyRenderingCompositeOrderId, LanguageResourceDictionary.ResourceKeys.Simulation_Particle_Rendering_CompositeOrder, typeof(CompositeOrder), typeof(LanguageResourceDictionary), CompositeOrder.Front, selectBoxWidth: 90.0),
                     ]
@@ -492,45 +495,64 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     break;
             }
 
+            var particleOnly = rendering.GetValue(PropertyRenderingParticleOnlyId, layerTime, false);
             var blendMode = rendering.GetValue(PropertyRenderingBlendModeId, layerTime, BlendMode.Normal);
             var compositeOrder = rendering.GetValue(PropertyRenderingCompositeOrderId, layerTime, CompositeOrder.Front);
             if (useGpu && AcceleratorObject != null)
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var result = image.ToGpu(device);
-                switch (compositeOrder)
+                var gpuRenderTarget = (NGPUImage)renderTarget;
+                if (particleOnly)
                 {
-                    case CompositeOrder.Front:
-                        ImageBlendProcessor.SameSizeGpu(device, result, (NGPUImage)renderTarget, roi, blendMode);
-                        image = result;
-                        break;
-                    default:
-                        ImageBlendProcessor.SameSizeGpu(device, (NGPUImage)renderTarget, result, roi, blendMode);
-                        if (image != result)
-                        {
-                            result.Dispose();
-                        }
-                        image = (NGPUImage)renderTarget;
-                        break;
+                    ImageBlendProcessor.TransferSameSizeGpu(device, result, gpuRenderTarget, roi);
+                    image = result;
+                }
+                else
+                {
+                    switch (compositeOrder)
+                    {
+                        case CompositeOrder.Front:
+                            ImageBlendProcessor.SameSizeGpu(device, result, gpuRenderTarget, roi, blendMode);
+                            image = result;
+                            break;
+                        default:
+                            ImageBlendProcessor.SameSizeGpu(device, gpuRenderTarget, result, roi, blendMode);
+                            if (image != result)
+                            {
+                                result.Dispose();
+                            }
+                            image = gpuRenderTarget;
+                            break;
+                    }
                 }
             }
             else
             {
                 var result = image.ToManaged();
-                switch (compositeOrder)
+                var managedRenderTarget = (NManagedImage)renderTarget;
+                if (particleOnly)
                 {
-                    case CompositeOrder.Front:
-                        ImageBlendProcessor.SameSizeCpu(result, (NManagedImage)renderTarget, roi, blendMode);
-                        image = result;
-                        break;
-                    default:
-                        ImageBlendProcessor.SameSizeCpu((NManagedImage)renderTarget, result, roi, blendMode);
-                        if (result != image)
-                        {
-                            result.Dispose();
-                        }
-                        image = (NManagedImage)renderTarget;
-                        break;
+                    ImageBlendProcessor.TransferSameSizeCpu(result, managedRenderTarget, roi);
+                    image = result;
+                }
+                else
+                {
+                    switch (compositeOrder)
+                    {
+                        case CompositeOrder.Front:
+                            ImageBlendProcessor.SameSizeCpu(result, managedRenderTarget, roi, blendMode);
+                            image = result;
+                            break;
+                        default:
+                            ImageBlendProcessor.SameSizeCpu(managedRenderTarget, result, roi, blendMode);
+                            if (result != image)
+                            {
+                                result.Dispose();
+                            }
+                            image = managedRenderTarget;
+                            break;
+                    }
                 }
             }
 

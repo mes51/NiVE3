@@ -1712,6 +1712,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("パーティクル間のブレンドモード")]
         public const string Simulation_Particle_Rendering_ParticleBlendMode = nameof(Simulation_Particle_Rendering_ParticleBlendMode);
 
+        [LanguageKey, DefaultValue("パーティクルのみをレンダリング")]
+        public const string Simulation_Particle_Rendering_ParticleOnly = nameof(Simulation_Particle_Rendering_ParticleOnly);
+
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Simulation_Particle_Rendering_BlendMode = nameof(Simulation_Particle_Rendering_BlendMode);
 
