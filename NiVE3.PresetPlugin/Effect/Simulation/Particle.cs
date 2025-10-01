@@ -356,7 +356,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 SimulatedParticles.Clear();
                 SimulatedParticleTimes.Clear();
                 CurrentParticles.Clear();
-                LastSimulateTime = Time.Zero;
+                LastSimulateTime = Time.FromTime(simulateionStartTimeOffset, composition.FrameRate);
+                LastSimulateStartTimeOffset = simulateionStartTimeOffset;
             }
 
             if (LastSimulateTime <= layerTime)
@@ -369,7 +370,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var world = properties.First(p => p.Id == PropertyWorldGroupId).GetChildren() ?? [];
 
                 SimulateParticle(
-                    layerTime + Time.FromTime(simulateionStartTimeOffset, composition.FrameRate) + new Time(1, composition.FrameRate),
+                    layerTime + new Time(1, composition.FrameRate),
                     composition.FrameRate,
                     cannon.First(p => p.Id == PropertyCannonParticleGenerationRateId),
                     cannon.First(p => p.Id == PropertyCannonParticleLifetimeId),
@@ -412,7 +413,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
                 LastSimulateFrameRate = composition.FrameRate;
                 LastSimulationRate = simulationRate;
-                LastSimulateStartTimeOffset = simulateionStartTimeOffset;
                 LastSimulateRandomSeed = randomSeed;
                 LastPropertyHash = propertyHash;
             }
@@ -448,7 +448,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             renderer.FieldOfView = fov;
             renderer.ViewMatrix = viewMatrix;
 
-            var particles = SimulatedParticles[SimulatedParticleTimes.First(t => t >= layerTime)];
+            var particlesKeyIndex = SimulatedParticleTimes.FindIndex(t => t >= layerTime);
+            var particles = particlesKeyIndex > -1 ? SimulatedParticles[SimulatedParticleTimes[particlesKeyIndex]] : [];
             var rendering = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
             var particleBlendMode = rendering.GetValue(PropertyRenderingParticleBlendModeId, layerTime, BlendMode.Normal);
             var renderSize = Math.Max(realWidth, realHeight);
@@ -588,11 +589,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             uint randomSeed
         )
         {
-            if (toTime <= 0.0)
-            {
-                return;
-            }
-
             var frameDuration = new Time(1, frameRate * simulationRate);
             var doubleFrameDuration = (double)frameDuration;
             var particleGeneration = 0.0;
