@@ -2579,19 +2579,20 @@ namespace NiVE3.Model
             LayerOptionProperties = null;
             if (footageModel.InputModel.Input is TextInput)
             {
-                TextProperties = new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.ResourceKeys.Layer_TextOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+                TextProperties = oldTextProperties ?? new PropertyGroupModel(new PropertyGroup(TextGroupId, LanguageResourceDictionary.ResourceKeys.Layer_TextOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
             }
             else if (footageModel.InputModel.Input is ShapeInput)
             {
-                ShapeProperties = new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.ResourceKeys.Layer_ShapeOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+                ShapeProperties = oldShapeProperties ?? new PropertyGroupModel(new PropertyGroup(ShapeGroupId, LanguageResourceDictionary.ResourceKeys.Layer_ShapeOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
             }
             else if (footageModel.IsCustomizableFootageSource)
             {
+                // NOTE: SourceOptionPropertiesは同じプロパティでもプロパティの置換を強制する
                 SourceOptionProperties = new PropertyGroupModel(new PropertyGroup(SourceOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_SourceOption, footageModel.GetOptionProperties()), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
             }
             if (footageModel.InputType.HasFlag(SourceType.Audio))
             {
-                AudioOptionProperties = new PropertyGroupModel(new PropertyGroup(AudioOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_AudioOption,
+                AudioOptionProperties = oldAudioOptionProperties ?? new PropertyGroupModel(new PropertyGroup(AudioOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_AudioOption,
                 [
                     new Vector3dProperty(
                                 ILayerObject.AudioLevelId,
@@ -2608,7 +2609,7 @@ namespace NiVE3.Model
             }
             if (footageModel.InputType.HasFlag(SourceType.Video) || footageModel.InputType.HasFlag(SourceType.Image))
             {
-                TransformProperties = new PropertyGroupModel(new PropertyGroup(TransformGroupId, LanguageResourceDictionary.ResourceKeys.Layer_Transform,
+                TransformProperties = oldTransformProperties ?? new PropertyGroupModel(new PropertyGroup(TransformGroupId, LanguageResourceDictionary.ResourceKeys.Layer_Transform,
                 [
                     new Vector2DOr3DProperty(ILayerObject.TransformAnchorPointId, LanguageResourceDictionary.ResourceKeys.TransformProperty_AnchorPoint, new Vector3d(footageModel.Width * 0.5, footageModel.Height * 0.5, 0.0), digit: 2),
                             new Vector2DOr3DProperty(ILayerObject.TransformPositionId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Translate, new Vector3d(CompositionModel.Width * 0.5, CompositionModel.Height * 0.5, 0.0), digit: 2),
@@ -2619,7 +2620,7 @@ namespace NiVE3.Model
                             new ZAngleProperty(ILayerObject.TransformZAngleId, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle2D, LanguageResourceDictionary.ResourceKeys.TransformProperty_ZAngle3D, 0.0, digit: 2),
                             new DoubleProperty(ILayerObject.TransformPropertyOpacityId, LanguageResourceDictionary.ResourceKeys.TransformProperty_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                 ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
-                LayerOptionProperties = new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer,
+                LayerOptionProperties = oldLayerOptionProperties ?? new PropertyGroupModel(new PropertyGroup(LayerOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_LayerOptions_Layer,
                 [
                     new EnumProperty(ILayerObject.ImageLayerOptionIsCastShadowId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_IsCastShadow, typeof(ShadowCastMode), typeof(LanguageResourceDictionary), ShadowCastMode.None, selectBoxWidth: 100),
                             new DoubleProperty(ILayerObject.ImageLayerOptionLightTransmissionId, LanguageResourceDictionary.ResourceKeys.LayerOptionsProperty_LightTransmission, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
@@ -2633,32 +2634,32 @@ namespace NiVE3.Model
                         ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
             }
 
-            if (TransformProperties != null)
+            if (TransformProperties != null && TransformProperties != oldTransformProperties)
             {
                 TransformProperties.ValueUpdated += Properties_ValueUpdated;
                 TransformProperties.ValueCommited += Properties_ValueCommited;
             }
-            if (LayerOptionProperties != null)
+            if (LayerOptionProperties != null && LayerOptionProperties != oldLayerOptionProperties)
             {
                 LayerOptionProperties.ValueUpdated += Properties_ValueUpdated;
                 LayerOptionProperties.ValueCommited += Properties_ValueCommited;
             }
-            if (TextProperties != null)
+            if (TextProperties != null && TextProperties != oldTextProperties)
             {
                 TextProperties.ValueUpdated += Properties_ValueUpdated;
                 TextProperties.ValueCommited += Properties_ValueCommited;
             }
-            if (ShapeProperties != null)
+            if (ShapeProperties != null && ShapeProperties != oldShapeProperties)
             {
                 ShapeProperties.ValueUpdated += Properties_ValueUpdated;
                 ShapeProperties.ValueCommited += Properties_ValueCommited;
             }
-            if (SourceOptionProperties != null)
+            if (SourceOptionProperties != null && SourceOptionProperties != oldSourceOptionProperties)
             {
                 SourceOptionProperties.ValueUpdated += Properties_ValueUpdated;
                 SourceOptionProperties.ValueCommited += Properties_ValueCommited;
             }
-            if (AudioOptionProperties != null)
+            if (AudioOptionProperties != null && AudioOptionProperties != oldAudioOptionProperties)
             {
                 AudioOptionProperties.ValueUpdated += Properties_ValueUpdated;
                 AudioOptionProperties.ValueCommited += Properties_ValueCommited;
