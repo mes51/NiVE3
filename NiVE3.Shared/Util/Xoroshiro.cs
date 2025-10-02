@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace NiVE3.Shared.Util
 {
     // https://prng.di.unimi.it/
-    public struct Xoroshiro
+    public class Xoroshiro
     {
         ulong S1 = 0UL;
         ulong S2 = 0UL;
