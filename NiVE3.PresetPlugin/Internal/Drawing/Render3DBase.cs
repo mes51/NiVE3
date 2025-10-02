@@ -131,36 +131,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RasterizedMaskImage? trackMatte
         )
         {
-            AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, 0, 0, width, height, width, height, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-
-            LastId++;
-        }
-
-        public void AddRect(
-            Int32Point roiOrigin,
-            NImage texture,
-            ImageInterpolationQuality interpolationQuality,
-            in Vector4 multiplyColor,
-            double width,
-            double height,
-            int polygonBaseWidth,
-            int polyginBaseHeight,
-            float opacity,
-            BlendMode blendType,
-            Matrix4x4d modelMatrix,
-            ShadowCastMode shadowCastMode,
-            float lightTransmission,
-            bool isAcceptShadow,
-            bool isAcceptLight,
-            float ambient,
-            float diffuse,
-            float specularIntensity,
-            float specularShininess,
-            float metal,
-            RasterizedMaskImage? trackMatte
-        )
-        {
-            AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, 0, 0, width, height, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+            AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, 0.0, 0.0, width, height, 0.0, 0.0, 1.0, 1.0, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
 
             LastId++;
         }
@@ -285,7 +256,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             int right,
             int bottom,
             int polygonBaseWidth,
-            int polyginBaseHeight,
+            int polygonBaseHeight,
             float opacity,
             BlendMode blendType,
             Matrix4x4d modelMatrix,
@@ -324,17 +295,17 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 var hSplit = (right - left) / 2 + left;
                 var tSplit = (bottom - top) / 2 + top;
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, top, hSplit, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, top, right, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, tSplit, hSplit, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, tSplit, right, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, top, hSplit, tSplit, polygonBaseWidth, polygonBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, top, right, tSplit, polygonBaseWidth, polygonBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, tSplit, hSplit, bottom, polygonBaseWidth, polygonBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, tSplit, right, bottom, polygonBaseWidth, polygonBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
                 return;
             }
 
             var uLeft = left / (double)polygonBaseWidth;
             var uRight = right / (double)polygonBaseWidth;
-            var vTop = top / (double)polyginBaseHeight;
-            var vBottom = bottom / (double)polyginBaseHeight;
+            var vTop = top / (double)polygonBaseHeight;
+            var vBottom = bottom / (double)polygonBaseHeight;
             var uv1 = new UVVertex(v1, uLeft, vTop);
             var uv2 = new UVVertex(v2, uLeft, vBottom);
             var uv3 = new UVVertex(v3, uRight, vBottom);
@@ -417,8 +388,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             double top,
             double right,
             double bottom,
-            double polygonBaseWidth,
-            double polyginBaseHeight,
+            double uLeft,
+            double vTop,
+            double uRight,
+            double vBottom,
             float opacity,
             BlendMode blendType,
             Matrix4x4d modelMatrix,
@@ -434,7 +407,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             RasterizedMaskImage? trackMatte
         )
         {
-
             var offsetX = (Size - Width) * 0.5 / Size;
             var offsetY = (Size - Height) * 0.5 / Size;
             var sv1 = Vector256.Create(left, top, 0.0, Size) / Size;
@@ -458,17 +430,15 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
             {
                 var hSplit = (int)((right - left) / 2.0 + left);
                 var tSplit = (int)((bottom - top) / 2.0 + top);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, top, hSplit, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, top, right, tSplit, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, tSplit, hSplit, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
-                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, tSplit, right, bottom, polygonBaseWidth, polyginBaseHeight, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                var uSplit = ((uRight - uLeft) / (right - left)) * (hSplit - left) + uLeft;
+                var vSplit = ((vBottom - vTop) / (bottom - top)) * (tSplit - top) + vTop;
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, top, hSplit, tSplit, uLeft, vTop, uSplit, vSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, top, right, tSplit, uSplit, vTop, uRight, vSplit, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, left, tSplit, hSplit, bottom, uLeft, vSplit, uSplit, vBottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
+                AddRectInternal(roiOrigin, texture, interpolationQuality, multiplyColor, hSplit, tSplit, right, bottom, uSplit, vSplit, uRight, vBottom, opacity, blendType, modelMatrix, shadowCastMode, lightTransmission, isAcceptShadow, isAcceptLight, ambient, diffuse, specularIntensity, specularShininess, metal, trackMatte);
                 return;
             }
 
-            var uLeft = left / polygonBaseWidth;
-            var uRight = right / polygonBaseWidth;
-            var vTop = top / polyginBaseHeight;
-            var vBottom = bottom / polyginBaseHeight;
             var uv1 = new UVVertex(v1, uLeft, vTop);
             var uv2 = new UVVertex(v2, uLeft, vBottom);
             var uv3 = new UVVertex(v3, uRight, vBottom);

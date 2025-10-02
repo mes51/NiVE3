@@ -461,16 +461,17 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             {
                 var particleSizeX = particle.Size * aspectX;
                 var particleSizeY = particle.Size * aspectY;
+
                 renderer.AddRect(
                     Int32Point.Zero,
                     texture,
-                    ImageInterpolationQuality.Level1,
+                    texture.Width == 1 && texture.Height == 1 ? ImageInterpolationQuality.Level1 : ImageInterpolationQuality.Level2,
                     particle.Color,
                     particleSizeX,
                     particleSizeY,
                     particle.Opacity,
                     particleBlendMode,
-                    Matrix4x4d.AffineTransform(new Vector3d(particleSizeX, particleSizeY, 0.0) * 0.5 / renderSize, Vector3d.One, particle.Angles, 0.0, 0.0, 0.0, particle.Position / renderSize),
+                    Matrix4x4d.AffineTransform(new Vector3d(particleSizeX, particleSizeY, 0.0) * 0.5 / renderSize, Vector3d.One, particle.Angles, 0.0, 0.0, 0.0, (particle.Position - new Vector3d(particleSizeX, particleSizeY, 0.0) * 0.5) / renderSize),
                     ShadowCastMode.None,
                     0.0F,
                     false,
@@ -766,6 +767,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             if (result != null)
             {
+                result.Origin = Vector2d.Zero;
                 return result;
             }
             else
