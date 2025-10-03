@@ -891,6 +891,17 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string ColorCollection_Sepia_BlendOriginal = nameof(ColorCollection_Sepia_BlendOriginal);
 
+        // Monochrome
+
+        [DefaultValue("白黒")]
+        public const string ColorCollection_Monochrome_Name = nameof(ColorCollection_Monochrome_Name);
+
+        [DefaultValue("画像を白黒のモノクロ画像に変換します")]
+        public const string ColorCollection_Monochrome_Description = nameof(ColorCollection_Monochrome_Description);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string ColorCollection_Monochrome_BlendOriginal = nameof(ColorCollection_Monochrome_BlendOriginal);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]
