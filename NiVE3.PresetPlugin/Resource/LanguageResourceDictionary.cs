@@ -869,6 +869,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ハイライト")]
         public const string ColorCollection_MultiTone_HighlightColor = nameof(ColorCollection_MultiTone_HighlightColor);
 
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string ColorCollection_MultiTone__BlendOriginal = nameof(ColorCollection_MultiTone__BlendOriginal);
+
         // ToneCurve
 
         [DefaultValue("トーンカーブ")]

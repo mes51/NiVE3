@@ -40,6 +40,8 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         const string PropertyHighlightColorId = nameof(PropertyHighlightColorId);
 
+        const string PropertyBlendOriginalId = nameof(PropertyBlendOriginalId);
+
         IAcceleratorObject? AcceleratorObject { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
@@ -61,11 +63,18 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
                 new ColorProperty(PropertyMidToneColor3Id, LanguageResourceDictionary.ResourceKeys.ColorCollection_MultiTone_MidToneColor3, dialogTitle, dialogOk, dialogCancel, new Vector4(0.043137254901960784F, 0.403921568627451F, 0.984313725490196F, 1.0F)),
                 new ColorProperty(PropertyMidToneColor4Id, LanguageResourceDictionary.ResourceKeys.ColorCollection_MultiTone_MidToneColor4, dialogTitle, dialogOk, dialogCancel, new Vector4(0.058823529411764705F, 0.6F, 0.9333333333333333F, 1.0F)),
                 new ColorProperty(PropertyHighlightColorId, LanguageResourceDictionary.ResourceKeys.ColorCollection_MultiTone_HighlightColor, dialogTitle, dialogOk, dialogCancel, new Vector4(0.1450980392156863F, 0.8352941176470589F, 0.9254901960784314F, 1.0F)),
+                new DoubleProperty(PropertyBlendOriginalId, LanguageResourceDictionary.ResourceKeys.ColorCollection_MultiTone__BlendOriginal, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
             ];
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
+            var blendOriginal = (float)(properties.GetValue(PropertyBlendOriginalId, layerTime, 0.0) * 0.01);
+            if (blendOriginal >= 1.0F)
+            {
+                return image;
+            }
+
             var useMidToneCount = (int)properties.GetValue(PropertyUseMidToneCountId, layerTime, 0.0);
             var shadowColor = properties.GetValue(PropertyShadowColorId, layerTime, Vector4.UnitW);
             var midToneColors = new Vector4[]
@@ -96,11 +105,11 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, colorMap, colorPositions, overShadowRate, overHighlightRate);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, colorMap, colorPositions, overShadowRate, overHighlightRate, blendOriginal);
             }
             else
             {
-                return ProcessCpu(image, roi, colorMap, colorPositions, overShadowRate, overHighlightRate);
+                return ProcessCpu(image, roi, colorMap, colorPositions, overShadowRate, overHighlightRate, blendOriginal);
             }
         }
 
@@ -111,7 +120,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, Vector4[] colorMap, float[] colorPositions, Vector4 overShadowRate, Vector4 overHighlightRate)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, Vector4[] colorMap, float[] colorPositions, Vector4 overShadowRate, Vector4 overHighlightRate, float blendOriginal)
         {
             var managedImage = image.ToManaged();
 
@@ -148,14 +157,14 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
                     }
 
                     newColor.W = oldColor.W;
-                    imageDataSpan[x] = newColor;
+                    imageDataSpan[x] = Vector4.Lerp(newColor, oldColor, blendOriginal);
                 }
             });
 
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector4[] colorMap, float[] colorPositions, Vector4 overShadowRate, Vector4 overHighlightRate)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, Vector4[] colorMap, float[] colorPositions, Vector4 overShadowRate, Vector4 overHighlightRate, float blendOriginal)
         {
             var gpuImage = image.ToGpu(device);
 
@@ -163,7 +172,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             using var colorPositionBuffer = device.AllocateReadOnlyBuffer(colorPositions);
             using var context = device.CreateComputeContext();
 
-            context.For(roi.Width, roi.Height, new MultiToneProcess(gpuImage.Data, gpuImage.Width, colorMapBuffer, colorPositionBuffer, overShadowRate, overHighlightRate, roi.Left, roi.Top));
+            context.For(roi.Width, roi.Height, new MultiToneProcess(gpuImage.Data, gpuImage.Width, colorMapBuffer, colorPositionBuffer, overShadowRate, overHighlightRate, blendOriginal, roi.Left, roi.Top));
 
             return gpuImage;
         }
@@ -171,7 +180,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct MultiToneProcess(ReadWriteBuffer<Float4> image, int width, ReadOnlyBuffer<Float4> colorMap, ReadOnlyBuffer<float> colorPositions, Float4 overShadowRate, Float4 overHighlightRate, int startX, int startY) : IComputeShader
+    readonly partial struct MultiToneProcess(ReadWriteBuffer<Float4> image, int width, ReadOnlyBuffer<Float4> colorMap, ReadOnlyBuffer<float> colorPositions, Float4 overShadowRate, Float4 overHighlightRate, float blendOriginal, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -202,7 +211,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             }
 
             newColor.W = oldColor.W;
-            image[pos] = newColor;
+            image[pos] = Hlsl.Lerp(newColor, oldColor, blendOriginal);
         }
     }
 }
