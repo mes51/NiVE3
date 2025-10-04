@@ -24,10 +24,10 @@ namespace NiVE3.Shape
             }
 
             var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
-            if (width < 1 || height < 1)
+            if (width < 1 || height < 1 || lineHitIndices == null || lineHits == null)
             {
-                lineHitIndices.Dispose();
-                lineHits.Dispose();
+                lineHitIndices?.Dispose();
+                lineHits?.Dispose();
                 return;
             }
 
@@ -59,10 +59,10 @@ namespace NiVE3.Shape
             }
 
             var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, 1, offsetX - 1.0F, offsetY);
-            if (width < 1 || height < 1)
+            if (width < 1 || height < 1 || lineHitIndices == null || lineHits == null)
             {
-                lineHitIndices.Dispose();
-                lineHits.Dispose();
+                lineHitIndices?.Dispose();
+                lineHits?.Dispose();
                 return;
             }
 
@@ -85,13 +85,18 @@ namespace NiVE3.Shape
             lineHits.Dispose();
         }
 
-        static (int minX, int width, int minY, int height, ReadOnlyBuffer<Int2> lineHitIndices, ReadOnlyBuffer<GPULineHit> lineHits) GetHitLines(GraphicsDevice device, Polygon[] polygons, int imageWidth, int imageHeight, int superSamplingCount, float offsetX, float offsetY)
+        static (int minX, int width, int minY, int height, ReadOnlyBuffer<Int2>? lineHitIndices, ReadOnlyBuffer<GPULineHit>? lineHits) GetHitLines(GraphicsDevice device, Polygon[] polygons, int imageWidth, int imageHeight, int superSamplingCount, float offsetX, float offsetY)
         {
             offsetX++;
             var minY = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinY) - offsetY), 0);
             var maxY = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), imageHeight);
             var minX = Math.Max((int)MathF.Floor(polygons.Min(p => p.MinX) - offsetX) - 1, 0);
             var maxX = Math.Min((int)MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX) + 1, imageWidth);
+            if (minY >= maxY)
+            {
+                return (0, 0, 0, 0, null, null);
+            }
+
             var lineHits = new List<GPULineHit>[(maxY - minY) * superSamplingCount];
             var samplingRate = 1.0F / superSamplingCount;
             Parallel.For(minY, maxY, h =>
@@ -131,6 +136,12 @@ namespace NiVE3.Shape
                     }
                 }
             });
+
+            var lineHitCount = lineHits.Sum(l => l.Count);
+            if (lineHitCount < 1)
+            {
+                return (0, 0, 0, 0, null, null);
+            }
 
             using var lineHitIndicesUploadBuffer = device.AllocateUploadBuffer<Int2>(lineHits.Length);
             using var lineHitsUploadBuffer = device.AllocateUploadBuffer<GPULineHit>(lineHits.Sum(l => l.Count));

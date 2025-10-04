@@ -13,7 +13,6 @@ using NiVE3.Image.Drawing;
 using NiVE3.Shape.Internal;
 using NiVE3.Shape.Internal.Shader;
 using NiVE3.Shared.Extension;
-using SixLabors.ImageSharp.Drawing;
 
 namespace NiVE3.Shape
 {
@@ -28,17 +27,11 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var hitData = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
-            if (!hitData.HasValue)
+            var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
+            if (width < 1 || height < 1 || lineHitIndices == null || lineHits == null)
             {
-                return;
-            }
-
-            var (startX, width, startY, height, lineHitIndices, lineHits) = hitData.Value;
-            if (width < 1 || height < 1)
-            {
-                lineHitIndices.Dispose();
-                lineHits.Dispose();
+                lineHitIndices?.Dispose();
+                lineHits?.Dispose();
                 return;
             }
 
@@ -141,17 +134,11 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var hitData = GetHitLines(device, polygons, image.Width, image.Height, 1, offsetX - 1.0F, offsetY);
-            if (!hitData.HasValue)
+            var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
+            if (width < 1 || height < 1 || lineHitIndices == null || lineHits == null)
             {
-                return;
-            }
-
-            var (startX, width, startY, height, lineHitIndices, lineHits) = hitData.Value;
-            if (width < 1 || height < 1)
-            {
-                lineHitIndices.Dispose();
-                lineHits.Dispose();
+                lineHitIndices?.Dispose();
+                lineHits?.Dispose();
                 return;
             }
 
@@ -251,17 +238,11 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var hitData = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
-            if (!hitData.HasValue)
+            var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
+            if (width < 1 || height < 1 || lineHitIndices == null || lineHits == null)
             {
-                return;
-            }
-
-            var (startX, width, startY, height, lineHitIndices, lineHits) = hitData.Value;
-            if (width < 1 || height < 1)
-            {
-                lineHitIndices.Dispose();
-                lineHits.Dispose();
+                lineHitIndices?.Dispose();
+                lineHits?.Dispose();
                 return;
             }
 
@@ -364,17 +345,11 @@ namespace NiVE3.Shape
                 return;
             }
 
-            var hitData = GetHitLines(device, polygons, image.Width, image.Height, 1, offsetX - 1.0F, offsetY);
-            if (!hitData.HasValue)
+            var (startX, width, startY, height, lineHitIndices, lineHits) = GetHitLines(device, polygons, image.Width, image.Height, SuperSamplingCount, offsetX, offsetY);
+            if (width < 1 || height < 1 || lineHitIndices == null || lineHits == null)
             {
-                return;
-            }
-
-            var (startX, width, startY, height, lineHitIndices, lineHits) = hitData.Value;
-            if (width < 1 || height < 1)
-            {
-                lineHitIndices.Dispose();
-                lineHits.Dispose();
+                lineHitIndices?.Dispose();
+                lineHits?.Dispose();
                 return;
             }
 
@@ -467,16 +442,16 @@ namespace NiVE3.Shape
             lineHits.Dispose();
         }
 
-        static (int minX, int width, int minY, int height, ReadOnlyBuffer<Int2> lineHitIndices, ReadOnlyBuffer<GPULineHit> lineHits)? GetHitLines(GraphicsDevice device, Polygon[] polygons, int imageWidth, int imageHeight, int superSamplingCount, float offsetX, float offsetY)
+        static (int minX, int width, int minY, int height, ReadOnlyBuffer<Int2>? lineHitIndices, ReadOnlyBuffer<GPULineHit>? lineHits) GetHitLines(GraphicsDevice device, Polygon[] polygons, int imageWidth, int imageHeight, int superSamplingCount, float offsetX, float offsetY)
         {
             offsetX++;
             var minY = (int)Math.Max((long)Math.Clamp(MathF.Floor(polygons.Min(p => p.MinY) - offsetY), int.MinValue, int.MaxValue), 0);
             var maxY = (int)Math.Min((long)Math.Clamp(MathF.Ceiling(polygons.Max(p => p.MaxY) - offsetY), int.MinValue, int.MaxValue), imageHeight);
             var minX = (int)Math.Max((long)Math.Clamp(MathF.Floor(polygons.Min(p => p.MinX) - offsetX), int.MinValue, int.MaxValue) - 1L, 0);
             var maxX = (int)Math.Min((long)Math.Clamp(MathF.Ceiling(polygons.Max(p => p.MaxX) - offsetX), int.MinValue, int.MaxValue) + 1L, imageWidth);
-            if (minY > maxY)
+            if (minY >= maxY)
             {
-                return null;
+                return (0, 0, 0, 0, null, null);
             }
 
             var lineHits = new List<GPULineHit>[(maxY - minY) * superSamplingCount];
@@ -522,7 +497,7 @@ namespace NiVE3.Shape
             var lineHitCount = lineHits.Sum(l => l.Count);
             if (lineHitCount < 1)
             {
-                return null;
+                return (0, 0, 0, 0, null, null);
             }
 
             using var lineHitIndicesUploadBuffer = device.AllocateUploadBuffer<Int2>(lineHits.Length);

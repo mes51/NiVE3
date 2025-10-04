@@ -369,7 +369,7 @@ namespace NiVE3.Input
             var (min, max, imageOrigin) = CalcTextBounds(glyphPolygons, sourceText, textOption, verticalMode, false);
             var width = max.GetElement(2) - min.GetElement(0) + 1;
             var height = max.GetElement(3) - min.GetElement(1);
-            if (width < 1 || height <1)
+            if (width < 1 || height <1 || Vector128.EqualsAny(min, Vector128.Create(int.MaxValue)) || Vector128.EqualsAny(max, Vector128.Create(int.MinValue)))
             {
                 return new NManagedImage(1, 1);
             }
