@@ -124,12 +124,31 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public KeyFrameWrapper? getKeyFrameNextTime(double time)
         {
+            return getKeyFrameNextTime(time, true);
+        }
+
+        [ExpressionPublicMember]
+        public KeyFrameWrapper? getKeyFrameNextTime(double time, bool includeCurrentTime)
+        {
             var layerTime = time - PropertyModel.SourceStartPoint;
-            foreach (var keyFrame in PropertyModel.KeyFrames)
+            if (includeCurrentTime)
             {
-                if (keyFrame.Time >= layerTime)
+                foreach (var keyFrame in PropertyModel.KeyFrames)
                 {
-                    return new KeyFrameWrapper(PropertyModel, keyFrame);
+                    if (keyFrame.Time >= layerTime)
+                    {
+                        return new KeyFrameWrapper(PropertyModel, keyFrame);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var keyFrame in PropertyModel.KeyFrames)
+                {
+                    if (keyFrame.Time > layerTime)
+                    {
+                        return new KeyFrameWrapper(PropertyModel, keyFrame);
+                    }
                 }
             }
 
@@ -139,12 +158,31 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public KeyFrameWrapper? getKeyFramePrevTime(double time)
         {
+            return getKeyFramePrevTime(time, true);
+        }
+
+        [ExpressionPublicMember]
+        public KeyFrameWrapper? getKeyFramePrevTime(double time, bool includeCurrentTime)
+        {
             var layerTime = time - PropertyModel.SourceStartPoint;
-            foreach (var keyFrame in PropertyModel.KeyFrames.Reverse())
+            if (includeCurrentTime)
             {
-                if (keyFrame.Time <= layerTime)
+                foreach (var keyFrame in PropertyModel.KeyFrames.Reverse())
                 {
-                    return new KeyFrameWrapper(PropertyModel, keyFrame);
+                    if (keyFrame.Time <= layerTime)
+                    {
+                        return new KeyFrameWrapper(PropertyModel, keyFrame);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var keyFrame in PropertyModel.KeyFrames.Reverse())
+                {
+                    if (keyFrame.Time < layerTime)
+                    {
+                        return new KeyFrameWrapper(PropertyModel, keyFrame);
+                    }
                 }
             }
 
