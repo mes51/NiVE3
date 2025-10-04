@@ -330,7 +330,7 @@ namespace NiVE3.View.Part
         {
             if (IsClicked)
             {
-                MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, RangeStart);
+                MarkerMovingTime = TimeCalc.CalcTimeFromPixel(e.GetPosition(this).X - ClickX, ActualWidth, Range, Time.Zero);
                 InvalidateVisual();
             }
             else
