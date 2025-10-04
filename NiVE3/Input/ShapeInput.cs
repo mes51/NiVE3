@@ -934,7 +934,7 @@ namespace NiVE3.Input
                         {
                             var brush = stroke.GetBrush();
                             brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
-                            var path = (IPathCollection)new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width)));
+                            var path = (IPathCollection)new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width, stroke.JoinStyle, stroke.EndCapStyle)));
                             path = path.Transform(Matrix3x2.CreateScale(downSampling));
                             yield return new Drawable(brush, ShapeFillRule.NonZero, stroke.BlendMode, path);
                         }
