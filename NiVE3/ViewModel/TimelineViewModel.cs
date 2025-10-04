@@ -1512,9 +1512,13 @@ namespace NiVE3.ViewModel
                 return;
             }
 
-            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && SelectedTargetTree?.Last() is LayerViewModel selectedLayer && interaction.HitTestInteraction(screenPos, previewImageScale, CompositionModel.GetCoordTransformer(currentTime, selectedLayer.LayerId)))
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && SelectedTargetTree?.Last() is LayerViewModel selectedLayer)
             {
-                return;
+                using var checker = CycleChecker.StartCheck();
+                if (interaction.HitTestInteraction(screenPos, previewImageScale, CompositionModel.GetCoordTransformer(currentTime, selectedLayer.LayerId)))
+                {
+                    return;
+                }
             }
 
             Guid layerId;
@@ -1735,6 +1739,7 @@ namespace NiVE3.ViewModel
 
             if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
             {
+                using var checker = CycleChecker.StartCheck();
                 if (e.IsCommit)
                 {
                     interaction.MouseLeftButtonUp(e.NextScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
@@ -1771,6 +1776,7 @@ namespace NiVE3.ViewModel
 
             if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction)
             {
+                using var checker = CycleChecker.StartCheck();
                 if (interaction.MouseLeftButtonDown(e.StartScreenPosition, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId)))
                 {
                     return;

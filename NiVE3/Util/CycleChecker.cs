@@ -17,7 +17,12 @@ namespace NiVE3.Util
 
         List<Entry> Entries { get; } = new List<Entry>();
 
-        private CycleChecker() { }
+        int StartCount { get; set; }
+
+        private CycleChecker()
+        {
+            StartCount++;
+        }
 
         Entry? TryEnterInternal(in Guid objectId)
         {
@@ -48,10 +53,10 @@ namespace NiVE3.Util
 
         public static IDisposable StartCheck()
         {
-            // TODO: 今後呼び出し階層が深くなると地獄が見えるので、何度も呼び出し可能にした上でDispose時に抜けていないEntryがないかどうか、checkerに名前を付けてデバッグしやすくする程度にする
             if (CurrentChecker.Value != null)
             {
-                throw new InvalidOperationException(); // bug
+                CurrentChecker.Value.StartCount++;
+                return CurrentChecker.Value;
             }
 
             var result = new CycleChecker();
@@ -89,12 +94,18 @@ namespace NiVE3.Util
 
         public void Dispose()
         {
-            foreach (var e in Entries.ToArray())
-            {
-                e.Dispose();
-            }
+            StartCount--;
 
-            CurrentChecker.Value = null;
+            if (StartCount < 1)
+            {
+                if (Entries.Count > 0)
+                {
+                    // NOTE: 基本的には全部処理が終わってからDisposeされるはずなのでここには来ないはずだが、来たら修正 or 対応を考える
+                    throw new InvalidOperationException("not ended entry found.");
+                }
+
+                CurrentChecker.Value = null;
+            }
         }
 
         private class Entry : IDisposable
