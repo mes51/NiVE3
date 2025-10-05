@@ -207,7 +207,7 @@ namespace NiVE3.Model
 
         public object? ToneMapperSetting { get; private set; }
 
-        public bool HasAudio => Layers.Any(l => l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
+        public bool HasAudio => Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) ? Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo) : Layers.Any(l => l.HasAudio && l.IsEnableAudio);
 
         public Int32Size Size => new Int32Size(Width, Height);
 
@@ -951,7 +951,7 @@ namespace NiVE3.Model
             var result = new float[(int)(length * Const.AudioSamplingRate) * 2];
             var resultVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(result.AsSpan(0, (result.Length / vectorLength) * vectorLength));
 
-            var hasSolo = Layers.Any(l => l.HasAudio && l.IsEnableSolo);
+            var hasSolo = Layers.Any(l => l.HasAudio && l.IsEnableAudio && l.IsEnableSolo);
             foreach (var l in Layers.Where(l => l.HasAudio && l.IsEnableAudio && (!hasSolo || l.IsEnableSolo)))
             {
                 if (!l.IsContainsTimeRange(time, time + length))
