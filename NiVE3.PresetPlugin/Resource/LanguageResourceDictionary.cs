@@ -1571,6 +1571,26 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ソースレイヤーの配置")]
         public const string Channel_BlendLayer_SourceLayerPosition = nameof(Channel_BlendLayer_SourceLayerPosition);
 
+        // ChannelShift
+
+        [DefaultValue("チャンネルシフト")]
+        public const string Channel_ChannelShift_Name = nameof(Channel_ChannelShift_Name);
+
+        [DefaultValue("画像の各チャンネルの値を、指定したチャンネルの値に変更します")]
+        public const string Channel_ChannelShift_Description = nameof(Channel_ChannelShift_Description);
+
+        [LanguageKey, DefaultValue("赤")]
+        public const string Channel_ChannelShift_R = nameof(Channel_ChannelShift_R);
+
+        [LanguageKey, DefaultValue("緑")]
+        public const string Channel_ChannelShift_G = nameof(Channel_ChannelShift_G);
+
+        [LanguageKey, DefaultValue("青")]
+        public const string Channel_ChannelShift_B = nameof(Channel_ChannelShift_B);
+
+        [LanguageKey, DefaultValue("アルファ")]
+        public const string Channel_ChannelShift_A = nameof(Channel_ChannelShift_A);
+
         // Particle
 
         [DefaultValue("パーティクル")]
@@ -2449,6 +2469,39 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("オフ")]
         public const string DisplacemenMapChannelType_Off = nameof(DisplacemenMapChannelType_Off);
+
+        [DefaultValue("赤")]
+        public const string ChannelShiftChannelType_R = nameof(ChannelShiftChannelType_R);
+
+        [DefaultValue("緑")]
+        public const string ChannelShiftChannelType_G = nameof(ChannelShiftChannelType_G);
+
+        [DefaultValue("青")]
+        public const string ChannelShiftChannelType_B = nameof(ChannelShiftChannelType_B);
+
+        [DefaultValue("アルファ")]
+        public const string ChannelShiftChannelType_A = nameof(ChannelShiftChannelType_A);
+
+        [DefaultValue("輝度")]
+        public const string ChannelShiftChannelType_Luminance = nameof(ChannelShiftChannelType_Luminance);
+
+        [DefaultValue("色相")]
+        public const string ChannelShiftChannelType_Hue = nameof(ChannelShiftChannelType_Hue);
+
+        [DefaultValue("彩度")]
+        public const string ChannelShiftChannelType_Saturation = nameof(ChannelShiftChannelType_Saturation);
+
+        [DefaultValue("明度")]
+        public const string ChannelShiftChannelType_Lightness = nameof(ChannelShiftChannelType_Lightness);
+
+        [DefaultValue("オン")]
+        public const string ChannelShiftChannelType_On = nameof(ChannelShiftChannelType_On);
+
+        [DefaultValue("半分")]
+        public const string ChannelShiftChannelType_Half = nameof(ChannelShiftChannelType_Half);
+
+        [DefaultValue("オフ")]
+        public const string ChannelShiftChannelType_Off = nameof(ChannelShiftChannelType_Off);
 
         [DefaultValue("中央配置")]
         public const string SourceLayerPositionType_Center = nameof(SourceLayerPositionType_Center);
