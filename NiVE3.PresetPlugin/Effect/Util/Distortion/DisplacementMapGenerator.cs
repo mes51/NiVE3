@@ -260,7 +260,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
             switch (position)
             {
                 case -1: // No resize
-                    color = displacementMap[mapPos];
+                    color = sourceImage[mapPos];
                     break;
                 case 0: // Center
                     {
