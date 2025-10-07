@@ -766,6 +766,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Stylize_Halftone_BlendMode = nameof(Stylize_Halftone_BlendMode);
 
+        // Halftone
+
+        [DefaultValue("境界線")]
+        public const string Stylize_Outline_Name = nameof(Stylize_Outline_Name);
+
+        [DefaultValue("画像のアルファ値の境界を元に背景を塗りつぶし、境界線を引きます")]
+        public const string Stylize_Outline_Description = nameof(Stylize_Outline_Description);
+
+        [LanguageKey, DefaultValue("閾値")]
+        public const string Stylize_Outline_Threshold = nameof(Stylize_Outline_Threshold);
+
+        [LanguageKey, DefaultValue("太さ")]
+        public const string Stylize_Outline_Width = nameof(Stylize_Outline_Width);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Stylize_Outline_Color = nameof(Stylize_Outline_Color);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Stylize_Outline_Opacity = nameof(Stylize_Outline_Opacity);
+
+        [LanguageKey, DefaultValue("境界線のみ表示")]
+        public const string Stylize_Outline_OutlineOnly = nameof(Stylize_Outline_OutlineOnly);
+
         // Level
 
         [DefaultValue("レベル")]

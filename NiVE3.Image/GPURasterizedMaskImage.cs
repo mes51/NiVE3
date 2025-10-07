@@ -26,10 +26,7 @@ namespace NiVE3.Image
         /// <param name="width">幅</param>
         /// <param name="height">高さ</param>
         /// <param name="device">GPUのデバイス</param>
-        public GPURasterizedMaskImage(int width, int height, GraphicsDevice device) : base(width, height)
-        {
-            Data = GPUBufferCache.GetInstance(device).RentMaskBuffer(width * height);
-        }
+        public GPURasterizedMaskImage(int width, int height, GraphicsDevice device) : this(width, height, device, 0.0F) { }
 
         /// <summary>
         /// コンストラクタ
