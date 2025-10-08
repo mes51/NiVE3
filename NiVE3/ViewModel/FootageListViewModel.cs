@@ -117,8 +117,6 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteFootageCommand { get; }
 
-        public ICommand AddSolidCommand { get; }
-
         public ICommand AddFootageFolderCommand { get; }
 
         public ICommand ShowPreviewCommand { get; }
@@ -220,8 +218,6 @@ namespace NiVE3.ViewModel
 
                 FootageListModel.DeleteFootages(SelectedFootages.Select(f => f.FootageId).ToArray());
             }, () => SelectedFootages.Count > 0).ObservesProperty(() => SelectedFootages.Count);
-
-            AddSolidCommand = new DelegateCommand(() => FootageListModel.AddSolid());
 
             AddFootageFolderCommand = new DelegateCommand(() => FootageListModel.AddFolder());
 

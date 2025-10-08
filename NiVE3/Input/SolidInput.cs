@@ -54,6 +54,7 @@ namespace NiVE3.Input
         {
             return new SolidData
             {
+                Name = FilePath,
                 Color = Source.Color,
                 Width = Source.Width,
                 Height = Source.Height
@@ -62,20 +63,24 @@ namespace NiVE3.Input
 
         public bool LoadSetting(object? data)
         {
-            if (data is not IDictionary<string, object> solidData)
+            if (data is not IDictionary<string, object> solidData ||
+                !solidData.TryGetValue(nameof(SolidData.Name), out var nameValue) || nameValue is not string name ||
+                !solidData.TryGetValue(nameof(SolidData.Color), out var colorDataValue) || colorDataValue is not IDictionary<string, object> colorData ||
+                !solidData.TryGetValue(nameof(SolidData.Width), out var widthValue) ||
+                !solidData.TryGetValue(nameof(SolidData.Height), out var heightValue))
             {
                 return false;
             }
 
-            var colorData = (IDictionary<string, object>)solidData[nameof(SolidData.Color)];
+            FilePath = !string.IsNullOrEmpty(name) ? name : FilePath;
             Source.Color = new FloatColor(
                 Convert.ToSingle(colorData[nameof(FloatColor.R)]),
                 Convert.ToSingle(colorData[nameof(FloatColor.G)]),
                 Convert.ToSingle(colorData[nameof(FloatColor.B)]),
                 Convert.ToSingle(colorData[nameof(FloatColor.A)])
             );
-            Source.Width = Convert.ToInt32(solidData[nameof(SolidData.Width)]);
-            Source.Height = Convert.ToInt32(solidData[nameof(SolidData.Height)]);
+            Source.Width = Convert.ToInt32(widthValue);
+            Source.Height = Convert.ToInt32(heightValue);
             return true;
         }
 
@@ -150,6 +155,8 @@ namespace NiVE3.Input
 
     file class SolidData
     {
+        public string Name { get; set; } = "";
+
         public FloatColor Color { get; set; }
 
         public int Width { get; set; }
