@@ -1055,7 +1055,7 @@ namespace NiVE3.ViewModel
 
                 var save = new SaveFileDialog
                 {
-                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveEffectPreset_Filter_EffectPreset)}({Const.PropertyEffectExtensionFilter})|({Const.PropertyEffectExtensionFilter}"
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveEffectPreset_Filter_EffectPreset)}({Const.PropertyEffectExtensionFilter})|{Const.PropertyEffectExtensionFilter}"
                 };
                 if (!(save.ShowDialog() ?? false))
                 {
@@ -1085,7 +1085,7 @@ namespace NiVE3.ViewModel
 
                 var open = new OpenFileDialog
                 {
-                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveEffectPreset_Filter_EffectPreset)}(({Const.PropertyEffectExtensionFilter})|({Const.PropertyEffectExtensionFilter}"
+                    Filter = $"{LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Dialog_OpenSaveEffectPreset_Filter_EffectPreset)}(({Const.PropertyEffectExtensionFilter})|{Const.PropertyEffectExtensionFilter}"
                 };
                 if (!(open.ShowDialog() ?? false))
                 {
