@@ -25,6 +25,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => false;
 
+        public bool IsSupportedGraphEditor => false;
+
         private EnumPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)

@@ -21,6 +21,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => throw new NotImplementedException();
 
+        public bool IsSupportedGraphEditor => throw new NotImplementedException();
+
         public Span<byte> ConvertToHashBase(object? value)
         {
             throw new NotImplementedException();

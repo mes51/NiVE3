@@ -19,6 +19,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => false;
 
+        public bool IsSupportedGraphEditor => false;
+
         private UseLayerImagePropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)

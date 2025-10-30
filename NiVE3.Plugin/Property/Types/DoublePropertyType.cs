@@ -20,6 +20,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => true;
 
+        public bool IsSupportedGraphEditor => true;
+
         private DoublePropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
@@ -118,6 +120,11 @@ namespace NiVE3.Plugin.Property.Types
         public object? ConvertToExpressionValue(object? value)
         {
             return value;
+        }
+
+        public double GetGraphValue(IReadOnlyList<KeyFrame> keyFrames, Time time)
+        {
+            return (double)(Interpolate(keyFrames, time) ?? 0.0);
         }
     }
 }

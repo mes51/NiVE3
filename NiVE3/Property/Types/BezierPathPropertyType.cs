@@ -20,6 +20,8 @@ namespace NiVE3.Property.Types
 
         public bool IsSupportedExpression => true;
 
+        public bool IsSupportedGraphEditor => false;
+
         private BezierPathPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)

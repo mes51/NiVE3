@@ -18,6 +18,8 @@ namespace NiVE3.PresetPlugin.Property.Types
 
         public bool IsSupportedExpression => false;
 
+        public bool IsSupportedGraphEditor => false;
+
         private ToneCurvePropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)

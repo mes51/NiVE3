@@ -18,6 +18,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => false;
 
+        public bool IsSupportedGraphEditor => false;
+
         private UseLayerAudioPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)

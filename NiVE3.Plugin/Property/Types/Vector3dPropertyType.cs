@@ -24,6 +24,8 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedExpression => true;
 
+        public bool IsSupportedGraphEditor => true;
+
         private Vector3dPropertyType() { }
 
         public object Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
@@ -143,6 +145,13 @@ namespace NiVE3.Plugin.Property.Types
         {
             var vector = (Vector3d)(value ?? Vector3d.Zero);
             return new object[] { vector.X, vector.Y, vector.Z };
+        }
+
+        public double GetGraphValue(IReadOnlyList<KeyFrame> keyFrames, Time time)
+        {
+            var value = (Vector3d)(Interpolate(keyFrames, time) ?? Vector3d.Zero);
+
+            return value.Length();
         }
     }
 }

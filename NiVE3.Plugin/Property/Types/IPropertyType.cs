@@ -25,6 +25,11 @@ namespace NiVE3.Plugin.Property.Types
         bool IsSupportedExpression { get; }
 
         /// <summary>
+        /// グラフエディタでの表示をサポートするかどうか
+        /// </summary>
+        bool IsSupportedGraphEditor { get; }
+
+        /// <summary>
         /// 2つのプロパティを補間します
         /// </summary>
         /// <param name="keyFrames">2つ以上の時間順でソートされたキーフレーム</param>
@@ -68,6 +73,14 @@ namespace NiVE3.Plugin.Property.Types
         /// <param name="value">このプロパティの型の値</param>
         /// <returns>プリミティブ型、またはstringの単体、配列、IDictionary&lt;string, object?&gt;のいずれか</returns>
         object? ConvertToExpressionValue(object? value);
+
+        /// <summary>
+        /// グラフエディタで表示する際の値を取得します
+        /// </summary>
+        /// <param name="keyFrames">2つ以上の時間順でソートされたキーフレーム</param>
+        /// <param name="t">取得する時間</param>
+        /// <returns>数値化されたプロパティの値</returns>
+        double GetGraphValue(IReadOnlyList<KeyFrame> keyFrames, Time time) => 0.0;
     }
 
     public interface ILayerDependPropertyType : IPropertyType
