@@ -928,6 +928,17 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("元画像のブレンド")]
         public const string ColorCollection_Monochrome_BlendOriginal = nameof(ColorCollection_Monochrome_BlendOriginal);
 
+        // Exposure
+
+        [DefaultValue("露出")]
+        public const string ColorCollection_Exposure_Name = nameof(ColorCollection_Exposure_Name);
+
+        [DefaultValue("画像を露出を調整します")]
+        public const string ColorCollection_Exposure_Description = nameof(ColorCollection_Exposure_Description);
+
+        [LanguageKey, DefaultValue("量")]
+        public const string ColorCollection_Exposure_Exposure = nameof(ColorCollection_Exposure_Exposure);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]
