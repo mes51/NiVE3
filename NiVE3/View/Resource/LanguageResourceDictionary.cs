@@ -1833,6 +1833,12 @@ namespace NiVE3.View.Resource
         [LanguageKey, DefaultValue("オフセット")]
         public static readonly string ShapeProperty_TrimmingGroup_Offset = nameof(ShapeProperty_TrimmingGroup_Offset);
 
+        [LanguageKey, DefaultValue("角を丸める")]
+        public static readonly string ShapeProperty_RoundCornerGroup = nameof(ShapeProperty_RoundCornerGroup);
+
+        [LanguageKey, DefaultValue("丸め量")]
+        public static readonly string ShapeProperty_RoundCornerGroup_Round = nameof(ShapeProperty_RoundCornerGroup_Round);
+
         [ShowInMarkup, LanguageKey, DefaultValue("マスク設定")]
         public static readonly string MaskProperty_Setting = nameof(MaskProperty_Setting);
 

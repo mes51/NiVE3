@@ -237,6 +237,10 @@ namespace NiVE3.Input
 
         const string TrimmingOffsetId = nameof(TrimmingOffsetId);
 
+        const string RoundCornerGroupId = nameof(RoundCornerGroupId);
+
+        const string RoundCornerRoundId = nameof(RoundCornerRoundId);
+
         public static ShapeFootageSource Instance { get; } = new ShapeFootageSource();
 
         public string SourceId => "shape";
@@ -406,6 +410,11 @@ namespace NiVE3.Input
                         new DoubleProperty(TrimmingBeginId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup_Begin, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(TrimmingEndId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup_End, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new AngleProperty(TrimmingOffsetId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup_Offset, 0.0, digit: 2)
+                    ])),
+                new AppendablePropertyItem(RoundCornerGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RoundCornerGroup, () =>
+                    new PropertyGroup(RoundCornerGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RoundCornerGroup,
+                    [
+                        new DoubleProperty(RoundCornerRoundId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_RoundCornerGroup_Round, 10.0, 0.0, double.MaxValue, digit: 2)
                     ]))
             ];
             groupItems[0] = new AppendablePropertyItem(GroupPropertyId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Group, () =>
@@ -831,6 +840,14 @@ namespace NiVE3.Input
 
                     tree.ApplyTrimming((float)(begin + offset), (float)(end + offset));
                 }
+                else if (property.TryGetValue(RoundCornerRoundId, out var roundCorner))
+                {
+                    var round = (float)(double)(roundCorner ?? 0.0);
+                    if (round > 0.0F)
+                    {
+                        tree.ApplyRoundCorner(round);
+                    }
+                }
             }
 
             return tree;
@@ -1005,6 +1022,22 @@ namespace NiVE3.Input
             }
         }
 
+        public void ApplyRoundCorner(float round)
+        {
+            foreach (var node in Nodes)
+            {
+                switch (node)
+                {
+                    case ShapeGroupTree childGroup:
+                        childGroup.ApplyRoundCorner(round);
+                        break;
+                    case ShapePath path:
+                        path.ApplyRoundCorner(round);
+                        break;
+                }
+            }
+        }
+
         public void Transform(Vector3d anchorPoint, Vector3d position, Vector3d scale, double skew, double skewAxis, double angle, double opacity)
         {
             var skewRad = skewAxis / 180.0F * Math.PI;
@@ -1137,6 +1170,32 @@ namespace NiVE3.Input
             Paths = new PathCollection(newPaths);
         }
 
+        public void ApplyRoundCorner(float round)
+        {
+            var newPaths = new List<IPath>();
+            foreach (var path in Paths)
+            {
+                var flattenedPaths = path.Flatten().ToArray();
+
+                if (flattenedPaths.Length == 1)
+                {
+                    newPaths.Add(RoundCorner(flattenedPaths[0], round));
+                }
+                else
+                {
+                    if (path is ComplexPolygon)
+                    {
+                        newPaths.Add(new ComplexPolygon(flattenedPaths.Select(fp => RoundCorner(fp, round))));
+                    }
+                    else
+                    {
+                        newPaths.AddRange(flattenedPaths.Select(fp => RoundCorner(fp, round)));
+                    }
+                }
+            }
+            Paths = new PathCollection(newPaths);
+        }
+
         static IEnumerable<Path> TrimPath(ISimplePath[] flattenedPaths, (Vector2, Vector2, float)[][] pathSegments, float[] pathLengths, float totalLength, float begin, float end)
         {
             var trimmedPaths = new List<Path>();
@@ -1206,6 +1265,70 @@ namespace NiVE3.Input
             }
 
             return trimmedPaths;
+        }
+
+        static IPath RoundCorner(ISimplePath path, float round)
+        {
+            var points = path.Points.Span;
+            if (points.Length < 2)
+            {
+                return EmptyPath.OpenPath;
+            }
+
+            var builder = new PathBuilder();
+            builder.StartFigure();
+
+            if (points.Length < 3)
+            {
+                builder.AddLine(points[0], points[1]);
+            }
+            else
+            {
+                if (!path.IsClosed)
+                {
+                    builder.MoveTo(points[0]);
+                    builder.LineTo((points[0] + (points[1] - points[0]) * 0.5F));
+                }
+                else
+                {
+                    builder.MoveTo(points[0] + (points[1] - points[0]) * 0.5F);
+                }
+
+                for (int i = 2, limit = points.Length + (path.IsClosed ? 2 : 0); i < limit; i++)
+                {
+                    var prev2 = points[i - 2];
+                    var prev = points[(i - 1) % points.Length];
+                    var next = points[i % points.Length];
+
+                    var prevLineLength = Vector2.Distance(prev, prev2);
+                    var remainPrev = Math.Max(prevLineLength * 0.5F - round, 0.0F) / prevLineLength;
+                    if (remainPrev > 0.0F)
+                    {
+                        builder.LineTo(prev2 + (prev - prev2) * (0.5F + remainPrev));
+                    }
+
+                    var nextLineLength = Vector2.Distance(prev, next);
+                    var remainNext = Math.Max(nextLineLength * 0.5F - round, 0.0F) / nextLineLength;
+
+                    builder.QuadraticBezierTo(prev, prev + (next - prev) * (0.5F - remainNext));
+                    if (remainNext > 0.0F)
+                    {
+                        builder.LineTo(prev + (next - prev) * 0.5F);
+                    }
+                }
+
+                if (!path.IsClosed)
+                {
+                    builder.LineTo(points[^1]);
+                }
+            }
+
+            if (path.IsClosed)
+            {
+                builder.CloseFigure();
+            }
+
+            return builder.Build();
         }
 
         public override ShapeTreeBase Copy()
