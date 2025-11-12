@@ -43,6 +43,7 @@ namespace NiVE3.PresetPlugin.Input
         {
             FilePath = filePath;
 
+            /*
             var doc = SvgDocument.Open(filePath);
             using var image = doc.Draw();
 
@@ -53,8 +54,9 @@ namespace NiVE3.PresetPlugin.Input
 
             LoadedImage = new NManagedImage(image.Width, image.Height);
             ImageConversion.ConvertToBGRA128(data, LoadedImage.GetDataSpan(), image.Width * image.Height);
+            */
 
-            return true;
+            return false;
         }
 
         public void Dispose()

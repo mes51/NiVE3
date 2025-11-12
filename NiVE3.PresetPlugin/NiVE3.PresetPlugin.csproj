@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<UseWPF>True</UseWPF>
     <Nullable>enable</Nullable>
@@ -20,8 +20,8 @@
     <PackageReference Include="HG.NWaves" Version="0.9.6" />
     <PackageReference Include="NAudio.Core" Version="2.2.1" />
     <PackageReference Include="Svg" Version="3.4.7" />
-    <PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.1.6" />
-    <PackageReference Include="Vanara.PInvoke.Multimedia" Version="4.1.6" />
+    <PackageReference Include="Vanara.PInvoke.Gdi32" Version="4.2.1" />
+    <PackageReference Include="Vanara.PInvoke.Multimedia" Version="4.2.1" />
     <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     <PackageReference Include="Vortice.MediaFoundation" Version="3.6.2" />
   </ItemGroup>
@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net8.0-windows7.0\Plugins\&quot;&#xD;&#xA;copy &quot;$(TargetDir)\*.*&quot; &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net8.0-windows7.0\Plugins\&quot;" />
+    <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net8.0-windows7.0\Plugins\&quot;&#xD;&#xA;copy &quot;$(TargetDir)\*.*&quot; &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\Plugins\&quot;" />
   </Target>
 
 </Project>
