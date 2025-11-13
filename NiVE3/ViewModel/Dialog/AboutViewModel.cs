@@ -4,20 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class AboutViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class AboutViewModel : BindableBase, IDialogAware
     {
-        private string versionString = "";
-        public string VersionString
-        {
-            get { return versionString; }
-            set { SetProperty(ref versionString, value); }
-        }
+        [ReactiveProperty]
+        public partial string VersionString { get; set; } = "";
 
         public string Title => "NicoVisualEffects 3 について";
 

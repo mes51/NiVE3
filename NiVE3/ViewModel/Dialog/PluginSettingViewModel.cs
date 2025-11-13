@@ -7,36 +7,26 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class PluginSettingViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class PluginSettingViewModel : BindableBase, IDialogAware
     {
         public const string TitleLanguageResourceName = nameof(TitleLanguageResourceName);
 
-        private string title = "";
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
+        [ReactiveProperty]
+        public partial string Title { get; set; } = "";
 
-        private FrameworkElement? settingView;
-        public FrameworkElement? SettingView
-        {
-            get { return settingView; }
-            private set { SetProperty(ref settingView, value); }
-        }
+        [ReactiveProperty]
+        public partial FrameworkElement? SettingView { get; private set; }
 
-        private bool hasErrors;
-        public bool HasErrors
-        {
-            get { return hasErrors; }
-            set { SetProperty(ref hasErrors, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasErrors { get; set; }
 
         int ErrorCount { get; set; }
 

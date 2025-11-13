@@ -11,13 +11,15 @@ using NiVE3.Extension;
 using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class OptionViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class OptionViewModel : BindableBase, IDialogAware
     {
         // for SlidableNumberTextBox.Maximum
 
@@ -47,129 +49,65 @@ namespace NiVE3.ViewModel.Dialog
 
         public ICommand CancelCommand { get; }
 
-        private string solidFolderName = "";
+        [ReactiveProperty]
         [SettingProperty]
-        public string SolidFolderName
-        {
-            get { return solidFolderName; }
-            set { SetProperty(ref solidFolderName, value); }
-        }
+        public partial string SolidFolderName { get; set; } = "";
 
-        private bool forceUseCpu;
+        [ReactiveProperty]
         [SettingProperty]
-        public bool ForceUseCpu
-        {
-            get { return forceUseCpu; }
-            set { SetProperty(ref forceUseCpu, value); }
-        }
+        public partial bool ForceUseCpu { get; set; }
 
-        private string useGpuLuid = "";
+        [ReactiveProperty]
         [SettingProperty]
-        public string UseGpuLuid
-        {
-            get { return useGpuLuid; }
-            set { SetProperty(ref useGpuLuid, value); }
-        }
+        public partial string UseGpuLuid { get; set; } = "";
 
-        private int imageCacheLimit;
+        [ReactiveProperty]
         [SettingProperty]
-        public int ImageCacheLimit
-        {
-            get { return imageCacheLimit; }
-            set { SetProperty(ref imageCacheLimit, value); }
-        }
+        public partial int ImageCacheLimit { get; set; }
 
-        private int ramPreviewCacheLimit;
+        [ReactiveProperty]
         [SettingProperty]
-        public int RamPreviewCacheLimit
-        {
-            get { return ramPreviewCacheLimit; }
-            set { SetProperty(ref ramPreviewCacheLimit, value); }
-        }
+        public partial int RamPreviewCacheLimit { get; set; }
 
-        private bool isCompressCache;
+        [ReactiveProperty]
         [SettingProperty]
-        public bool IsCompressCache
-        {
-            get { return isCompressCache; }
-            set { SetProperty(ref isCompressCache, value); }
-        }
+        public partial bool IsCompressCache { get; set; }
 
-        private bool useGpuCache;
+        [ReactiveProperty]
         [SettingProperty]
-        public bool UseGpuCache
-        {
-            get { return useGpuCache; }
-            set { SetProperty(ref useGpuCache, value); }
-        }
+        public partial bool UseGpuCache { get; set; }
 
-        private double gpuCacheLimitRate;
+        [ReactiveProperty]
         [SettingProperty]
-        public double GpuCacheLimitRate
-        {
-            get { return gpuCacheLimitRate; }
-            set { SetProperty(ref gpuCacheLimitRate, value); }
-        }
+        public partial double GpuCacheLimitRate { get; set; }
 
-        private bool useAutoSave;
+        [ReactiveProperty]
         [SettingProperty]
-        public bool UseAutoSave
-        {
-            get { return useAutoSave; }
-            set { SetProperty(ref useAutoSave, value); }
-        }
+        public partial bool UseAutoSave { get; set; }
 
-        private int autoSaveInterval;
+        [ReactiveProperty]
         [SettingProperty]
-        public int AutoSaveInterval
-        {
-            get { return autoSaveInterval; }
-            set { SetProperty(ref autoSaveInterval, value); }
-        }
+        public partial int AutoSaveInterval { get; set; }
 
-        private int autoSaveCount;
+        [ReactiveProperty]
         [SettingProperty]
-        public int AutoSaveCount
-        {
-            get { return autoSaveCount; }
-            set { SetProperty(ref autoSaveCount, value); }
-        }
+        public partial int AutoSaveCount { get; set; }
 
-        private int displayFrameRangePropertyInPreview;
+        [ReactiveProperty]
         [SettingProperty]
-        public int DisplayFrameRangePropertyInPreview
-        {
-            get { return displayFrameRangePropertyInPreview; }
-            set { SetProperty(ref displayFrameRangePropertyInPreview, value); }
-        }
+        public partial int DisplayFrameRangePropertyInPreview { get; set; }
 
-        private double maxRamPreviewCacheLimit;
-        public double MaxRamPreviewCacheLimit
-        {
-            get { return maxRamPreviewCacheLimit; }
-            set { SetProperty(ref maxRamPreviewCacheLimit, value); }
-        }
+        [ReactiveProperty]
+        public partial double MaxRamPreviewCacheLimit { get; set; }
 
-        private long gpuCahceLimit;
-        public long GpuCacheLimit
-        {
-            get { return gpuCahceLimit; }
-            set { SetProperty(ref gpuCahceLimit, value); }
-        }
+        [ReactiveProperty]
+        public partial long GpuCacheLimit { get; set; }
 
-        private Tuple<string, string> selectedGpuDevice = Tuple.Create("", "");
-        public Tuple<string, string> SelectedGpuDevice
-        {
-            get { return selectedGpuDevice; }
-            set { SetProperty(ref selectedGpuDevice, value); }
-        }
+        [ReactiveProperty]
+        public partial Tuple<string, string> SelectedGpuDevice { get; set; } = Tuple.Create("", "");
 
-        private bool isDirty;
-        public bool IsDirty
-        {
-            get { return isDirty; }
-            set { SetProperty(ref isDirty, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsDirty { get; set; }
 
         static OptionViewModel()
         {

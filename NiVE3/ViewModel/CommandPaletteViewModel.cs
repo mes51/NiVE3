@@ -13,12 +13,14 @@ using NiVE3.Model.UI;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.CommandOnly;
 using NiVE3.Wpf.Behavior;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     partial class CommandPaletteViewModel : BindableBase
     {
         [GeneratedRegex("\\s+", RegexOptions.Compiled)]
@@ -28,33 +30,17 @@ namespace NiVE3.ViewModel
 
         static readonly Tuple<string, string[], string>[] AllShortcutCommands;
 
-        private bool isOpen;
-        public bool IsOpen
-        {
-            get { return isOpen; }
-            set { SetProperty(ref isOpen, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsOpen { get; set; }
 
-        private ObservableCollection<Tuple<string, string[], ICommand, object?, bool>> commands = [];
-        public ObservableCollection<Tuple<string, string[], ICommand, object?, bool>> Commands
-        {
-            get { return commands; }
-            set { SetProperty(ref commands, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<Tuple<string, string[], ICommand, object?, bool>> Commands { get; set; } = [];
 
-        private Tuple<string, string[], ICommand, object?, bool>? selectedCommand;
-        public Tuple<string, string[], ICommand, object?, bool>? SelectedCommand
-        {
-            get { return selectedCommand; }
-            set { SetProperty(ref selectedCommand, value); }
-        }
+        [ReactiveProperty]
+        public partial Tuple<string, string[], ICommand, object?, bool>? SelectedCommand { get; set; }
 
-        private string filterText = "";
-        public string FilterText
-        {
-            get { return filterText; }
-            set { SetProperty(ref filterText, value); }
-        }
+        [ReactiveProperty]
+        public partial string FilterText { get; set; } = "";
 
         public ICollectionView FilteredCommands { get; }
 

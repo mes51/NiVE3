@@ -10,8 +10,8 @@ using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
-using Prism.Mvvm;
 using NiVE3.Mvvm;
 using System.Collections.Specialized;
 using NiVE3.Model.UI;
@@ -21,44 +21,45 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(UndoCommand), nameof(ShortcutKeySetting.UndoGesture), IsGlobal = true)]
     [CommandHandling(nameof(RedoCommand), nameof(ShortcutKeySetting.RedoGesture), IsGlobal = true)]
     [PaneLocation(PaneLocation.Right1Bottom, Size = 200)]
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class HistoryViewModel : SingletonePaneViewModelBase
     {
         public IEnumerable<IHistoryCommand> FirstHistoryCommand { get; } = [NewProjectHistoryCommand.Instance];
 
-        private ObservableStack<IHistoryCommand> undoCommands = [];
         [NeedWire(nameof(HistoryModel), IsOneWay = true)]
         public ObservableStack<IHistoryCommand> UndoCommands
         {
-            get { return undoCommands; }
+            get;
             set
             {
-                undoCommands.CollectionChanged -= UndoCommands_CollectionChanged;
-                value.CollectionChanged += UndoCommands_CollectionChanged;
-                SetProperty(ref undoCommands, value);
+                if (field != value)
+                {
+                    field.CollectionChanged -= UndoCommands_CollectionChanged;
+                    value.CollectionChanged += UndoCommands_CollectionChanged;
+                }
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private ObservableStack<IHistoryCommand> redoCommands = [];
         [NeedWire(nameof(HistoryModel), IsOneWay = true)]
         public ObservableStack<IHistoryCommand> RedoCommands
         {
-            get { return redoCommands; }
+            get;
             set
             {
-                RedoCommands.CollectionChanged -= RedoCommands_CollectionChanged;
-                value.CollectionChanged += RedoCommands_CollectionChanged;
-                SetProperty(ref redoCommands, value);
+                if (field != value)
+                {
+                    field.CollectionChanged -= RedoCommands_CollectionChanged;
+                    value.CollectionChanged += RedoCommands_CollectionChanged;
+                }
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private bool isIgnoreUpdatePreview;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState))]
-        public bool IsIgnoreUpdatePreview
-        {
-            get { return isIgnoreUpdatePreview; }
-            set { SetProperty(ref isIgnoreUpdatePreview, value); }
-        }
+        public partial bool IsIgnoreUpdatePreview { get; set; }
 
         // NOTE: なぜかStackをそのままCollectionContainer等に渡すと順番がひっくり返るため、順序を固定する
         public IEnumerable<IHistoryCommand> ReversedRedoCommands => [..RedoCommands];

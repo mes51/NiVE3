@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -16,6 +15,7 @@ using NiVE3.Mvvm;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
 using NiVE3.UI.Command;
@@ -59,86 +59,49 @@ namespace NiVE3.ViewModel
         ICommand EndEditCommentCommand { get; }
     }
 
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel))]
     partial class FootageViewModel : BindableBase, IFootageViewModel
     {
         public Guid FootageId { get; private set; }
 
-        private string name;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private int width;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public int Width
-        {
-            get { return width; }
-            set { SetProperty(ref width, value); }
-        }
+        public partial int Width { get; set; }
 
-        private int height;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public int Height
-        {
-            get { return height; }
-            set { SetProperty(ref height, value); }
-        }
+        public partial int Height { get; set; }
 
-        private double frameRate;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        public partial double FrameRate { get; set; }
 
-        private Time duration;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        public partial Time Duration { get; set; }
 
-        private string filePath;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public string FilePath
-        {
-            get { return filePath; }
-            set { SetProperty(ref filePath, value); }
-        }
+        public partial string FilePath { get; set; } = "";
 
-        private string fileExtension;
-        public string FileExtension
-        {
-            get { return fileExtension; }
-            set { SetProperty(ref fileExtension, value); }
-        }
+        [ReactiveProperty]
+        public partial string FileExtension { get; set; } = "";
 
-        private string comment = "";
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        public partial string Comment { get; set; } = "";
 
-        private SourceType inputType;
+        [ReactiveProperty]
         [NeedWire(nameof(Footage), IsOneWay = true)]
-        public SourceType InputType
-        {
-            get { return inputType; }
-            set { SetProperty(ref inputType, value); }
-        }
+        public partial SourceType InputType { get; set; }
 
         public bool IsFolder => false;
 
-
-        private BitmapSource? sampleImage;
         public BitmapSource? SampleImage
         {
             get
@@ -147,17 +110,13 @@ namespace NiVE3.ViewModel
                 {
                     UpdateSampleImage();
                 }
-                return sampleImage;
+                return field;
             }
-            set { SetProperty(ref sampleImage, value); }
+            set { SetProperty(ref field, value); }
         }
 
-        private EditingFootageParameter editingParameter;
-        public EditingFootageParameter EditingParameter
-        {
-            get { return editingParameter; }
-            set { SetProperty(ref editingParameter, value); }
-        }
+        [ReactiveProperty]
+        public partial EditingFootageParameter EditingParameter { get; set; }
 
         public ObservableCollectionView<IFootageModel, IFootageViewModel>? Footages => null;
 
@@ -181,9 +140,7 @@ namespace NiVE3.ViewModel
 
         bool IsDirty { get; set; } = true;
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public FootageViewModel(FootageModel footage, ApplicationModel applicationModel)
-#pragma warning restore CS8618
         {
             Footage = footage;
             ApplicationModel = applicationModel;
@@ -286,18 +243,15 @@ namespace NiVE3.ViewModel
         }
     }
 
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel))]
     partial class FootageFolderViewModel : BindableBase, IFootageViewModel
     {
         public Guid FootageId { get; private set; }
 
-        private string name;
+        [ReactiveProperty]
         [NeedWire(nameof(Folder), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
         public int Width => 0;
 
@@ -309,33 +263,21 @@ namespace NiVE3.ViewModel
 
         public string FilePath => "";
 
-        private string comment;
+        [ReactiveProperty]
         [NeedWire(nameof(Folder), IsOneWay = true)]
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        public partial string Comment { get; set; } = "";
 
         public SourceType InputType => SourceType.None;
 
-        private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
-        public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages
-        {
-            get { return footages; }
-            set { SetProperty(ref footages, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<IFootageModel, IFootageViewModel> Footages { get; set; }
 
         public bool IsFolder => true;
 
         public BitmapSource? SampleImage => null;
 
-        private EditingFootageParameter editingParameter;
-        public EditingFootageParameter EditingParameter
-        {
-            get { return editingParameter; }
-            set { SetProperty(ref editingParameter, value); }
-        }
+        [ReactiveProperty]
+        public partial EditingFootageParameter EditingParameter { get; set; }
 
         public ICommand BeginEditNameCommand { get; }
 
@@ -351,9 +293,7 @@ namespace NiVE3.ViewModel
 
         FootageFolderModel Folder { get; }
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public FootageFolderViewModel(FootageFolderModel folder, ApplicationModel applicationModel)
-#pragma warning restore CS8618
         {
             Folder = folder;
             FootageId = folder.FootageId;

@@ -20,6 +20,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.UI.Command;
 using NiVE3.UI.Dialog;
 using NiVE3.Util;
@@ -31,584 +32,305 @@ using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class LayerViewModel : BindableBase, IDropTarget, IViewModelShortcutCommand, INameEditableViewModel, INameEditableParentViewModel
     {
-        private Guid layerId;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Guid LayerId
-        {
-            get { return layerId; }
-            set { SetProperty(ref layerId, value); }
-        }
+        public partial Guid LayerId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private string comment = "";
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        public partial string Comment { get; set; } = "";
 
-        private Time sourceDuration;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Time SourceDuration
-        {
-            get { return sourceDuration; }
-            set { SetProperty(ref sourceDuration, value); }
-        }
+        public partial Time SourceDuration { get; set; }
 
-        private Time duration;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        public partial Time Duration { get; set; }
 
-        private Time sourceStartPoint;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public Time SourceStartPoint
-        {
-            get { return sourceStartPoint; }
-            set { SetProperty(ref sourceStartPoint, value); }
-        }
+        public partial Time SourceStartPoint { get; set; }
 
-        private Time inPoint;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public Time InPoint
-        {
-            get { return inPoint; }
-            set { SetProperty(ref inPoint, value); }
-        }
+        public partial Time InPoint { get; set; }
 
-        private Time outPoint;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public Time OutPoint
-        {
-            get { return outPoint; }
-            set { SetProperty(ref outPoint, value); }
-        }
+        public partial Time OutPoint { get; set; }
 
-        private bool isEnableTimeRemap;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public bool IsEnableTimeRemap
-        {
-            get { return isEnableTimeRemap; }
-            set { SetProperty(ref isEnableTimeRemap, value); }
-        }
+        public partial bool IsEnableTimeRemap { get; set; }
 
-        private bool isFreezeFrame;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsFreezeFrame
-        {
-            get { return isFreezeFrame; }
-            set { SetProperty(ref isFreezeFrame, value); }
-        }
+        public partial bool IsFreezeFrame { get; set; }
 
-        private Time freezeFrameTime;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Time FreezeFrameTime
-        {
-            get { return freezeFrameTime; }
-            set { SetProperty(ref freezeFrameTime, value); }
-        }
+        public partial Time FreezeFrameTime { get; set; }
 
-        private SourceType sourceType;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public SourceType SourceType
-        {
-            get { return sourceType; }
-            set { SetProperty(ref sourceType, value); }
-        }
+        public partial SourceType SourceType { get; set; }
 
-        private Color tagColor;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Color TagColor
-        {
-            get { return tagColor; }
-            set { SetProperty(ref tagColor, value); }
-        }
+        public partial Color TagColor { get; set; }
 
-        private double playRate;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public double PlayRate
-        {
-            get { return playRate; }
-            set { SetProperty(ref playRate, value); }
-        }
+        public partial double PlayRate { get; set; }
 
-        private bool isEnableVideo;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public bool IsEnableVideo
-        {
-            get { return isEnableVideo; }
-            set { SetProperty(ref isEnableVideo, value); }
-        }
+        public partial bool IsEnableVideo { get; set; }
 
-        private bool isEnableAudio;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public bool IsEnableAudio
-        {
-            get { return isEnableAudio; }
-            set { SetProperty(ref isEnableAudio, value); }
-        }
+        public partial bool IsEnableAudio { get; set; }
 
-        private bool isEnableSolo;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public bool IsEnableSolo
-        {
-            get { return isEnableSolo; }
-            set { SetProperty(ref isEnableSolo, value); }
-        }
+        public partial bool IsEnableSolo { get; set; }
 
-        private bool isLock;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel))]
-        public bool IsLock
-        {
-            get { return isLock; }
-            set { SetProperty(ref isLock, value); }
-        }
+        public partial bool IsLock { get; set; }
 
-        private bool isEnableShy;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnableShy
-        {
-            get { return isEnableShy; }
-            set { SetProperty(ref isEnableShy, value); }
-        }
+        public partial bool IsEnableShy { get; set; }
 
-        private bool isEnableCollapse;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnableCollapse
-        {
-            get { return isEnableCollapse; }
-            set { SetProperty(ref isEnableCollapse, value); }
-        }
+        public partial bool IsEnableCollapse { get; set; }
 
-        private bool isEnableEffect;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnableEffect
-        {
-            get { return isEnableEffect; }
-            set { SetProperty(ref isEnableEffect, value); }
-        }
+        public partial bool IsEnableEffect { get; set; }
 
-        private bool isEnableFrameBlend;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnableFrameBlend
-        {
-            get { return isEnableFrameBlend; }
-            set { SetProperty(ref isEnableFrameBlend, value); }
-        }
+        public partial bool IsEnableFrameBlend { get; set; }
 
-        private bool isEnableMotionBlur;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnableMotionBlur
-        {
-            get { return isEnableMotionBlur; }
-            set { SetProperty(ref isEnableMotionBlur, value); }
-        }
+        public partial bool IsEnableMotionBlur { get; set; }
 
-        private bool isEnableAdjustmentLayer;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnableAdjustmentLayer
-        {
-            get { return isEnableAdjustmentLayer; }
-            set { SetProperty(ref isEnableAdjustmentLayer, value); }
-        }
+        public partial bool IsEnableAdjustmentLayer { get; set; }
 
-        private bool isEnable3D;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnable3D
-        {
-            get { return isEnable3D; }
-            set { SetProperty(ref isEnable3D, value); }
-        }
+        public partial bool IsEnable3D { get; set; }
 
-        private ImageInterpolationQuality interpolationQuality;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public ImageInterpolationQuality InterpolationQuality
-        {
-            get { return interpolationQuality; }
-            set { SetProperty(ref interpolationQuality, value); }
-        }
+        public partial ImageInterpolationQuality InterpolationQuality { get; set; }
 
-        private bool hasEffect;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool HasEffect
-        {
-            get { return hasEffect; }
-            set { SetProperty(ref hasEffect, value); }
-        }
+        public partial bool HasEffect { get; set; }
 
-        private bool hasNonDummyEffect;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool HasNonDummyEffect
-        {
-            get { return  hasNonDummyEffect; }
-            set { SetProperty(ref  hasNonDummyEffect, value); }
-        }
+        public partial bool HasNonDummyEffect { get; set; }
 
-        private bool hasMask;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool HasMask
-        {
-            get { return hasMask; }
-            set { SetProperty(ref hasMask, value); }
-        }
+        public partial bool HasMask { get; set; }
 
-        private BlendMode blendMode;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public BlendMode BlendMode
-        {
-            get { return blendMode; }
-            set { SetProperty(ref blendMode, value); }
-        }
+        public partial BlendMode BlendMode { get; set; }
 
-        private Guid? trackMatteLayerId;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Guid? TrackMatteLayerId
-        {
-            get { return trackMatteLayerId; }
-            set { SetProperty(ref trackMatteLayerId, value); }
-        }
+        public partial Guid? TrackMatteLayerId { get; set; }
 
-        private TrackMatteMode trackMatteMode;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public TrackMatteMode TrackMatteMode
-        {
-            get { return trackMatteMode; }
-            set { SetProperty(ref trackMatteMode, value); }
-        }
+        public partial TrackMatteMode TrackMatteMode { get; set; }
 
-        private Guid? parentLayerId;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Guid? ParentLayerId
-        {
-            get { return parentLayerId; }
-            set { SetProperty(ref parentLayerId, value); }
-        }
+        public partial Guid? ParentLayerId { get; set; }
 
-        private bool isSpecial;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsSpecial
-        {
-            get { return isSpecial; }
-            set { SetProperty(ref isSpecial, value); }
-        }
+        public partial bool IsSpecial { get; set; }
 
-        private bool isCamera;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsCamera
-        {
-            get { return isCamera; }
-            set { SetProperty(ref isCamera, value); }
-        }
+        public partial bool IsCamera { get; set; }
 
-        private bool isLight;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsLight
-        {
-            get { return isLight; }
-            set { SetProperty(ref isLight, value); }
-        }
+        public partial bool IsLight { get; set; }
 
-        private bool isNullObject;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsNullObject
-        {
-            get { return isNullObject; }
-            set { SetProperty(ref isNullObject, value); }
-        }
+        public partial bool IsNullObject { get; set; }
 
-        private bool isText;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsText
-        {
-            get { return isText; }
-            set { SetProperty(ref isText, value); }
-        }
+        public partial bool IsText { get; set; }
 
-        private bool isNotRenderable;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsNotRenderable
-        {
-            get { return isNotRenderable; }
-            set { SetProperty(ref isNotRenderable, value); }
-        }
+        public partial bool IsNotRenderable { get; set; }
 
-        private bool isDisableDuration;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsDisableDuration
-        {
-            get { return isDisableDuration; }
-            set { SetProperty(ref isDisableDuration, value); }
-        }
+        public partial bool IsDisableDuration { get; set; }
 
-        private double layerNumberColumnWudth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth), IsOneWay = true)]
-        public double LayerNumberColumnWidth
-        {
-            get { return layerNumberColumnWudth; }
-            set { SetProperty(ref layerNumberColumnWudth, value); }
-        }
+        public partial double LayerNumberColumnWidth { get; set; }
 
-        private double layerNameColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNameColumnWidth), IsOneWay = true)]
-        public double LayerNameColumnWidth
-        {
-            get { return layerNameColumnWidth; }
-            set { SetProperty(ref layerNameColumnWidth, value); }
-        }
+        public partial double LayerNameColumnWidth { get; set; }
 
-        private double layerCommentColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerCommentColumnWidth), IsOneWay = true)]
-        public double LayerCommentColumnWidth
-        {
-            get { return layerCommentColumnWidth; }
-            set { SetProperty(ref layerCommentColumnWidth, value); }
-        }
+        public partial double LayerCommentColumnWidth { get; set; }
 
-        private double layerSwitchColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerSwitchColumnWidth), IsOneWay = true)]
-        public double LayerSwitchColumnWidth
-        {
-            get { return layerSwitchColumnWidth; }
-            set { SetProperty(ref layerSwitchColumnWidth, value); }
-        }
+        public partial double LayerSwitchColumnWidth { get; set; }
 
-        private double modeColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineModeColumnWidth), IsOneWay = true)]
-        public double ModeColumnWidth
-        {
-            get { return modeColumnWidth; }
-            set { SetProperty(ref modeColumnWidth, value); }
-        }
+        public partial double ModeColumnWidth { get; set; }
 
-        private double trackMatteColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnWidth), IsOneWay = true)]
-        public double TrackMatteColumnWidth
-        {
-            get { return trackMatteColumnWidth; }
-            set { SetProperty(ref trackMatteColumnWidth, value); }
-        }
+        public partial double TrackMatteColumnWidth { get; set; }
 
-        private double parentLayerColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnWidth), IsOneWay = true)]
-        public double ParentLayerColumnWidth
-        {
-            get { return parentLayerColumnWidth; }
-            set { SetProperty(ref parentLayerColumnWidth, value); }
-        }
+        public partial double ParentLayerColumnWidth { get; set; }
 
-        private bool isAVSwitchColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineAVSwitchColumnVisible), IsOneWay = true)]
-        public bool IsAVSwitchColumnVisible
-        {
-            get { return isAVSwitchColumnVisible; }
-            set { SetProperty(ref isAVSwitchColumnVisible, value); }
-        }
+        public partial bool IsAVSwitchColumnVisible { get; set; }
 
-        private bool isTagColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnVisible), IsOneWay = true)]
-        public bool IsTagColumnVisible
-        {
-            get { return isTagColumnVisible; }
-            set { SetProperty(ref isTagColumnVisible, value); }
-        }
+        public partial bool IsTagColumnVisible { get; set; }
 
-        private bool isLayerNumberColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnVisible), IsOneWay = true)]
-        public bool IsLayerNumberColumnVisible
-        {
-            get { return isLayerNumberColumnVisible; }
-            set { SetProperty(ref isLayerNumberColumnVisible, value); }
-        }
+        public partial bool IsLayerNumberColumnVisible { get; set; }
 
-        private bool isLayerCommentColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerCommentColumnVisible), IsOneWay = true)]
-        public bool IsLayerCommentColumnVisible
-        {
-            get { return isLayerCommentColumnVisible; }
-            set { SetProperty(ref isLayerCommentColumnVisible, value); }
-        }
+        public partial bool IsLayerCommentColumnVisible { get; set; }
 
-        private bool isLayerSwitchColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerSwitchColumnVisible), IsOneWay = true)]
-        public bool IsLayerSwitchColumnVisible
-        {
-            get { return isLayerSwitchColumnVisible; }
-            set { SetProperty(ref isLayerSwitchColumnVisible, value); }
-        }
+        public partial bool IsLayerSwitchColumnVisible { get; set; }
 
-        private bool isModeColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineModeColumnVisible), IsOneWay = true)]
-        public bool IsModeColumnVisible
-        {
-            get { return isModeColumnVisible; }
-            set { SetProperty(ref isModeColumnVisible, value); }
-        }
+        public partial bool IsModeColumnVisible { get; set; }
 
-        private bool isTrackMatteColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnVisible), IsOneWay = true)]
-        public bool IsTrackMatteColumnVisible
-        {
-            get { return isTrackMatteColumnVisible; }
-            set { SetProperty(ref isTrackMatteColumnVisible, value); }
-        }
+        public partial bool IsTrackMatteColumnVisible { get; set; }
 
-        private bool isParentLayerColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnVisible), IsOneWay = true)]
-        public bool IsParentLayerColumnVisible
-        {
-            get { return isParentLayerColumnVisible; }
-            set { SetProperty(ref isParentLayerColumnVisible, value); }
-        }
+        public partial bool IsParentLayerColumnVisible { get; set; }
 
-        private double propertyNameAreaWidth;
-        public double PropertyNameAreaWidth
-        {
-            get { return propertyNameAreaWidth; }
-            set { SetProperty(ref propertyNameAreaWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double PropertyNameAreaWidth { get; set; }
 
-        private LayerModelProxy? trackMatteLayerProxy;
-        public LayerModelProxy? TrackMatteLayerProxy
-        {
-            get { return trackMatteLayerProxy; }
-            set { SetProperty(ref trackMatteLayerProxy, value); }
-        }
+        [ReactiveProperty]
+        public partial LayerModelProxy? TrackMatteLayerProxy { get; set; }
 
-        private LayerModelProxy? parentLayerProxy;
-        public LayerModelProxy? ParentLayerProxy
-        {
-            get { return parentLayerProxy; }
-            set { SetProperty(ref parentLayerProxy, value); }
-        }
+        [ReactiveProperty]
+        public partial LayerModelProxy? ParentLayerProxy { get; set; }
 
-        private bool isExpanded;
-        public bool IsExpanded
-        {
-            get { return isExpanded; }
-            set { SetProperty(ref isExpanded, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsExpanded { get; set; }
 
-        private WaveFormType audioWaveFormType = WaveFormType.Stereo;
-        public WaveFormType AudioWaveFormType
-        {
-            get { return audioWaveFormType; }
-            set { SetProperty(ref audioWaveFormType, value); }
-        }
+        [ReactiveProperty]
+        public partial WaveFormType AudioWaveFormType { get; set; } = WaveFormType.Stereo;
 
-        private EditingLayerParameter editingParameter;
-        public EditingLayerParameter EditingParameter
-        {
-            get { return editingParameter; }
-            set { SetProperty(ref editingParameter, value); }
-        }
+        [ReactiveProperty]
+        public partial EditingLayerParameter EditingParameter { get; set; }
 
-        private ObservableCollectionView<EffectModel, EffectViewModel> effects;
-        public ObservableCollectionView<EffectModel, EffectViewModel> Effects
-        {
-            get { return effects; }
-            set { SetProperty(ref effects, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<EffectModel, EffectViewModel> Effects { get; set; }
 
-        private ObservableCollectionView<MaskModel, MaskViewModel> masks;
-        public ObservableCollectionView<MaskModel, MaskViewModel> Masks
-        {
-            get { return masks; }
-            set { SetProperty(ref masks, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<MaskModel, MaskViewModel> Masks { get; set; }
 
-        private ObservableCollection<EffectViewModel> selectedEffects = [];
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
-            get { return selectedEffects; }
+            get;
             set
             {
-                selectedEffects.CollectionChanged -= SelectedEffects_CollectionChanged;
-                value.CollectionChanged += SelectedEffects_CollectionChanged;
-                SetProperty(ref selectedEffects, value);
+                if (field != value)
+                {
+                    field.CollectionChanged -= SelectedEffects_CollectionChanged;
+                    value.CollectionChanged += SelectedEffects_CollectionChanged;
+                }
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private ObservableCollection<MaskViewModel> selectedMasks = [];
         public ObservableCollection<MaskViewModel> SelectedMasks
         {
-            get { return selectedMasks; }
+            get;
             set
             {
-                selectedMasks.CollectionChanged -= SelectedMasks_CollectionChanged;
-                value.CollectionChanged += SelectedMasks_CollectionChanged;
-                SetProperty(ref selectedMasks, value);
+                if (field != value)
+                {
+                    field.CollectionChanged -= SelectedMasks_CollectionChanged;
+                    value.CollectionChanged += SelectedMasks_CollectionChanged;
+                }
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private EffectViewModel? lastSelectedEffect;
-        public EffectViewModel? LastSelectedEffect
-        {
-            get { return lastSelectedEffect; }
-            set { SetProperty(ref lastSelectedEffect, value); }
-        }
+        [ReactiveProperty]
+        public partial EffectViewModel? LastSelectedEffect { get; set; }
 
-        private MaskViewModel? lastSelectedMask;
-        public MaskViewModel? LastSelectedMask
-        {
-            get { return lastSelectedMask; }
-            set { SetProperty(ref lastSelectedMask, value); }
-        }
+        [ReactiveProperty]
+        public partial MaskViewModel? LastSelectedMask { get; set; }
 
-        private PropertyGroupViewModel? transformProperties;
-        public PropertyGroupViewModel? TransformProperties
-        {
-            get { return transformProperties; }
-            set { SetProperty(ref transformProperties, value); }
-        }
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? TransformProperties { get; set; }
 
-        private PropertyGroupViewModel? layerOptionProperties;
-        public PropertyGroupViewModel? LayerOptionProperties
-        {
-            get { return layerOptionProperties; }
-            set { SetProperty(ref layerOptionProperties, value); }
-        }
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? LayerOptionProperties { get; set; }
 
-        private PropertyGroupViewModel? textProperties;
-        public PropertyGroupViewModel? TextProperties
-        {
-            get { return textProperties; }
-            set { SetProperty(ref textProperties, value); }
-        }
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? TextProperties { get; set; }
 
-        private PropertyGroupViewModel? shapeProperties;
-        public PropertyGroupViewModel? ShapeProperties
-        {
-            get { return shapeProperties; }
-            set { SetProperty(ref shapeProperties, value); }
-        }
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? ShapeProperties { get; set; }
 
-        private PropertyGroupViewModel? sourceOptionProperties;
-        public PropertyGroupViewModel? SourceOptionProperties
-        {
-            get { return sourceOptionProperties; }
-            set { SetProperty(ref sourceOptionProperties, value); }
-        }
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? SourceOptionProperties { get; set; }
 
-        private PropertyGroupViewModel? audioOptionProperties;
-        public PropertyGroupViewModel? AudioOptionProperties
-        {
-            get { return audioOptionProperties; }
-            set { SetProperty(ref audioOptionProperties, value); }
-        }
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? AudioOptionProperties { get; set; }
 
         public bool IsComposition { get; }
 
@@ -789,9 +511,7 @@ namespace NiVE3.ViewModel
 
         Time PrevSourceStartPoint { get; set; }
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public LayerViewModel(LayerModel layerModel, ViewStateModel viewState, EventHubModel eventHubModel, IEnumerable<LayerModelProxy> trackMatteViewSource, IEnumerable<LayerModelProxy> parentLayerViewSource)
-#pragma warning restore CS8618
         {
             LayerModel = layerModel;
             ViewState = viewState;
@@ -1849,32 +1569,21 @@ namespace NiVE3.ViewModel
         }
     }
 
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class LayerModelProxy : BindableBase
     {
-        private Guid layerId;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Guid LayerId
-        {
-            get { return layerId; }
-            set { SetProperty(ref layerId, value); }
-        }
+        public partial Guid LayerId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private SourceType sourceType;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public SourceType SourceType
-        {
-            get { return sourceType; }
-            set { SetProperty(ref sourceType, value); }
-        }
+        public partial SourceType SourceType { get; set; }
 
         LayerModel LayerModel { get; }
 

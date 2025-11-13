@@ -6,55 +6,33 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class NameSettingViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class NameSettingViewModel : BindableBase, IDialogAware
     {
-        private string title = "";
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
+        [ReactiveProperty]
+        public partial string Title { get; set; } = "";
 
-        private string label = "";
-        public string Label
-        {
-            get { return label; }
-            set { SetProperty(ref label, value); }
-        }
+        [ReactiveProperty]
+        public partial string Label { get; set; } = "";
 
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
-        private bool allowEmptyName;
-        public bool AllowEmptyName
-        {
-            get { return allowEmptyName; }
-            set { SetProperty(ref allowEmptyName, value); }
-        }
+        [ReactiveProperty]
+        public partial bool AllowEmptyName { get; set; }
 
-        private bool canOverwrite;
-        public bool CanOverwrite
-        {
-            get { return canOverwrite; }
-            set { SetProperty(ref canOverwrite, value); }
-        }
+        [ReactiveProperty]
+        public partial bool CanOverwrite { get; set; }
 
-        private string[] registeredNames = [];
-        public string[] RegisteredNames
-        {
-            get { return registeredNames; }
-            set { SetProperty(ref registeredNames, value); }
-        }
+        [ReactiveProperty]
+        public partial string[] RegisteredNames { get; set; } = [];
 
         public ICommand OKCommand { get; }
 

@@ -9,63 +9,37 @@ using System.Windows.Media;
 using NiVE3.Data;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Input
 {
-    class SolidSettingViewModel : BindableBase
+    [UseReactiveProperty]
+    partial class SolidSettingViewModel : BindableBase
     {
         const int MinSize = 4;
 
-        private string name = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.SolidInputSettingView_DefaultName);
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.SolidInputSettingView_DefaultName);
 
-        private int width = 1920;
-        public int Width
-        {
-            get { return width; }
-            set { SetProperty(ref width, Math.Max(value, MinSize)); }
-        }
+        [ReactiveProperty]
+        public partial int Width { get; set; } = 1920;
 
-        private int height = 1080;
-        public int Height
-        {
-            get { return height; }
-            set { SetProperty(ref height, Math.Max(value, MinSize)); }
-        }
+        [ReactiveProperty]
+        public partial int Height { get; set; } = 1080;
 
-        private bool isFixRatio;
-        public bool IsFixRatio
-        {
-            get { return isFixRatio; }
-            set { SetProperty(ref isFixRatio, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsFixRatio { get; set; }
 
-        private FloatColor color = FloatColor.FromColor(Colors.White);
-        public FloatColor Color
-        {
-            get { return color; }
-            set { SetProperty(ref color, value); }
-        }
+        [ReactiveProperty]
+        public partial FloatColor Color { get; set; } = FloatColor.FromColor(Colors.White);
 
-        private Brush colorBrush = Brushes.White;
-        public Brush ColorBrush
-        {
-            get { return colorBrush; }
-            set { SetProperty(ref colorBrush, value); }
-        }
+        [ReactiveProperty]
+        public partial Brush ColorBrush { get; set; } = Brushes.White;
 
-        private Int32Size? compositionSize;
-        public Int32Size? CompositionSize
-        {
-            get { return compositionSize; }
-            set { SetProperty(ref compositionSize, value); }
-        }
+        [ReactiveProperty]
+        public partial Int32Size? CompositionSize { get; set; }
 
         public double FixedRatio { get; private set; }
 

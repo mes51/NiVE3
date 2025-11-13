@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.Model;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
@@ -19,182 +20,95 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class RenderQueueItemViewModel : BindableBase
     {
-        private Guid queueId;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Guid QueueId
-        {
-            get { return queueId; }
-            set { SetProperty(ref queueId, value); }
-        }
+        public partial Guid QueueId { get; set; }
 
-        private bool isRenderSelected;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel))]
-        public bool IsRenderSelected
-        {
-            get { return isRenderSelected; }
-            set { SetProperty(ref isRenderSelected, value); }
-        }
+        public partial bool IsRenderSelected { get; set; }
 
-        private string filePath = "";
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public string FilePath
-        {
-            get { return filePath; }
-            set { SetProperty(ref filePath, value); }
-        }
+        public partial string FilePath { get; set; } = "";
 
-        private RenderRangeType renderRangeType;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public RenderRangeType RenderRangeType
-        {
-            get { return renderRangeType; }
-            set { SetProperty(ref renderRangeType, value); }
-        }
+        public partial RenderRangeType RenderRangeType { get; set; }
 
-        private Time beginTime;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time BeginTime
-        {
-            get { return beginTime; }
-            set { SetProperty(ref beginTime, value); }
-        }
+        public partial Time BeginTime { get; set; }
 
-        private Time endTime;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time EndTime
-        {
-            get { return endTime; }
-            set { SetProperty(ref endTime, value); }
-        }
+        public partial Time EndTime { get; set; }
 
-        private Time fixedBeginTime;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time FixedBeginTime
-        {
-            get { return fixedBeginTime; }
-            set { SetProperty(ref fixedBeginTime, value); }
-        }
+        public partial Time FixedBeginTime { get; set; }
 
-        private Time fixedEndTime;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time FixedEndTime
-        {
-            get { return fixedEndTime; }
-            set { SetProperty(ref fixedEndTime, value); }
-        }
+        public partial Time FixedEndTime { get; set; }
 
-        private bool isOutputVideo;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public bool IsOutputVideo
-        {
-            get { return isOutputVideo; }
-            set { SetProperty(ref isOutputVideo, value); }
-        }
+        public partial bool IsOutputVideo { get; set; }
 
-        private bool isOutputAudio;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public bool IsOutputAudio
-        {
-            get { return isOutputAudio; }
-            set { SetProperty(ref isOutputAudio, value); }
-        }
+        public partial bool IsOutputAudio { get; set; }
 
-        private Guid outputPluginId;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Guid OutputPluginId
-        {
-            get { return outputPluginId; }
-            set { SetProperty(ref outputPluginId, value); }
-        }
+        public partial Guid OutputPluginId { get; set; }
 
-        private string outputPluginName = "";
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public string OutputPluginName
-        {
-            get { return outputPluginName; }
-            set { SetProperty(ref outputPluginName, value); }
-        }
+        public partial string OutputPluginName { get; set; } = "";
 
-        private ExportLifetimeContext<IOutput>? output;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public ExportLifetimeContext<IOutput>? Output
-        {
-            get { return output; }
-            set { SetProperty(ref output, value); }
-        }
+        public partial ExportLifetimeContext<IOutput>? Output { get; set; }
 
-        private RenderQueueItemState state;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public RenderQueueItemState State
-        {
-            get { return state; }
-            set { SetProperty(ref state, value); }
-        }
+        public partial RenderQueueItemState State { get; set; }
 
-        private TimeSpan renderingTime;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public TimeSpan RenderingTime
-        {
-            get { return renderingTime; }
-            set { SetProperty(ref renderingTime, value); }
-        }
+        public partial TimeSpan RenderingTime { get; set; }
 
-        private string compositionName = "";
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public string CompositionName
-        {
-            get { return compositionName; }
-            set { SetProperty(ref compositionName, value); }
-        }
+        public partial string CompositionName { get; set; } = "";
 
-        private Time compositionWorkareaBegin;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time CompositionWorkareaBegin
-        {
-            get { return compositionWorkareaBegin; }
-            set { SetProperty(ref compositionWorkareaBegin, value); }
-        }
+        public partial Time CompositionWorkareaBegin { get; set; }
 
-        private Time compositionWorkareaEnd;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time CompositionWorkareaEnd
-        {
-            get { return compositionWorkareaEnd; }
-            set { SetProperty(ref compositionWorkareaEnd, value); }
-        }
+        public partial Time CompositionWorkareaEnd { get; set; }
 
-        private Time compositionDuration;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public Time CompositionDuration
-        {
-            get { return compositionDuration; }
-            set { SetProperty(ref compositionDuration, value); }
-        }
+        public partial Time CompositionDuration { get; set; }
 
-        private double compositionFrameRate;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueItemModel), IsOneWay = true)]
-        public double CompositionFrameRate
-        {
-            get { return compositionFrameRate; }
-            set { SetProperty(ref compositionFrameRate, value); }
-        }
+        public partial double CompositionFrameRate { get; set; }
 
-        private bool isSelected;
-        public bool IsSelected
-        {
-            get { return isSelected; }
-            set { SetProperty(ref isSelected, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsSelected { get; set; }
 
-        private bool isExpanded;
-        public bool IsExpanded
-        {
-            get { return isExpanded; }
-            set { SetProperty(ref isExpanded, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsExpanded { get; set; }
 
         public ICommand ChangeFilePathCommand { get; }
 

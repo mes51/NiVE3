@@ -5,64 +5,38 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class PrecomposeSettingViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class PrecomposeSettingViewModel : BindableBase, IDialogAware
     {
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PrecomposeSettingView_Title);
 
-        private string layerName = "";
-        public string LayerName
-        {
-            get { return layerName; }
-            set { SetProperty(ref layerName, value); }
-        }
+        [ReactiveProperty]
+        public partial string LayerName { get; set; } = "";
 
-        private bool hasParent;
-        public bool HasParent
-        {
-            get { return hasParent; }
-            set { SetProperty(ref hasParent, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasParent { get; set; }
 
-        private bool targetIsSingleLayer;
-        public bool TargetIsSingleLayer
-        {
-            get { return targetIsSingleLayer; }
-            set { SetProperty(ref targetIsSingleLayer, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TargetIsSingleLayer { get; set; }
 
-        private string newCompositionName = "";
-        public string NewCompositionName
-        {
-            get { return newCompositionName; }
-            set { SetProperty(ref newCompositionName, value); }
-        }
+        [ReactiveProperty]
+        public partial string NewCompositionName { get; set; } = "";
 
-        private PrecomposeMode mode;
-        public PrecomposeMode Mode
-        {
-            get { return mode; }
-            set { SetProperty(ref mode, value); }
-        }
+        [ReactiveProperty]
+        public partial PrecomposeMode Mode { get; set; }
 
-        private bool alignDurationToLayer;
-        public bool AlignDurationToLayer
-        {
-            get { return alignDurationToLayer; }
-            set { SetProperty(ref alignDurationToLayer, value); }
-        }
+        [ReactiveProperty]
+        public partial bool AlignDurationToLayer { get; set; }
 
-        private bool copyParent;
-        public bool CopyParent
-        {
-            get { return copyParent; }
-            set { SetProperty(ref copyParent, value); }
-        }
+        [ReactiveProperty]
+        public partial bool CopyParent { get; set; }
 
         public DialogCloseListener RequestClose { get; }
 

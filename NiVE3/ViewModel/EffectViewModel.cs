@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Prism.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using System.Windows.Input;
@@ -13,55 +14,32 @@ using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class EffectViewModel : BindableBase, INameEditableViewModel, IViewModelShortcutCommand
     {
-        private Guid effectId;
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public Guid EffectId
-        {
-            get { return effectId; }
-            set { SetProperty(ref effectId, value); }
-        }
+        public partial Guid EffectId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private string comment = "";
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        public partial string Comment { get; set; } = "";
 
-        private bool isEnable;
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public bool IsEnable
-        {
-            get { return isEnable; }
-            set { SetProperty(ref isEnable, value); }
-        }
+        public partial bool IsEnable { get; set; }
 
-        private bool parentLayerIsLock;
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        public partial bool ParentLayerIsLock { get; set; }
 
-        private bool isExpanded;
-        public bool IsExpanded
-        {
-            get { return isExpanded; }
-            set { SetProperty(ref isExpanded, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsExpanded { get; set; }
 
         WeakEventPublisher<EffectEnableChangeEventArgs> EffectEnableChangeRequestPublisher { get; } = new WeakEventPublisher<EffectEnableChangeEventArgs>();
         public event EventHandler<EffectEnableChangeEventArgs> EffectEnableChangeRequest
@@ -84,19 +62,11 @@ namespace NiVE3.ViewModel
             remove { PropertyValueCommitedPublisher.Unsubscribe(value); }
         }
 
-        private bool isNameEditing;
-        public bool IsNameEditing
-        {
-            get { return isNameEditing; }
-            private set { SetProperty(ref isNameEditing, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsNameEditing { get; private set; }
 
-        private bool isCommentEditing;
-        public bool IsCommentEditing
-        {
-            get { return isCommentEditing; }
-            set { SetProperty(ref isCommentEditing, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsCommentEditing { get; set; }
 
         public PropertyGroupViewModel Properties { get; }
 
@@ -130,9 +100,7 @@ namespace NiVE3.ViewModel
 
         string PrevComment { get; set; } = "";
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public EffectViewModel(EffectModel effectModel, ViewStateModel viewState)
-#pragma warning restore CS8618
         {
             EffectModel = effectModel;
             Properties = new PropertyGroupViewModel(effectModel.Properties, viewState);

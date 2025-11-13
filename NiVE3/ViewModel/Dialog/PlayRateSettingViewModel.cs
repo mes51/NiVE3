@@ -7,57 +7,35 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class PlayRateSettingViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class PlayRateSettingViewModel : BindableBase, IDialogAware
     {
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.PlayRateSettingView_Title);
 
-        private double playRate;
-        public double PlayRate
-        {
-            get { return playRate; }
-            set { SetProperty(ref playRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double PlayRate { get; set; }
 
-        private Time sourceDuration;
-        public Time SourceDuration
-        {
-            get { return sourceDuration; }
-            set { SetProperty(ref sourceDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time SourceDuration { get; set; }
 
-        private Time duration;
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; set; }
 
-        private double compositionFrameRate = 30.0;
-        public double CompositionFrameRate
-        {
-            get { return compositionFrameRate; }
-            set { SetProperty(ref compositionFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double CompositionFrameRate { get; set; } = 30.0;
 
-        private double minPlayRate = double.MinValue;
-        public double MinPlayRate
-        {
-            get { return minPlayRate; }
-            set { SetProperty(ref minPlayRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double MinPlayRate { get; set; } = double.MinValue;
 
-        private double maxPlayRate = double.MaxValue;
-        public double MaxPlayRate
-        {
-            get { return maxPlayRate; }
-            set { SetProperty(ref maxPlayRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double MaxPlayRate { get; set; } = double.MaxValue;
 
         public ICommand OKCommand { get; }
 

@@ -14,6 +14,7 @@ using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.Text;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 using SixLabors.ImageSharp.Drawing;
 using FontFamily = SixLabors.Fonts.FontFamily;
@@ -31,174 +32,98 @@ using NiVE3.Plugin.ValueObject;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Right1Center, Size = 351)]
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     partial class TextPropertyViewModel : SingletonePaneViewModelBase
     {
-        private int selectedFontGroupIndex;
-        public int SelectedFontGroupIndex
-        {
-            get { return selectedFontGroupIndex; }
-            set { SetProperty(ref selectedFontGroupIndex, value); }
-        }
+        [ReactiveProperty]
+        public partial int SelectedFontGroupIndex { get; set; }
 
-        private int selectedFontSubFamilyIndex;
-        public int SelectedFontSubFamilyIndex
-        {
-            get { return selectedFontSubFamilyIndex; }
-            set { SetProperty(ref selectedFontSubFamilyIndex, value); }
-        }
+        [ReactiveProperty]
+        public partial int SelectedFontSubFamilyIndex { get; set; }
 
-        private double fontSize = 20.0;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public double FontSize
-        {
-            get { return fontSize; }
-            set { SetProperty(ref fontSize, value); }
-        }
+        public partial double FontSize { get; set; } = 20.0;
 
-        private double lineHeight = 1.0;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public double LineHeight
-        {
-            get { return lineHeight; }
-            set { SetProperty(ref lineHeight, value); }
-        }
+        public partial double LineHeight { get; set; } = 1.0;
 
-        private double verticalScale = 100.0;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public double VerticalScale
-        {
-            get { return verticalScale; }
-            set { SetProperty(ref verticalScale, value); }
-        }
+        public partial double VerticalScale { get; set; } = 100.0;
 
-        private double horizontalScale = 100.0;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public double HorizontalScale
-        {
-            get { return horizontalScale; }
-            set { SetProperty(ref horizontalScale, value); }
-        }
+        public partial double HorizontalScale { get; set; } = 100.0;
 
-        private double letterSpacing;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public double LetterSpacing
-        {
-            get { return letterSpacing; }
-            set { SetProperty(ref letterSpacing, value); }
-        }
+        public partial double LetterSpacing { get; set; }
 
-        private double textLineWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public double TextLineWidth
-        {
-            get { return textLineWidth; }
-            set { SetProperty(ref textLineWidth, value); }
-        }
+        public partial double TextLineWidth { get; set; }
 
-        private TextLineDrawOrder textLineDrawOrder;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public TextLineDrawOrder TextLineDrawOrder
-        {
-            get { return textLineDrawOrder; }
-            set { SetProperty(ref textLineDrawOrder, value); }
-        }
+        public partial TextLineDrawOrder TextLineDrawOrder { get; set; }
 
-        private bool isEnableBold;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public bool IsEnableBold
-        {
-            get { return isEnableBold; }
-            set { SetProperty(ref isEnableBold, value); }
-        }
+        public partial bool IsEnableBold { get; set; }
 
-        private bool isEnableItalic;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public bool IsEnableItalic
-        {
-            get { return isEnableItalic; }
-            set { SetProperty(ref isEnableItalic, value); }
-        }
+        public partial bool IsEnableItalic { get; set; }
 
-        private TextAlign textAlign;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public TextAlign TextAlign
-        {
-            get { return textAlign; }
-            set { SetProperty(ref textAlign, value); }
-        }
+        public partial TextAlign TextAlign { get; set; }
 
-        private FloatColor fillColor;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public FloatColor FillColor
-        {
-            get { return fillColor; }
-            set { SetProperty(ref fillColor, value); }
-        }
+        public partial FloatColor FillColor { get; set; }
 
-        private FloatColor textLineColor;
+        [ReactiveProperty]
         [NeedWire(nameof(TextPropertyModel))]
-        public FloatColor TextLineColor
-        {
-            get { return textLineColor; }
-            set { SetProperty(ref textLineColor, value); }
-        }
+        public partial FloatColor TextLineColor { get; set; }
 
-        private Guid? currentEditingCompositionId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
-        public Guid? CurrentEditingCompositionId
-        {
-            get { return currentEditingCompositionId; }
-            set { SetProperty(ref currentEditingCompositionId, value); }
-        }
+        public partial Guid? CurrentEditingCompositionId { get; set; }
 
-        private Guid? lastSelectedLayerId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
-        public Guid? LastSelectedLayerId
-        {
-            get { return lastSelectedLayerId; }
-            set { SetProperty(ref lastSelectedLayerId, value); }
-        }
+        public partial Guid? LastSelectedLayerId { get; set; }
 
-        private Time currentTime;
+        [ReactiveProperty]
         [ManualWire(nameof(Composition), IsOneWay = true)]
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        public partial Time CurrentTime { get; set; }
 
-        private SolidColorBrush fillColorBrush = Brushes.White;
-        public SolidColorBrush FillColorBrush
-        {
-            get { return fillColorBrush; }
-            set { SetProperty(ref fillColorBrush, value); }
-        }
+        [ReactiveProperty]
+        public partial SolidColorBrush FillColorBrush { get; set; } = Brushes.White;
 
-        private SolidColorBrush textLineColorBrush = Brushes.Red;
-        public SolidColorBrush TextLineColorBrush
-        {
-            get { return textLineColorBrush; }
-            set { SetProperty(ref textLineColorBrush, value); }
-        }
+        [ReactiveProperty]
+        public partial SolidColorBrush TextLineColorBrush { get; set; } = Brushes.Red;
 
-        private CompositionModel? compositionModel;
         public CompositionModel? Composition
         {
-            get { return compositionModel; }
+            get;
             set
             {
-                if (compositionModel == value)
+                if (field == value)
                 {
                     return;
                 }
 
-                if (compositionModel != null)
+                if (field != null)
                 {
                     UnbindComposition();
                 }
-                SetProperty(ref compositionModel, value);
+                SetProperty(ref field, value);
                 if (value != null)
                 {
                     BindComposition();
@@ -212,9 +137,9 @@ namespace NiVE3.ViewModel
 
         public FontGroupViewModel SelectedFontGroup => Fonts[SelectedFontGroupIndex];
 
-        public bool IsSupportBold => SelectedFontGroup.SubFamiles.ElementAtOrDefault(selectedFontSubFamilyIndex)?.IsSupportBold ?? false;
+        public bool IsSupportBold => SelectedFontGroup.SubFamiles.ElementAtOrDefault(SelectedFontSubFamilyIndex)?.IsSupportBold ?? false;
 
-        public bool IsSupportItalic => SelectedFontGroup.SubFamiles.ElementAtOrDefault(selectedFontSubFamilyIndex)?.IsSupportItalic ?? false;
+        public bool IsSupportItalic => SelectedFontGroup.SubFamiles.ElementAtOrDefault(SelectedFontSubFamilyIndex)?.IsSupportItalic ?? false;
 
         public List<FontGroupViewModel> Fonts { get; set; } = [];
 
@@ -465,14 +390,11 @@ namespace NiVE3.ViewModel
         }
     }
 
-    abstract class FontViewModelBase : BindableBase
+    [UseReactiveProperty]
+    abstract partial class FontViewModelBase : BindableBase
     {
-        private GeometryGroup? sample;
-        public GeometryGroup? Sample
-        {
-            get { return sample; }
-            private set { SetProperty(ref sample, value); }
-        }
+        [ReactiveProperty]
+        public partial GeometryGroup? Sample { get; private set; }
 
         protected abstract FontFamily SampleFontFamily { get; }
 

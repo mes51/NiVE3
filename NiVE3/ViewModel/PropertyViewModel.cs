@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Acornima;
@@ -24,14 +23,15 @@ using NiVE3.Plugin.Property.Interaction;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.UI.Command;
 using NiVE3.Util;
-using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyViewModel : BindableBase, IInternalPropertyViewModel, IPreviewInteractionTarget
     {
@@ -39,153 +39,91 @@ namespace NiVE3.ViewModel
 
         public PropertyViewState ViewState { get; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private Time sourceStartPoint;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public Time SourceStartPoint
-        {
-            get { return sourceStartPoint; }
-            set { SetProperty(ref sourceStartPoint, value); }
-        }
+        public partial Time SourceStartPoint { get; set; }
 
-        private Time currentTime;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        public partial Time CurrentTime { get; set; }
 
-        private ObservableCollection<KeyFrame> keyFrames = [];
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
         public ObservableCollection<KeyFrame> KeyFrames
         {
-            get { return keyFrames; }
+            get;
             set
             {
-                if (keyFrames != value)
+                if (field != value)
                 {
-                    keyFrames.CollectionChanged -= KeyFrames_CollectionChanged;
+                    field.CollectionChanged -= KeyFrames_CollectionChanged;
                     value.CollectionChanged += KeyFrames_CollectionChanged;
                 }
-                SetProperty(ref keyFrames, value);
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private bool parentLayerIsLock;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        public partial bool ParentLayerIsLock { get; set; }
 
         public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel>? Children => null;
 
-        private bool useEditingValue;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel))]
-        public bool UseEditingValue
-        {
-            get { return useEditingValue; }
-            set { SetProperty(ref useEditingValue, value); }
-        }
+        public partial bool UseEditingValue { get; set; }
 
-        private bool useExpression;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public bool UseExpression
-        {
-            get { return useExpression; }
-            set { SetProperty(ref useExpression, value); }
-        }
+        public partial bool UseExpression { get; set; }
 
-        private string expressionCode = "";
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public string ExpressionCode
-        {
-            get { return expressionCode; }
-            set { SetProperty(ref expressionCode, value); }
-        }
+        public partial string ExpressionCode { get; set; } = "";
 
-        private string expressionErrorMessage = "";
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public string ExpressionErrorMessage
-        {
-            get { return expressionErrorMessage; }
-            set { SetProperty(ref expressionErrorMessage, value); }
-        }
+        public partial string ExpressionErrorMessage { get; set; } = "";
 
-        private SourceLocation expressionErrorSourceLocation;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyModel), IsOneWay = true)]
-        public SourceLocation ExpressionErrorSourceLocation
-        {
-            get { return expressionErrorSourceLocation; }
-            set { SetProperty(ref expressionErrorSourceLocation, value); }
-        }
+        public partial SourceLocation ExpressionErrorSourceLocation { get; set; }
 
-        private bool isPreviewPlaying;
+        [ReactiveProperty]
         [NeedWire(nameof(ApplicationViewState), IsOneWay = true)]
-        public bool IsPreviewPlaying
-        {
-            get { return isPreviewPlaying; }
-            set { SetProperty(ref isPreviewPlaying, value); }
-        }
+        public partial bool IsPreviewPlaying { get; set; }
 
-        private bool hasExpressionError;
-        public bool HasExpressionError
-        {
-            get { return hasExpressionError; }
-            set { SetProperty(ref hasExpressionError, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasExpressionError { get; set; }
 
-        private bool isEnableExpression;
-        public bool IsEnableExpression
-        {
-            get { return isEnableExpression; }
-            set { SetProperty(ref isEnableExpression, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableExpression { get; set; }
 
-        private object? currentTimeValue;
-        public object? CurrentTimeValue
-        {
-            get { return currentTimeValue; }
-            private set { SetProperty(ref currentTimeValue, value); }
-        }
+        [ReactiveProperty]
+        public partial object? CurrentTimeValue { get; private set; }
 
-        private object? currentTimeRawValue;
-        public object? CurrentTimeRawValue
-        {
-            get { return currentTimeRawValue; }
-            set { SetProperty(ref currentTimeRawValue, value); }
-        }
+        [ReactiveProperty]
+        public partial object? CurrentTimeRawValue { get; set; }
 
-        private bool hasKeyFrame;
-        public bool HasKeyFrame
-        {
-            get { return hasKeyFrame; }
-            set { SetProperty(ref hasKeyFrame, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasKeyFrame { get; set; }
 
-        private ObservableCollection<int> selectedKeyFrameIds = [];
         public ObservableCollection<int> SelectedKeyFrameIds
         {
-            get { return selectedKeyFrameIds; }
+            get;
             set
             {
-                if (selectedKeyFrameIds != value)
+                if (field != value)
                 {
-                    selectedKeyFrameIds.CollectionChanged -= SelectedKeyFrameIds_CollectionChanged;
+                    field.CollectionChanged -= SelectedKeyFrameIds_CollectionChanged;
                     value.CollectionChanged += SelectedKeyFrameIds_CollectionChanged;
                 }
-                SetProperty(ref selectedKeyFrameIds, value);
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
         public PropertyBase Property { get; }
 
@@ -271,26 +209,14 @@ namespace NiVE3.ViewModel
 
         public DelegateCommand<SelectItemType?> SavePresetCommand { get; }
 
-        private bool isEditing;
-        bool IsEditing
-        {
-            get { return isEditing; }
-            set { SetProperty(ref isEditing, value); }
-        }
+        [ReactiveProperty]
+        private partial bool IsEditing { get; set; }
 
-        private bool isEditingExpression;
-        public bool IsEditingExpression
-        {
-            get { return isEditingExpression; }
-            set { SetProperty(ref isEditingExpression, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEditingExpression { get; set; }
 
-        private TextDocument expressionCodeDocument = new TextDocument();
-        public TextDocument ExpressionCodeDocument
-        {
-            get { return expressionCodeDocument; }
-            set { SetProperty(ref expressionCodeDocument, value); }
-        }
+        [ReactiveProperty]
+        public partial TextDocument ExpressionCodeDocument { get; set; } = new TextDocument();
 
         PropertyModel PropertyModel { get; }
 

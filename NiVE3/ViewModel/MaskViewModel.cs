@@ -10,49 +10,31 @@ using Prism.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class MaskViewModel : BindableBase, INameEditableViewModel, IViewModelShortcutCommand
     {
-        private Guid maskId;
+        [ReactiveProperty]
         [NeedWire(nameof(MaskModel), IsOneWay = true)]
-        public Guid MaskId
-        {
-            get { return maskId; }
-            set { SetProperty(ref maskId, value); }
-        }
+        public partial Guid MaskId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(MaskModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private bool isEnable;
+        [ReactiveProperty]
         [NeedWire(nameof(MaskModel), IsOneWay = true)]
-        public bool IsEnable
-        {
-            get { return isEnable; }
-            set { SetProperty(ref isEnable, value); }
-        }
+        public partial bool IsEnable { get; set; }
 
-        private bool isExpanded;
-        public bool IsExpanded
-        {
-            get { return isExpanded; }
-            set { SetProperty(ref isExpanded, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsExpanded { get; set; }
 
-        private bool isNameEditing;
-        public bool IsNameEditing
-        {
-            get { return isNameEditing; }
-            private set { SetProperty(ref isNameEditing, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsNameEditing { get; private set; }
 
         public PropertyGroupViewModel Properties { get; }
 

@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.Model;
 using NiVE3.Mvvm;
 using NiVE3.View.Dock;
-using Prism.Mvvm;
 using System.Windows.Input;
 using NiVE3.UI.Command;
 using System.ComponentModel;
 using System.Threading;
 using System.Diagnostics;
-using System.Windows.Threading;
 using NiVE3.View.Resource;
 using Prism.Commands;
 using Prism.Dialogs;
@@ -23,78 +21,43 @@ using Prism.Dialogs;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Bottom)]
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class RenderQueueViewModel : SingletonePaneViewModelBase
     {
-        private ObservableCollectionView<RenderQueueItemModel, RenderQueueItemViewModel> items;
-        public ObservableCollectionView<RenderQueueItemModel, RenderQueueItemViewModel> Items
-        {
-            get { return items; }
-            set { SetProperty(ref items, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<RenderQueueItemModel, RenderQueueItemViewModel> Items { get; set; }
 
-        private double progress;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
-        public double Progress
-        {
-            get { return progress; }
-            set { SetProperty(ref progress, value); }
-        }
+        public partial double Progress { get; set; }
 
-        private int renderedFrameCount;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
-        public int RenderedFrameCount
-        {
-            get { return renderedFrameCount; }
-            set { SetProperty(ref renderedFrameCount, value); }
-        }
+        public partial int RenderedFrameCount { get; set; }
 
-        private int totalFrameCount;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
-        public int TotalFrameCount
-        {
-            get { return totalFrameCount; }
-            set { SetProperty(ref totalFrameCount, value); }
-        }
+        public partial int TotalFrameCount { get; set; }
 
-        private bool isRendering;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
-        public bool IsRendering
-        {
-            get { return isRendering; }
-            set { SetProperty(ref isRendering, value); }
-        }
+        public partial bool IsRendering { get; set; }
 
-        private bool isPaused;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel))]
-        public bool IsPaused
-        {
-            get { return isPaused; }
-            set { SetProperty(ref isPaused, value); }
-        }
+        public partial bool IsPaused { get; set; }
 
-        private bool isAborting;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
-        public bool IsAborting
-        {
-            get { return isAborting; }
-            set { SetProperty(ref isAborting, value); }
-        }
+        public partial bool IsAborting { get; set; }
 
-        private TimeSpan eta;
+        [ReactiveProperty]
         [NeedWire(nameof(RenderQueueModel), IsOneWay = true)]
-        public TimeSpan Eta
-        {
-            get { return eta; }
-            set { SetProperty(ref eta, value); }
-        }
+        public partial TimeSpan Eta { get; set; }
 
-        private TimeSpan currentEta;
-        public TimeSpan CurrentEta
-        {
-            get { return currentEta; }
-            set { SetProperty(ref currentEta, value); }
-        }
+        [ReactiveProperty]
+        public partial TimeSpan CurrentEta { get; set; }
 
         public ICommand RenderStartCommand { get; }
 
@@ -110,9 +73,7 @@ namespace NiVE3.ViewModel
 
         long LastEtaUpdateTimestamp { get; set; }
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public RenderQueueViewModel(RenderQueueModel renderQueueModel, IDialogService dialogService)
-#pragma warning restore CS8618
         {
             Title = "レンダーキュー";
             Visibility = Visibility.Hidden;

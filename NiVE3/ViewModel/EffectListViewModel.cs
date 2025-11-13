@@ -13,28 +13,22 @@ using NiVE3.View.Resource;
 using NiVE3.Extension;
 using System.Text.RegularExpressions;
 using NiVE3.Model.UI;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left2Top)]
+    [UseReactiveProperty]
     partial class EffectListViewModel : SingletonePaneViewModelBase, IDragSource
     {
         [GeneratedRegex("\\s+", RegexOptions.Compiled)]
         private static partial Regex GenerateFilterSeparatorRegex();
 
-        private string filterText = "";
-        public string FilterText
-        {
-            get { return filterText; }
-            set { SetProperty(ref filterText, value); }
-        }
+        [ReactiveProperty]
+        public partial string FilterText { get; set; } = "";
 
-        private ObservableCollection<EffectItem> effects = [];
-        public ObservableCollection<EffectItem> Effects
-        {
-            get { return effects; }
-            set { SetProperty(ref effects, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<EffectItem> Effects { get; set; } = [];
 
         public ICollectionView FilteredEffects { get; }
 

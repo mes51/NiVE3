@@ -19,150 +19,76 @@ using NiVE3.Shared.Util;
 using NiVE3.UI.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class RenderSettingViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class RenderSettingViewModel : BindableBase, IDialogAware
     {
         public const string CompositionParameterName = nameof(CompositionParameterName);
 
         public const string OutputParameterName = nameof(OutputParameterName);
 
-        private string filePath = "";
-        public string FilePath
-        {
-            get { return filePath; }
-            set { SetProperty(ref filePath, value); }
-        }
+        [ReactiveProperty]
+        public partial string FilePath { get; set; } = "";
 
-        private RenderRangeType renderRangeType = RenderRangeType.Workarea;
-        public RenderRangeType RenderRangeType
-        {
-            get { return renderRangeType; }
-            set { SetProperty(ref renderRangeType, value); }
-        }
+        [ReactiveProperty]
+        public partial RenderRangeType RenderRangeType { get; set; } = RenderRangeType.Workarea;
 
-        private Time beginTime;
-        public Time BeginTime
-        {
-            get { return beginTime; }
-            set { SetProperty(ref beginTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time BeginTime { get; set; }
 
-        private Time endTime;
-        public Time EndTime
-        {
-            get { return endTime; }
-            set { SetProperty(ref endTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time EndTime { get; set; }
 
-        private double frameRate;
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double FrameRate { get; set; }
 
-        private Time frameDuration;
-        public Time FrameDuration
-        {
-            get { return frameDuration; }
-            set { SetProperty(ref frameDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time FrameDuration { get; set; }
 
-        private Time compositionDuration;
-        public Time CompositionDuration
-        {
-            get { return compositionDuration; }
-            set { SetProperty(ref compositionDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CompositionDuration { get; set; }
 
-        private Time compositionWorkareaBegin;
-        public Time CompositionWorkareaBegin
-        {
-            get { return compositionWorkareaBegin; }
-            set { SetProperty(ref compositionWorkareaBegin, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CompositionWorkareaBegin { get; set; }
 
-        private Time compositionWorkareaEnd;
-        public Time CompositionWorkareaEnd
-        {
-            get { return compositionWorkareaEnd; }
-            set { SetProperty(ref compositionWorkareaEnd, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CompositionWorkareaEnd { get; set; }
 
-        private bool hasOutputSetting;
-        public bool HasOutputSetting
-        {
-            get { return hasOutputSetting; }
-            set { SetProperty(ref hasOutputSetting, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasOutputSetting { get; set; }
 
-        private ObservableCollection<Tuple<Guid, string>> outputPlugins = [];
-        public ObservableCollection<Tuple<Guid, string>> OutputPlugins
-        {
-            get { return outputPlugins; }
-            set { SetProperty(ref outputPlugins, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<Tuple<Guid, string>> OutputPlugins { get; set; } = [];
 
-        private int selectedOutputPlugin;
-        public int SelectedOutputPlugin
-        {
-            get { return selectedOutputPlugin; }
-            set { SetProperty(ref selectedOutputPlugin, value); }
-        }
+        [ReactiveProperty]
+        public partial int SelectedOutputPlugin { get; set; }
 
-        private bool isOutputVideo = true;
-        public bool IsOutputVideo
-        {
-            get { return isOutputVideo; }
-            set { SetProperty(ref isOutputVideo, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsOutputVideo { get; set; } = true;
 
-        private bool isOutputAudio = true;
-        public bool IsOutputAudio
-        {
-            get { return isOutputAudio; }
-            set { SetProperty(ref isOutputAudio, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsOutputAudio { get; set; } = true;
 
-        private SourceType supportedSourceType;
-        public SourceType SupportedSourceType
-        {
-            get { return supportedSourceType; }
-            set { SetProperty(ref supportedSourceType, value); }
-        }
+        [ReactiveProperty]
+        public partial SourceType SupportedSourceType { get; set; }
 
-        private Time renderRangeBeginLimit;
-        public Time RenderRangeBeginLimit
-        {
-            get { return renderRangeBeginLimit; }
-            set { SetProperty(ref renderRangeBeginLimit, value); }
-        }
+        [ReactiveProperty]
+        public partial Time RenderRangeBeginLimit { get; set; }
 
-        private Time renderRangeEndStart;
-        public Time RenderRangeEndStart
-        {
-            get { return renderRangeEndStart; }
-            set { SetProperty(ref renderRangeEndStart, value); }
-        }
+        [ReactiveProperty]
+        public partial Time RenderRangeEndStart { get; set; }
 
-        private bool hasAudio;
-        public bool HasAudio
-        {
-            get { return hasAudio; }
-            set { SetProperty(ref hasAudio, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasAudio { get; set; }
 
-        private RenderSettingMode mode;
-        public RenderSettingMode Mode
-        {
-            get { return mode; }
-            set { SetProperty(ref mode, value); }
-        }
+        [ReactiveProperty]
+        public partial RenderSettingMode Mode { get; set; }
 
         public ICommand ChangeSaveFilePathCommand { get; }
 

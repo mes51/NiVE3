@@ -17,13 +17,15 @@ using NiVE3.ToneMapper;
 using NiVE3.Util;
 using NiVE3.View.Dialog;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
-    class CompositionSettingViewModel : BindableBase, IDialogAware
+    [UseReactiveProperty]
+    partial class CompositionSettingViewModel : BindableBase, IDialogAware
     {
         public const string SelectedRendererPluginId = nameof(SelectedRendererPluginId);
 
@@ -33,124 +35,56 @@ namespace NiVE3.ViewModel.Dialog
 
         public const string ToneMapperSettingViewData = nameof(ToneMapperSettingViewData);
 
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
-        private int width = 1920;
-        public int Width
-        {
-            get { return width; }
-            set { SetProperty(ref width, value); }
-        }
+        [ReactiveProperty]
+        public partial int Width { get; set; } = 1920;
 
-        private int height = 1080;
-        public int Height
-        {
-            get { return height; }
-            set { SetProperty(ref height, value); }
-        }
+        [ReactiveProperty]
+        public partial int Height { get; set; } = 1080;
 
-        private double frameRate = 30.0;
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double FrameRate { get; set; } = 30.0;
 
-        private Time frameDuration = new Time(1, 30.0);
-        public Time FrameDuration
-        {
-            get { return frameDuration; }
-            set { SetProperty(ref frameDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time FrameDuration { get; set; } = new Time(1, 30.0);
 
-        private Time duration = new Time(300, 30.0);
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; set; } = new Time(300, 30.0);
 
-        private bool isRetentionFrameRate;
-        public bool IsRetentionFrameRate
-        {
-            get { return isRetentionFrameRate; }
-            set { SetProperty(ref isRetentionFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsRetentionFrameRate { get; set; }
 
-        private bool applyToneMappingWhenNested;
-        public bool ApplyToneMappingWhenNested
-        {
-            get { return applyToneMappingWhenNested; }
-            set { SetProperty(ref applyToneMappingWhenNested, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ApplyToneMappingWhenNested { get; set; }
 
-        private int shutterAngle = 180;
-        public int ShutterAngle
-        {
-            get { return shutterAngle; }
-            set { SetProperty(ref shutterAngle, value); }
-        }
+        [ReactiveProperty]
+        public partial int ShutterAngle { get; set; } = 180;
 
-        private int shutterPhase = -90;
-        public int ShutterPhase
-        {
-            get { return shutterPhase; }
-            set { SetProperty(ref shutterPhase, value); }
-        }
+        [ReactiveProperty]
+        public partial int ShutterPhase { get; set; } = -90;
+        
+        [ReactiveProperty]
+        public partial int MotionBlurSampleCount { get; set; } = 16;
 
-        private int motionBlurSampleCount = 16;
-        public int MotionBlurSampleCount
-        {
-            get { return motionBlurSampleCount; }
-            set { SetProperty(ref motionBlurSampleCount, value); }
-        }
+        [ReactiveProperty]
+        public partial int SelectedRenderer { get; set; }
 
-        private int selectedRenderer;
-        public int SelectedRenderer
-        {
-            get { return selectedRenderer; }
-            set { SetProperty(ref selectedRenderer, value); }
-        }
+        [ReactiveProperty]
+        public partial int SelectedToneMapper { get; set; }
 
-        private int selectedToneMapper;
-        public int SelectedToneMapper
-        {
-            get { return selectedToneMapper; }
-            set { SetProperty(ref selectedToneMapper, value); }
-        }
+        [ReactiveProperty]
+        public partial object? RendererSetting { get; set; }
 
-        private object? rendererSetting;
-        public object? RendererSetting
-        {
-            get { return rendererSetting; }
-            set { SetProperty(ref rendererSetting, value); }
-        }
+        [ReactiveProperty]
+        public partial object? ToneMapperSetting { get; set; }
 
-        private object? toneMapperSetting;
-        public object? ToneMapperSetting
-        {
-            get { return toneMapperSetting; }
-            set { SetProperty(ref toneMapperSetting, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<CompositionPresetData> Presets { get; set; } = [];
 
-        private ObservableCollection<CompositionPresetData> presets = [];
-        public ObservableCollection<CompositionPresetData> Presets
-        {
-            get { return presets; }
-            set { SetProperty(ref presets, value); }
-        }
-
-        private CompositionPresetData? selectedPreset;
-        public CompositionPresetData? SelectedPreset
-        {
-            get { return selectedPreset; }
-            set { SetProperty(ref selectedPreset, value); }
-        }
+        [ReactiveProperty]
+        public partial CompositionPresetData? SelectedPreset { get; set; }
 
         public string[] Renderers { get; }
 

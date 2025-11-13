@@ -15,6 +15,7 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.View.Resource;
@@ -23,32 +24,21 @@ using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PropertyGroupViewModel : BindableBase, IInternalPropertyViewModel, INameEditableViewModel
     {
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private bool isEnable;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
-        public bool IsEnable
-        {
-            get { return isEnable; }
-            set { SetProperty(ref isEnable, value); }
-        }
+        public partial bool IsEnable { get; set; }
 
-        private bool parentLayerIsLock;
+        [ReactiveProperty]
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        public partial bool ParentLayerIsLock { get; set; }
 
         [NeedWire(nameof(PropertyGroupModel), IsOneWay = true)]
         public bool UseEnableSwitch { get; set; }
@@ -57,19 +47,11 @@ namespace NiVE3.ViewModel
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
-        private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> children;
-        public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children
-        {
-            get { return children; }
-            set { SetProperty(ref children, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children { get; set; }
 
-        private bool isExpanded;
-        public bool IsExpanded
-        {
-            get { return isExpanded; }
-            set { SetProperty(ref isExpanded, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsExpanded { get; set; }
 
         public object? CurrentTimeValue => null;
 
@@ -81,12 +63,8 @@ namespace NiVE3.ViewModel
 
         public bool IsEnableExpression => false;
 
-        private bool isNameEditing;
-        public bool IsNameEditing
-        {
-            get { return isNameEditing; }
-            set { SetProperty(ref isNameEditing, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsNameEditing { get; set; }
 
         public PropertyBase Property { get; }
 
@@ -170,17 +148,19 @@ namespace NiVE3.ViewModel
 
         public bool IsRenameable { get; }
 
-        private ObservableCollection<IInternalPropertyViewModel> selectedChildren = [];
         public ObservableCollection<IInternalPropertyViewModel> SelectedChildren
         {
-            get { return selectedChildren; }
+            get;
             set
             {
-                selectedChildren.CollectionChanged -= SelectedChildren_CollectionChanged;
-                value.CollectionChanged += SelectedChildren_CollectionChanged;
-                SetProperty(ref selectedChildren, value);
+                if (field != value)
+                {
+                    field.CollectionChanged -= SelectedChildren_CollectionChanged;
+                    value.CollectionChanged += SelectedChildren_CollectionChanged;
+                }
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
         PropertyGroupModel PropertyGroupModel { get; }
 
@@ -194,7 +174,7 @@ namespace NiVE3.ViewModel
             PropertyGroupModel = propertyGroupModel;
             InstanceId = propertyGroupModel.InstanceId;
             Property = propertyGroupModel.Property;
-            children = propertyGroupModel.Children.CreateViewCollection(m =>
+            Children = propertyGroupModel.Children.CreateViewCollection(m =>
             {
                 var vm = InternalPropertyViewModel.CreateViewModel(m, viewState);
                 vm.SelectItemChanged += Property_SelectItemChanged;

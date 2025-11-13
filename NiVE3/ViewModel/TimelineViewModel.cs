@@ -26,6 +26,7 @@ using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.Util;
 using NiVE3.ValueObject;
 using NiVE3.View.Command;
@@ -42,8 +43,6 @@ using Prism.Dialogs;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Bottom)]
-    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(AddSolidLayerCommand), nameof(ShortcutKeySetting.AddSolidLayerGesture))]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
@@ -93,297 +92,167 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(SavePresetCommand), nameof(ShortcutKeySetting.SavePresetGesture))]
     [CommandHandling(nameof(LoadPresetCommand), nameof(ShortcutKeySetting.LoadPresetGesture))]
     [CommandHandling(nameof(PrecomposeCommand), nameof(ShortcutKeySetting.PrecomposeGesture))]
+    [UseReactiveProperty]
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     partial class TimelineViewModel : PaneViewModelBase, IDropTarget
     {
-        private Guid compositionId;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public Guid CompositionId
-        {
-            get { return compositionId; }
-            set { SetProperty(ref compositionId, value); }
-        }
+        public partial Guid CompositionId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private double frameRate;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        public partial double FrameRate { get; set; }
 
-        private Time frameDuration;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public Time FrameDuration
-        {
-            get { return frameDuration; }
-            set { SetProperty(ref frameDuration, value); }
-        }
+        public partial Time FrameDuration { get; set; }
 
-        private Time duration;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        public partial Time Duration { get; set; }
 
-        private Time timeBarRange;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel))]
-        public Time TimeBarRange
-        {
-            get { return timeBarRange; }
-            set { SetProperty(ref timeBarRange, value); }
-        }
+        public partial Time TimeBarRange { get; set; }
 
-        private Time timeBarRangeStart;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel))]
-        public Time TimeBarRangeStart
-        {
-            get { return timeBarRangeStart; }
-            set { SetProperty(ref timeBarRangeStart, value); }
-        }
+        public partial Time TimeBarRangeStart { get; set; }
 
-        private Time currentTime;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel))]
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        public partial Time CurrentTime { get; set; }
 
-        private Time workareaBegin;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public Time WorkareaBegin
-        {
-            get { return workareaBegin; }
-            set { SetProperty(ref workareaBegin, value); }
-        }
+        public partial Time WorkareaBegin { get; set; }
 
-        private Time workareaEnd;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public Time WorkareaEnd
-        {
-            get { return workareaEnd; }
-            set { SetProperty(ref workareaEnd, value); }
-        }
+        public partial Time WorkareaEnd { get; set; }
 
-        private bool isEnableShy;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public bool IsEnableShy
-        {
-            get { return isEnableShy; }
-            set { SetProperty(ref isEnableShy, value); }
-        }
+        public partial bool IsEnableShy { get; set; }
 
-        private bool isEnableFrameBlend;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public bool IsEnableFrameBlend
-        {
-            get { return isEnableFrameBlend; }
-            set { SetProperty(ref isEnableFrameBlend, value); }
-        }
+        public partial bool IsEnableFrameBlend { get; set; }
 
-        private bool isEnableMotionBlur;
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public bool IsEnableMotionBlur
-        {
-            get { return isEnableMotionBlur; }
-            set { SetProperty(ref isEnableMotionBlur, value); }
-        }
+        public partial bool IsEnableMotionBlur { get; set; }
 
-        private ObservableCollection<Marker> compositionMarkers = [];
+        [ReactiveProperty]
         [ManualWire(nameof(CompositionModel), IsOneWay = true)]
-        public ObservableCollection<Marker> CompositionMarkers
-        {
-            get { return compositionMarkers; }
-            set { SetProperty(ref compositionMarkers, value); }
-        }
+        public partial ObservableCollection<Marker> CompositionMarkers { get; set; } = [];
 
-        private double layerNumberColumnWudth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnWidth))]
-        public double LayerNumberColumnWidth
-        {
-            get { return layerNumberColumnWudth; }
-            set { SetProperty(ref layerNumberColumnWudth, value); }
-        }
+        public partial double LayerNumberColumnWidth { get; set; }
 
-        private double layerNameColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNameColumnWidth))]
-        public double LayerNameColumnWidth
-        {
-            get { return layerNameColumnWidth; }
-            set { SetProperty(ref layerNameColumnWidth, value); }
-        }
+        public partial double LayerNameColumnWidth { get; set; }
 
-        private double layerCommentColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerCommentColumnWidth))]
-        public double LayerCommentColumnWidth
-        {
-            get { return layerCommentColumnWidth; }
-            set { SetProperty(ref layerCommentColumnWidth, value); }
-        }
+        public partial double LayerCommentColumnWidth { get; set; }
 
-        private double layerSwitchColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerSwitchColumnWidth))]
-        public double LayerSwitchColumnWidth
-        {
-            get { return layerSwitchColumnWidth; }
-            set { SetProperty(ref layerSwitchColumnWidth, value); }
-        }
+        public partial double LayerSwitchColumnWidth { get; set; }
 
-        private double modeColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineModeColumnWidth))]
-        public double ModeColumnWidth
-        {
-            get { return modeColumnWidth; }
-            set { SetProperty(ref modeColumnWidth, value); }
-        }
+        public partial double ModeColumnWidth { get; set; }
 
-        private double trackMatteColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnWidth))]
-        public double TrackMatteColumnWidth
-        {
-            get { return trackMatteColumnWidth; }
-            set { SetProperty(ref trackMatteColumnWidth, value); }
-        }
+        public partial double TrackMatteColumnWidth { get; set; }
 
-        private double parentLayerColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnWidth))]
-        public double ParentLayerColumnWidth
-        {
-            get { return parentLayerColumnWidth; }
-            set { SetProperty(ref parentLayerColumnWidth, value); }
-        }
+        public partial double ParentLayerColumnWidth { get; set; }
 
-        private bool isAVSwitchColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineAVSwitchColumnVisible))]
-        public bool IsAVSwitchColumnVisible
-        {
-            get { return isAVSwitchColumnVisible; }
-            set { SetProperty(ref isAVSwitchColumnVisible, value); }
-        }
+        public partial bool IsAVSwitchColumnVisible { get; set; }
 
-        private bool isTagColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTagColumnVisible))]
-        public bool IsTagColumnVisible
-        {
-            get { return isTagColumnVisible; }
-            set { SetProperty(ref isTagColumnVisible, value); }
-        }
+        public partial bool IsTagColumnVisible { get; set; }
 
-        private bool isLayerNumberColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerNumberColumnVisible))]
-        public bool IsLayerNumberColumnVisible
-        {
-            get { return isLayerNumberColumnVisible; }
-            set { SetProperty(ref isLayerNumberColumnVisible, value); }
-        }
+        public partial bool IsLayerNumberColumnVisible { get; set; }
 
-        private bool isLayerCommentColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerCommentColumnVisible))]
-        public bool IsLayerCommentColumnVisible
-        {
-            get { return isLayerCommentColumnVisible; }
-            set { SetProperty(ref isLayerCommentColumnVisible, value); }
-        }
+        public partial bool IsLayerCommentColumnVisible { get; set; }
 
-        private bool isLayerSwitchColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineLayerSwitchColumnVisible))]
-        public bool IsLayerSwitchColumnVisible
-        {
-            get { return isLayerSwitchColumnVisible; }
-            set { SetProperty(ref isLayerSwitchColumnVisible, value); }
-        }
+        public partial bool IsLayerSwitchColumnVisible { get; set; }
 
-        private bool isModeColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineModeColumnVisible))]
-        public bool IsModeColumnVisible
-        {
-            get { return isModeColumnVisible; }
-            set { SetProperty(ref isModeColumnVisible, value); }
-        }
+        public partial bool IsModeColumnVisible { get; set; }
 
-        private bool isTrackMatteColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineTrackMatteColumnVisible))]
-        public bool IsTrackMatteColumnVisible
-        {
-            get { return isTrackMatteColumnVisible; }
-            set { SetProperty(ref isTrackMatteColumnVisible, value); }
-        }
+        public partial bool IsTrackMatteColumnVisible { get; set; }
 
-        private bool isParentLayerColumnVisible;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.TimelineParentLayerColumnVisible))]
-        public bool IsParentLayerColumnVisible
-        {
-            get { return isParentLayerColumnVisible; }
-            set { SetProperty(ref isParentLayerColumnVisible, value); }
-        }
+        public partial bool IsParentLayerColumnVisible { get; set; }
 
-        private Guid? lastSelectedLayerId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState))]
-        public Guid? LastSelectedLayerId
-        {
-            get { return lastSelectedLayerId; }
-            set { SetProperty(ref lastSelectedLayerId, value); }
-        }
+        public partial Guid? LastSelectedLayerId { get; set; }
 
-        private ObservableCollection<Guid>? selectedLayerIdsForPreview;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.SelectedLayerIds))]
-        public ObservableCollection<Guid>? SelectedLayerIdsForPreview
-        {
-            get { return selectedLayerIdsForPreview; }
-            set { SetProperty(ref selectedLayerIdsForPreview, value); }
-        }
+        public partial ObservableCollection<Guid>? SelectedLayerIdsForPreview { get; set; }
 
-        private Guid? currentEditingCompositionId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState))]
-        public Guid? CurrentEditingCompositionId
-        {
-            get { return currentEditingCompositionId; }
-            set { SetProperty(ref currentEditingCompositionId, value); }
-        }
+        public partial Guid? CurrentEditingCompositionId { get; set; }
 
-        private int lastSelectedObjectHashCode;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState))]
-        public int LastSelectedObjectHashCode
-        {
-            get { return lastSelectedObjectHashCode; }
-            set { SetProperty(ref lastSelectedObjectHashCode, value); }
-        }
+        public partial int LastSelectedObjectHashCode { get; set; }
 
-        private CompositionModel? compositionModel;
         public CompositionModel? CompositionModel
         {
-            get { return compositionModel; }
+            get;
             set
             {
-                if (compositionModel == value)
+                if (field == value)
                 {
                     return;
                 }
 
-                if (compositionModel != null)
+                if (field != null)
                 {
                     UnbindComposition();
                     Layers = null;
                     SelectedLayers = null;
-                    if (CurrentEditingCompositionId == compositionModel.CompositionId)
+                    if (CurrentEditingCompositionId == field.CompositionId)
                     {
                         CurrentEditingCompositionId = null;
                         LastSelectedLayerId = null;
                         SelectedLayerIdsForPreview = null;
                     }
-                    compositionModel.PropertyChanged -= CompositionModel_PropertyChanged;
+                    field.PropertyChanged -= CompositionModel_PropertyChanged;
                 }
-                SetProperty(ref compositionModel, value);
+                SetProperty(ref field, value);
                 if (value != null)
                 {
                     BindComposition();
@@ -407,24 +276,19 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private Time timelineScrollBarMax;
-        public Time TimelineScrollBarMax
-        {
-            get { return timelineScrollBarMax; }
-            set { SetProperty(ref timelineScrollBarMax, value); }
-        }
+        [ReactiveProperty]
+        public partial Time TimelineScrollBarMax { get; set; }
 
-        private ObservableCollectionView<LayerModel, LayerViewModel>? layers;
         public ObservableCollectionView<LayerModel, LayerViewModel>? Layers
         {
-            get { return layers; }
+            get;
             set
             {
-                if (layers != null)
+                if (field != null)
                 {
-                    layers.CollectionChanged -= Layers_CollectionChanged;
+                    field.CollectionChanged -= Layers_CollectionChanged;
                 }
-                SetProperty(ref layers, value);
+                SetProperty(ref field, value);
                 if (value != null)
                 {
                     value.CollectionChanged += Layers_CollectionChanged;
@@ -432,44 +296,31 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private ObservableCollection<LayerViewModel>? selectedLayers;
         public ObservableCollection<LayerViewModel>? SelectedLayers
         {
-            get { return selectedLayers; }
+            get;
             set
             {
-                if (selectedLayers != null)
+                if (field != null)
                 {
-                    selectedLayers.CollectionChanged -= SelectedLayers_CollectionChanged;
+                    field.CollectionChanged -= SelectedLayers_CollectionChanged;
                 }
                 if (value != null)
                 {
                     value.CollectionChanged += SelectedLayers_CollectionChanged;
                 }
-                SetProperty(ref selectedLayers, value);
+                SetProperty(ref field, value);
             }
         }
 
-        private bool isScrubbing;
-        public bool IsScrubbing
-        {
-            get { return isScrubbing; }
-            set { SetProperty(ref isScrubbing, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsScrubbing { get; set; }
 
-        private Dictionary<string, List<EffectItem>> groupedEffects = [];
-        public Dictionary<string, List<EffectItem>> GroupedEffects
-        {
-            get { return groupedEffects; }
-            set { SetProperty(ref groupedEffects, value); }
-        }
+        [ReactiveProperty]
+        public partial Dictionary<string, List<EffectItem>> GroupedEffects { get; set; } = [];
 
-        private ProceduralInputItem[] proceduralInputItems = [];
-        public ProceduralInputItem[] ProceduralInputItems
-        {
-            get { return proceduralInputItems; }
-            set { SetProperty(ref proceduralInputItems, value); }
-        }
+        [ReactiveProperty]
+        public partial ProceduralInputItem[] ProceduralInputItems { get; set; } = [];
 
         public ICommand ChangeEnableShyCommand { get; }
 

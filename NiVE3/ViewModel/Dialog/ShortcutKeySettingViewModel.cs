@@ -11,18 +11,19 @@ using System.Windows.Input;
 using System.Windows.Media.Effects;
 using NiVE3.Config;
 using NiVE3.Extension;
-using NiVE3.Shared.Extension;
 using NiVE3.UI.Command;
 using NiVE3.Util;
 using NiVE3.ValueObject;
 using NiVE3.View.Resource;
 using NiVE3.Wpf.Input;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel.Dialog
 {
+    [UseReactiveProperty]
     partial class ShortcutKeySettingViewModel : BindableBase, IDialogAware
     {
         [GeneratedRegex("\\s+", RegexOptions.Compiled)]
@@ -43,26 +44,14 @@ namespace NiVE3.ViewModel.Dialog
 
         public string Title => LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.ShortcutKeySettingView_Title);
 
-        private ObservableDictionary<ShortcutKeyName, InputGesture> shortcutKeys = [];
-        public ObservableDictionary<ShortcutKeyName, InputGesture> ShortcutKeys
-        {
-            get { return shortcutKeys; }
-            set { SetProperty(ref shortcutKeys, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableDictionary<ShortcutKeyName, InputGesture> ShortcutKeys { get; set; } = [];
 
-        private ObservableDictionary<ShortcutKeyName, List<ShortcutKeyName>> duplicatedKeys = [];
-        public ObservableDictionary<ShortcutKeyName, List<ShortcutKeyName>> DuplicatedKeys
-        {
-            get { return duplicatedKeys; }
-            set { SetProperty(ref duplicatedKeys, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableDictionary<ShortcutKeyName, List<ShortcutKeyName>> DuplicatedKeys { get; set; } = [];
 
-        private string filterText = "";
-        public string FilterText
-        {
-            get { return filterText; }
-            set { SetProperty(ref filterText, value); }
-        }
+        [ReactiveProperty]
+        public partial string FilterText { get; set; } = "";
 
         bool IsEdited { get; set; }
 

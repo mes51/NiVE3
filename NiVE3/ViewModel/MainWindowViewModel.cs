@@ -25,6 +25,7 @@ using Prism.Navigation.Regions;
 using Prism.Dialogs;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Windows;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.ViewModel
 {
@@ -34,6 +35,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(SaveProjectAsNewNameCommand), nameof(ShortcutKeySetting.SaveProjectAsNewNameGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
     [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class MainWindowViewModel : BindableBase
     {
@@ -45,44 +47,24 @@ namespace NiVE3.ViewModel
 
         IRegion MainRegion => Region.Regions[RegionName];
 
-        private string projectPath = "";
+        [ReactiveProperty]
         [NeedWire(nameof(ProjectModel))]
-        public string ProjectPath
-        {
-            get { return projectPath; }
-            set { SetProperty(ref projectPath, value); }
-        }
+        public partial string ProjectPath { get; set; } = "";
 
-        private string projectName = "";
+        [ReactiveProperty]
         [NeedWire(nameof(ProjectModel), IsOneWay = true)]
-        public string ProjectName
-        {
-            get { return projectName; }
-            set { SetProperty(ref projectName, value); }
-        }
+        public partial string ProjectName { get; set; } = "";
 
-        private bool isEdited;
+        [ReactiveProperty]
         [NeedWire(nameof(ProjectModel), IsOneWay = true)]
-        public bool IsEdited
-        {
-            get { return isEdited; }
-            set { SetProperty(ref isEdited, value); }
-        }
+        public partial bool IsEdited { get; set; }
 
-        private bool isRendering;
+        [ReactiveProperty]
         [NeedWire(nameof(ProjectModel), IsOneWay = true)]
-        public bool IsRendering
-        {
-            get { return isRendering; }
-            set { SetProperty(ref isRendering, value); }
-        }
+        public partial bool IsRendering { get; set; }
 
-        private Dictionary<string, List<EffectItem>> groupedEffects = [];
-        public Dictionary<string, List<EffectItem>> GroupedEffects
-        {
-            get { return groupedEffects; }
-            set { SetProperty(ref groupedEffects, value); }
-        }
+        [ReactiveProperty]
+        public partial Dictionary<string, List<EffectItem>> GroupedEffects { get; set; } = [];
 
         public bool IsForceClosing { get; set; }
 

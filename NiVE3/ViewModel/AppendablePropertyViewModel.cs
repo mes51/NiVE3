@@ -20,10 +20,12 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Data.Clipboard;
 using NiVE3.Model.UI;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel
 {
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class AppendablePropertyViewModel : BindableBase, IInternalPropertyViewModel, IDropTarget, INameEditableParentViewModel
     {
@@ -33,29 +35,17 @@ namespace NiVE3.ViewModel
 
         public PropertyViewState ViewState { get; }
 
-        private bool parentLayerIsLock;
+        [ReactiveProperty]
         [NeedWire(nameof(AppendablePropertyModel), IsOneWay = true)]
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        public partial bool ParentLayerIsLock { get; set; }
 
         public ObservableCollection<KeyFrame>? KeyFrames => throw new NotImplementedException();
 
-        private ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> children;
-        public ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children
-        {
-            get { return children; }
-            set { SetProperty(ref children, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<IPropertyModel, IInternalPropertyViewModel> Children { get; set; }
 
-        private bool isExpanded;
-        public bool IsExpanded
-        {
-            get { return isExpanded; }
-            set { SetProperty(ref isExpanded, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsExpanded { get; set; }
 
         public object? CurrentTimeValue => null;
 
@@ -154,7 +144,7 @@ namespace NiVE3.ViewModel
             SelectedChildren = [];
             AppendablePropertyModel = appendablePropertyModel;
             Property = appendablePropertyModel.Property;
-            children = appendablePropertyModel.Children.CreateViewCollection(m =>
+            Children = appendablePropertyModel.Children.CreateViewCollection(m =>
             {
                 var vm = new PropertyGroupViewModel((PropertyGroupModel)m, viewState, true);
                 vm.SelectItemChanged += Property_SelectItemChanged;

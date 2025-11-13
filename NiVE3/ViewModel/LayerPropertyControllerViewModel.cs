@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -10,19 +9,16 @@ using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
-using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.View.Command;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using Prism.Commands;
-using Prism.Dialogs;
 
 namespace NiVE3.ViewModel
 {
-    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
-    [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     [PaneLocation(PaneLocation.Left2Center)]
     [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
     [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
@@ -33,69 +29,41 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
     [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
     [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
+    [UseReactiveProperty]
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
+    [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
     partial class LayerPropertyControllerViewModel : SingletonePaneViewModelBase
     {
-        private double layerNameColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.PropertyControllerLayerNameColumnWidth))]
-        public double LayerNameColumnWidth
-        {
-            get { return layerNameColumnWidth; }
-            set { SetProperty(ref layerNameColumnWidth, value); }
-        }
+        public partial double LayerNameColumnWidth { get; set; }
 
-        private double layerSwitchColumnWidth;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), BindTargetName = nameof(ViewStateModel.PropertyControllerLayerSwitchColumnWidth))]
-        public double LayerSwitchColumnWidth
-        {
-            get { return layerSwitchColumnWidth; }
-            set { SetProperty(ref layerSwitchColumnWidth, value); }
-        }
+        public partial double LayerSwitchColumnWidth { get; set; }
 
-        private Guid? lastSelectedLayerId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
-        public Guid? LastSelectedLayerId
-        {
-            get { return lastSelectedLayerId; }
-            set { SetProperty(ref lastSelectedLayerId, value); }
-        }
+        public partial Guid? LastSelectedLayerId { get; set; }
 
-        private Guid? currentEditingCompositionId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
-        public Guid? CurrentEditingCompositionId
-        {
-            get { return currentEditingCompositionId; }
-            set { SetProperty(ref currentEditingCompositionId, value); }
-        }
+        public partial Guid? CurrentEditingCompositionId { get; set; }
 
-        private Time timeBarRange;
+        [ReactiveProperty]
         [ManualWire(nameof(Composition))]
-        public Time TimeBarRange
-        {
-            get { return timeBarRange; }
-            set { SetProperty(ref timeBarRange, value); }
-        }
+        public partial Time TimeBarRange { get; set; }
 
-        private Time timeBarRangeStart;
+        [ReactiveProperty]
         [ManualWire(nameof(Composition))]
-        public Time TimeBarRangeStart
-        {
-            get { return timeBarRangeStart; }
-            set { SetProperty(ref timeBarRangeStart, value); }
-        }
-        private double frameRate;
+        public partial Time TimeBarRangeStart { get; set; }
+
+        [ReactiveProperty]
         [ManualWire(nameof(Composition), BindTargetName = nameof(CompositionModel.FrameRate), IsOneWay = true)]
-        public double CompositionFrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        public partial double CompositionFrameRate { get; set; }
 
-        private LayerViewModel? targetLayer;
-        public LayerViewModel? TargetLayer
-        {
-            get { return targetLayer; }
-            set { SetProperty(ref targetLayer, value); }
-        }
+        [ReactiveProperty]
+        public partial LayerViewModel? TargetLayer { get; set; }
 
         public ICommand DeleteCommand { get; }
 
@@ -127,22 +95,21 @@ namespace NiVE3.ViewModel
 
         EventHubModel EventHubModel { get; }
 
-        private CompositionModel? compositionModel;
         public CompositionModel? Composition
         {
-            get { return compositionModel; }
+            get;
             set
             {
-                if (compositionModel == value)
+                if (field == value)
                 {
                     return;
                 }
 
-                if (compositionModel != null)
+                if (field != null)
                 {
                     UnbindComposition();
                 }
-                SetProperty(ref compositionModel, value);
+                SetProperty(ref field, value);
                 if (value != null)
                 {
                     BindComposition();
@@ -150,12 +117,8 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private Dictionary<string, List<EffectItem>> groupedEffects = [];
-        public Dictionary<string, List<EffectItem>> GroupedEffects
-        {
-            get { return groupedEffects; }
-            set { SetProperty(ref groupedEffects, value); }
-        }
+        [ReactiveProperty]
+        public partial Dictionary<string, List<EffectItem>> GroupedEffects { get; set; } = [];
 
         public LayerPropertyControllerViewModel(ProjectModel project, ViewStateModel viewState, EffectListStateModel effectListStateModel, EventHubModel eventHubModel)
         {

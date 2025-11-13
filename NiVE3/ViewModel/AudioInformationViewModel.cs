@@ -5,32 +5,24 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.View.Dock;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
-using Prism.Mvvm;
-using System.ComponentModel;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.View.Resource;
 using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Right1Top, Size = 100)]
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class AudioInformationViewModel : SingletonePaneViewModelBase
     {
-        private double leftAudioLevel = double.NegativeInfinity;
+        [ReactiveProperty]
         [NeedWire(nameof(AudioInformationModel), IsOneWay = true)]
-        public double LeftAudioLevel
-        {
-            get { return leftAudioLevel; }
-            set { SetProperty(ref leftAudioLevel, value); }
-        }
+        public partial double LeftAudioLevel { get; set; } = double.NegativeInfinity;
 
-        private double rightAudioLevel = double.NegativeInfinity;
+        [ReactiveProperty]
         [NeedWire(nameof(AudioInformationModel), IsOneWay = true)]
-        public double RightAudioLevel
-        {
-            get { return rightAudioLevel; }
-            set { SetProperty(ref rightAudioLevel, value); }
-        }
+        public partial double RightAudioLevel { get; set; } = double.NegativeInfinity;
 
         AudioInformationModel AudioInformationModel { get; }
 

@@ -17,6 +17,7 @@ using NiVE3.Mvvm;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.Util;
 using NiVE3.ValueObject;
 using NiVE3.View.Dock;
@@ -44,12 +45,13 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Document)]
-    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [CommandHandling(nameof(ChangeToHandToolCommand), nameof(ShortcutKeySetting.SelectHandToolGesture), IsGlobal = true)]
     [CommandHandling(nameof(ChangeToSelectToolCommand), nameof(ShortcutKeySetting.SelectSelectToolGesture), IsGlobal = true)]
     [CommandHandling(nameof(ChangeToRotateToolCommand), nameof(ShortcutKeySetting.SelectRotateToolGesture), IsGlobal = true)]
     [CommandHandling(nameof(ChangeToScaleCommand), nameof(ShortcutKeySetting.SelectScaleGestureGesture), IsGlobal = true)]
     [CommandHandling(nameof(ChangeToCameraToolCommand), nameof(ShortcutKeySetting.SelectCameraToolGesture), IsGlobal = true)]
+    [UseReactiveProperty]
+    [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PreviewViewModel : PaneViewModelBase, IDropTarget
     {
         const int Black = 255 << 24;
@@ -60,271 +62,138 @@ namespace NiVE3.ViewModel
 
         static readonly WriteableBitmap EmptyImage = new WriteableBitmap(1, 1, 96.0, 96.0, PixelFormats.Bgra32, null);
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private bool isFootage;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public bool IsFootage
-        {
-            get { return isFootage; }
-            set { SetProperty(ref isFootage, value); }
-        }
+        public partial bool IsFootage { get; set; }
 
-        private SourceType sourceType;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public SourceType SourceType
-        {
-            get { return sourceType; }
-            set { SetProperty(ref sourceType, value); }
-        }
+        public partial SourceType SourceType { get; set; }
 
-        private Time workareaBegin;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public Time WorkareaBegin
-        {
-            get { return workareaBegin; }
-            set { SetProperty(ref workareaBegin, value); }
-        }
+        public partial Time WorkareaBegin { get; set; }
 
-        private Time workareaEnd;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public Time WorkareaEnd
-        {
-            get { return workareaEnd; }
-            set { SetProperty(ref workareaEnd, value); }
-        }
+        public partial Time WorkareaEnd { get; set; }
 
-        private Time duration;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        public partial Time Duration { get; set; }
 
-        private double frameRate;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        public partial double FrameRate { get; set; }
 
-        private Time currentTime;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel))]
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        public partial Time CurrentTime { get; set; }
 
-        private int width;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public int Width
-        {
-            get { return width; }
-            set { SetProperty(ref width, value); }
-        }
+        public partial int Width { get; set; }
 
-        private int height;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel), IsOneWay = true)]
-        public int Height
-        {
-            get { return height; }
-            set { SetProperty(ref height, value); }
-        }
+        public partial int Height { get; set; }
 
-        private double downScaleRate;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel))]
-        public double DownScaleRate
-        {
-            get { return downScaleRate; }
-            set { SetProperty(ref downScaleRate, value); }
-        }
+        public partial double DownScaleRate { get; set; }
 
-        private bool isLock;
+        [ReactiveProperty]
         [NeedWire(nameof(PreviewModel))]
-        public bool IsLock
-        {
-            get { return isLock; }
-            set { SetProperty(ref isLock, value); }
-        }
+        public partial bool IsLock { get; set; }
 
-        private bool isIgnoreUpdatePreview;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
-        public bool IsIgnoreUpdatePreview
-        {
-            get { return isIgnoreUpdatePreview; }
-            set { SetProperty(ref isIgnoreUpdatePreview, value); }
-        }
+        public partial bool IsIgnoreUpdatePreview { get; set; }
 
-        private ObservableCollection<Guid>? selectedLayerIds;
         [NeedWire(nameof(ViewState), IsOneWay = true)]
         public ObservableCollection<Guid>? SelectedLayerIds
         {
-            get { return selectedLayerIds; }
+            get;
             set
             {
-                if (selectedLayerIds != null)
+                if (field != null)
                 {
-                    selectedLayerIds.CollectionChanged -= SelectedLayerIds_CollectionChanged;
+                    field.CollectionChanged -= SelectedLayerIds_CollectionChanged;
                 }
                 if (value != null)
                 {
                     value.CollectionChanged += SelectedLayerIds_CollectionChanged;
                 }
-                SetProperty(ref selectedLayerIds, value);
+                SetProperty(ref field, value);
             }
         }
 
-        private Guid? currentEditingCompositionId;
+        [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
-        public Guid? CurrentEditingCompositionId
-        {
-            get { return currentEditingCompositionId; }
-            set { SetProperty(ref currentEditingCompositionId, value); }
-        }
+        public partial Guid? CurrentEditingCompositionId { get; set; }
 
-        private bool isPlaying;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel), IsOneWay = true)]
-        public bool IsPlaying
-        {
-            get { return isPlaying; }
-            set { SetProperty(ref isPlaying, value); }
-        }
+        public partial bool IsPlaying { get; set; }
 
-        private bool historyIsChanging;
+        [ReactiveProperty]
         [NeedWire(nameof(HistoryModel), BindTargetName = nameof(HistoryModel.IsChanging), IsOneWay = true)]
-        public bool HistoryIsChanging
-        {
-            get { return historyIsChanging; }
-            set { SetProperty(ref historyIsChanging, value); }
-        }
+        public partial bool HistoryIsChanging { get; set; }
 
-        private double realFrameRate;
-        public double RealFrameRate
-        {
-            get { return realFrameRate; }
-            set { SetProperty(ref realFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double RealFrameRate { get; set; }
 
-        private bool realFrameRateIsUpdated;
-        public bool RealFrameRateIsUpdated
-        {
-            get { return realFrameRateIsUpdated; }
-            set { SetProperty(ref realFrameRateIsUpdated, value); }
-        }
+        [ReactiveProperty]
+        public partial bool RealFrameRateIsUpdated { get; set; }
 
-        private Time timeBarRange;
-        public Time TimeBarRange
-        {
-            get { return timeBarRange; }
-            set { SetProperty(ref timeBarRange, value); }
-        }
+        [ReactiveProperty]
+        public partial Time TimeBarRange { get; set; }
 
-        private Time timeBarRangeStart;
-        public Time TimeBarRangeStart
-        {
-            get { return timeBarRangeStart; }
-            set { SetProperty(ref timeBarRangeStart, value); }
-        }
+        [ReactiveProperty]
+        public partial Time TimeBarRangeStart { get; set; }
 
-        private double scale = 100.0;
-        public double Scale
-        {
-            get { return scale; }
-            set { SetProperty(ref scale, value); }
-        }
+        [ReactiveProperty]
+        public partial double Scale { get; set; } = 100.0;
 
-        private double screenX;
-        public double ScreenX
-        {
-            get { return screenX; }
-            set { SetProperty(ref screenX, value); }
-        }
+        [ReactiveProperty]
+        public partial double ScreenX { get; set; }
 
-        private double screenY;
-        public double ScreenY
-        {
-            get { return screenY; }
-            set { SetProperty(ref screenY, value); }
-        }
+        [ReactiveProperty]
+        public partial double ScreenY { get; set; }
 
-        private bool isStretchPreview;
-        public bool IsStretchPreview
-        {
-            get { return isStretchPreview; }
-            set { SetProperty(ref isStretchPreview, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsStretchPreview { get; set; }
 
-        private bool isStretchLimited;
-        public bool IsStretchLimited
-        {
-            get { return isStretchLimited; }
-            set { SetProperty(ref isStretchLimited, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsStretchLimited { get; set; }
 
-        private bool isScrubbing;
-        public bool IsScrubbing
-        {
-            get { return isScrubbing; }
-            set { SetProperty(ref isScrubbing, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsScrubbing { get; set; }
 
-        private PreviewColorChannel previewColorChannel = PreviewColorChannel.Rgb;
-        public PreviewColorChannel PreviewColorChannel
-        {
-            get { return previewColorChannel; }
-            set { SetProperty(ref previewColorChannel, value); }
-        }
+        [ReactiveProperty]
+        public partial PreviewColorChannel PreviewColorChannel { get; set; } = PreviewColorChannel.Rgb;
 
-        private WriteableBitmap currentFrame = EmptyImage;
-        public WriteableBitmap CurrentFrame
-        {
-            get { return currentFrame; }
-            set { SetProperty(ref currentFrame, value); }
-        }
+        [ReactiveProperty]
+        public partial WriteableBitmap CurrentFrame { get; set; } = EmptyImage;
 
-        private ObservableCollection<ColoredPreviewBoundingBox> boundingBoxes = [];
-        public ObservableCollection<ColoredPreviewBoundingBox> BoundingBoxes
-        {
-            get { return boundingBoxes; }
-            set { SetProperty(ref boundingBoxes, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<ColoredPreviewBoundingBox> BoundingBoxes { get; set; } = [];
 
-        private ToolType toolType = ToolType.Select;
-        public ToolType ToolType
-        {
-            get { return toolType; }
-            set { SetProperty(ref toolType, value); }
-        }
+        [ReactiveProperty]
+        public partial ToolType ToolType { get; set; } = ToolType.Select;
 
-        private ToolType activeRotateTool = ToolType.RotateAll;
-        public ToolType ActiveRotateTool
-        {
-            get { return activeRotateTool; }
-            set { SetProperty(ref activeRotateTool, value); }
-        }
+        [ReactiveProperty]
+        public partial ToolType ActiveRotateTool { get; set; } = ToolType.RotateAll;
 
-        private ToolType activeCameraTool = ToolType.CameraOrbit;
-        public ToolType ActiveCameraTool
-        {
-            get { return activeCameraTool; }
-            set { SetProperty(ref activeCameraTool, value); }
-        }
+        [ReactiveProperty]
+        public partial ToolType ActiveCameraTool { get; set; } = ToolType.CameraOrbit;
 
-        private ProceduralInputItem[] proceduralInputItems = [];
-        public ProceduralInputItem[] ProceduralInputItems
-        {
-            get { return proceduralInputItems; }
-            set { SetProperty(ref proceduralInputItems, value); }
-        }
+        [ReactiveProperty]
+        public partial ProceduralInputItem[] ProceduralInputItems { get; set; } = [];
 
         public PreviewModelBase PreviewModel { get; }
 
@@ -1188,7 +1057,7 @@ namespace NiVE3.ViewModel
             IsStretchPreview = false;
             IsStretchLimited = false;
             DownScaleRate = 1;
-            previewColorChannel = PreviewColorChannel.Rgb;
+            PreviewColorChannel = PreviewColorChannel.Rgb;
             CurrentTime = Time.Zero;
             UpdateCurrentFrame();
             SourceChangedPublisher.Publish(this, EventArgs.Empty);

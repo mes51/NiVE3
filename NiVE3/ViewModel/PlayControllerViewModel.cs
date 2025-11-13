@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.UI.Command;
 using NiVE3.Model.UI;
 using NiVE3.Plugin.ValueObject;
@@ -15,80 +15,45 @@ using NiVE3.Plugin.ValueObject;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left1Bottom, Size = 80)]
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PlayControllerViewModel : SingletonePaneViewModelBase
     {
-        private double frameRate;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        public partial double FrameRate { get; set; }
 
-        private Time currentTime;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        public partial Time CurrentTime { get; set; }
 
-        private Time workareaBegin;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public Time WorkareaBegin
-        {
-            get { return workareaBegin; }
-            set { SetProperty(ref workareaBegin, value); }
-        }
+        public partial Time WorkareaBegin { get; set; }
 
-        private Time workareaEnd;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public Time WorkareaEnd
-        {
-            get { return workareaEnd; }
-            set { SetProperty(ref workareaEnd, value); }
-        }
+        public partial Time WorkareaEnd { get; set; }
 
-        private Time duration;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        public partial Time Duration { get; set; }
 
-        private bool isPlaying;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public bool IsPlaying
-        {
-            get { return isPlaying; }
-            set { SetProperty(ref isPlaying, value); }
-        }
+        public partial bool IsPlaying { get; set; }
 
-        private bool isPaused;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public bool IsPaused
-        {
-            get { return isPaused; }
-            set { SetProperty(ref isPaused, value); }
-        }
+        public partial bool IsPaused { get; set; }
 
-        private bool isRenderingRamPreview;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel), IsOneWay = true)]
-        public bool IsRenderingRamPreview
-        {
-            get { return isRenderingRamPreview; }
-            set { SetProperty(ref isRenderingRamPreview, value); }
-        }
+        public partial bool IsRenderingRamPreview { get; set; }
 
-        private bool useRamPreview;
+        [ReactiveProperty]
         [NeedWire(nameof(PlayControllerModel))]
-        public bool UseRamPreview
-        {
-            get { return useRamPreview; }
-            set { SetProperty(ref useRamPreview, value); }
-        }
+        public partial bool UseRamPreview { get; set; }
 
         public ICommand PlayCommand { get; }
 

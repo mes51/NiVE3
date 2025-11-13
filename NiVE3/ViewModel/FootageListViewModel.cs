@@ -13,12 +13,12 @@ using NiVE3.Config;
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.Mvvm;
-using NiVE3.UI.Command;
 using NiVE3.View.Command;
 using NiVE3.View.Dialog;
 using NiVE3.View.Dock;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel.Dialog;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 
@@ -35,77 +35,38 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
     [CommandHandling(nameof(LoadSolidCommand), nameof(ShortcutKeySetting.LoadSolidGesture), IsGlobal = true)]
     [CommandHandling(nameof(LoadFileCommand), nameof(ShortcutKeySetting.LoadFileGesture), IsGlobal = true)]
-    class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget, IDragSource
+    [UseReactiveProperty]
+    partial class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget, IDragSource
     {
-        private ObservableCollectionView<IFootageModel, IFootageViewModel> footages;
-        public ObservableCollectionView<IFootageModel, IFootageViewModel> Footages
-        {
-            get { return footages; }
-            set { SetProperty(ref footages, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollectionView<IFootageModel, IFootageViewModel> Footages { get; set; }
 
-        private ObservableCollection<IFootageViewModel> selectedFootages = [];
-        public ObservableCollection<IFootageViewModel> SelectedFootages
-        {
-            get { return selectedFootages; }
-            set { SetProperty(ref selectedFootages, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<IFootageViewModel> SelectedFootages { get; set; } = [];
 
-        private bool showFileExtension = true;
-        public bool ShowFileExtension
-        {
-            get { return showFileExtension; }
-            set { SetProperty(ref showFileExtension, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ShowFileExtension { get; set; } = true;
 
-        private bool showSize = true;
-        public bool ShowSize
-        {
-            get { return showSize; }
-            set { SetProperty(ref showSize, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ShowSize { get; set; } = true;
 
-        private bool showFrameRate = true;
-        public bool ShowFrameRate
-        {
-            get { return showFrameRate; }
-            set { SetProperty(ref showFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ShowFrameRate { get; set; } = true;
 
-        private bool showDuration = true;
-        public bool ShowDuration
-        {
-            get { return showDuration; }
-            set { SetProperty(ref showDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ShowDuration { get; set; } = true;
 
-        private bool showComment = true;
-        public bool ShowComment
-        {
-            get { return showComment; }
-            set { SetProperty(ref showComment, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ShowComment { get; set; } = true;
 
-        private bool showFilePath = true;
-        public bool ShowFilePath
-        {
-            get { return showFilePath; }
-            set { SetProperty(ref showFilePath, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ShowFilePath { get; set; } = true;
 
-        private EditingFootageParameter editingProperty;
-        public EditingFootageParameter EditingParameter
-        {
-            get { return editingProperty; }
-            set { SetProperty(ref editingProperty, value); }
-        }
+        [ReactiveProperty]
+        public partial EditingFootageParameter EditingParameter { get; set; }
 
-        private IFootageViewModel? editingFootage;
-        public IFootageViewModel? EditingFootage
-        {
-            get { return editingFootage; }
-            set { SetProperty(ref editingFootage, value); }
-        }
+        [ReactiveProperty]
+        public partial IFootageViewModel? EditingFootage { get; set; }
 
         public ICommand MoveFootageCommand { get; }
 
@@ -135,9 +96,7 @@ namespace NiVE3.ViewModel
 
         IDialogService DialogService { get; }
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public FootageListViewModel(FootageListModel footageListModel, ApplicationModel applicationModel, EventHubModel eventHubModel, IDialogService dialogService)
-#pragma warning restore CS8618
         {
             FootageListModel = footageListModel;
             EventHubModel = eventHubModel;

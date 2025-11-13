@@ -5,28 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using NiVE3.Mvvm;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.ViewModel
 {
-    abstract class PaneViewModelBase : BindableBase
+    [UseReactiveProperty]
+    abstract partial class PaneViewModelBase : BindableBase
     {
         public string ContentId { get; private set; } = "";
 
-        private string title = "";
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
+        [ReactiveProperty]
+        public partial string Title { get; set; } = "";
 
-        private bool isActive;
         public bool IsActive
         {
-            get { return isActive; }
+            get;
             set
             {
-                SetProperty(ref isActive, value);
+                SetProperty(ref field, value);
                 if (value)
                 {
                     PaneSelectedPublisher.Publish(this, EventArgs.Empty);
@@ -34,13 +31,12 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private bool isSelected;
         public bool IsSelected
         {
-            get { return isSelected; }
+            get;
             set
             {
-                SetProperty(ref isSelected, value);
+                SetProperty(ref field, value);
                 if (value)
                 {
                     PaneSelectedPublisher.Publish(this, EventArgs.Empty);
@@ -75,14 +71,11 @@ namespace NiVE3.ViewModel
         }
     }
 
-    abstract class SingletonePaneViewModelBase : PaneViewModelBase
+    [UseReactiveProperty]
+    abstract partial class SingletonePaneViewModelBase : PaneViewModelBase
     {
-        private Visibility visibility;
-        public Visibility Visibility
-        {
-            get { return visibility; }
-            set { SetProperty(ref visibility, value); }
-        }
+        [ReactiveProperty]
+        public partial Visibility Visibility { get; set; }
 
         public override void OpenPane()
         {
