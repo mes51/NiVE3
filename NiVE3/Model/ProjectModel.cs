@@ -18,10 +18,12 @@ using NiVE3.Model.UI;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class ProjectModel : BindableBase
     {
         const string AutoSaveDateFormat = "yyyyMMddHHmmss";
@@ -30,40 +32,20 @@ namespace NiVE3.Model
 
         public ObservableCollection<PreviewModelBase> PreviewModels { get; } = [];
 
-        private string projectPath = "";
-        public string ProjectPath
-        {
-            get { return projectPath; }
-            set { SetProperty(ref projectPath, value); }
-        }
+        [ReactiveProperty]
+        public partial string ProjectPath { get; set; } = "";
 
-        private string projectName = "";
-        public string ProjectName
-        {
-            get { return projectName; }
-            set { SetProperty(ref projectName, value); }
-        }
+        [ReactiveProperty]
+        public partial string ProjectName { get; set; } = "";
 
-        private bool isEdited;
-        public bool IsEdited
-        {
-            get { return isEdited; }
-            set { SetProperty(ref isEdited, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEdited { get; set; }
 
-        private bool isRendering;
-        public bool IsRendering
-        {
-            get { return isRendering; }
-            set { SetProperty(ref isRendering, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsRendering { get; set; }
 
-        private bool gpuErrorRaised;
-        public bool GpuErrorRaised
-        {
-            get { return gpuErrorRaised; }
-            set { SetProperty(ref gpuErrorRaised, value); }
-        }
+        [ReactiveProperty]
+        public partial bool GpuErrorRaised { get; set; }
 
         public bool UseGpu => ApplicationModel.UseGpu && !GpuErrorRaised;
 

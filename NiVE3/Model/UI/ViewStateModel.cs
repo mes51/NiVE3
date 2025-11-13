@@ -4,175 +4,81 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NiVE3.Mvvm;
-using NiVE3.Numerics;
-using NiVE3.Plugin.Interfaces.RendererParams;
-using NiVE3.ViewModel;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
 {
-    class ViewStateModel : BindableBase
+    [UseReactiveProperty]
+    partial class ViewStateModel : BindableBase
     {
-        private double timelineLayerNumberColumnWidth = 21.0;
-        public double TimelineLayerNumberColumnWidth
-        {
-            get { return timelineLayerNumberColumnWidth; }
-            set { SetProperty(ref timelineLayerNumberColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineLayerNumberColumnWidth { get; set; } = 21.0;
 
-        private double timelineLayerNameColumnWidth = 153.0;
-        public double TimelineLayerNameColumnWidth
-        {
-            get { return timelineLayerNameColumnWidth; }
-            set { SetProperty(ref timelineLayerNameColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineLayerNameColumnWidth { get; set; } = 153.0;
 
-        private double timelineLayerCommentColumnWidth = 53.0;
-        public double TimelineLayerCommentColumnWidth
-        {
-            get { return timelineLayerCommentColumnWidth; }
-            set { SetProperty(ref timelineLayerCommentColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineLayerCommentColumnWidth { get; set; } = 53.0;
 
-        private double timelineLayerSwitchColumnWidth = 133.0;
-        public double TimelineLayerSwitchColumnWidth
-        {
-            get { return timelineLayerSwitchColumnWidth; }
-            set { SetProperty(ref timelineLayerSwitchColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineLayerSwitchColumnWidth { get; set; } = 133.0;
 
-        private double timelineModeColumnWidth = 75.0;
-        public double TimelineModeColumnWidth
-        {
-            get { return timelineModeColumnWidth; }
-            set { SetProperty(ref timelineModeColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineModeColumnWidth { get; set; } = 75.0;
 
-        private double timelineTrackMatteColumnWidth = 125.0;
-        public double TimelineTrackMatteColumnWidth
-        {
-            get { return timelineTrackMatteColumnWidth; }
-            set { SetProperty(ref timelineTrackMatteColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineTrackMatteColumnWidth { get; set; } = 125.0;
 
-        private double timelineParentLayerColumnWidth = 75.0;
-        public double TimelineParentLayerColumnWidth
-        {
-            get { return timelineParentLayerColumnWidth; }
-            set { SetProperty(ref timelineParentLayerColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TimelineParentLayerColumnWidth { get; set; } = 75.0;
 
-        private bool timelineAVSwitchColumnVisible = true;
-        public bool TimelineAVSwitchColumnVisible
-        {
-            get { return timelineAVSwitchColumnVisible; }
-            set { SetProperty(ref timelineAVSwitchColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineAVSwitchColumnVisible { get; set; } = true;
 
-        private bool timelineTagColumnVisible = true;
-        public bool TimelineTagColumnVisible
-        {
-            get { return timelineTagColumnVisible; }
-            set { SetProperty(ref timelineTagColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineTagColumnVisible { get; set; } = true;
 
-        private bool timelineLayerNumberColumnVisible = true;
-        public bool TimelineLayerNumberColumnVisible
-        {
-            get { return timelineLayerNumberColumnVisible; }
-            set { SetProperty(ref timelineLayerNumberColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineLayerNumberColumnVisible { get; set; } = true;
 
-        private bool timelineLayerCommentColumnVisible = true;
-        public bool TimelineLayerCommentColumnVisible
-        {
-            get { return timelineLayerCommentColumnVisible; }
-            set { SetProperty(ref timelineLayerCommentColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineLayerCommentColumnVisible { get; set; } = true;
 
-        private bool timelineLayerSwitchColumnVisible = true;
-        public bool TimelineLayerSwitchColumnVisible
-        {
-            get { return timelineLayerSwitchColumnVisible; }
-            set { SetProperty(ref timelineLayerSwitchColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineLayerSwitchColumnVisible { get; set; } = true;
 
-        private bool timelineModeColumnVisible = true;
-        public bool TimelineModeColumnVisible
-        {
-            get { return timelineModeColumnVisible; }
-            set { SetProperty(ref timelineModeColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineModeColumnVisible { get; set; } = true;
 
-        private bool timelineTrackMatteColumnVisible = true;
-        public bool TimelineTrackMatteColumnVisible
-        {
-            get { return timelineTrackMatteColumnVisible; }
-            set { SetProperty(ref timelineTrackMatteColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineTrackMatteColumnVisible { get; set; } = true;
 
-        private bool timelineParentLayerColumnVisible = true;
-        public bool TimelineParentLayerColumnVisible
-        {
-            get { return timelineParentLayerColumnVisible; }
-            set { SetProperty(ref timelineParentLayerColumnVisible, value); }
-        }
+        [ReactiveProperty]
+        public partial bool TimelineParentLayerColumnVisible { get; set; } = true;
 
-        private double propertyControllerLayerNameColumnWidth = 153.0;
-        public double PropertyControllerLayerNameColumnWidth
-        {
-            get { return propertyControllerLayerNameColumnWidth; }
-            set { SetProperty(ref propertyControllerLayerNameColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double PropertyControllerLayerNameColumnWidth { get; set; } = 153.0;
 
-        private double propertyControllerLayerSwitchColumnWidth = 133.0;
-        public double PropertyControllerLayerSwitchColumnWidth
-        {
-            get { return propertyControllerLayerSwitchColumnWidth; }
-            set { SetProperty(ref propertyControllerLayerSwitchColumnWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double PropertyControllerLayerSwitchColumnWidth { get; set; } = 133.0;
 
-        private Guid? lastSelectedLayerId;
-        public Guid? LastSelectedLayerId
-        {
-            get { return lastSelectedLayerId; }
-            set { SetProperty(ref lastSelectedLayerId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid? LastSelectedLayerId { get; set; }
 
-        private ObservableCollection<Guid>? selectedLayerIds;
-        public ObservableCollection<Guid>? SelectedLayerIds
-        {
-            get { return selectedLayerIds; }
-            set { SetProperty(ref selectedLayerIds, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<Guid>? SelectedLayerIds { get; set; }
 
-        private Guid? currentEditingCompositionId;
-        public Guid? CurrentEditingCompositionId
-        {
-            get { return currentEditingCompositionId; }
-            set { SetProperty(ref currentEditingCompositionId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid? CurrentEditingCompositionId { get; set; }
 
-        private int lastSelectedObjectHashCode;
-        public int LastSelectedObjectHashCode
-        {
-            get { return lastSelectedObjectHashCode; }
-            set { SetProperty(ref lastSelectedObjectHashCode, value); }
-        }
+        [ReactiveProperty]
+        public partial int LastSelectedObjectHashCode { get; set; }
 
-        private bool isIgnoreUpdatePreview;
-        public bool IsIgnoreUpdatePreview
-        {
-            get { return isIgnoreUpdatePreview; }
-            set { SetProperty(ref isIgnoreUpdatePreview, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsIgnoreUpdatePreview { get; set; }
 
-        private bool isPreviewPlaying;
-        public bool IsPreviewPlaying
-        {
-            get { return isPreviewPlaying; }
-            set { SetProperty(ref isPreviewPlaying, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsPreviewPlaying { get; set; }
     }
 }

@@ -7,7 +7,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>13</LangVersion>
+    <LangVersion>14</LangVersion>
     <Authors>mes</Authors>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <Product>NicoVisualEffects 3</Product>
@@ -62,6 +62,7 @@
     <ProjectReference Include="..\NiVE3.Plugin\NiVE3.Plugin.csproj" />
     <ProjectReference Include="..\NiVE3.Shape\NiVE3.Shape.csproj" />
     <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
+    <ProjectReference Include="..\NiVE3.SourceGenerator.ReactivePropertyGenerator\NiVE3.SourceGenerator.ReactivePropertyGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.ResourceMarkupGenerator\NiVE3.SourceGenerator.ResourceMarkupGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.ViewModelWireGenerator\NiVE3.SourceGenerator.ViewModelWireGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\NiVE3.SourceGenerator.LanguageResourceGenerator\NiVE3.SourceGenerator.LanguageResourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

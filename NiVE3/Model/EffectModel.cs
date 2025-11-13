@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.IO.Hashing;
@@ -15,39 +14,25 @@ using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class EffectModel : BindableBase, IDisposable, IEffectObject
     {
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; }
 
-        private string comment = "";
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        [ReactiveProperty]
+        public partial string Comment { get; set; } = "";
 
-        private bool isEnable = true;
-        public bool IsEnable
-        {
-            get { return isEnable; }
-            set { SetProperty(ref isEnable, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnable { get; set; } = true;
 
-        private bool parentLayerIsLock;
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ParentLayerIsLock { get; set; }
 
         public PropertyGroupModel Properties { get; }
 

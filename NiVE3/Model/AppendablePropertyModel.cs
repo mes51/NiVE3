@@ -20,10 +20,12 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class AppendablePropertyModel : BindableBase, IPropertyModel
     {
         public string Name { get; }
@@ -34,26 +36,21 @@ namespace NiVE3.Model
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
-        private ObservableCollection<IPropertyModel> children = [];
         public ObservableCollection<IPropertyModel> Children
         {
-            get { return children; }
+            get;
             set
             {
-                children.CollectionChanged -= Children_CollectionChanged;
+                field.CollectionChanged -= Children_CollectionChanged;
 
-                SetProperty(ref children, value);
+                SetProperty(ref field, value);
 
                 value.CollectionChanged += Children_CollectionChanged;
             }
-        }
+        } = [];
 
-        private bool parentLayerIsLock;
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ParentLayerIsLock { get; set; }
 
         public PropertyBase Property { get; }
 

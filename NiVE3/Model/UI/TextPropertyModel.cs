@@ -9,117 +9,65 @@ using NiVE3.Input;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Property.Types;
 using NiVE3.Text;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 using SixLabors.Fonts;
 
 namespace NiVE3.Model.UI
 {
-    class TextPropertyModel : BindableBase
+    [UseReactiveProperty]
+    partial class TextPropertyModel : BindableBase
     {
         const string DefaultFontName = "游ゴシック";
 
         const string DefaultFontSubFamilyName = "Regular";
 
-        private FontInfo selectedFont;
-        public FontInfo SelectedFont
-        {
-            get { return selectedFont; }
-            set { SetProperty(ref selectedFont, value); }
-        }
+        [ReactiveProperty]
+        public partial FontInfo SelectedFont { get; set; }
 
-        private double fontSize = 20.0;
-        public double FontSize
-        {
-            get { return fontSize; }
-            set { SetProperty(ref fontSize, value); }
-        }
+        [ReactiveProperty]
+        public partial double FontSize { get; set; } = 20.0;
 
-        private double lineHeight = 1.0;
-        public double LineHeight
-        {
-            get { return lineHeight; }
-            set { SetProperty(ref lineHeight, value); }
-        }
+        [ReactiveProperty]
+        public partial double LineHeight { get; set; } = 1.0;
 
-        private double verticalScale = 100.0;
-        public double VerticalScale
-        {
-            get { return verticalScale; }
-            set { SetProperty(ref verticalScale, value); }
-        }
+        [ReactiveProperty]
+        public partial double VerticalScale { get; set; } = 100.0;
 
-        private double horizontalScale = 100.0;
-        public double HorizontalScale
-        {
-            get { return horizontalScale; }
-            set { SetProperty(ref horizontalScale, value); }
-        }
+        [ReactiveProperty]
+        public partial double HorizontalScale { get; set; } = 100.0;
 
-        private double letterSpacing;
-        public double LetterSpacing
-        {
-            get { return letterSpacing; }
-            set { SetProperty(ref letterSpacing, value); }
-        }
+        [ReactiveProperty]
+        public partial double LetterSpacing { get; set; }
 
-        private double textLineWidth;
-        public double TextLineWidth
-        {
-            get { return textLineWidth; }
-            set { SetProperty(ref textLineWidth, value); }
-        }
+        [ReactiveProperty]
+        public partial double TextLineWidth { get; set; }
 
-        private TextLineDrawOrder textLineDrawOrder;
-        public TextLineDrawOrder TextLineDrawOrder
-        {
-            get { return textLineDrawOrder; }
-            set { SetProperty(ref textLineDrawOrder, value); }
-        }
+        [ReactiveProperty]
+        public partial TextLineDrawOrder TextLineDrawOrder { get; set; }
 
-        private bool isEnableBold;
-        public bool IsEnableBold
-        {
-            get { return isEnableBold; }
-            set { SetProperty(ref isEnableBold, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableBold { get; set; }
 
-        private bool isEnableItalic;
-        public bool IsEnableItalic
-        {
-            get { return isEnableItalic; }
-            set { SetProperty(ref isEnableItalic, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableItalic { get; set; }
 
-        private TextAlign textAlign;
-        public TextAlign TextAlign
-        {
-            get { return textAlign; }
-            set { SetProperty(ref textAlign, value); }
-        }
+        [ReactiveProperty]
+        public partial TextAlign TextAlign { get; set; }
 
-        private FloatColor fillColor = FloatColor.White;
-        public FloatColor FillColor
-        {
-            get { return fillColor; }
-            set { SetProperty(ref fillColor, value); }
-        }
+        [ReactiveProperty]
+        public partial FloatColor FillColor { get; set; } = FloatColor.White;
 
-        private FloatColor textLineColor = new FloatColor(1.0F, 0.0F, 0.0F, 1.0F);
-        public FloatColor TextLineColor
-        {
-            get { return textLineColor; }
-            set { SetProperty(ref textLineColor, value); }
-        }
+        [ReactiveProperty]
+        public partial FloatColor TextLineColor { get; set; } = new FloatColor(1.0F, 0.0F, 0.0F, 1.0F);
 
         public FontGroup[] FontGroups { get; }
 
         FontCollection FontCollection { get; } = new FontCollection();
 
-#pragma warning disable CS8618 // 各フィールドには初期化時に必ず値を代入するため無視
         public TextPropertyModel()
-#pragma warning restore CS8618
         {
-            FontGroups = [.. FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup([.. g])).OrderBy(g => g.FontName)];
+            FontGroups = [..FontInfo.LoadedFonts.GroupBy(f => f.Name).Select(g => new FontGroup([.. g])).OrderBy(g => g.FontName)];
             SelectedFont = FontGroups.FirstOrDefault(g => g.FontName == DefaultFontName)?.SubFamiles?.TryGetValue(DefaultFontSubFamilyName, out var defaultFont) ?? false ? defaultFont : FontInfo.FallbackFont;
         }
 

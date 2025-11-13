@@ -12,11 +12,10 @@ namespace NiVE3.Model
 {
     class ApplicationModel : BindableBase
     {
-        private bool useGpu;
         public bool UseGpu
         {
-            get { return !ApplicationSetting.Setting.ForceUseCpu && useGpu; }
-            set { SetProperty(ref useGpu, value); }
+            get { return !ApplicationSetting.Setting.ForceUseCpu && field; }
+            set { SetProperty(ref field, value); }
         }
 
         public GPUException? LastGPUException { get; private set; }

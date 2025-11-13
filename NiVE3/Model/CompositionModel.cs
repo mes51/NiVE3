@@ -35,169 +35,89 @@ using ComputeSharp;
 using NiVE3.InternalShader.MotionBlur;
 using NiVE3.Model.UI;
 using NiVE3.Image.Color;
-using NiVE3.InternalShader;
 using NiVE3.InternalShader.Mask;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class CompositionModel : WeakPropertyChangedBindingBase, IDisposable, ICompositionObject
     {
         public Guid CompositionId { get; }
 
-        string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
-        private int width;
-        public int Width
-        {
-            get { return width; }
-            set { SetProperty(ref width, value); }
-        }
+        [ReactiveProperty]
+        public partial int Width { get; set; }
 
-        private int height;
-        public int Height
-        {
-            get { return height; }
-            set { SetProperty(ref height, value); }
-        }
+        [ReactiveProperty]
+        public partial int Height { get; set; }
 
-        private double frameRate;
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double FrameRate { get; set; }
 
-        private Time frameDuration;
-        public Time FrameDuration
-        {
-            get { return frameDuration; }
-            private set { SetProperty(ref frameDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time FrameDuration { get; private set; }
 
-        private Time duration;
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; set; }
 
-        private bool isRetentionFrameRate;
-        public bool IsRetentionFrameRate
-        {
-            get { return isRetentionFrameRate; }
-            set { SetProperty(ref isRetentionFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsRetentionFrameRate { get; set; }
 
-        private bool applyToneMappingWhenNested;
-        public bool ApplyToneMappingWhenNested
-        {
-            get { return applyToneMappingWhenNested; }
-            set { SetProperty(ref applyToneMappingWhenNested, value); }
-        }
+        [ReactiveProperty]
+        public partial  bool ApplyToneMappingWhenNested { get; set; }
 
-        private int shutterAngle;
-        public int ShutterAngle
-        {
-            get { return shutterAngle; }
-            set { SetProperty(ref shutterAngle, value); }
-        }
+        [ReactiveProperty]
+        public partial int ShutterAngle { get; set; }
 
-        private int shutterPhase;
-        public int ShutterPhase
-        {
-            get { return shutterPhase; }
-            set { SetProperty(ref shutterPhase, value); }
-        }
+        [ReactiveProperty]
+        public partial int ShutterPhase { get; set; }
 
-        private int motionBlurSampleCount;
-        public int MotionBlurSampleCount
-        {
-            get { return motionBlurSampleCount; }
-            set { SetProperty(ref motionBlurSampleCount, value); }
-        }
+        [ReactiveProperty]
+        public partial int MotionBlurSampleCount { get; set; }
 
-        private Time timeBarRange;
-        public Time TimeBarRange
-        {
-            get { return timeBarRange; }
-            set { SetProperty(ref timeBarRange, value); }
-        }
+        [ReactiveProperty]
+        public partial Time TimeBarRange { get; set; }
 
-        private Time timeBarRangeStart;
-        public Time TimeBarRangeStart
-        {
-            get { return timeBarRangeStart; }
-            set { SetProperty(ref timeBarRangeStart, value); }
-        }
+        [ReactiveProperty]
+        public partial Time TimeBarRangeStart { get; set; }
 
-        private Time currentTime;
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CurrentTime { get; set; }
 
-        private Time workareaBegin;
-        public Time WorkareaBegin
-        {
-            get { return workareaBegin; }
-            set { SetProperty(ref workareaBegin, value); }
-        }
+        [ReactiveProperty]
+        public partial Time WorkareaBegin { get; set; }
 
-        private Time workareaEnd;
-        public Time WorkareaEnd
-        {
-            get { return workareaEnd; }
-            set { SetProperty(ref workareaEnd, value); }
-        }
+        [ReactiveProperty]
+        public partial Time WorkareaEnd { get; set; }
 
-        private bool isEnableShy;
-        public bool IsEnableShy
-        {
-            get { return isEnableShy; }
-            set { SetProperty(ref isEnableShy, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableShy { get; set; }
 
-        private bool isEnableFrameBlend;
-        public bool IsEnableFrameBlend
-        {
-            get { return isEnableFrameBlend; }
-            set { SetProperty(ref isEnableFrameBlend, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableFrameBlend { get; set; }
 
-        private bool isEnableMotionBlur;
-        public bool IsEnableMotionBlur
-        {
-            get { return isEnableMotionBlur; }
-            set { SetProperty(ref isEnableMotionBlur, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableMotionBlur { get; set; }
 
-        private ObservableCollection<LayerModel> layers = [];
         public ObservableCollection<LayerModel> Layers
         {
-            get { return layers; }
+            get;
             set
             {
-                if (layers != value)
+                if (field != value)
                 {
-                    layers.CollectionChanged -= Layers_CollectionChanged;
+                    field.CollectionChanged -= Layers_CollectionChanged;
                     value.CollectionChanged += Layers_CollectionChanged;
                 }
-                SetProperty(ref layers, value);
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private ObservableCollection<Marker> compositionMarkers = [];
-        public ObservableCollection<Marker> CompositionMarkers
-        {
-            get { return compositionMarkers; }
-            set { SetProperty(ref compositionMarkers, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<Marker> CompositionMarkers { get; set; } = [];
 
         public Guid RendererPluginId { get; private set; }
 
@@ -299,6 +219,8 @@ namespace NiVE3.Model
             TextPropertyModel = textPropertyModel;
             HistoryModel = historyModel;
             AcceleratorModel = acceleratorModel;
+            // NOTE: プロパティの初期化はsetterの中を経由せずに直接バッキングフィールドに値が代入されるため、setterの中を経由したい場合はコンストラクタで代入する
+            // SEE: https://github.com/dotnet/csharplang/blob/main/meetings/2022/LDM-2022-03-02.md#open-questions-in-field
             Layers = [];
 
             PropertyChanged += CompositionModel_PropertyChanged;
@@ -1910,7 +1832,7 @@ namespace NiVE3.Model
                 Transformer.SetSize(Width, Height);
             }
 
-            return new CoordTransformerWrapper(Transformer, this, layer, currentTime);
+            return new CoordTransformerWrapper(Transformer, this, layer, CurrentTime);
         }
 
         NImage RenderFrameInternal(Time time, Time shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)

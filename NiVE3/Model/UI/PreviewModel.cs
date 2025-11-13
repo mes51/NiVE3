@@ -9,93 +9,50 @@ using NiVE3.Mvvm;
 using NiVE3.Image;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
-using NiVE3.Util;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.Model.UI
 {
-    abstract class PreviewModelBase : BindableBase
+    [UseReactiveProperty]
+    abstract partial class PreviewModelBase : BindableBase
     {
         public abstract bool IsFootage { get; }
 
         public abstract bool CanRendering { get; }
 
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
-        private SourceType sourceType = SourceType.Video;
-        public SourceType SourceType
-        {
-            get { return sourceType; }
-            set { SetProperty(ref sourceType, value); }
-        }
+        [ReactiveProperty]
+        public partial SourceType SourceType { get; set; } = SourceType.Video;
 
-        private Time workareaBegin;
-        public Time WorkareaBegin
-        {
-            get { return workareaBegin; }
-            set { SetProperty(ref workareaBegin, value); }
-        }
+        [ReactiveProperty]
+        public partial Time WorkareaBegin { get; set; }
 
-        private Time workareaEnd;
-        public Time WorkareaEnd
-        {
-            get { return workareaEnd; }
-            set { SetProperty(ref workareaEnd, value); }
-        }
+        [ReactiveProperty]
+        public partial Time WorkareaEnd { get; set; }
 
-        private Time duration;
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; set; }
 
-        private double frameRate;
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double FrameRate { get; set; }
 
-        private Time currentTime;
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CurrentTime { get; set; }
 
-        private int width;
-        public int Width
-        {
-            get { return width; }
-            set { SetProperty(ref width, value); }
-        }
+        [ReactiveProperty]
+        public partial int Width { get; set; }
 
-        private int height;
-        public int Height
-        {
-            get { return height; }
-            set { SetProperty(ref height, value); }
-        }
+        [ReactiveProperty]
+        public partial int Height { get; set; }
 
-        private double downScaleRate = 1.0;
-        public double DownScaleRate
-        {
-            get { return downScaleRate; }
-            set { SetProperty(ref downScaleRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double DownScaleRate { get; set; } = 1.0;
 
-        private bool isLock;
-        public bool IsLock
-        {
-            get { return isLock; }
-            set { SetProperty(ref isLock, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsLock { get; set; }
 
         protected ApplicationModel ApplicationModel { get; }
 
@@ -128,18 +85,15 @@ namespace NiVE3.Model.UI
         }
     }
 
-    class FootagePreviewModel : PreviewModelBase
+    [UseReactiveProperty]
+    partial class FootagePreviewModel : PreviewModelBase
     {
         public override bool IsFootage => true;
 
         public override bool CanRendering => true;
 
-        private FootageModel? footage;
-        public FootageModel? Footage
-        {
-            get { return footage; }
-            set { SetProperty(ref footage, value); }
-        }
+        [ReactiveProperty]
+        public partial FootageModel? Footage { get; set; }
 
         public FootagePreviewModel(ApplicationModel applicationModel) : base(applicationModel)
         {
@@ -209,18 +163,17 @@ namespace NiVE3.Model.UI
 
         public override bool CanRendering => !(Composition?.IsRendering ?? true);
 
-        private CompositionModel? composition;
         public CompositionModel? Composition
         {
-            get { return composition; }
+            get;
             set
             {
-                if (composition != value)
+                if (field != value)
                 {
-                    if (composition != null)
+                    if (field != null)
                     {
-                        composition.CompositionUpdated -= Composition_CompositionUpdated;
-                        composition.PropertyChanged -= Composition_PropertyChanged;
+                        field.CompositionUpdated -= Composition_CompositionUpdated;
+                        field.PropertyChanged -= Composition_PropertyChanged;
                     }
                     if (value != null)
                     {
@@ -228,7 +181,7 @@ namespace NiVE3.Model.UI
                         value.PropertyChanged += Composition_PropertyChanged;
                     }
                 }
-                SetProperty(ref composition, value);
+                SetProperty(ref field, value);
             }
         }
 

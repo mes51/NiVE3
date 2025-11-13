@@ -5,25 +5,19 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
 {
-    class AudioInformationModel : BindableBase
+    [UseReactiveProperty]
+    partial class AudioInformationModel : BindableBase
     {
-        private double leftAudioLevel = double.NegativeInfinity;
-        public double LeftAudioLevel
-        {
-            get { return leftAudioLevel; }
-            set { SetProperty(ref leftAudioLevel, value); }
-        }
+        [ReactiveProperty]
+        public partial double LeftAudioLevel { get; set; } = double.NegativeInfinity;
 
-        private double rightAudioLevel = double.NegativeInfinity;
-        public double RightAudioLevel
-        {
-            get { return rightAudioLevel; }
-            set { SetProperty(ref rightAudioLevel, value); }
-        }
+        [ReactiveProperty]
+        public partial double RightAudioLevel { get; set; } = double.NegativeInfinity;
 
         public void CalcAudioLevel(ReadOnlySpan<float> audio)
         {

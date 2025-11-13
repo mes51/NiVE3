@@ -16,6 +16,7 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
@@ -68,90 +69,53 @@ namespace NiVE3.Model
         }
     }
 
-    class FootageModel : BindableBase, IFootageModel
+    [UseReactiveProperty]
+    partial class FootageModel : BindableBase, IFootageModel
     {
         public Guid FootageId { get; private set; }
 
-        private string name = "";
         public string Name
         {
-            get { return name; }
+            get;
             set
             {
-                SetProperty(ref name, value);
+                SetProperty(ref field, value);
                 IsNameChanged = value != Source.Name;
             }
         }
 
-        private int width;
-        public int Width
-        {
-            get { return width; }
-            private set { SetProperty(ref width, value); }
-        }
+        [ReactiveProperty]
+        public partial int Width { get; private set; }
 
-        private int height;
-        public int Height
-        {
-            get { return height; }
-            private set { SetProperty(ref height, value); }
-        }
+        [ReactiveProperty]
+        public partial int Height { get; private set; }
 
-        private double frameRate;
-        public double FrameRate
-        {
-            get { return frameRate; }
-            private set { SetProperty(ref frameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double FrameRate { get; private set; }
 
-        private Time duration;
-        public Time Duration
-        {
-            get { return duration; }
-            private set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; private set; }
 
-        private string filePath = "";
-        public string FilePath
-        {
-            get { return filePath; }
-            private set { SetProperty(ref filePath, value); }
-        }
+        [ReactiveProperty]
+        public partial string FilePath { get; private set; } = "";
 
-        private string comment = "";
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        [ReactiveProperty]
+        public partial string Comment { get; set; } = "";
 
-        private SourceType inputType;
-        public SourceType InputType
-        {
-            get { return inputType; }
-            set { SetProperty(ref inputType, value); }
-        }
+        [ReactiveProperty]
+        public partial SourceType InputType { get; set; }
 
-        private FootageSortKey sortKey;
-        public FootageSortKey SortKey
-        {
-            get { return sortKey; }
-            set { SetProperty(ref sortKey, value); }
-        }
+        [ReactiveProperty]
+        public partial FootageSortKey SortKey { get; set; }
 
-        private bool sortIsAscending;
-        public bool SortIsAscending
-        {
-            get { return sortIsAscending; }
-            set { SetProperty(ref sortIsAscending, value); }
-        }
+        [ReactiveProperty]
+        public partial bool SortIsAscending { get; set; }
 
         // TODO: フッテージの再読み込み実装時に更新するようにする
-        private DateTime lastUpdated;
         public DateTime LastUpdated
         {
-            get { return lastUpdated; }
-            set { SetProperty(ref lastUpdated, value); }
+            get;
+            set { SetProperty(ref field, value); }
         }
 
         public string FileName => Path.GetFileName(InputModel.FilePath);
@@ -345,16 +309,13 @@ namespace NiVE3.Model
         }
     }
 
-    class FootageFolderModel : BindableBase, IFootageModel
+    [UseReactiveProperty]
+    partial class FootageFolderModel : BindableBase, IFootageModel
     {
         public Guid FootageId { get; private set; }
 
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
         public int Width => 0;
 
@@ -366,37 +327,21 @@ namespace NiVE3.Model
 
         public string FilePath => "";
 
-        private string comment = "";
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        [ReactiveProperty]
+        public partial string Comment { get; set; } = "";
 
         public string FileName => "";
 
         public SourceType InputType => SourceType.None;
 
-        private FootageSortKey sortKey;
-        public FootageSortKey SortKey
-        {
-            get { return sortKey; }
-            set { SetProperty(ref sortKey, value); }
-        }
+        [ReactiveProperty]
+        public partial FootageSortKey SortKey { get; set; }
 
-        private bool sortIsAscending;
-        public bool SortIsAscending
-        {
-            get { return sortIsAscending; }
-            set { SetProperty(ref sortIsAscending, value); }
-        }
+        [ReactiveProperty]
+        public partial bool SortIsAscending { get; set; }
 
-        private ObservableCollection<IFootageModel> children = [];
-        public ObservableCollection<IFootageModel> Children
-        {
-            get { return children; }
-            set { SetProperty(ref children, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<IFootageModel> Children { get; set; } = [];
 
         HistoryModel HistoryModel { get; }
 

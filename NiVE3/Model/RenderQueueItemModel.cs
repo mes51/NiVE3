@@ -13,151 +13,73 @@ using NiVE3.Data.Json.Project;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class RenderQueueItemModel : BindableBase, IDisposable
     {
-        private Guid queueId;
-        public Guid QueueId
-        {
-            get { return queueId; }
-            set { SetProperty(ref queueId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid QueueId { get; set; }
 
-        private bool isRenderSelected;
-        public bool IsRenderSelected
-        {
-            get { return isRenderSelected; }
-            set { SetProperty(ref isRenderSelected, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsRenderSelected { get; set; }
 
-        private string filePath = "";
-        public string FilePath
-        {
-            get { return filePath; }
-            set { SetProperty(ref filePath, value); }
-        }
+        [ReactiveProperty]
+        public partial string FilePath { get; set; } = "";
 
-        private RenderRangeType renderRangeType;
-        public RenderRangeType RenderRangeType
-        {
-            get { return renderRangeType; }
-            set { SetProperty(ref renderRangeType, value); }
-        }
+        [ReactiveProperty]
+        public partial RenderRangeType RenderRangeType { get; set; }
 
-        private Time beginTime;
-        public Time BeginTime
-        {
-            get { return beginTime; }
-            set { SetProperty(ref beginTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time BeginTime { get; set; }
 
-        private Time endTime;
-        public Time EndTime
-        {
-            get { return endTime; }
-            set { SetProperty(ref endTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time EndTime { get; set; }
 
-        private Time fixedBeginTime;
-        public Time FixedBeginTime
-        {
-            get { return fixedBeginTime; }
-            set { SetProperty(ref fixedBeginTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time FixedBeginTime { get; set; }
 
-        private Time fixedEndTime;
-        public Time FixedEndTime
-        {
-            get { return fixedEndTime; }
-            set { SetProperty(ref fixedEndTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time FixedEndTime { get; set; }
 
-        private bool isOutputVideo;
-        public bool IsOutputVideo
-        {
-            get { return isOutputVideo; }
-            set { SetProperty(ref isOutputVideo, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsOutputVideo { get; set; }
 
-        private bool isOutputAudio;
-        public bool IsOutputAudio
-        {
-            get { return isOutputAudio; }
-            set { SetProperty(ref isOutputAudio, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsOutputAudio { get; set; }
 
-        private Guid outputPluginId;
-        public Guid OutputPluginId
-        {
-            get { return outputPluginId; }
-            set { SetProperty(ref outputPluginId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid OutputPluginId { get; set; }
 
-        private string outputPluginName = "";
-        public string OutputPluginName
-        {
-            get { return outputPluginName; }
-            set { SetProperty(ref outputPluginName, value); }
-        }
+        [ReactiveProperty]
+        public partial string OutputPluginName { get; set; } = "";
 
-        private ExportLifetimeContext<IOutput>? output;
-        public ExportLifetimeContext<IOutput>? Output
-        {
-            get { return output; }
-            set { SetProperty(ref output, value); }
-        }
+        [ReactiveProperty]
+        public partial ExportLifetimeContext<IOutput>? Output { get; set; }
 
-        private RenderQueueItemState state;
-        public RenderQueueItemState State
-        {
-            get { return state; }
-            set { SetProperty(ref state, value); }
-        }
+        [ReactiveProperty]
+        public partial RenderQueueItemState State { get; set; }
 
-        private TimeSpan renderingTime;
-        public TimeSpan RenderingTime
-        {
-            get { return renderingTime; }
-            set { SetProperty(ref renderingTime, value); }
-        }
+        [ReactiveProperty]
+        public partial TimeSpan RenderingTime { get; set; }
 
-        private string compositionName = "";
-        public string CompositionName
-        {
-            get { return compositionName; }
-            set { SetProperty(ref compositionName, value); }
-        }
+        [ReactiveProperty]
+        public partial string CompositionName { get; set; }
 
-        private Time compositionWorkareaBegin;
-        public Time CompositionWorkareaBegin
-        {
-            get { return compositionWorkareaBegin; }
-            set { SetProperty(ref compositionWorkareaBegin, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CompositionWorkareaBegin { get; set; }
 
-        private Time compositionWorkareaEnd;
-        public Time CompositionWorkareaEnd
-        {
-            get { return compositionWorkareaEnd; }
-            set { SetProperty(ref compositionWorkareaEnd, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CompositionWorkareaEnd { get; set; }
 
-        private Time compositionDuration;
-        public Time CompositionDuration
-        {
-            get { return compositionDuration; }
-            set { SetProperty(ref compositionDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CompositionDuration { get; set; }
 
-        private double compositionFrameRate;
-        public double CompositionFrameRate
-        {
-            get { return compositionFrameRate; }
-            set { SetProperty(ref compositionFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double CompositionFrameRate { get; set; }
 
         public CompositionModel CompositionModel { get; }
 
@@ -302,8 +224,8 @@ namespace NiVE3.Model
             dispatcher.Invoke(() => State = RenderQueueItemState.Rendering);
 
             var plugin = Output.Value;
-            var size = isOutputVideo ? new Int32Size(CompositionModel.Width, CompositionModel.Height) : (Int32Size?)null;
-            var sourceTypes = (isOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && isOutputAudio ? SourceType.Audio : SourceType.None);
+            var size = IsOutputVideo ? new Int32Size(CompositionModel.Width, CompositionModel.Height) : (Int32Size?)null;
+            var sourceTypes = (IsOutputVideo ? SourceType.Video : SourceType.None) | (CompositionModel.HasAudio && IsOutputAudio ? SourceType.Audio : SourceType.None);
             var frameRate = CompositionModel.FrameRate;
             var frameDuration = CompositionModel.FrameDuration;
             var (beginTime, endTime) = GetTimeRange();
@@ -312,7 +234,7 @@ namespace NiVE3.Model
             try
             {
                 using var propertyCache = PropertyValueCache.Start();
-                plugin.BeginOutput(filePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
+                plugin.BeginOutput(FilePath, beginTime, endTime - beginTime, frameRate, size, sourceTypes);
 
                 if (sourceTypes.HasFlag(SourceType.Audio))
                 {

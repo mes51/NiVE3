@@ -10,90 +10,48 @@ using NiVE3.Mvvm;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.ViewModel;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
 {
-    class PlayControllerModel : BindableBase, IDisposable
+    [UseReactiveProperty]
+    partial class PlayControllerModel : BindableBase, IDisposable
     {
         const int RealFrameRateAvgCount = 5;
 
-        private Time currentTime;
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CurrentTime { get; set; }
 
-        private double frameRate;
-        public double FrameRate
-        {
-            get { return frameRate; }
-            set { SetProperty(ref frameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double FrameRate { get; set; }
 
-        private Time workareaBegin;
-        public Time WorkareaBegin
-        {
-            get { return workareaBegin; }
-            set { SetProperty(ref workareaBegin, value); }
-        }
+        [ReactiveProperty]
+        public partial Time WorkareaBegin { get; set; }
 
-        private Time workareaEnd;
-        public Time WorkareaEnd
-        {
-            get { return workareaEnd; }
-            set { SetProperty(ref workareaEnd, value); }
-        }
+        [ReactiveProperty]
+        public partial Time WorkareaEnd { get; set; }
 
-        private Time duration;
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; set; }
 
-        private bool isPlaying;
-        public bool IsPlaying
-        {
-            get { return isPlaying; }
-            set { SetProperty(ref isPlaying, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsPlaying { get; set; }
 
-        private bool isPaused;
-        public bool IsPaused
-        {
-            get { return isPaused; }
-            set { SetProperty(ref isPaused, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsPaused { get; set; }
 
-        private bool isRenderingRamPreview;
-        public bool IsRenderingRamPreview
-        {
-            get { return isRenderingRamPreview; }
-            set { SetProperty(ref isRenderingRamPreview, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsRenderingRamPreview { get; set; }
 
-        private bool useRamPreview;
-        public bool UseRamPreview
-        {
-            get { return useRamPreview; }
-            set { SetProperty(ref useRamPreview, value); }
-        }
+        [ReactiveProperty]
+        public partial bool UseRamPreview { get; set; }
 
-        private Time ramPreviewRenderedWorkareaEnd;
-        public Time RamPreviewRenderedWorkareaEnd
-        {
-            get { return ramPreviewRenderedWorkareaEnd; }
-            set { SetProperty(ref ramPreviewRenderedWorkareaEnd, value); }
-        }
+        [ReactiveProperty]
+        public partial Time RamPreviewRenderedWorkareaEnd { get; set; }
 
-        private double realFrameRate = -1.0;
-        public double RealFrameRate
-        {
-            get { return realFrameRate; }
-            private set { SetProperty(ref realFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double RealFrameRate { get; set; } = -1.0;
 
         public Time FrameDuration => FrameRate > 0.0 ? new Time(1, FrameRate) : Time.Zero;
 

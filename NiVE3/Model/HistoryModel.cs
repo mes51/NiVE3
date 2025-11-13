@@ -4,32 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Mvvm;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
-    class HistoryModel : BindableBase
+    [UseReactiveProperty]
+    partial class HistoryModel : BindableBase
     {
-        private ObservableStack<IHistoryCommand> undoCommands = new ObservableStack<IHistoryCommand>();
-        public ObservableStack<IHistoryCommand> UndoCommands
-        {
-            get { return undoCommands; }
-            set { SetProperty(ref undoCommands, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableStack<IHistoryCommand> UndoCommands { get; set; } = [];
 
-        private ObservableStack<IHistoryCommand> redoCommands = new ObservableStack<IHistoryCommand>();
-        public ObservableStack<IHistoryCommand> RedoCommands
-        {
-            get { return redoCommands; }
-            set { SetProperty(ref redoCommands, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableStack<IHistoryCommand> RedoCommands { get; set; } = [];
 
-        private bool isChanging;
-        public bool IsChanging
-        {
-            get { return isChanging; }
-            set { SetProperty(ref isChanging, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsChanging { get; set; }
 
         GroupedHistoryCommand? CurrentGroup { get; set; }
 

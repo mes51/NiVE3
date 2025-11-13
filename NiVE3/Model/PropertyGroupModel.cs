@@ -19,46 +19,32 @@ using System.ComponentModel;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Cache;
 using NiVE3.Data.Json.Preset;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using System.Text.Json;
 using System.IO;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class PropertyGroupModel : BindableBase, IPropertyModel
     {
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; }
 
         public Time SourceStartPoint { get; set; }
 
-        private bool isEnabled = true;
-        public bool IsEnable
-        {
-            get { return isEnabled; }
-            set { SetProperty(ref isEnabled, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnable { get; set; } = true;
 
         public Guid InstanceId { get; }
 
         public ObservableCollection<KeyFrame>? KeyFrames => null;
 
-        private ObservableCollection<IPropertyModel> children = [];
-        public ObservableCollection<IPropertyModel> Children
-        {
-            get { return children; }
-            set { SetProperty(ref children, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<IPropertyModel> Children { get; set; } = [];
 
-        private bool parentLayerIsLock;
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ParentLayerIsLock { get; set; }
 
         public PropertyBase Property { get; }
 

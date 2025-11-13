@@ -41,9 +41,11 @@ using NiVE3.Property;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class LayerModel : WeakPropertyChangedBindingBase, IDisposable, ILayerObject, IFootageSourceUsingLayerObject
     {
         const string TransformGroupId = nameof(TransformGroupId);
@@ -58,229 +60,101 @@ namespace NiVE3.Model
 
         const string AudioOptionGroupId = nameof(AudioOptionGroupId);
 
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
-        private string comment = "";
-        public string Comment
-        {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
-        }
+        [ReactiveProperty]
+        public partial string Comment { get; set; } = "";
 
-        private Time sourceDuration;
-        public Time SourceDuration
-        {
-            get { return sourceDuration; }
-            set { SetProperty(ref sourceDuration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time SourceDuration { get; set; }
 
-        private Time duration;
-        public Time Duration
-        {
-            get { return duration; }
-            set { SetProperty(ref duration, value); }
-        }
+        [ReactiveProperty]
+        public partial Time Duration { get; set; }
 
-        private Time sourceStartPoint;
-        public Time SourceStartPoint
-        {
-            get { return sourceStartPoint; }
-            set { SetProperty(ref sourceStartPoint, value); }
-        }
+        [ReactiveProperty]
+        public partial Time SourceStartPoint { get; set; }
 
-        private Time inPoint;
-        public Time InPoint
-        {
-            get { return inPoint; }
-            set { SetProperty(ref inPoint, value); }
-        }
+        [ReactiveProperty]
+        public partial Time InPoint { get; set; }
 
-        private Time outPoint;
-        public Time OutPoint
-        {
-            get { return outPoint; }
-            set { SetProperty(ref outPoint, value); }
-        }
+        [ReactiveProperty]
+        public partial Time OutPoint { get; set; }
 
-        private bool isEnableTimeRemap;
-        public bool IsEnableTimeRemap
-        {
-            get { return isEnableTimeRemap; }
-            set { SetProperty(ref isEnableTimeRemap, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableTimeRemap { get; set; }
 
-        private bool isFreezeFrame;
-        public bool IsFreezeFrame
-        {
-            get { return isFreezeFrame; }
-            set { SetProperty(ref isFreezeFrame, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsFreezeFrame { get; set; }
 
-        private Time freezeFrameTime;
-        public Time FreezeFrameTime
-        {
-            get { return freezeFrameTime; }
-            set { SetProperty(ref freezeFrameTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time FreezeFrameTime { get; set; }
 
-        private SourceType sourceType;
-        public SourceType SourceType
-        {
-            get { return sourceType; }
-            set { SetProperty(ref sourceType, value); }
-        }
+        [ReactiveProperty]
+        public partial SourceType SourceType { get; set; }
 
-        private Color tagColor = Colors.Red;
-        public Color TagColor
-        {
-            get { return tagColor; }
-            set { SetProperty(ref tagColor, value); }
-        }
+        [ReactiveProperty]
+        public partial Color TagColor { get; set; } = Colors.Red;
 
-        private double playRate = 100.0;
-        public double PlayRate
-        {
-            get { return playRate; }
-            set { SetProperty(ref playRate, value); }
-        }
+        [ReactiveProperty]
+        public partial double PlayRate { get; set; } = 100.0;
 
-        private bool isEnableVideo;
-        public bool IsEnableVideo
-        {
-            get { return isEnableVideo; }
-            set { SetProperty(ref isEnableVideo, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableVideo { get; set; }
 
-        private bool isEnableAudio;
-        public bool IsEnableAudio
-        {
-            get { return isEnableAudio; }
-            set { SetProperty(ref isEnableAudio, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableAudio { get; set; }
 
-        private bool isEnableSolo;
-        public bool IsEnableSolo
-        {
-            get { return isEnableSolo; }
-            set { SetProperty(ref isEnableSolo, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableSolo { get; set; }
 
-        private bool isLock;
-        public bool IsLock
-        {
-            get { return isLock; }
-            set { SetProperty(ref isLock, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsLock { get; set; }
 
-        private bool isEnableShy;
-        public bool IsEnableShy
-        {
-            get { return isEnableShy; }
-            set { SetProperty(ref isEnableShy, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableShy { get; set; }
 
-        private bool isEnableCollapse;
-        public bool IsEnableCollapse
-        {
-            get { return isEnableCollapse; }
-            set { SetProperty(ref isEnableCollapse, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableCollapse { get; set; }
 
-        private bool isEnableEffect = true;
-        public bool IsEnableEffect
-        {
-            get { return isEnableEffect; }
-            set { SetProperty(ref isEnableEffect, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableEffect { get; set; } = true;
 
-        private bool isEnableFrameBlend;
-        public bool IsEnableFrameBlend
-        {
-            get { return isEnableFrameBlend; }
-            set { SetProperty(ref isEnableFrameBlend, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableFrameBlend { get; set; }
 
-        private bool isEnableMotionBlur;
-        public bool IsEnableMotionBlur
-        {
-            get { return isEnableMotionBlur; }
-            set { SetProperty(ref isEnableMotionBlur, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableMotionBlur { get; set; }
 
-        private bool isEnableAdjustmentLayer;
-        public bool IsEnableAdjustmentLayer
-        {
-            get { return isEnableAdjustmentLayer; }
-            set { SetProperty(ref isEnableAdjustmentLayer, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnableAdjustmentLayer { get; set; }
 
-        private bool isEnable3D;
-        public bool IsEnable3D
-        {
-            get { return isEnable3D; }
-            set { SetProperty(ref isEnable3D, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnable3D { get; set; }
 
-        private ImageInterpolationQuality interpolationQuality = ImageInterpolationQuality.Level2;
-        public ImageInterpolationQuality InterpolationQuality
-        {
-            get { return interpolationQuality; }
-            set { SetProperty(ref interpolationQuality, value); }
-        }
+        [ReactiveProperty]
+        public partial ImageInterpolationQuality InterpolationQuality { get; set; } = ImageInterpolationQuality.Level2;
 
-        private bool hasEffect;
-        public bool HasEffect
-        {
-            get { return hasEffect; }
-            set { SetProperty(ref hasEffect, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasEffect { get; private set; }
 
-        private bool hasNonDummyEffect;
-        public bool HasNonDummyEffect
-        {
-            get { return hasNonDummyEffect; }
-            set { SetProperty(ref hasNonDummyEffect, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasNonDummyEffect { get; private set; }
 
-        private bool hasMask;
-        public bool HasMask
-        {
-            get { return hasMask; }
-            set { SetProperty(ref hasMask, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasMask { get; private set; }
 
-        private BlendMode blendMode = BlendMode.Normal;
-        public BlendMode BlendMode
-        {
-            get { return blendMode; }
-            set { SetProperty(ref blendMode, value); }
-        }
+        [ReactiveProperty]
+        public partial BlendMode BlendMode { get; set; } = BlendMode.Normal;
 
-        private Guid? trackMatteLayerId;
-        public Guid? TrackMatteLayerId
-        {
-            get { return trackMatteLayerId; }
-            set { SetProperty(ref trackMatteLayerId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid? TrackMatteLayerId { get; set; }
 
-        private TrackMatteMode trackMatteMode = TrackMatteMode.Alpha;
-        public TrackMatteMode TrackMatteMode
-        {
-            get { return trackMatteMode; }
-            set { SetProperty(ref trackMatteMode, value); }
-        }
+        [ReactiveProperty]
+        public partial TrackMatteMode TrackMatteMode { get; set; } = TrackMatteMode.Alpha;
 
-        private Guid? parentLayerId;
-        public Guid? ParentLayerId
-        {
-            get { return parentLayerId; }
-            set { SetProperty(ref parentLayerId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid? ParentLayerId { get; set; }
 
         public Guid LayerId { get; }
 
@@ -326,31 +200,29 @@ namespace NiVE3.Model
 
         public Guid FootageId => FootageModel.FootageId;
 
-        private ObservableCollection<EffectModel> effects = [];
         public ObservableCollection<EffectModel> Effects
         {
-            get { return effects; }
+            get;
             set
             {
-                effects.CollectionChanged -= Effects_CollectionChanged;
+                field.CollectionChanged -= Effects_CollectionChanged;
                 value.CollectionChanged += Effects_CollectionChanged;
 
-                SetProperty(ref effects, value);
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
-        private ObservableCollection<MaskModel> masks = [];
         public ObservableCollection<MaskModel> Masks
         {
-            get { return masks; }
+            get;
             set
             {
-                masks.CollectionChanged -= Masks_CollectionChanged;
+                field.CollectionChanged -= Masks_CollectionChanged;
                 value.CollectionChanged += Masks_CollectionChanged;
 
-                SetProperty(ref masks, value);
+                SetProperty(ref field, value);
             }
-        }
+        } = [];
 
         public PropertyGroupModel? TransformProperties { get; set; }
 
@@ -1044,7 +916,7 @@ namespace NiVE3.Model
         public bool IsContainsTime(Time time)
         {
             var layerTime = time - SourceStartPoint;
-            return layerTime >= inPoint && layerTime < OutPoint;
+            return layerTime >= InPoint && layerTime < OutPoint;
         }
 
         public bool IsContainsTimeRange(Time begin, Time end)
@@ -1970,7 +1842,7 @@ namespace NiVE3.Model
         {
             if ((LayerOptionProperties?.HasCompositionDependProperty() ?? false) ||
                 (SourceOptionProperties?.HasCompositionDependProperty() ?? false) ||
-                effects.Any(e => e.UseCompositionCamera || e.HasCompositionDependProperty()))
+                Effects.Any(e => e.UseCompositionCamera || e.HasCompositionDependProperty()))
             {
                 ImageCache.Clear(LayerId);
             }

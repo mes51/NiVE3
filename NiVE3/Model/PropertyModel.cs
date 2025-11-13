@@ -24,9 +24,11 @@ using Jint.Runtime;
 using Acornima;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Cache;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class PropertyModel : BindableBase, IPropertyModel
     {
         public const string RawValueUpdateKey = nameof(RawValue);
@@ -35,80 +37,47 @@ namespace NiVE3.Model
 
         public bool IsEnable => true;
 
-        private Time sourceStartPoint;
-        public Time SourceStartPoint
-        {
-            get { return sourceStartPoint; }
-            set { SetProperty(ref sourceStartPoint, value); }
-        }
+        [ReactiveProperty]
+        public partial Time SourceStartPoint { get; set; }
 
-        private Time currentTime;
-        public Time CurrentTime
-        {
-            get { return currentTime; }
-            set { SetProperty(ref currentTime, value); }
-        }
+        [ReactiveProperty]
+        public partial Time CurrentTime { get; set; }
 
-        private ObservableCollection<KeyFrame> keyFrames = [];
-        public ObservableCollection<KeyFrame> KeyFrames
-        {
-            get { return keyFrames; }
-            set { SetProperty(ref keyFrames, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<KeyFrame> KeyFrames { get; set; } = [];
 
-        private bool useExpression;
-        public bool UseExpression
-        {
-            get { return useExpression; }
-            set { SetProperty(ref useExpression, value); }
-        }
+        [ReactiveProperty]
+        public partial bool UseExpression { get; set; }
 
-        private bool useEditingValue;
-        public bool UseEditingValue
-        {
-            get { return useEditingValue; }
-            set { SetProperty(ref useEditingValue, value); }
-        }
+        [ReactiveProperty]
+        public partial bool UseEditingValue { get; set; }
 
-        private string expressionCode = "";
         public string ExpressionCode
         {
-            get { return expressionCode; }
+            get;
             set
             {
-                var oldIsEmpty = string.IsNullOrEmpty(expressionCode);
+                var oldIsEmpty = string.IsNullOrEmpty(field);
                 if (!oldIsEmpty && string.IsNullOrEmpty(value))
                 {
                     HistoryModel.HistoryChanged -= HistoryModel_HistoryChanged;
                 }
-                SetProperty(ref expressionCode, value);
+                SetProperty(ref field, value);
                 if (oldIsEmpty && !string.IsNullOrEmpty(value))
                 {
                     HistoryModel.HistoryChanged += HistoryModel_HistoryChanged;
                 }
             }
-        }
+        } = "";
 
-        private string expressionErrorMessage = "";
-        public string ExpressionErrorMessage
-        {
-            get { return expressionErrorMessage; }
-            set { SetProperty(ref expressionErrorMessage, value); }
-        }
+        [ReactiveProperty]
+        public partial string ExpressionErrorMessage { get; set; } = "";
 
-        private SourceLocation expressionErrorSourceLocation;
-        public SourceLocation ExpressionErrorSourceLocation
-        {
-            get { return expressionErrorSourceLocation; }
-            set { SetProperty(ref expressionErrorSourceLocation, value); }
-        }
+        [ReactiveProperty]
+        public partial SourceLocation ExpressionErrorSourceLocation { get; set; }
 
-        private bool parentLayerIsLock;
-        public bool ParentLayerIsLock
-        {
-            get { return parentLayerIsLock; }
-            set { SetProperty(ref parentLayerIsLock, value); }
-        }
+        [ReactiveProperty]
+        public partial bool ParentLayerIsLock { get; set; }
 
         public ObservableCollection<IPropertyModel>? Children => null;
 
@@ -135,12 +104,8 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? ValueInvalidateByHistoryChanged;
 
-        private object? rawValue;
-        object? RawValue
-        {
-            get { return rawValue; }
-            set { SetProperty(ref rawValue, value); }
-        }
+        [ReactiveProperty]
+        private partial object? RawValue { get; set; }
 
         ProjectModel ProjectModel { get; }
 

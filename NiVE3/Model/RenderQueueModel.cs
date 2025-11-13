@@ -15,10 +15,12 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Util;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class RenderQueueModel : BindableBase
     {
         [GeneratedRegex("_([0-9]+)", RegexOptions.Compiled)]
@@ -26,61 +28,29 @@ namespace NiVE3.Model
 
         const int EtaRingBufferSize = 30;
 
-        private ObservableCollection<RenderQueueItemModel> items = [];
-        public ObservableCollection<RenderQueueItemModel> Items
-        {
-            get { return items; }
-            set { SetProperty(ref items, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<RenderQueueItemModel> Items { get; set; } = [];
 
-        private double progress;
-        public double Progress
-        {
-            get { return progress; }
-            set { SetProperty(ref progress, value); }
-        }
+        [ReactiveProperty]
+        public partial double Progress { get; set; }
 
-        private int renderedFrameCount;
-        public int RenderedFrameCount
-        {
-            get { return renderedFrameCount; }
-            set { SetProperty(ref renderedFrameCount, value); }
-        }
+        [ReactiveProperty]
+        public partial int RenderedFrameCount { get; set; }
 
-        private int totalFrameCount;
-        public int TotalFrameCount
-        {
-            get { return totalFrameCount; }
-            set { SetProperty(ref totalFrameCount, value); }
-        }
+        [ReactiveProperty]
+        public partial int TotalFrameCount { get; set; }
 
-        private bool isRendering;
-        public bool IsRendering
-        {
-            get { return isRendering; }
-            set { SetProperty(ref isRendering, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsRendering { get; set; }
 
-        private bool isPaused;
-        public bool IsPaused
-        {
-            get { return isPaused; }
-            set { SetProperty(ref isPaused, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsPaused { get; set; }
 
-        private bool isAborting;
-        public bool IsAborting
-        {
-            get { return isAborting; }
-            set { SetProperty(ref isAborting, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsAborting { get; set; }
 
-        private TimeSpan eta;
-        public TimeSpan Eta
-        {
-            get { return eta; }
-            set { SetProperty(ref eta, value); }
-        }
+        [ReactiveProperty]
+        public partial TimeSpan Eta { get; set; }
 
         public event EventHandler? RenderQueueItemAdded;
 
@@ -220,7 +190,7 @@ namespace NiVE3.Model
                             });
                         },
                         () => IsPaused,
-                        () => isAborting
+                        () => IsAborting
                     );
 
                     if (IsAborting)

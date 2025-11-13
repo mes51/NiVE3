@@ -24,10 +24,12 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class FootageListModel : BindableBase
     {
         public IReadOnlyDictionary<Type, IInputMetadata> InputMetadatas { get; private set; } = new Dictionary<Type, IInputMetadata>();
@@ -35,26 +37,14 @@ namespace NiVE3.Model
         [ImportMany]
         List<ExportFactory<IInput, IInputMetadata>>? Inputs { get; set; }
 
-        private ObservableCollection<IFootageModel> footages = [];
-        public ObservableCollection<IFootageModel> Footages
-        {
-            get { return footages; }
-            set { SetProperty(ref footages, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<IFootageModel> Footages { get; set; } = [];
 
-        private FootageSortKey sortKey = FootageSortKey.Name;
-        public FootageSortKey SortKey
-        {
-            get { return sortKey; }
-            set { SetProperty(ref sortKey, value); }
-        }
+        [ReactiveProperty]
+        public partial FootageSortKey SortKey { get; set; } = FootageSortKey.Name;
 
-        private bool sortIsAscending = true;
-        public bool SortIsAscending
-        {
-            get { return sortIsAscending; }
-            set { SetProperty(ref sortIsAscending, value); }
-        }
+        [ReactiveProperty]
+        public partial bool SortIsAscending { get; set; } = true;
 
         public FootageModel CameraFootage { get; }
 
@@ -109,8 +99,6 @@ namespace NiVE3.Model
             HistoryModel = historyModel;
             ViewState = viewState;
             ProceduralInputListModel = proceduralInputListModel;
-
-            //TODO: イベントの追加方法をfieldに対し行うか、nullableにした上でコンストラクタでインスタンスをセットするのが良いか
             Footages = [];
 
             PropertyChanged += FootageListModel_PropertyChanged;

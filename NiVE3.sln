@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33205.214
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3", "NiVE3\NiVE3.csproj", "{1E1E55E1-8C64-43CE-A204-6AA3DFC56B7B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -36,6 +36,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiVE3.InternalShader", "NiVE3.InternalShader\NiVE3.InternalShader.csproj", "{BBDCAF4F-5DB5-4135-B574-55B380DD212C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.Shape", "NiVE3.Shape\NiVE3.Shape.csproj", "{580D6A1B-668F-443A-88EE-5F4538F7763B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiVE3.SourceGenerator.ReactivePropertyGenerator", "NiVE3.SourceGenerator.ReactivePropertyGenerator\NiVE3.SourceGenerator.ReactivePropertyGenerator.csproj", "{EF6A1D49-9E23-449E-8D6E-EE30C1FE42EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{580D6A1B-668F-443A-88EE-5F4538F7763B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF6A1D49-9E23-449E-8D6E-EE30C1FE42EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF6A1D49-9E23-449E-8D6E-EE30C1FE42EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF6A1D49-9E23-449E-8D6E-EE30C1FE42EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF6A1D49-9E23-449E-8D6E-EE30C1FE42EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -23,10 +23,12 @@ using NiVE3.View.Resource;
 using Prism.Mvvm;
 using SixLabors.ImageSharp.Drawing;
 using NiVE3.Property;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.Model
 {
+    [UseReactiveProperty]
     partial class MaskModel : BindableBase, IMaskObject
     {
         const string PropertyMaskSettingId = nameof(PropertyMaskSettingId);
@@ -49,19 +51,11 @@ namespace NiVE3.Model
 
         public Guid MaskId { get; }
 
-        private string name = "";
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        [ReactiveProperty]
+        public partial string Name { get; set; } = "";
 
-        private bool isEnable = true;
-        public bool IsEnable
-        {
-            get { return isEnable; }
-            set { SetProperty(ref isEnable, value); }
-        }
+        [ReactiveProperty]
+        public partial bool IsEnable { get; set; } = true;
 
         public bool IsBezierPath { get; }
 

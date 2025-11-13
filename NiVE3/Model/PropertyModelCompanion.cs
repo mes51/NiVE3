@@ -10,6 +10,7 @@ using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property;
 using NiVE3.Mvvm;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.Plugin.ValueObject;
 using System.Collections.Specialized;
 
@@ -84,48 +85,29 @@ namespace NiVE3.Model
         }
     }
 
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true, KeepStrongReferenceBinder = true)]
     partial class LayerViewModelProxy : WeakPropertyChangedBindingBase, ILayerViewModel
     {
-        private Guid layerId;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public Guid LayerId
-        {
-            get { return layerId; }
-            set { SetProperty(ref layerId, value); }
-        }
+        public partial Guid LayerId { get; set; }
 
-        private bool isEnable3D;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public bool IsEnable3D
-        {
-            get { return isEnable3D; }
-            set { SetProperty(ref isEnable3D, value); }
-        }
+        public partial bool IsEnable3D { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-        private string sourceName = "";
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public string SourceName
-        {
-            get { return sourceName; }
-            set { SetProperty(ref sourceName, value); }
-        }
+        public partial string SourceName { get; set; } = "";
 
-        private SourceType sourceType;
+        [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public SourceType SourceType
-        {
-            get { return sourceType; }
-            set { SetProperty(ref sourceType, value); }
-        }
+        public partial SourceType SourceType { get; set; }
 
         public IReadOnlyCollection<IEffectViewModel> EffectViewModels { get; }
 
@@ -146,28 +128,19 @@ namespace NiVE3.Model
         partial void WiringModel();
     }
 
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class EffectViewModelProxy : WeakPropertyChangedBindingBase, IEffectViewModel
     {
-        private Guid effectId;
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public Guid EffectId
-        {
-            get { return effectId; }
-            set { SetProperty(ref effectId, value); }
-        }
+        public partial Guid EffectId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(EffectModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-#pragma warning disable IDE0052 // 読み取られていないプライベート メンバーを削除
         EffectModel EffectModel { get; }
-#pragma warning restore IDE0052 // 読み取られていないプライベート メンバーを削除
 
         public EffectViewModelProxy(EffectModel effectModel)
         {
@@ -179,28 +152,19 @@ namespace NiVE3.Model
         partial void WiringModel();
     }
 
+    [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class MaskViewModelProxy : WeakPropertyChangedBindingBase, IMaskViewModel
     {
-        private Guid maskId;
+        [ReactiveProperty]
         [NeedWire(nameof(MaskModel), IsOneWay = true)]
-        public Guid MaskId
-        {
-            get { return maskId; }
-            set { SetProperty(ref maskId, value); }
-        }
+        public partial Guid MaskId { get; set; }
 
-        private string name = "";
+        [ReactiveProperty]
         [NeedWire(nameof(MaskModel), IsOneWay = true)]
-        public string Name
-        {
-            get { return name; }
-            set { SetProperty(ref name, value); }
-        }
+        public partial string Name { get; set; } = "";
 
-#pragma warning disable IDE0052 // 読み取られていないプライベート メンバーを削除
         MaskModel MaskModel { get; }
-#pragma warning restore IDE0052 // 読み取られていないプライベート メンバーを削除
 
         public MaskViewModelProxy(MaskModel maskModel)
         {

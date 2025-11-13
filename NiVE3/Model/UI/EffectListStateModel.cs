@@ -6,25 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Plugin.Resource;
 using NiVE3.View.Resource;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
 {
-    class EffectListStateModel : BindableBase
+    [UseReactiveProperty]
+    partial class EffectListStateModel : BindableBase
     {
-        private Guid? recentUsedEffectId;
-        public Guid? RecentUsedEffectId
-        {
-            get { return recentUsedEffectId; }
-            set { SetProperty(ref recentUsedEffectId, value); }
-        }
+        [ReactiveProperty]
+        public partial Guid? RecentUsedEffectId { get; set; }
 
-        private ObservableCollection<EffectItem> effects = [];
-        public ObservableCollection<EffectItem> Effects
-        {
-            get { return effects; }
-            set { SetProperty(ref effects, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<EffectItem> Effects { get; set; } = [];
 
         EffectListModel EffectListModel { get; }
 
