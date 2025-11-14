@@ -7,7 +7,6 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>14</LangVersion>
     <Authors>mes</Authors>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <Product>NicoVisualEffects 3</Product>

@@ -80,7 +80,7 @@ namespace NiVE3.Image
         public override Vector4[] GetData()
         {
             var result = ArrayPool<Vector4>.Shared.Rent(DataLength);
-            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result);
+            var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result.AsSpan());
             Data.CopyTo(float4Data[..DataLength]);
 
             return result;

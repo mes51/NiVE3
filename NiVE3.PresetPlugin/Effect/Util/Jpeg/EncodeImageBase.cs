@@ -45,7 +45,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
             Coefficient = new Vector256<float>[Mcu.LineSize];
             CoefficientTransposed = new Vector256<float>[Mcu.LineSize];
 
-            var coefficient = MemoryMarshal.Cast<Vector256<float>, float>(Coefficient);
+            var coefficient = MemoryMarshal.Cast<Vector256<float>, float>(Coefficient.AsSpan());
             for (int y = 0, pos = 0; y < Mcu.LineSize; y++)
             {
                 for (var x = 0; x < Mcu.LineSize; x++, pos++)
@@ -58,7 +58,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Jpeg
                 }
             }
 
-            var coeffTFloat = MemoryMarshal.Cast<Vector256<float>, float>(CoefficientTransposed);
+            var coeffTFloat = MemoryMarshal.Cast<Vector256<float>, float>(CoefficientTransposed.AsSpan());
             for (int y = 0, pos = 0; y < Mcu.LineSize; y++)
             {
                 for (var x = 0; x < Mcu.LineSize; x++, pos++)

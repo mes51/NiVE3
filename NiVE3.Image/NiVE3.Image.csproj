@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	<UseWPF>true</UseWPF>
-    <LangVersion>13</LangVersion>
     <Authors>mes</Authors>
     <Copyright>Copyright © mes 2022 - 2025</Copyright>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>

@@ -152,7 +152,7 @@ namespace NiVE3.PresetPlugin.Internal.IO
         public char[] ReadChars(int length)
         {
             var result = new char[length];
-            var buffer = MemoryMarshal.Cast<char, byte>(result);
+            var buffer = MemoryMarshal.Cast<char, byte>(result.AsSpan());
             Read(buffer);
 
             for (var i = 0; i < buffer.Length; i += sizeof(char))

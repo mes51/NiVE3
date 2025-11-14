@@ -81,7 +81,7 @@ namespace NiVE3.PresetPlugin.Property.Types
             var result = new float[GraphValueParameter.ValueCount];
             parameter.Values.AsSpan().CopyTo(result);
 
-            return MemoryMarshal.Cast<float, byte>(result);
+            return MemoryMarshal.Cast<float, byte>(result.AsSpan());
         }
 
         public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
