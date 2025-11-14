@@ -37,6 +37,17 @@
 	  <ProjectReference Include="..\SharpAvi\SharpAvi\SharpAvi.csproj" />
   </ItemGroup>
 
+	<!-- Workaround for https://github.com/dotnet/wpf/issues/11246 -->
+	<!-- NOTE: .NET側で修正が来たら削除する -->
+	<Target Name="FixWpfReferences" AfterTargets="ResolveTargetingPackAssets" Condition="'$(UseWPF)' == 'true'">
+		<ItemGroup>
+			<SystemPrivateWindowsCoreRef Include="@(Reference)" Condition="'%(Filename)' == 'System.Private.Windows.Core'" />
+			<ReferencePath Include="@(SystemPrivateWindowsCoreRef->'%(RootDir)%(Directory)System.Private.Windows.GdiPlus.dll')">
+				<AssemblyName>System.Private.Windows.GdiPlus</AssemblyName>
+			</ReferencePath>
+		</ItemGroup>
+	</Target>
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net8.0-windows7.0\Plugins\&quot;&#xD;&#xA;copy &quot;$(TargetDir)\*.*&quot; &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\Plugins\&quot;" />
   </Target>
