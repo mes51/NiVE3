@@ -536,7 +536,7 @@ namespace NiVE3.ViewModel
 
             BeginEditNameCommand = new DelegateCommand(() =>
             {
-                if (SelectedShortcutCommandTarget == null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
+                if (SelectedShortcutCommandTarget == null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.First().BeginEditNameCommand.CanExecute(null))
                 {
                     SelectedLayers.First().BeginEditNameCommand.Execute(null);
                 }
@@ -548,15 +548,15 @@ namespace NiVE3.ViewModel
                         targetChild.BeginEditNameCommand.Execute(null);
                     }
                 }
-            }, () => SelectedShortcutCommandTarget != null || SelectedLayers.Count > 0)
+            }, () => SelectedShortcutCommandTarget != null || (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => SelectedShortcutCommandTarget)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count); // NOTE: ここは実際には値を参照せず、式木を受け取るだけなので!の使用を許可する
 
             ChangeWorkareaCommand = new DelegateCommand<Tuple<Time, Time>>(t => CompositionModel?.ChangeWorkarea(t.Item1, t.Item2));
 
             AddSolidLayerCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || Layers == null)
+                if (CompositionModel == null || Layers == null || SelectedLayers == null)
                 {
                     return;
                 }
@@ -579,7 +579,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (SelectedLayers.Count > 0 && SelectedLayers.All(l => l.EditingParameter == EditingLayerParameter.None))
+                    if (SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.EditingParameter == EditingLayerParameter.None))
                     {
                         var ids = SelectedLayers.Select(l => l.LayerId).ToArray();
                         CompositionModel?.DeleteLayers(ids);
@@ -599,7 +599,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
                     }
@@ -622,7 +622,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
                     }
@@ -642,7 +642,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
                     }
@@ -676,7 +676,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
                     }
@@ -702,7 +702,7 @@ namespace NiVE3.ViewModel
                     }
 
                     CurrentEditingCompositionId = CompositionModel?.CompositionId;
-                    SelectedLayers.Clear();
+                    SelectedLayers?.Clear();
                     foreach (var layer in Layers)
                     {
                         SelectLayer(layer.LayerId, true);
@@ -721,7 +721,7 @@ namespace NiVE3.ViewModel
 
             SplitLayerCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                 {
                     return;
                 }
@@ -758,55 +758,55 @@ namespace NiVE3.ViewModel
 
             AddEffectCommand = new DelegateCommand<EffectItem>(effectItem =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.AddEffectsToLayers([..SelectedLayers.Select(l => l.LayerId)], [effectItem.PluginId]);
-            }, _ => CompositionModel != null && SelectedLayers.Count > 0)
+            }, _ => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             AddRectangleMaskCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.AddShapedMaskToLayers([..SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Rectangle);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             AddEllipseMaskCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.AddShapedMaskToLayers([..SelectedLayers.Select(l => l.LayerId)], MaskShapeType.Ellipse);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             AddBezierMaskCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.AddBezierMaskToLayers([..SelectedLayers.Select(l => l.LayerId)]);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveLayerOrderUpCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || Layers == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || Layers == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
@@ -814,13 +814,13 @@ namespace NiVE3.ViewModel
                 var firstLayer = SelectedLayers.OrderBy(Layers.IndexOf).First();
                 var newIndex = Math.Clamp(Layers.IndexOf(firstLayer) - 1, 0, Layers.Count - 1);
                 CompositionModel.MoveLayers([..SelectedLayers.Select(l => l.LayerId)], firstLayer.LayerId, newIndex);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveLayerOrderDownCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || Layers == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || Layers == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
@@ -828,117 +828,117 @@ namespace NiVE3.ViewModel
                 var lastLayer = SelectedLayers.OrderBy(Layers.IndexOf).First();
                 var newIndex = Math.Clamp(Layers.IndexOf(lastLayer) + 1, 0, Layers.Count - 1);
                 CompositionModel.MoveLayers([.. SelectedLayers.Select(l => l.LayerId)], lastLayer.LayerId, newIndex);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             ChangeLayerTagsRandomlyCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.ChangeLayerTagsRandomly([..SelectedLayers.Select(l => l.LayerId)]);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveInPointToIndicatorCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerInPoint([.. SelectedLayers.Select(l => l.LayerId)], CurrentTime);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveOutPointToIndicatorCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerOutPoint([.. SelectedLayers.Select(l => l.LayerId)], CurrentTime);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveSourceStartPointToIndicatorBaseInPointCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerSourceStartPointToInPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveSourceStartPointToIndicatorBaseOutPointCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerSourceStartPointToOutPoint([..SelectedLayers.Select(l => l.LayerId)], CurrentTime);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             ShiftSourceStartPointToNextFrameCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], FrameDuration);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             ShiftSourceStartPointToPreviousFrameCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], -FrameDuration);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             ShiftSourceStartPointToNext10FrameCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], FrameDuration * 10.0);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             ShiftSourceStartPointToPrevious10FrameCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 CompositionModel.MoveLayerSourceStartPoint([..SelectedLayers.Select(l => l.LayerId)], FrameDuration * -10.0);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             CompositionSettingCommand = new DelegateCommand(() =>
             {
@@ -1068,7 +1068,7 @@ namespace NiVE3.ViewModel
 
             MoveIndicatorToSelectLayerInPointCommand = new DelegateCommand(() =>
             {
-                if (SelectedLayers.Count < 1)
+                if (SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
@@ -1077,13 +1077,13 @@ namespace NiVE3.ViewModel
                 CurrentTime = (targetLayer.SourceStartPoint + targetLayer.InPoint).RoundToFrameRate(FrameRate);
                 TimeBarRangeStart = Time.MaxAndMin(CurrentTime - TimeBarRange * 0.5, Time.Zero, Duration - TimeBarRange);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             MoveIndicatorToSelectLayerOutPointCommand = new DelegateCommand(() =>
             {
-                if (SelectedLayers.Count < 1)
+                if (SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
@@ -1092,15 +1092,15 @@ namespace NiVE3.ViewModel
                 CurrentTime = (targetLayer.SourceStartPoint + targetLayer.OutPoint - FrameDuration).RoundToFrameRate(FrameRate);
                 TimeBarRangeStart = Time.MaxAndMin(CurrentTime - TimeBarRange * 0.5, Time.Zero, Duration - TimeBarRange);
                 CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0)
+            }, () => CompositionModel != null && (SelectedLayers?.Count ?? 0) > 0)
                 .ObservesProperty(() => CompositionModel)
-                .ObservesProperty(() => SelectedLayers.Count);
+                .ObservesProperty(() => SelectedLayers!.Count);
 
             PlayOrStopCommand = new DelegateCommand(() => EventHubModel.NotifyPlayOrStop(), () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             PlayRateChangeCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
@@ -1118,20 +1118,20 @@ namespace NiVE3.ViewModel
                 {
                     CompositionModel.ChangeLayerPlayRate([..SelectedLayers.Select(l => l.LayerId)], result.Parameters.GetValue<double>(nameof(PlayRateSettingViewModel.PlayRate)));
                 }
-            }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
+            }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
 
             ChangeLayerFreezeFrameCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1)
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
                 {
                     return;
                 }
 
                 var baseTargetLayer = SelectedLayers[0];
                 CompositionModel.ChangeFreezeFrame([..SelectedLayers.Select(l => l.LayerId)], !baseTargetLayer.IsFreezeFrame, CurrentTime);
-            }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
+            }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
 
@@ -1231,7 +1231,7 @@ namespace NiVE3.ViewModel
                 }
                 else
                 {
-                    if (CompositionModel == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
+                    if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1 && SelectedLayers.Any(l => l.EditingParameter != EditingLayerParameter.None))
                     {
                         return;
                     }
@@ -1268,7 +1268,7 @@ namespace NiVE3.ViewModel
 
             PrecomposeCommand = new DelegateCommand(() =>
             {
-                if (CompositionModel == null || SelectedLayers.Count < 1 || SelectedLayers.All(l => l.IsNotRenderable))
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1 || SelectedLayers.All(l => l.IsNotRenderable))
                 {
                     return;
                 }
@@ -1289,7 +1289,7 @@ namespace NiVE3.ViewModel
                     var copyParent = result.Parameters.GetValue<bool>(nameof(PrecomposeSettingViewModel.CopyParent));
                     CompositionModel.Precompose([..SelectedLayers.Select(l => l.LayerId)], compositionName, mode == PrecomposeMode.MoveAll, alignDuration, copyParent, LastSelectedLayerId);
                 }
-            }, () => CompositionModel != null && SelectedLayers.Count > 0 && SelectedLayers.Any(l => !l.IsNotRenderable))
+            }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.Any(l => !l.IsNotRenderable))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
 

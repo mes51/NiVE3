@@ -64,6 +64,7 @@ namespace NiVE3.Expression.Utility
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MemberNotNull(nameof(Random))]
         public void setSeed(double seed)
         {
             setSeed(seed, true, false);
@@ -71,6 +72,7 @@ namespace NiVE3.Expression.Utility
 
         [ExpressionPublicMember]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MemberNotNull(nameof(Random))]
         public void setSeed(double seed, bool isChangeByTime)
         {
             setSeed(seed, isChangeByTime, false);

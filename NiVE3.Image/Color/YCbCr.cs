@@ -17,9 +17,9 @@ namespace NiVE3.Image.Color
 
         public float Cr = Cr;
 
-#pragma warning disable IDE0040 // for cast to Vector4
+#pragma warning disable 0169 // for cast to Vector4
         readonly float Spacer;
-#pragma warning restore IDE0040
+#pragma warning restore 0169
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Vector4 ToRgb()
