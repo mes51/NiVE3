@@ -4,23 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.PresetPlugin.Internal.Mvvm;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.PresetPlugin.Internal.ViewModel
 {
-    class WaveOutputSettingViewModel : BindableBase
+    [UseReactiveProperty]
+    partial class WaveOutputSettingViewModel : BindableBase
     {
-        private int samplingRate;
-        public int SamplingRate
-        {
-            get { return samplingRate; }
-            set { SetProperty(ref samplingRate, value); }
-        }
+        [ReactiveProperty]
+        public partial int SamplingRate { get; set; }
 
-        private int bitsPerSample;
-        public int BitsPerSample
-        {
-            get { return bitsPerSample; }
-            set { SetProperty(ref bitsPerSample, value); }
-        }
+        [ReactiveProperty]
+        public partial int BitsPerSample { get; set; }
     }
 }

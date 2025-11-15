@@ -14,102 +14,52 @@ using NiVE3.PresetPlugin.Internal.Mvvm;
 using NiVE3.PresetPlugin.Output;
 using NiVE3.Shared.Extension;
 using NiVE3.UI.Command;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using SharpAvi;
 
 namespace NiVE3.PresetPlugin.Internal.ViewModel
 {
-    class AviOutputSettingViewModel : BindableBase
+    [UseReactiveProperty]
+    partial class AviOutputSettingViewModel : BindableBase
     {
-        private bool supportQuality;
-        public bool SupportQuality
-        {
-            get { return supportQuality; }
-            set { SetProperty(ref supportQuality, value); }
-        }
+        [ReactiveProperty]
+        public partial bool SupportQuality { get; set; }
 
-        private bool supportKeyFrameRate;
-        public bool SupportKeyFrameRate
-        {
-            get { return supportKeyFrameRate; }
-            set { SetProperty(ref supportKeyFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial bool SupportKeyFrameRate { get; set; }
 
-        private bool hasConfigure;
-        public bool HasConfigure
-        {
-            get { return hasConfigure; }
-            set { SetProperty(ref hasConfigure, value); }
-        }
+        [ReactiveProperty]
+        public partial bool HasConfigure { get; set; }
 
-        private int quality;
-        public int Quality
-        {
-            get { return quality; }
-            set { SetProperty(ref quality, value); }
-        }
+        [ReactiveProperty]
+        public partial int Quality { get; set; }
 
-        private bool useKeyFrameRate;
-        public bool UseKeyFrameRate
-        {
-            get { return useKeyFrameRate; }
-            set { SetProperty(ref useKeyFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial bool UseKeyFrameRate { get; set; }
 
-        private int keyFrameRate;
-        public int KeyFrameRate
-        {
-            get { return keyFrameRate; }
-            set { SetProperty(ref keyFrameRate, value); }
-        }
+        [ReactiveProperty]
+        public partial int KeyFrameRate { get; set; }
 
-        private int selectedCodecIndex;
-        public int SelectedCodecIndex
-        {
-            get { return selectedCodecIndex; }
-            set { SetProperty(ref selectedCodecIndex, value); }
-        }
+        [ReactiveProperty]
+        public partial int SelectedCodecIndex { get; set; }
 
-        private OutputChannel outputChannel;
-        public OutputChannel OutputChannel
-        {
-            get { return outputChannel; }
-            set { SetProperty(ref outputChannel, value); }
-        }
+        [ReactiveProperty]
+        public partial OutputChannel OutputChannel { get; set; }
 
-        private OutputAlphaMode outputAlphaMode;
-        public OutputAlphaMode OutputAlphaMode
-        {
-            get { return outputAlphaMode; }
-            set { SetProperty(ref outputAlphaMode, value); }
-        }
+        [ReactiveProperty]
+        public partial OutputAlphaMode OutputAlphaMode { get; set; }
 
-        private ObservableCollection<Tuple<FourCC, string>> codecList = [];
-        public ObservableCollection<Tuple<FourCC, string>> CodecList
-        {
-            get { return codecList; }
-            set { SetProperty(ref codecList, value); }
-        }
+        [ReactiveProperty]
+        public partial ObservableCollection<Tuple<FourCC, string>> CodecList { get; set; } = [];
 
-        private byte[]? codecState;
-        public byte[]? CodecState
-        {
-            get { return codecState; }
-            set { SetProperty(ref codecState, value); }
-        }
+        [ReactiveProperty]
+        public partial byte[]? CodecState { get; set; }
 
-        private int audioSamplingRate;
-        public int AudioSamplingRate
-        {
-            get { return audioSamplingRate; }
-            set { SetProperty(ref audioSamplingRate, value); }
-        }
+        [ReactiveProperty]
+        public partial int AudioSamplingRate { get; set; }
 
-        private int audioBitsPerSample;
-        public int AudioBitsPerSample
-        {
-            get { return audioBitsPerSample; }
-            set { SetProperty(ref audioBitsPerSample, value); }
-        }
+        [ReactiveProperty]
+        public partial int AudioBitsPerSample { get; set; }
 
         public FourCC Codec
         {

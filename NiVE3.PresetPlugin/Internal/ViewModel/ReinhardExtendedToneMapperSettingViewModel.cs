@@ -4,16 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.PresetPlugin.Internal.Mvvm;
+using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 
 namespace NiVE3.PresetPlugin.Internal.ViewModel
 {
-    class ReinhardExtendedToneMapperSettingViewModel : BindableBase
+    [UseReactiveProperty]
+    partial class ReinhardExtendedToneMapperSettingViewModel : BindableBase
     {
-        private float maxLuminance = 1.0F;
-        public float MaxLuminance
-        {
-            get { return maxLuminance; }
-            set { SetProperty(ref maxLuminance, value); }
-        }
+        [ReactiveProperty]
+        public partial float MaxLuminance { get; set; } = 1.0F;
     }
 }
