@@ -219,67 +219,10 @@ namespace NiVE3.Shared.Extension
             return Avx.ConvertToVector128Single(result);
         }
 
-        // https://stackoverflow.com/questions/39821367/very-fast-approximate-logarithm-natural-log-function-in-c
-        // Memo: 他の方法 https://codingforspeed.com/using-faster-exponential-approximation/
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> Log(this in Vector128<float> v)
         {
-            var minMask = Sse.CompareLessThan(v, Vector128.Create(1.175494351E-38F));
-            var i = Sse.And(Vector128.Create(-23.0F), minMask);
-            var a = Sse.Or(Sse.And(v, minMask.Not()), Sse.And(v, minMask) * 8388608.0F);
-            var e = Sse2.And(a.AsInt32() - Vector128.Create(0.666666667F).AsInt32(), Vector128.Create(0xff800000).AsInt32());
-            var m = (a.AsInt32() - e).AsSingle();
-
-            if (Fma.IsSupported)
-            {
-                i = Fma.MultiplyAdd(Sse2.ConvertToVector128Single(e), Vector128.Create(1.19209290E-7F), i);
-
-            }
-            else
-            {
-                i = Sse2.ConvertToVector128Single(e) * Vector128.Create(1.19209290E-7F) + i;
-            }
-
-            m -= Vector128<float>.One;
-            var s = m * m;
-
-            var r = Vector128<float>.Zero;
-            if (Fma.IsSupported)
-            {
-                r = Fma.MultiplyAdd(Vector128.Create(-0.130310059F), s, Vector128.Create(-0.121483512F));
-                var t = Fma.MultiplyAdd(Vector128.Create(0.140869141F), s, Vector128.Create(0.139814854F));
-                r = Fma.MultiplyAdd(r, s, Vector128.Create(-0.166846126F));
-                t = Fma.MultiplyAdd(t, s, Vector128.Create(0.200120345F));
-                r = Fma.MultiplyAdd(r, s, Vector128.Create(-0.249996200F));
-                r = Fma.MultiplyAdd(t, m, r);
-                r = Fma.MultiplyAdd(r, m, Vector128.Create(0.333331972F));
-                r = Fma.MultiplyAdd(r, m, Vector128.Create(-0.5F));
-                r = Fma.MultiplyAdd(r, s, m);
-                r = Fma.MultiplyAdd(i, Vector128.Create(0.693147182F), r);
-            }
-            else
-            {
-                r = Vector128.Create(-0.130310059F) * s + Vector128.Create(-0.121483512F);
-                var t = Vector128.Create(0.140869141F) * s * Vector128.Create(0.139814854F);
-                r = r * s + Vector128.Create(-0.166846126F);
-                t = t * s + Vector128.Create(0.200120345F);
-                r = r * s + Vector128.Create(-0.249996200F);
-                r = t * m + r;
-                r = r * m + Vector128.Create(0.333331972F);
-                r = r * m + Vector128.Create(-0.5F);
-                r = r * s + m;
-                r = i * Vector128.Create(0.693147182F) + r;
-            }
-
-            var resultMask = Sse.And(
-                Sse.CompareGreaterThan(a, Vector128<float>.Zero),
-                Sse.CompareLessThan(a, Vector128.Create(float.PositiveInfinity))
-            );
-
-            var nan = Sse.And(Vector128.Create(float.NaN), Sse.CompareLessThan(a, Vector128<float>.Zero));
-            var negativeInf = Sse.And(Vector128.Create(float.NegativeInfinity), Sse.CompareEqual(a, Vector128<float>.Zero));
-
-            return Sse.Or(Sse.Or(Sse.And(r, resultMask), nan), negativeInf);
+            return Vector128.Log(v);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -297,10 +240,10 @@ namespace NiVE3.Shared.Extension
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> SignWithoutZero(this in Vector128<float> v)
         {
-            var gteMask = Sse.CompareGreaterThanOrEqual(v, Vector128<float>.Zero);
-            var ltMask = Sse.CompareLessThan(v, Vector128<float>.Zero);
+            var gteMask = Vector128.GreaterThanOrEqual(v, Vector128<float>.Zero);
+            var ltMask = Vector128.LessThan(v, Vector128<float>.Zero);
 
-            return Sse.Or(Sse.And(Vector128<float>.One, gteMask), Sse.And(Vector128.Create(-1.0F), ltMask));
+            return (Vector128<float>.One & gteMask) | (Vector128.Create(-1.0F) & ltMask);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -332,32 +275,10 @@ namespace NiVE3.Shared.Extension
 
     public static class Vector256Extension
     {
-        const byte MmInsert0To3 = 3 << 4;
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector256<double> Not(this in Vector256<double> v)
         {
-            var high = Avx.ExtractVector128(v, 1).AsInt32();
-            var low = Avx.ExtractVector128(v, 0).AsInt32();
-            high = Sse2.Xor(high, Sse2.CompareEqual(high, high));
-            low = Sse2.Xor(low, Sse2.CompareEqual(low, low));
-            return Vector256.Create(low, high).AsDouble();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector256<double> HorizontalAdd(this in Vector256<double> v)
-        {
-            if (Avx2.IsSupported)
-            {
-                var a = Avx.HorizontalAdd(v, v);
-                a = Avx2.Permute4x64(a, 0b00100010);
-                return Avx.HorizontalAdd(a, a);
-            }
-            else
-            {
-                var rv = Vector256.Create(Avx.ExtractVector128(v, 1), Avx.ExtractVector128(v, 0));
-                var a = Avx.HorizontalAdd(v, rv);
-                return Avx.HorizontalAdd(a, a);
-            }
+            return Vector256.Xor(v, Vector256<double>.AllBitsSet);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -389,12 +310,6 @@ namespace NiVE3.Shared.Extension
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector256<double> Invert(this in Vector256<double> v)
-        {
-            return Avx.Subtract(Vector256<double>.Zero, v);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 AsVector4(this in Vector256<double> v)
         {
             return Avx.ConvertToVector128Single(v).AsVector4();
@@ -411,35 +326,14 @@ namespace NiVE3.Shared.Extension
         public static Vector256<double> CrossProduct(this in Vector256<double> a, in Vector256<double> b)
         {
             var resultMask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0).AsDouble();
-            Vector256<double> result;
-            if (Avx2.IsSupported)
-            {
-                var tmp0 = Avx2.Permute4x64(a, 0b11001001);
-                var tmp1 = Avx2.Permute4x64(b, 0b11010010);
-                var tmp2 = Avx.Multiply(tmp0, b);
-                var tmp3 = Avx.Multiply(tmp0, tmp1);
-                var tmp4 = Avx2.Permute4x64(tmp2, 0b11001001);
-                result = Avx.Subtract(tmp3, tmp4);
-            }
-            else
-            {
-                var aLow = Avx.ExtractVector128(a, 0);
-                var aHigh = Avx.ExtractVector128(a, 1);
-                var bLow = Avx.ExtractVector128(b, 0);
-                var bHigh = Avx.ExtractVector128(b, 1);
+            var tmp0 = a.Permute4x64(0b11001001);
+            var tmp1 = b.Permute4x64(0b11010010);
+            var tmp2 = tmp0 * b;
+            var tmp3 = tmp0 * tmp1;
+            var tmp4 = tmp2.Permute4x64(0b11001001);
+            var result = tmp3 - tmp4;
 
-                var tmp0 = Vector256.Create(Sse2.Shuffle(aHigh, aLow, 0b10), Sse2.Shuffle(aHigh, aLow, 0b01));
-                var tmp1 = Vector256.Create(Sse2.Shuffle(bHigh, bLow, 0b11), Sse2.Shuffle(bLow, bHigh, 0b00));
-                var tmp2 = Avx.Multiply(tmp0, b);
-                var tmp3 = Avx.Multiply(tmp0, tmp1);
-
-                var tmp2Low = Avx.ExtractVector128(tmp2, 0);
-                var tmp2High = Avx.ExtractVector128(tmp2, 1);
-                var tmp4 = Vector256.Create(Sse2.Shuffle(tmp2High, tmp2Low, 0b10), Sse2.Shuffle(tmp2High, tmp2Low, 0b01));
-                result = Avx.Subtract(tmp3, tmp4);
-            }
-
-            return Avx.And(result, resultMask);
+            return result & resultMask;
         }
 
         public static Vector256<double> CrossProduct3D(this in Vector256<double> a, in Vector256<double> b)
@@ -466,20 +360,20 @@ namespace NiVE3.Shared.Extension
             var hi1 = en3 > 1 ? bHigh : bLow;
             var hi2 = en4 > 1 ? bHigh : bLow;
 
-            var low = (en1, en2) switch
+            var low = (en1 & 1, en2 & 1) switch
             {
-                (_, _) when ((en1 & 1) == 0 && ((en2 & 1) == 0)) => Sse2.Shuffle(lo1, lo2, 0b00),
-                (_, _) when ((en1 & 1) != 0 && ((en2 & 1) == 0)) => Sse2.Shuffle(lo1, lo2, 0b01),
-                (_, _) when ((en1 & 1) == 0 && ((en2 & 1) != 0)) => Sse2.Shuffle(lo1, lo2, 0b10),
-                (_, _) when ((en1 & 1) != 0 && ((en2 & 1) != 0)) => Sse2.Shuffle(lo1, lo2, 0b11),
+                (0, 0) => Sse2.Shuffle(lo1, lo2, 0b00),
+                (1, 0) => Sse2.Shuffle(lo1, lo2, 0b01),
+                (0, 1) => Sse2.Shuffle(lo1, lo2, 0b10),
+                (1, 1) => Sse2.Shuffle(lo1, lo2, 0b11),
                 _ => throw new InvalidOperationException()
             };
-            var high = (en3, en4) switch
+            var high = (en3 & 1, en4 & 1) switch
             {
-                (_, _) when ((en3 & 1) == 0 && ((en4 & 1) == 0)) => Sse2.Shuffle(hi1, hi2, 0b00),
-                (_, _) when ((en3 & 1) != 0 && ((en4 & 1) == 0)) => Sse2.Shuffle(hi1, hi2, 0b01),
-                (_, _) when ((en3 & 1) == 0 && ((en4 & 1) != 0)) => Sse2.Shuffle(hi1, hi2, 0b10),
-                (_, _) when ((en3 & 1) != 0 && ((en4 & 1) != 0)) => Sse2.Shuffle(hi1, hi2, 0b11),
+                (0, 0) => Sse2.Shuffle(hi1, hi2, 0b00),
+                (1, 0) => Sse2.Shuffle(hi1, hi2, 0b01),
+                (0, 1) => Sse2.Shuffle(hi1, hi2, 0b10),
+                (1, 1) => Sse2.Shuffle(hi1, hi2, 0b11),
                 _ => throw new InvalidOperationException()
             };
 
@@ -495,7 +389,11 @@ namespace NiVE3.Shared.Extension
             }
             else
             {
-                return v.Shuffle4x64(v, control);
+                var en1 = (control & 0b00000011);
+                var en2 = (control & 0b00001100) >> 2;
+                var en3 = (control & 0b00110000) >> 4;
+                var en4 = (control & 0b11000000) >> 6;
+                return Vector256.Shuffle(v, Vector256.Create(en1, en2, en3, en4));
             }
         }
     }
