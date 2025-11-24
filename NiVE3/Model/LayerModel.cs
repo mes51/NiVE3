@@ -60,6 +60,14 @@ namespace NiVE3.Model
 
         const string AudioOptionGroupId = nameof(AudioOptionGroupId);
 
+        const string AudioLevelValueGroupId = nameof(AudioLevelValueGroupId);
+
+        const string AudioLevelValueLeftId = nameof(AudioLevelValueLeftId);
+
+        const string AudioLevelValueRightId = nameof(AudioLevelValueRightId);
+
+        const string AudioLevelValueBothId = nameof(AudioLevelValueBothId);
+
         [ReactiveProperty]
         public partial string Name { get; set; } = "";
 
@@ -235,6 +243,8 @@ namespace NiVE3.Model
         public PropertyGroupModel? SourceOptionProperties { get; set; }
 
         public PropertyGroupModel? AudioOptionProperties { get; set; }
+
+        public PropertyGroupModel? AudioLevelValueProperties { get; set; }
 
         public IReadOnlyCollection<Guid> EffectIdentifiers => [..Effects.Select(e => e.EffectId)];
 
@@ -1546,7 +1556,7 @@ namespace NiVE3.Model
             SourceDuration = footageModel.Duration;
             SourceType = footageModel.InputType;
 
-            var (oldTextProperties, oldShapeProperties, oldSourceOptionProperties, oldAudioOptionProperties, oldTransformProperties, oldLayerOptionProperties) = LoadProperty(footageModel);
+            var (oldTextProperties, oldShapeProperties, oldSourceOptionProperties, oldAudioOptionProperties, oldAudioLevelValueProperties, oldTransformProperties, oldLayerOptionProperties) = LoadProperty(footageModel);
 
             HistoryModel.Add(
                 new ReplaceFootageHistoryCommand(
@@ -1556,6 +1566,7 @@ namespace NiVE3.Model
                     oldShapeProperties,
                     oldSourceOptionProperties,
                     oldAudioOptionProperties,
+                    oldAudioLevelValueProperties,
                     oldTransformProperties,
                     oldLayerOptionProperties,
                     footageModel,
@@ -1563,6 +1574,7 @@ namespace NiVE3.Model
                     ShapeProperties,
                     SourceOptionProperties,
                     AudioOptionProperties,
+                    AudioLevelValueProperties,
                     TransformProperties,
                     LayerOptionProperties
                 )
@@ -1879,6 +1891,177 @@ namespace NiVE3.Model
                 SourceOptionProperties == propertyGroup ||
                 AudioOptionProperties == propertyGroup) &&
                 CompositionModel.LayerIsChild(LayerId);
+        }
+
+        public void GenerateAudioLevelValueKeyFrames(AudioLevelValueType type)
+        {
+            if (AudioLevelValueProperties == null)
+            {
+                return;
+            }
+
+            var children = (AudioLevelValueProperties.GetChildren() ?? []).OfType<PropertyModel>().ToArray();
+            var leftProperty = children.First(p => p.Id == AudioLevelValueLeftId);
+            var rightProperty = children.First(p => p.Id == AudioLevelValueRightId);
+            var bothProperty = children.First(p => p.Id == AudioLevelValueBothId);
+
+            var frameRate = CompositionModel.FrameRate;
+            var audio = GetAudio(Time.Zero, Duration);
+            var bothKeyFrames = new KeyFrame[(int)Math.Ceiling((double)Duration * frameRate)];
+            var leftKeyFrames = new KeyFrame[bothKeyFrames.Length];
+            var rightKeyFrames = new KeyFrame[bothKeyFrames.Length];
+
+            var normalizePos = 0;
+            if (Vector<float>.IsSupported)
+            {
+                var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audio.AsSpan(0, audio.Length / Vector<float>.Count * Vector<float>.Count));
+
+                for (var i = 0; i < audioVectorSpan.Length; i++)
+                {
+                    audioVectorSpan[i] = Vector.Abs(audioVectorSpan[i]) * 100.0F;
+                }
+
+                normalizePos = audioVectorSpan.Length * Vector<float>.Count;
+            }
+            for (var i = normalizePos; i < audio.Length; i++)
+            {
+                audio[i] = Math.Abs(audio[i]) * 100.0F;
+            }
+
+            switch (type)
+            {
+                case AudioLevelValueType.Average:
+                    Parallel.For(0, bothKeyFrames.Length, k =>
+                    {
+                        var startSample = (int)(k / frameRate * Const.AudioSamplingRate);
+                        var sampleLength = (int)((k + 1) / frameRate * Const.AudioSamplingRate) - startSample;
+                        var startPos = startSample * Const.AudioChannelCount;
+                        var audioSpan = audio.AsSpan(startPos, Math.Min(audio.Length - startPos, sampleLength * Const.AudioChannelCount));
+
+                        var leftSum = 0.0;
+                        var rightSum = 0.0;
+                        var currentPos = 0;
+                        if (Vector<float>.IsSupported)
+                        {
+                            var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audioSpan[..(audioSpan.Length / Vector<float>.Count * Vector<float>.Count)]);
+                            var sumVector = Vector<float>.Zero;
+
+                            for (var i = 0; i < audioVectorSpan.Length; i++)
+                            {
+                                sumVector += audioVectorSpan[i];
+                            }
+
+                            for (var i = 0; i < Vector<float>.Count; i += 2)
+                            {
+                                leftSum += sumVector[i];
+                                rightSum += sumVector[i + 1];
+                            }
+
+                            currentPos = audioVectorSpan.Length * Vector<float>.Count;
+                        }
+                        for (var i = currentPos; i < audioSpan.Length; i += 2)
+                        {
+                            leftSum += audioSpan[i];
+                            rightSum += audioSpan[i + 1];
+                        }
+
+                        var time = new Time(k, frameRate);
+                        leftKeyFrames[k] = new KeyFrame(time, leftSum / sampleLength, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                        rightKeyFrames[k] = new KeyFrame(time, rightSum / sampleLength, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                        bothKeyFrames[k] = new KeyFrame(time, (leftSum + rightSum) / audioSpan.Length, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                    });
+                    break;
+                case AudioLevelValueType.Max:
+                    Parallel.For(0, bothKeyFrames.Length, k =>
+                    {
+                        var startSample = (int)(k / frameRate * Const.AudioSamplingRate);
+                        var sampleLength = (int)((k + 1) / frameRate * Const.AudioSamplingRate) - startSample;
+                        var startPos = startSample * Const.AudioChannelCount;
+                        var audioSpan = audio.AsSpan(startPos, Math.Min(audio.Length - startPos, sampleLength * Const.AudioChannelCount));
+
+                        var leftMax = double.NegativeInfinity;
+                        var rightMax = double.NegativeInfinity;
+                        var currentPos = 0;
+                        if (Vector<float>.IsSupported)
+                        {
+                            var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audioSpan[..(audioSpan.Length / Vector<float>.Count * Vector<float>.Count)]);
+                            var maxVector = new Vector<float>(float.NegativeInfinity);
+
+                            for (var i = 0; i < audioVectorSpan.Length; i++)
+                            {
+                                maxVector = Vector.Max(maxVector, audioVectorSpan[i]);
+                            }
+
+                            for (var i = 0; i < Vector<float>.Count; i += 2)
+                            {
+                                leftMax = Math.Max(leftMax, maxVector[i]);
+                                rightMax = Math.Max(rightMax, maxVector[i + 1]);
+                            }
+
+                            currentPos = audioVectorSpan.Length * Vector<float>.Count;
+                        }
+                        for (var i = currentPos; i < audioSpan.Length; i += 2)
+                        {
+                            leftMax = Math.Max(leftMax, audioSpan[i]);
+                            rightMax = Math.Max(rightMax, audioSpan[i + 1]);
+                        }
+
+                        var time = new Time(k, frameRate);
+                        leftKeyFrames[k] = new KeyFrame(time, leftMax, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                        rightKeyFrames[k] = new KeyFrame(time, rightMax, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                        bothKeyFrames[k] = new KeyFrame(time, Math.Max(leftMax, rightMax), new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                    });
+                    break;
+                case AudioLevelValueType.Min:
+                    Parallel.For(0, bothKeyFrames.Length, k =>
+                    {
+                        var startSample = (int)(k / frameRate * Const.AudioSamplingRate);
+                        var sampleLength = (int)((k + 1) / frameRate * Const.AudioSamplingRate) - startSample;
+                        var startPos = startSample * Const.AudioChannelCount;
+                        var audioSpan = audio.AsSpan(startPos, Math.Min(audio.Length - startPos, sampleLength * Const.AudioChannelCount));
+
+                        var leftMin = double.PositiveInfinity;
+                        var rightMin = double.PositiveInfinity;
+                        var currentPos = 0;
+                        if (Vector<float>.IsSupported)
+                        {
+                            var audioVectorSpan = MemoryMarshal.Cast<float, Vector<float>>(audioSpan[..(audioSpan.Length / Vector<float>.Count * Vector<float>.Count)]);
+                            var minVector = new Vector<float>(float.PositiveInfinity);
+
+                            for (var i = 0; i < audioVectorSpan.Length; i++)
+                            {
+                                minVector = Vector.Min(minVector, audioVectorSpan[i]);
+                            }
+
+                            for (var i = 0; i < Vector<float>.Count; i += 2)
+                            {
+                                leftMin = Math.Min(leftMin, minVector[i]);
+                                rightMin = Math.Min(rightMin, minVector[i + 1]);
+                            }
+
+                            currentPos = audioVectorSpan.Length * Vector<float>.Count;
+                        }
+                        for (var i = currentPos; i < audioSpan.Length; i += 2)
+                        {
+                            leftMin = Math.Min(leftMin, audioSpan[i]);
+                            rightMin = Math.Min(rightMin, audioSpan[i + 1]);
+                        }
+
+                        var time = new Time(k, frameRate);
+                        leftKeyFrames[k] = new KeyFrame(time, leftMin, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                        rightKeyFrames[k] = new KeyFrame(time, rightMin, new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                        bothKeyFrames[k] = new KeyFrame(time, Math.Min(leftMin, rightMin), new Ease(0.0, 0.0), new Ease(0.0, 0.0), InterpolationType.Linear);
+                    });
+                    break;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_GenerateAudioLevelValueKeyFrame));
+
+            leftProperty.ReplaceAllKeyFrames(leftKeyFrames);
+            rightProperty.ReplaceAllKeyFrames(rightKeyFrames);
+            bothProperty.ReplaceAllKeyFrames(bothKeyFrames);
+
+            HistoryModel.EndGroup();
         }
 
         void DeleteEffectInternal(Guid[] effectIds, bool isCut)
@@ -2434,12 +2617,13 @@ namespace NiVE3.Model
             }
         }
 
-        (PropertyGroupModel? oldTextProperties, PropertyGroupModel? oldShapeProperties, PropertyGroupModel? oldSourceOptionProperties, PropertyGroupModel? oldAudioOptionProperties, PropertyGroupModel? oldTransformProperties, PropertyGroupModel? oldLayerOptionProperties) LoadProperty(FootageModel footageModel)
+        (PropertyGroupModel? oldTextProperties, PropertyGroupModel? oldShapeProperties, PropertyGroupModel? oldSourceOptionProperties, PropertyGroupModel? oldAudioOptionProperties, PropertyGroupModel? oldAudioLevelValueProperties, PropertyGroupModel? oldTransformProperties, PropertyGroupModel? oldLayerOptionProperties) LoadProperty(FootageModel footageModel)
         {
             var oldTextProperties = TextProperties;
             var oldShapeProperties = ShapeProperties;
             var oldSourceOptionProperties = SourceOptionProperties;
             var oldAudioOptionProperties = AudioOptionProperties;
+            var oldAudioLevelValueProperties = AudioLevelValueProperties;
             var oldTransformProperties = TransformProperties;
             var oldLayerOptionProperties = LayerOptionProperties;
 
@@ -2467,16 +2651,22 @@ namespace NiVE3.Model
                 AudioOptionProperties = oldAudioOptionProperties ?? new PropertyGroupModel(new PropertyGroup(AudioOptionGroupId, LanguageResourceDictionary.ResourceKeys.Layer_AudioOption,
                 [
                     new Vector3dProperty(
-                                ILayerObject.AudioLevelId,
-                                LanguageResourceDictionary.ResourceKeys.Layer_AudioOption_AudioLevel,
-                                new Vector3d(),
-                                new Vector3d(-192.0),
-                                new Vector3d(24.0),
-                                digit: 2,
-                                unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Decibel,
-                                separator: ",",
-                                useLinkRatio: true
-                            )
+                        ILayerObject.AudioLevelId,
+                        LanguageResourceDictionary.ResourceKeys.Layer_AudioOption_AudioLevel,
+                        new Vector3d(),
+                        new Vector3d(-192.0),
+                        new Vector3d(24.0),
+                        digit: 2,
+                        unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Decibel,
+                        separator: ",",
+                        useLinkRatio: true
+                    ),
+                ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
+                AudioLevelValueProperties = oldAudioLevelValueProperties ?? new PropertyGroupModel(new PropertyGroup(AudioLevelValueGroupId, LanguageResourceDictionary.ResourceKeys.Layer_AudioLevelValue,
+                [
+                    new DoubleProperty(AudioLevelValueLeftId, LanguageResourceDictionary.ResourceKeys.Layer_AudioLevelValue_Left, 0.0, double.MinValue, double.MaxValue, digit: 2),
+                    new DoubleProperty(AudioLevelValueRightId, LanguageResourceDictionary.ResourceKeys.Layer_AudioLevelValue_Right, 0.0, double.MinValue, double.MaxValue, digit: 2),
+                    new DoubleProperty(AudioLevelValueBothId, LanguageResourceDictionary.ResourceKeys.Layer_AudioLevelValue_Both, 0.0, double.MinValue, double.MaxValue, digit: 2)
                 ]), LayerId.ToInt128(), ProjectModel, CompositionModel, this, HistoryModel);
             }
             if (footageModel.InputType.HasFlag(SourceType.Video) || footageModel.InputType.HasFlag(SourceType.Image))
@@ -2537,7 +2727,7 @@ namespace NiVE3.Model
                 AudioOptionProperties.ValueCommited += Properties_ValueCommited;
             }
 
-            return (oldTextProperties, oldShapeProperties, oldSourceOptionProperties, oldAudioOptionProperties, oldTransformProperties, oldLayerOptionProperties);
+            return (oldTextProperties, oldShapeProperties, oldSourceOptionProperties, oldAudioOptionProperties, oldAudioLevelValueProperties, oldTransformProperties, oldLayerOptionProperties);
         }
 
         public static (Guid oldId, Guid newId, Dictionary<Guid, Guid> effectIdMa, Dictionary<Guid, Guid> maskIdMapp) ConvertDataForImport(LayerData layerData, Dictionary<Guid, Guid> footageIdMap)
@@ -2698,5 +2888,12 @@ namespace NiVE3.Model
             return (supported.HasFlag(EffectSupportedSource.Image) && (sourceType.HasFlag(SourceType.Image) || sourceType.HasFlag(SourceType.Video))) ||
                 (supported.HasFlag(EffectSupportedSource.Audio) && sourceType.HasFlag(SourceType.Audio));
         }
+    }
+
+    enum AudioLevelValueType
+    {
+        Average,
+        Max,
+        Min
     }
 }

@@ -140,6 +140,8 @@
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerFreezeFrame}" IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.IsFreezeFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerFreezeFrameGesture}"/>
                         </MenuItem>
                         <Separator />
+                        <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_GenerateAudioLevelValueKeyFrame}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=GenerateAudioLevelValueKeyFrameGesture}"/>
+                        <Separator />
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveLayerOrderUp}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveLayerOrderUpGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_MoveLayerOrderDown}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=MoveLayerOrderDownGesture}"/>
                         <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_ChangeLayerTagsRandomly}" a:MenuItemGestureBindingProperty.InputBinding="{cgm:ShortcutKeyBinding ResourceKey=ChangeLayerTagsRandomlyGesture}"/>

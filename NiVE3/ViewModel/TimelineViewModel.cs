@@ -85,6 +85,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(MoveIndicatorToSelectLayerOutPointCommand), nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerOutPointGesture))]
     [CommandHandling(nameof(PlayRateChangeCommand), nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
     [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
+    [CommandHandling(nameof(GenerateAudioLevelValueKeyFrameCommand), nameof(ShortcutKeySetting.GenerateAudioLevelValueKeyFrameGesture))]
     [CommandHandling(nameof(MoveWorkareaBeginToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
     [CommandHandling(nameof(MoveWorkareaEndToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
     [CommandHandling(nameof(AddMarkerToCurrentTimeCommand), nameof(ShortcutKeySetting.AddMarkerToCurrentTimeGesture))]
@@ -421,6 +422,8 @@ namespace NiVE3.ViewModel
         public ICommand PlayRateChangeCommand { get; }
 
         public ICommand ChangeLayerFreezeFrameCommand { get; }
+
+        public ICommand GenerateAudioLevelValueKeyFrameCommand { get; }
 
         public ICommand MoveWorkareaBeginToIndicatorCommand { get; }
 
@@ -1132,6 +1135,23 @@ namespace NiVE3.ViewModel
                 var baseTargetLayer = SelectedLayers[0];
                 CompositionModel.ChangeFreezeFrame([..SelectedLayers.Select(l => l.LayerId)], !baseTargetLayer.IsFreezeFrame, CurrentTime);
             }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasDuration))
+                .ObservesProperty(() => CompositionModel)
+                .ObservesProperty(() => SelectedLayers);
+
+            GenerateAudioLevelValueKeyFrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null || SelectedLayers == null || SelectedLayers.Count < 1)
+                {
+                    return;
+                }
+
+                IDialogResult? settingResult = null;
+                DialogService.ShowDialog(nameof(GenerateAudioLevelValueKeyFrameView), r => settingResult = r);
+                if (settingResult?.Result == ButtonResult.OK)
+                {
+                    CompositionModel.GenerateAudioLevelValueKeyFrame([.. SelectedLayers.Select(l => l.LayerId)], settingResult.Parameters.GetValue<AudioLevelValueType>(nameof(GenerateAudioLevelValueKeyFrameViewModel.Type)));
+                }
+            }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.All(l => l.HasAudio))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
 

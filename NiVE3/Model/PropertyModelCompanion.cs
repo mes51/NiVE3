@@ -56,7 +56,7 @@ namespace NiVE3.Model
 
         bool HasCompositionDependProperty();
 
-        bool HasKeyFrames();
+        bool HasKeyFrame();
 
         bool IsChangeableByTime();
 

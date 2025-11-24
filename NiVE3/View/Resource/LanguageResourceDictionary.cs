@@ -461,6 +461,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの表示フレームを現在時刻で固定(_F)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerFreezeFrame = nameof(Timeline_ContextMenu_ChangeLayerFreezeFrame);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("音声の音量を元にキーフレームを生成...(_K)")]
+        public static readonly string Timeline_ContextMenu_GenerateAudioLevelValueKeyFrame = nameof(Timeline_ContextMenu_GenerateAudioLevelValueKeyFrame);
+
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの順番を1つ上げる(_U)")]
         public static readonly string Timeline_ContextMenu_MoveLayerOrderUp = nameof(Timeline_ContextMenu_MoveLayerOrderUp);
 
@@ -598,6 +601,18 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("音声レベル")]
         public static readonly string Layer_AudioOption_AudioLevel = nameof(Layer_AudioOption_AudioLevel);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("音声のキーフレーム")]
+        public static readonly string Layer_AudioLevelValue = nameof(Layer_AudioLevelValue);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("左チャンネル")]
+        public static readonly string Layer_AudioLevelValue_Left = nameof(Layer_AudioLevelValue_Left);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("右チャンネル")]
+        public static readonly string Layer_AudioLevelValue_Right = nameof(Layer_AudioLevelValue_Right);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("両方のチャンネル")]
+        public static readonly string Layer_AudioLevelValue_Both = nameof(Layer_AudioLevelValue_Both);
 
         [ShowInMarkup, LanguageKey, DefaultValue("切り取り(_X)")]
         public static readonly string Layer_Effect_ContextMenu_Cut = nameof(Layer_Effect_ContextMenu_Cut);
@@ -998,6 +1013,21 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("親レイヤーを非表示で新規のコンポジションにコピーする")]
         public static readonly string PrecomposeSettingView_CopyParent = nameof(PrecomposeSettingView_CopyParent);
 
+        [DefaultValue("音声の音量を元にキーフレームを生成")]
+        public static readonly string GenerateAudioLevelValueKeyFrame_Title = nameof(GenerateAudioLevelValueKeyFrame_Title);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("音量の基準")]
+        public static readonly string GenerateAudioLevelValueKeyFrame_Type = nameof(GenerateAudioLevelValueKeyFrame_Type);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("平均値")]
+        public static readonly string GenerateAudioLevelValueKeyFrame_Type_Average = nameof(GenerateAudioLevelValueKeyFrame_Type_Average);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("最大値")]
+        public static readonly string GenerateAudioLevelValueKeyFrame_Type_Max = nameof(GenerateAudioLevelValueKeyFrame_Type_Max);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("最小値")]
+        public static readonly string GenerateAudioLevelValueKeyFrame_Type_Min = nameof(GenerateAudioLevelValueKeyFrame_Type_Min);
+
         // Effect category names
 
         [DefaultValue("オーディオ")]
@@ -1191,6 +1221,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("キーフレームのペースト")]
         public static readonly string History_PasteKeyFrames = nameof(History_PasteKeyFrames);
 
+        [DefaultValue("キーフレームの置き換え")]
+        public static readonly string History_ReplaceKeyFrames = nameof(History_ReplaceKeyFrames);
+
         [DefaultValue("エフェクトの追加")]
         public static readonly string History_AddEffects = nameof(History_AddEffects);
 
@@ -1286,6 +1319,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("プリコンポーズ")]
         public static readonly string History_Precompose = nameof(History_Precompose);
+
+        [DefaultValue("音声の音量のキーフレーム生成")]
+        public static readonly string History_GenerateAudioLevelValueKeyFrame = nameof(History_GenerateAudioLevelValueKeyFrame);
 
         // Dialog
 
@@ -1907,6 +1943,9 @@ namespace NiVE3.View.Resource
 
         [DefaultValue("レイヤーの表示フレームを現在時刻で固定")]
         public static readonly string ShortcutKeyName_ChangeLayerFreezeFrameGesture = nameof(ShortcutKeyName_ChangeLayerFreezeFrameGesture);
+
+        [DefaultValue("音声の音量を元にキーフレームを生成")]
+        public static readonly string ShortcutKeyName_GenerateAudioLevelValueKeyFrameGesture = nameof(ShortcutKeyName_GenerateAudioLevelValueKeyFrameGesture);
 
         [DefaultValue("再生速度を変更")]
         public static readonly string ShortcutKeyName_ChangeLayerPlayRateGesture = nameof(ShortcutKeyName_ChangeLayerPlayRateGesture);

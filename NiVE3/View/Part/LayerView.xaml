@@ -443,6 +443,19 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="AudioLevelValuePropertyGroupViewStyle" TargetType="{x:Type pt:PropertyGroupView}">
+            <Setter Property="Visibility" Value="Visible"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=DataContext.AudioLevelValueProperties}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ElementName=Root, Path=DataContext.HasAudioLevelValueKeyFrames}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -851,6 +864,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <pt:PropertyGroupView Grid.Row="0"
                                               DataContext="{Binding AudioOptionProperties}"
@@ -862,7 +876,18 @@
                                               Range="{Binding ElementName=Root, Path=Range}"
                                               RangeStart="{Binding ElementName=Root, Path=RangeStart}"
                                               CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"/>
-                        <pt:AudioWaveFormView Grid.Row="1"
+                        <pt:PropertyGroupView Grid.Row="1"
+                                              DataContext="{Binding AudioLevelValueProperties}"
+                                              IndentLevel="2"
+                                              ControlAreaWidth="{Binding ElementName=Root, Path=LayerControlAreaWidth}"
+                                              NameAreaWidth="{Binding ElementName=Root, Path=DataContext.PropertyNameAreaWidth}"
+                                              IsAVSwitchColumnVisible="{Binding ElementName=Root, Path=DataContext.IsAVSwitchColumnVisible}"
+                                              IsTagColumnVisible="{Binding ElementName=Root, Path=DataContext.IsTagColumnVisible}"
+                                              Range="{Binding ElementName=Root, Path=Range}"
+                                              RangeStart="{Binding ElementName=Root, Path=RangeStart}"
+                                              CompositionFrameRate="{Binding ElementName=Root, Path=CompositionFrameRate}"
+                                              Style="{StaticResource AudioLevelValuePropertyGroupViewStyle}"/>
+                        <pt:AudioWaveFormView Grid.Row="2"
                                               DataContext="{Binding}"
                                               Text="{gm:LanguageResource ResourceKey=Layer_Audio_WaveForm}"
                                               IndentLevel="2"

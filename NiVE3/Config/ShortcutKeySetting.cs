@@ -424,6 +424,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty GenerateAudioLevelValueKeyFrameGestureProperty = DependencyProperty.Register(
+            nameof(GenerateAudioLevelValueKeyFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
         public static readonly DependencyProperty MoveWorkareaBeginToIndicatorGestureProperty = DependencyProperty.Register(
             nameof(MoveWorkareaBeginToIndicatorGesture),
             typeof(InputGesture),
@@ -572,6 +579,14 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(MoveWorkareaBeginToIndicatorGestureProperty); }
             set { SetValue(MoveWorkareaBeginToIndicatorGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture GenerateAudioLevelValueKeyFrameGesture
+        {
+            get { return (InputGesture)GetValue(GenerateAudioLevelValueKeyFrameGestureProperty); }
+            set { SetValue(GenerateAudioLevelValueKeyFrameGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]

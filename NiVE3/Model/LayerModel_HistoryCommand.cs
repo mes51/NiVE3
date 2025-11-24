@@ -636,6 +636,8 @@ namespace NiVE3.Model
 
             PropertyGroupModel? OldAudioOptionProperties { get; }
 
+            PropertyGroupModel? OldAudioLevelValueProperties { get; }
+
             PropertyGroupModel? OldTransformProperties { get; }
 
             PropertyGroupModel? OldLayerOptionProperties { get; }
@@ -650,6 +652,8 @@ namespace NiVE3.Model
 
             PropertyGroupModel? NewAudioOptionProperties { get; }
 
+            PropertyGroupModel? NewAudioLevelValueProperties { get; }
+
             PropertyGroupModel? NewTransformProperties { get; }
 
             PropertyGroupModel? NewLayerOptionProperties { get; }
@@ -661,6 +665,7 @@ namespace NiVE3.Model
                 PropertyGroupModel? oldShapeProperties,
                 PropertyGroupModel? oldSourceOptionProperties,
                 PropertyGroupModel? oldAudioOptionProperties,
+                PropertyGroupModel? oldAudioLevelValueProperties,
                 PropertyGroupModel? oldTransformProperties,
                 PropertyGroupModel? oldLayerOptionProperties,
                 FootageModel newFootage,
@@ -668,6 +673,7 @@ namespace NiVE3.Model
                 PropertyGroupModel? newShapeProperties,
                 PropertyGroupModel? newSourceOptionProperties,
                 PropertyGroupModel? newAudioOptionProperties,
+                PropertyGroupModel? newAudioLevelValueProperties,
                 PropertyGroupModel? newTransformProperties,
                 PropertyGroupModel? newLayerOptionProperties
             )
@@ -678,6 +684,7 @@ namespace NiVE3.Model
                 OldShapeProperties = oldShapeProperties;
                 OldSourceOptionProperties = oldSourceOptionProperties;
                 OldAudioOptionProperties = oldAudioOptionProperties;
+                OldAudioLevelValueProperties = oldAudioLevelValueProperties;
                 OldTransformProperties = oldTransformProperties;
                 OldLayerOptionProperties = oldLayerOptionProperties;
                 NewFootage = newFootage;
@@ -685,6 +692,7 @@ namespace NiVE3.Model
                 NewShapeProperties = newShapeProperties;
                 NewSourceOptionProperties = newSourceOptionProperties;
                 NewAudioOptionProperties = newAudioOptionProperties;
+                NewAudioLevelValueProperties = newAudioLevelValueProperties;
                 NewTransformProperties = newTransformProperties;
                 NewLayerOptionProperties = newLayerOptionProperties;
             }
@@ -701,6 +709,7 @@ namespace NiVE3.Model
                 Model.ShapeProperties = NewShapeProperties;
                 Model.SourceOptionProperties = NewSourceOptionProperties;
                 Model.AudioOptionProperties = NewAudioOptionProperties;
+                Model.AudioLevelValueProperties = NewAudioLevelValueProperties;
                 Model.TransformProperties = NewTransformProperties;
                 Model.LayerOptionProperties = NewLayerOptionProperties;
 
@@ -734,6 +743,7 @@ namespace NiVE3.Model
                 Model.ShapeProperties = OldShapeProperties;
                 Model.SourceOptionProperties = OldSourceOptionProperties;
                 Model.AudioOptionProperties = OldAudioOptionProperties;
+                Model.AudioLevelValueProperties = OldAudioLevelValueProperties;
                 Model.TransformProperties = OldTransformProperties;
                 Model.LayerOptionProperties = OldLayerOptionProperties;
 

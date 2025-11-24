@@ -290,14 +290,14 @@ namespace NiVE3.Model
             return Children.Any(c => c.HasCompositionDependProperty());
         }
 
-        public bool HasKeyFrames()
+        public bool HasKeyFrame()
         {
-            return Children.Any(p => p.HasKeyFrames());
+            return Children.Any(p => p.HasKeyFrame());
         }
 
         public bool IsChangeableByTime()
         {
-            return Children.Any(p => p.IsChangeableByTime()) || HasKeyFrames();
+            return Children.Any(p => p.IsChangeableByTime()) || HasKeyFrame();
         }
 
         public void ChangeName(string name)

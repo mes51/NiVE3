@@ -91,6 +91,7 @@ namespace NiVE3.Module
             containerRegistry.RegisterDialog<AboutView, AboutViewModel>();
             containerRegistry.RegisterDialog<PlayRateSettingView, PlayRateSettingViewModel>();
             containerRegistry.RegisterDialog<PrecomposeSettingView, PrecomposeSettingViewModel>();
+            containerRegistry.RegisterDialog<GenerateAudioLevelValueKeyFrameView, GenerateAudioLevelValueKeyFrameViewModel>();
         }
     }
 }

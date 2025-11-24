@@ -1526,6 +1526,18 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
+        public void GenerateAudioLevelValueKeyFrame(Guid[] layerIds, AudioLevelValueType type)
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_GenerateAudioLevelValueKeyFrame));
+
+            foreach (var layer in Layers.Where(l => layerIds.Contains(l.LayerId)))
+            {
+                layer.GenerateAudioLevelValueKeyFrames(type);
+            }
+
+            HistoryModel.EndGroup();
+        }
+
         public void ChangeTextStyle(Guid[] layerIds, Guid? targetLayerId, object? targetLayerPrevValue)
         {
             var layers = Layers.Where(l => l.IsText && layerIds.Contains(l.LayerId)).ToArray();

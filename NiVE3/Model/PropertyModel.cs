@@ -267,6 +267,11 @@ namespace NiVE3.Model
             ValueCommited?.Invoke(this, EventArgs.Empty);
         }
 
+        public void ReplaceAllKeyFrames(KeyFrame[] newKeyFrames)
+        {
+            ReplaceKeyFrames([..KeyFrames], newKeyFrames, LanguageResourceDictionary.History_ReplaceKeyFrames);
+        }
+
         public void ChangeExpressionCode(string newExpressionCode)
         {
             if (ExpressionCode == newExpressionCode)
@@ -418,7 +423,7 @@ namespace NiVE3.Model
         {
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ResetPropertyValue));
 
-            if (HasKeyFrames())
+            if (HasKeyFrame())
             {
                 CreateKeyFrame(Property.DefaultValue);
             }
@@ -549,7 +554,7 @@ namespace NiVE3.Model
             return Property is CompositionDependPropertyBase;
         }
 
-        public bool HasKeyFrames()
+        public bool HasKeyFrame()
         {
             return KeyFrames.Count > 0;
         }

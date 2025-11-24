@@ -280,6 +280,9 @@ namespace NiVE3.ViewModel
         [ReactiveProperty]
         public partial ObservableCollectionView<MaskModel, MaskViewModel> Masks { get; set; }
 
+        [ReactiveProperty]
+        public partial bool HasAudioLevelValueKeyFrames { get; set; }
+
         public ObservableCollection<EffectViewModel> SelectedEffects
         {
             get;
@@ -331,6 +334,9 @@ namespace NiVE3.ViewModel
 
         [ReactiveProperty]
         public partial PropertyGroupViewModel? AudioOptionProperties { get; set; }
+
+        [ReactiveProperty]
+        public partial PropertyGroupViewModel? AudioLevelValueProperties { get; set; }
 
         public bool IsComposition { get; }
 
@@ -1329,6 +1335,20 @@ namespace NiVE3.ViewModel
                 AudioOptionProperties.PropertyValueCommited -= PropertyGroupViewModel_PropertyValueCommited;
                 AudioOptionProperties = null;
             }
+
+            if (LayerModel.AudioLevelValueProperties != null)
+            {
+                AudioLevelValueProperties = new PropertyGroupViewModel(LayerModel.AudioLevelValueProperties, ViewState);
+                AudioLevelValueProperties.SelectItemChanged += PropertyGroupViewModel_SelectItemChanged; ;
+                AudioLevelValueProperties.PropertyValueCommited += AudioLevelValueProperties_PropertyValueCommited;
+                HasAudioLevelValueKeyFrames = LayerModel.AudioLevelValueProperties.Children?.OfType<PropertyModel>()?.Any(p => p.HasKeyFrame()) ?? false;
+            }
+            else if (AudioLevelValueProperties != null)
+            {
+                AudioLevelValueProperties.SelectItemChanged -= PropertyGroupViewModel_SelectItemChanged;
+                AudioLevelValueProperties.PropertyValueCommited -= AudioLevelValueProperties_PropertyValueCommited;
+                AudioLevelValueProperties = null;
+            }
         }
 
         partial void WiringModel();
@@ -1561,11 +1581,21 @@ namespace NiVE3.ViewModel
             {
                 AudioOptionProperties?.DeSelect();
             }
+            if (!e.ObjectHierarchy.Contains(AudioLevelValueProperties))
+            {
+                AudioLevelValueProperties?.DeSelect();
+            }
         }
 
         private void PropertyGroupViewModel_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
         {
             PropertyValueCommitedPublisher.Publish(this, e);
+        }
+
+        private void AudioLevelValueProperties_PropertyValueCommited(object? sender, PropertyValueCommitedEventArgs e)
+        {
+            PropertyValueCommitedPublisher.Publish(this, e);
+            HasAudioLevelValueKeyFrames = AudioLevelValueProperties?.Children?.OfType<PropertyViewModel>()?.Any(p => p.HasKeyFrame) ?? false;
         }
     }
 
