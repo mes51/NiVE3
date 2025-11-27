@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -20,8 +18,6 @@ using System.Xml;
 using AvalonDock.Layout;
 using AvalonDock.Layout.Serialization;
 using NiVE3.Config;
-using NiVE3.Shared.Extension;
-using NiVE3.Util;
 using NiVE3.View.Dock;
 using NiVE3.ViewModel;
 

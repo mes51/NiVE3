@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,28 +10,23 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NiVE3.ViewModel;
+using NiVE3.ViewModel.Dialog;
 
-namespace NiVE3.View.Popup
+namespace NiVE3.View.Dialog
 {
     /// <summary>
-    /// CommandPalettePopup.xaml の相互作用ロジック
+    /// CommandPaletteView.xaml の相互作用ロジック
     /// </summary>
-    public partial class CommandPalettePopup : System.Windows.Controls.Primitives.Popup
+    public partial class CommandPaletteView : UserControl
     {
-        public CommandPalettePopup()
+        public CommandPaletteView()
         {
             InitializeComponent();
         }
 
         CommandPaletteViewModel? ViewModel => DataContext as CommandPaletteViewModel;
 
-        void Close()
-        {
-            SetCurrentValue(IsOpenProperty, false);
-        }
-
-        private void Root_Opened(object sender, EventArgs e)
+        private void Root_Loaded(object sender, RoutedEventArgs e)
         {
             FilterTextBox.Focus();
         }
@@ -44,11 +37,10 @@ namespace NiVE3.View.Popup
             if (e.Key == Key.Enter && e.ImeProcessedKey == Key.None && viewModel?.SelectedCommand != null)
             {
                 viewModel.ExecuteCommand.Execute(null);
-                Close();
             }
             else if (e.Key == Key.Escape)
             {
-                Close();
+                viewModel?.CancelCommand.Execute(null);
             }
         }
 
@@ -58,7 +50,6 @@ namespace NiVE3.View.Popup
             if (e.Key == Key.Enter && viewModel?.SelectedCommand != null)
             {
                 viewModel.ExecuteCommand.Execute(null);
-                Close();
             }
         }
 
@@ -73,7 +64,6 @@ namespace NiVE3.View.Popup
             if (viewModel?.SelectedCommand != null)
             {
                 viewModel.ExecuteCommand.Execute(null);
-                Close();
             }
         }
     }

@@ -26,6 +26,7 @@ using Prism.Dialogs;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Windows;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
+using NiVE3.View.Dialog.CustomWindow;
 
 namespace NiVE3.ViewModel
 {
@@ -35,6 +36,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(SaveProjectAsNewNameCommand), nameof(ShortcutKeySetting.SaveProjectAsNewNameGesture))]
     [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
     [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
+    [CommandHandling(nameof(OpenCommandPaletteCommand), nameof(ShortcutKeySetting.OpenCommandPaletteGesture))]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class MainWindowViewModel : BindableBase
@@ -91,6 +93,8 @@ namespace NiVE3.ViewModel
         public ICommand OpenShortcutKeySettingCommand { get; }
 
         public ICommand OpenAboutCommand { get; }
+
+        public ICommand OpenCommandPaletteCommand { get; }
 
         public ICommand NewCompositionCommand { get; }
 
@@ -245,6 +249,12 @@ namespace NiVE3.ViewModel
             OpenAboutCommand = new DelegateCommand(() =>
             {
                 DialogService.ShowDialog(nameof(AboutView));
+            });
+
+            OpenCommandPaletteCommand = new DelegateCommand(() =>
+            {
+                // NOTE: なぜかPrism.WpfにあるはずのShowDialog(string, IDialogParameters, Action<IDialogResult>, string)が見つからないため、DialogParametersに直接使用するウインドウの名前を詰める
+                DialogService.ShowDialog(nameof(CommandPaletteView), new DialogParameters { { KnownDialogParameters.WindowName, nameof(CommandPaletteDialogWindow) } });
             });
 
             NewCompositionCommand = new DelegateCommand(() =>

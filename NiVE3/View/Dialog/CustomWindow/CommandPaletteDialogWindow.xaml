@@ -1,0 +1,21 @@
+﻿<Window x:Class="NiVE3.View.Dialog.CustomWindow.CommandPaletteDialogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NiVE3.View.Dialog.CustomWindow"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:b="clr-namespace:NiVE3.Wpf.Behavior"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        Closing="Window_Closing"
+        Deactivated="Window_Deactivated"
+        Height="450" Width="800">
+    <Grid>
+        
+    </Grid>
+    <i:Interaction.Behaviors>
+        <b:WindowGestureBehavior />
+    </i:Interaction.Behaviors>
+</Window>

@@ -20,7 +20,6 @@
         xmlns:it="clr-namespace:NiVE3.Wpf.Interaction.Trigger"
         xmlns:ia="clr-namespace:NiVE3.Wpf.Interaction.Action"
         xmlns:vp="clr-namespace:NiVE3.View.Pane"
-        xmlns:pp="clr-namespace:NiVE3.View.Popup"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
         xmlns:sgm="clr-namespace:NiVE3.Config.Wpf.GeneratedMarkup"
         xmlns:ui="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
@@ -156,10 +155,6 @@
                 </Style>
             </vd:LayoutItemContainerStyle>
         </vd:LayoutItemContainerStyleSelector>
-
-        <DataTemplate x:Key="CommandPaletteTemplate" DataType="{x:Type vm:CommandPaletteViewModel}">
-            <pp:CommandPalettePopup PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"/>
-        </DataTemplate>
 
         <!-- SEE: https://stackoverflow.com/a/44199807 -->
         <Style x:Key="CaptionButtonTextStyle" TargetType="{x:Type TextBlock}">
@@ -384,8 +379,6 @@
                 </ad:LayoutPanel>
             </ad:LayoutRoot>
         </ad:DockingManager>
-
-        <ContentControl x:Name="CommandPalettePlacementTarget" Grid.Row="1" Visibility="Hidden" MaxWidth="500" MaxHeight="500" Margin="10" ContentTemplate="{StaticResource CommandPaletteTemplate}" pr:RegionManager.RegionName="{x:Static vm:CommandPaletteViewModel.RegionName}"/>
     </Grid>
     <i:Interaction.Behaviors>
         <b:WindowGestureBehavior />

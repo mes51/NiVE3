@@ -48,6 +48,9 @@ namespace NiVE3.UI.Resources
         [ShowInMarkup, BrushColorRange("#11FFFFFF", "#11000000")]
         public static readonly string OutOfWorkareaBrush = nameof(OutOfWorkareaBrush);
 
+        [ShowInMarkup, BrushColorRange("#FF666666", "#FFAAAAAA")]
+        public static readonly string PopupWindowBorderBrush = nameof(PopupWindowBorderBrush);
+
         bool isDarkMode = false;
         public bool IsDarkMode
         {

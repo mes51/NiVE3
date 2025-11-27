@@ -11,27 +11,21 @@ using NiVE3.Config;
 using NiVE3.Extension;
 using NiVE3.Model.UI;
 using NiVE3.View.Resource;
-using NiVE3.ViewModel.CommandOnly;
 using NiVE3.Wpf.Behavior;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
-using Prism.Events;
 using Prism.Mvvm;
+using Prism.Dialogs;
 
-namespace NiVE3.ViewModel
+namespace NiVE3.ViewModel.Dialog
 {
     [UseReactiveProperty]
-    partial class CommandPaletteViewModel : BindableBase
+    partial class CommandPaletteViewModel : BindableBase, IDialogAware
     {
         [GeneratedRegex("\\s+", RegexOptions.Compiled)]
         private static partial Regex GenerateFilterSeparatorRegex();
 
-        public static readonly string RegionName = "CommandPalette";
-
         static readonly Tuple<string, string[], string>[] AllShortcutCommands;
-
-        [ReactiveProperty]
-        public partial bool IsOpen { get; set; }
 
         [ReactiveProperty]
         public partial ObservableCollection<Tuple<string, string[], ICommand, object?, bool>> Commands { get; set; } = [];
@@ -46,6 +40,8 @@ namespace NiVE3.ViewModel
 
         public ICommand ExecuteCommand { get; }
 
+        public ICommand CancelCommand { get; }
+
         ViewStateModel ViewState { get; }
 
         EffectListStateModel EffectListStateModel { get; }
@@ -53,6 +49,8 @@ namespace NiVE3.ViewModel
         EventHubModel EventHubModel { get; }
 
         Tuple<string, string[], ICommand, object?>[] EffectCommands { get; }
+
+        public DialogCloseListener RequestClose { get; set; }
 
         static CommandPaletteViewModel()
         {
@@ -73,7 +71,7 @@ namespace NiVE3.ViewModel
             })];
         }
 
-        public CommandPaletteViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, EventHubModel eventHubModel, IEventAggregator eventAggregator)
+        public CommandPaletteViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, EventHubModel eventHubModel)
         {
             ViewState = viewState;
             EffectListStateModel = effectListStateModel;
@@ -96,6 +94,8 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
+                RequestClose.Invoke(ButtonResult.OK);
+
                 var inputElement = Keyboard.FocusedElement;
                 if (SelectedCommand.Item3 is RoutedCommand routedCommand)
                 {
@@ -113,12 +113,19 @@ namespace NiVE3.ViewModel
                 }
             }, () => SelectedCommand != null).ObservesProperty(() => SelectedCommand);
 
-            eventAggregator.GetEvent<OpenCommandPaletteEvent>().Subscribe(OpenPalette);
+            CancelCommand = new DelegateCommand(() => RequestClose.Invoke(ButtonResult.Cancel));
 
             PropertyChanged += CommandPaletteViewModel_PropertyChanged;
         }
 
-        void OpenPalette()
+        public bool CanCloseDialog()
+        {
+            return true;
+        }
+
+        public void OnDialogClosed() { }
+
+        public void OnDialogOpened(IDialogParameters parameters)
         {
             FilterText = "";
 
@@ -135,7 +142,6 @@ namespace NiVE3.ViewModel
             }
 
             SelectedCommand = Commands.FirstOrDefault();
-            IsOpen = true;
         }
 
         static bool FilterCommand(Tuple<string, string[], ICommand, object?, bool> command, string filterKey)

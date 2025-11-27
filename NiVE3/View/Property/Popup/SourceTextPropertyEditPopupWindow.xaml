@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:NiVE3.View.Property.Popup"
         xmlns:pr="http://prismlibrary.com/"
         xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
+        xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
         mc:Ignorable="d"
         x:Name="RootWindow"
         WindowStartupLocation="Manual"
@@ -16,7 +17,7 @@
         MinWidth="200"
         MinHeight="100"
         Deactivated="RootWindow_Deactivated">
-    <Border Background="White" BorderBrush="DarkGray" BorderThickness="1">
+    <Border Background="White" BorderBrush="{ugm:AppearanceResource ResourceKey=PopupWindowBorderBrush}" BorderThickness="1">
         <Grid Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition />

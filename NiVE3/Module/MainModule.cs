@@ -2,8 +2,8 @@
 using NiVE3.Model;
 using NiVE3.Model.UI;
 using NiVE3.View.Dialog;
+using NiVE3.View.Dialog.CustomWindow;
 using NiVE3.ViewModel;
-using NiVE3.ViewModel.CommandOnly;
 using NiVE3.ViewModel.Dialog;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -40,8 +40,6 @@ namespace NiVE3.Module
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(TextPropertyViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(AudioInformationViewModel));
             ViewRegistry.RegisterViewWithRegion(MainWindowViewModel.RegionName, typeof(RenderQueueViewModel));
-
-            ViewRegistry.RegisterViewWithRegion(CommandPaletteViewModel.RegionName, typeof(CommandPaletteViewModel));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -79,8 +77,7 @@ namespace NiVE3.Module
             Container.Register<PreviewViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
             Container.Register<TimelineViewModel>(Reuse.Transient, FactoryMethod.ConstructorWithResolvableArguments);
 
-            Container.Register<CommandPaletteCommandOnlyViewModel>(Reuse.Singleton, FactoryMethod.ConstructorWithResolvableArguments);
-            Container.RegisterMapping<CommandOnlyViewModelBase, CommandPaletteCommandOnlyViewModel>();
+            //Container.RegisterMapping<CommandOnlyViewModelBase, >();
 
             containerRegistry.RegisterDialog<NameSettingView, NameSettingViewModel>();
             containerRegistry.RegisterDialog<PluginSettingView, PluginSettingViewModel>();
@@ -92,6 +89,9 @@ namespace NiVE3.Module
             containerRegistry.RegisterDialog<PlayRateSettingView, PlayRateSettingViewModel>();
             containerRegistry.RegisterDialog<PrecomposeSettingView, PrecomposeSettingViewModel>();
             containerRegistry.RegisterDialog<GenerateAudioLevelValueKeyFrameView, GenerateAudioLevelValueKeyFrameViewModel>();
+            containerRegistry.RegisterDialog<CommandPaletteView, CommandPaletteViewModel>();
+
+            containerRegistry.RegisterDialogWindow<CommandPaletteDialogWindow>(nameof(CommandPaletteDialogWindow));
         }
     }
 }
