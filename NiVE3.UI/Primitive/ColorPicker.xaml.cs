@@ -89,6 +89,19 @@ namespace NiVE3.UI.Primitive
             new FrameworkPropertyMetadata(255.0, RGB_ValueChanged)
         );
 
+        public static readonly DependencyProperty UseOkHSVProperty = DependencyProperty.Register(
+            nameof(UseOkHSV),
+            typeof(bool),
+            typeof(ColorPicker),
+            new FrameworkPropertyMetadata(false, ColorPickTypeChanged)
+        );
+
+        public bool UseOkHSV
+        {
+            get { return (bool)GetValue(UseOkHSVProperty); }
+            set { SetValue(UseOkHSVProperty, value); }
+        }
+
         internal double Blue
         {
             get { return (double)GetValue(BlueProperty); }
@@ -165,6 +178,8 @@ namespace NiVE3.UI.Primitive
 
         Hsv Hsv => new Hsv((float)Hue, (float)(Saturation * 0.01), (float)(Value * 0.01));
 
+        OkHsv OkHsv => new OkHsv((float)Hue, (float)(Saturation * 0.01), (float)(Value * 0.01));
+
         public ColorPicker()
         {
             InitializeComponent();
@@ -179,93 +194,165 @@ namespace NiVE3.UI.Primitive
 
             Func<int, int, Vector4> areaFunc;
             Func<int, Vector4> barFunc;
+            var colorBarHeight = ColorBarImage.Height;
             switch (ColorPickType)
             {
                 case ColorPickType.S:
                     {
                         var addX = 360.0 / ColorPickAreaImage.Width;
                         var addY = 1.0 / ColorPickAreaImage.Height;
-                        areaFunc = (x, y) =>
+                        if (UseOkHSV)
                         {
-                            var hsv = Hsv;
-                            hsv.Hue = (float)(addX * x);
-                            hsv.Value = (float)(1.0 - addY * y);
-                            return hsv.ToRgb();
-                        };
-                        barFunc = y =>
+                            var baseHsv = OkHsv;
+                            areaFunc = (x, y) =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Hue = (float)(addX * x);
+                                hsv.Value = (float)(1.0 - addY * y);
+                                return hsv.ToRgb();
+                            };
+                            barFunc = y =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Saturation = (float)(1.0 - (y / colorBarHeight));
+                                return hsv.ToRgb();
+                            };
+                        }
+                        else
                         {
-                            var hsv = Hsv;
-                            hsv.Saturation = (float)(1.0 - (y / ColorBarImage.Height));
-                            return hsv.ToRgb();
-                        };
+                            var baseHsv = Hsv;
+                            areaFunc = (x, y) =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Hue = (float)(addX * x);
+                                hsv.Value = (float)(1.0 - addY * y);
+                                return hsv.ToRgb();
+                            };
+                            barFunc = y =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Saturation = (float)(1.0 - (y / colorBarHeight));
+                                return hsv.ToRgb();
+                            };
+                        }
                     }
                     break;
                 case ColorPickType.V:
                     {
                         var addX = 360.0 / ColorPickAreaImage.Width;
                         var addY = 1.0 / ColorPickAreaImage.Height;
-                        areaFunc = (x, y) =>
+                        if (UseOkHSV)
                         {
-                            var hsv = Hsv;
-                            hsv.Hue = (float)(addX * x);
-                            hsv.Saturation = (float)(1.0 - addY * y);
-                            return hsv.ToRgb();
-                        };
-                        barFunc = y =>
+                            var baseHsv = OkHsv;
+                            areaFunc = (x, y) =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Hue = (float)(addX * x);
+                                hsv.Saturation = (float)(1.0 - addY * y);
+                                return hsv.ToRgb();
+                            };
+                            barFunc = y =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Value = (float)(1.0 - (y / colorBarHeight));
+                                return hsv.ToRgb();
+                            };
+                        }
+                        else
                         {
-                            var hsv = Hsv;
-                            hsv.Value = (float)(1.0 - (y / ColorBarImage.Height));
-                            return hsv.ToRgb();
-                        };
+                            var baseHsv = Hsv;
+                            areaFunc = (x, y) =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Hue = (float)(addX * x);
+                                hsv.Saturation = (float)(1.0 - addY * y);
+                                return hsv.ToRgb();
+                            };
+                            barFunc = y =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Value = (float)(1.0 - (y / colorBarHeight));
+                                return hsv.ToRgb();
+                            };
+                        }
                     }
                     break;
                 case ColorPickType.R:
                     {
                         var addX = 255.0 / ColorPickAreaImage.Width;
                         var addY = 255.0 / ColorPickAreaImage.Height;
-                        areaFunc = (x, y) => Color.FromRgb(Color.R, (byte)Math.Round(255.0 - addY * y), (byte)Math.Round(addX * x)).ToVector4();
-                        barFunc = y => Color.FromRgb((byte)Math.Round(255.0 - (y / ColorBarImage.Height) * 255.0), Color.G, Color.B).ToVector4();
+                        var r = Color.R;
+                        var g = Color.G;
+                        var b = Color.B;
+                        areaFunc = (x, y) => Color.FromRgb(r, (byte)Math.Round(255.0 - addY * y), (byte)Math.Round(addX * x)).ToVector4();
+                        barFunc = y => Color.FromRgb((byte)Math.Round(255.0 - (y / colorBarHeight) * 255.0), g, b).ToVector4();
                     }
                     break;
                 case ColorPickType.G:
                     {
                         var addX = 255.0 / ColorPickAreaImage.Width;
                         var addY = 255.0 / ColorPickAreaImage.Height;
-                        areaFunc = (x, y) => Color.FromRgb((byte)Math.Round(255.0 - addY * y), Color.G, (byte)Math.Round(addX * x)).ToVector4();
-                        barFunc = y => Color.FromRgb(Color.R, (byte)Math.Round(255.0 - (y / ColorBarImage.Height) * 255.0), Color.B).ToVector4();
+                        var r = Color.R;
+                        var g = Color.G;
+                        var b = Color.B;
+                        areaFunc = (x, y) => Color.FromRgb((byte)Math.Round(255.0 - addY * y), g, (byte)Math.Round(addX * x)).ToVector4();
+                        barFunc = y => Color.FromRgb(r, (byte)Math.Round(255.0 - (y / colorBarHeight) * 255.0), b).ToVector4();
                     }
                     break;
                 case ColorPickType.B:
                     {
                         var addX = 255.0 / ColorPickAreaImage.Width;
                         var addY = 255.0 / ColorPickAreaImage.Height;
-                        areaFunc = (x, y) => Color.FromRgb((byte)Math.Round(addX * x), (byte)Math.Round(255.0 - addY * y), Color.B).ToVector4();
-                        barFunc = y => Color.FromRgb(Color.R, Color.G, (byte)Math.Round(255.0 - (y / ColorBarImage.Height) * 255.0)).ToVector4();
+                        var r = Color.R;
+                        var g = Color.G;
+                        var b = Color.B;
+                        areaFunc = (x, y) => Color.FromRgb((byte)Math.Round(addX * x), (byte)Math.Round(255.0 - addY * y), b).ToVector4();
+                        barFunc = y => Color.FromRgb(r, b, (byte)Math.Round(255.0 - (y / colorBarHeight) * 255.0)).ToVector4();
                     }
                     break;
                 default:
                     {
                         var addX = 1.0 / ColorPickAreaImage.Width;
                         var addY = 1.0 / ColorPickAreaImage.Height;
-                        areaFunc = (x, y) =>
+                        if (UseOkHSV)
                         {
-                            var hsv = Hsv;
-                            hsv.Saturation = (float)(addX * x);
-                            hsv.Value = (float)(1.0 - addY * y);
-                            return hsv.ToRgb();
-                        };
-                        barFunc = y =>
+                            var baseHsv = OkHsv;
+                            areaFunc = (x, y) =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Saturation = (float)(addX * x);
+                                hsv.Value = (float)(1.0 - addY * y);
+                                return hsv.ToRgb();
+                            };
+                            barFunc = y =>
+                            {
+                                return new OkHsv((float)(360.0 - (y / colorBarHeight) * 360.0), 1.0F, 1.0F).ToRgb();
+                            };
+                        }
+                        else
                         {
-                            return new Hsv((float)(360.0 - (y / ColorBarImage.Height) * 360.0), 1.0F, 1.0F).ToRgb();
-                        };
+                            var baseHsv = Hsv;
+                            areaFunc = (x, y) =>
+                            {
+                                var hsv = baseHsv;
+                                hsv.Saturation = (float)(addX * x);
+                                hsv.Value = (float)(1.0 - addY * y);
+                                return hsv.ToRgb();
+                            };
+                            barFunc = y =>
+                            {
+                                return new Hsv((float)(360.0 - (y / colorBarHeight) * 360.0), 1.0F, 1.0F).ToRgb();
+                            };
+                        }
                     }
                     break;
             }
 
             var pickAreaRect = new Int32Rect(0, 0, (int)ColorPickAreaImage.Width, (int)ColorPickAreaImage.Height);
             var barRect = new Int32Rect(0, 0, (int)ColorBarImage.Width, (int)ColorBarImage.Height);
-            for (int y = 0, pos = 0; y < pickAreaRect.Height; y++)
+            Parallel.For(0, pickAreaRect.Height, y =>
             {
+                var pos = y * pickAreaRect.Width * 4;
                 for (var x = 0; x < pickAreaRect.Width; x++, pos += 4)
                 {
                     var color = areaFunc(x, y).ToColor();
@@ -273,10 +360,11 @@ namespace NiVE3.UI.Primitive
                     ColorPickAreaImageData[pos + 1] = color.G;
                     ColorPickAreaImageData[pos + 2] = color.R;
                 }
-            }
+            });
 
-            for (int y = 0, pos = 0; y < barRect.Height; y++)
+            Parallel.For(0, barRect.Height, y =>
             {
+                var pos = y * barRect.Width * 4;
                 var color = barFunc(y).ToColor();
                 for (var x = 0; x < barRect.Width; x++, pos += 4)
                 {
@@ -284,7 +372,7 @@ namespace NiVE3.UI.Primitive
                     ColorBarImageData[pos + 1] = color.G;
                     ColorBarImageData[pos + 2] = color.R;
                 }
-            }
+            });
 
             ColorPickAreaImage.WritePixels(pickAreaRect, ColorPickAreaImageData, pickAreaRect.Width * 4, 0);
             ColorBarImage.WritePixels(barRect, ColorBarImageData, barRect.Width * 4, 0);
@@ -296,14 +384,25 @@ namespace NiVE3.UI.Primitive
             var circleY = 0.0;
             var barY = 0.0;
             var hsv = Hsv;
+            var okHsv = OkHsv;
             switch (ColorPickType)
             {
-                case ColorPickType.S:
+                case ColorPickType.S when UseOkHSV:
+                    circleX = okHsv.Hue / 360.0 * ColorPickArea.ActualWidth;
+                    circleY = (1.0 - okHsv.Value) * ColorPickArea.ActualHeight;
+                    barY = (1.0 - okHsv.Saturation) * ColorBar.ActualHeight;
+                    break;
+                case ColorPickType.S when !UseOkHSV:
                     circleX = hsv.Hue / 360.0 * ColorPickArea.ActualWidth;
                     circleY = (1.0 - hsv.Value) * ColorPickArea.ActualHeight;
                     barY = (1.0 - hsv.Saturation) * ColorBar.ActualHeight;
                     break;
-                case ColorPickType.V:
+                case ColorPickType.V when UseOkHSV:
+                    circleX = okHsv.Hue / 360.0 * ColorPickArea.ActualWidth;
+                    circleY = (1.0 - okHsv.Saturation) * ColorPickArea.ActualHeight;
+                    barY = (1.0 - okHsv.Value) * ColorBar.ActualHeight;
+                    break;
+                case ColorPickType.V when !UseOkHSV:
                     circleX = hsv.Hue / 360.0 * ColorPickArea.ActualWidth;
                     circleY = (1.0 - hsv.Saturation) * ColorPickArea.ActualHeight;
                     barY = (1.0 - hsv.Value) * ColorBar.ActualHeight;
@@ -323,6 +422,11 @@ namespace NiVE3.UI.Primitive
                     circleY = (255.0 - Color.G) / 255.0 * ColorPickArea.ActualHeight;
                     barY = (255.0 - Color.B) / 255.0 * ColorBar.ActualHeight;
                     break;
+                case ColorPickType.H when UseOkHSV:
+                    circleX = okHsv.Saturation * ColorPickArea.ActualWidth;
+                    circleY = (1.0 - okHsv.Value) * ColorPickArea.ActualHeight;
+                    barY = (360.0 - okHsv.Hue) / 360.0 * ColorBar.ActualHeight;
+                    break;
                 default:
                     circleX = hsv.Saturation * ColorPickArea.ActualWidth;
                     circleY = (1.0 - hsv.Value) * ColorPickArea.ActualHeight;
@@ -340,17 +444,39 @@ namespace NiVE3.UI.Primitive
 
             Color = color;
             var hsv = Hsv.FromRgb(color.ToVector4());
+            var okHsv = OkHsv.FromRgb(color.ToVector4());
             if (inputSource != HueProperty)
             {
-                SetCurrentValue(HueProperty, (double)hsv.Hue);
+                if (UseOkHSV)
+                {
+                    SetCurrentValue(HueProperty, (double)okHsv.Hue);
+                }
+                else
+                {
+                    SetCurrentValue(HueProperty, (double)hsv.Hue);
+                }
             }
             if (inputSource != SaturationProperty)
             {
-                SetCurrentValue(SaturationProperty, hsv.Saturation * 100.0);
+                if (UseOkHSV)
+                {
+                    SetCurrentValue(SaturationProperty, okHsv.Saturation * 100.0);
+                }
+                else
+                {
+                    SetCurrentValue(SaturationProperty, hsv.Saturation * 100.0);
+                }
             }
             if (inputSource != ValueProperty)
             {
-                SetCurrentValue(ValueProperty, hsv.Value * 100.0);
+                if (UseOkHSV)
+                {
+                    SetCurrentValue(ValueProperty, okHsv.Value * 100.0);
+                }
+                else
+                {
+                    SetCurrentValue(ValueProperty, hsv.Value * 100.0);
+                }
             }
             if (inputSource != RedProperty)
             {
@@ -375,7 +501,7 @@ namespace NiVE3.UI.Primitive
             SetSelectedPosition();
         }
 
-        void ChangeColorByHSV(Hsv hsv, object? inputSource)
+        void ChangeColorByHsv(Hsv hsv, object? inputSource)
         {
             IsValueChanging = true;
 
@@ -415,6 +541,46 @@ namespace NiVE3.UI.Primitive
             SetSelectedPosition();
         }
 
+        void ChangeColorByOkHsv(OkHsv okHsv, object? inputSource)
+        {
+            IsValueChanging = true;
+
+            Color = okHsv.ToRgb().ToColor();
+            if (inputSource != HueProperty)
+            {
+                SetCurrentValue(HueProperty, (double)okHsv.Hue);
+            }
+            if (inputSource != SaturationProperty)
+            {
+                SetCurrentValue(SaturationProperty, okHsv.Saturation * 100.0);
+            }
+            if (inputSource != ValueProperty)
+            {
+                SetCurrentValue(ValueProperty, okHsv.Value * 100.0);
+            }
+            if (inputSource != RedProperty)
+            {
+                SetCurrentValue(RedProperty, (double)Color.R);
+            }
+            if (inputSource != GreenProperty)
+            {
+                SetCurrentValue(GreenProperty, (double)Color.G);
+            }
+            if (inputSource != BlueProperty)
+            {
+                SetCurrentValue(BlueProperty, (double)Color.B);
+            }
+            if (inputSource != ColorCode)
+            {
+                ColorCode.Text = Color.ToHex();
+            }
+
+            IsValueChanging = false;
+
+            UpdateColorImage();
+            SetSelectedPosition();
+        }
+
         void SelectColorFromPickerArea(double x, double y)
         {
             if (ColorPickArea.ActualWidth < 1.0 || ColorPickArea.ActualHeight < 1.0)
@@ -425,17 +591,28 @@ namespace NiVE3.UI.Primitive
             x = Math.Min(Math.Max(x, 0.0), ColorPickArea.ActualWidth);
             y = Math.Min(Math.Max(y, 0.0), ColorPickArea.ActualHeight);
             var hsv = Hsv;
+            var okHsv = OkHsv;
             switch (ColorPickType)
             {
-                case ColorPickType.S:
+                case ColorPickType.S when UseOkHSV:
+                    okHsv.Hue = (float)(x / ColorPickArea.ActualWidth * 360.0);
+                    okHsv.Value = (float)(1.0 - y / ColorPickArea.ActualHeight);
+                    ChangeColorByOkHsv(okHsv, null);
+                    break;
+                case ColorPickType.S when !UseOkHSV:
                     hsv.Hue = (float)(x / ColorPickArea.ActualWidth * 360.0);
                     hsv.Value = (float)(1.0 - y / ColorPickArea.ActualHeight);
-                    ChangeColorByHSV(hsv, null);
+                    ChangeColorByHsv(hsv, null);
                     break;
-                case ColorPickType.V:
+                case ColorPickType.V when UseOkHSV:
+                    okHsv.Hue = (float)(x / ColorPickArea.ActualWidth * 360.0);
+                    okHsv.Saturation = (float)(1.0 - y / ColorPickArea.ActualHeight);
+                    ChangeColorByOkHsv(okHsv, null);
+                    break;
+                case ColorPickType.V when !UseOkHSV:
                     hsv.Hue = (float)(x / ColorPickArea.ActualWidth * 360.0);
                     hsv.Saturation = (float)(1.0 - y / ColorPickArea.ActualHeight);
-                    ChangeColorByHSV(hsv, null);
+                    ChangeColorByHsv(hsv, null);
                     break;
                 case ColorPickType.R:
                     ChangeColor(Color.FromRgb(Color.R, RoundToEvenByte(255.0 - y / ColorPickArea.ActualHeight * 255.0), RoundToEvenByte(x / ColorPickArea.ActualWidth * 255.0)), null);
@@ -446,10 +623,15 @@ namespace NiVE3.UI.Primitive
                 case ColorPickType.B:
                     ChangeColor(Color.FromRgb(RoundToEvenByte(x / ColorPickArea.ActualWidth * 255.0), RoundToEvenByte(255.0F - y / ColorPickArea.ActualHeight * 255.0), Color.B), null);
                     break;
+                case ColorPickType.H when UseOkHSV:
+                    okHsv.Saturation = (float)(x / ColorPickArea.ActualWidth);
+                    okHsv.Value = (float)(1.0 - y / ColorPickArea.ActualHeight);
+                    ChangeColorByOkHsv(okHsv, null);
+                    break;
                 default:
                     hsv.Saturation = (float)(x / ColorPickArea.ActualWidth);
                     hsv.Value = (float)(1.0 - y / ColorPickArea.ActualHeight);
-                    ChangeColorByHSV(hsv, null);
+                    ChangeColorByHsv(hsv, null);
                     break;
             }
         }
@@ -463,15 +645,24 @@ namespace NiVE3.UI.Primitive
 
             y = Math.Min(Math.Max(y, 0.0), ColorBar.ActualHeight);
             var hsv = Hsv;
+            var okHsv = OkHsv;
             switch (ColorPickType)
             {
-                case ColorPickType.S:
-                    hsv.Saturation = (float)(1.0 - y / ColorBar.ActualHeight);
-                    ChangeColorByHSV(hsv, null);
+                case ColorPickType.S when UseOkHSV:
+                    okHsv.Saturation = (float)(1.0 - y / ColorBar.ActualHeight);
+                    ChangeColorByOkHsv(okHsv, null);
                     break;
-                case ColorPickType.V:
+                case ColorPickType.S when !UseOkHSV:
+                    hsv.Saturation = (float)(1.0 - y / ColorBar.ActualHeight);
+                    ChangeColorByHsv(hsv, null);
+                    break;
+                case ColorPickType.V when UseOkHSV:
+                    okHsv.Value = (float)(1.0 - y / ColorBar.ActualHeight);
+                    ChangeColorByOkHsv(okHsv, null);
+                    break;
+                case ColorPickType.V when !UseOkHSV:
                     hsv.Value = (float)(1.0 - y / ColorBar.ActualHeight);
-                    ChangeColorByHSV(hsv, null);
+                    ChangeColorByHsv(hsv, null);
                     break;
                 case ColorPickType.R:
                     ChangeColor(Color.FromRgb(RoundToEvenByte(255.0 - y / ColorBar.ActualHeight * 255.0), Color.G, Color.B), null);
@@ -482,9 +673,13 @@ namespace NiVE3.UI.Primitive
                 case ColorPickType.B:
                     ChangeColor(Color.FromRgb(Color.R, Color.G, RoundToEvenByte(255.0 - y / ColorBar.ActualHeight * 255.0)), null);
                     break;
+                case ColorPickType.H when UseOkHSV:
+                    okHsv.Hue = (float)(360.0 - y / ColorBar.ActualHeight * 360.0);
+                    ChangeColorByOkHsv(okHsv, null);
+                    break;
                 default:
                     hsv.Hue = (float)(360.0 - y / ColorBar.ActualHeight * 360.0);
-                    ChangeColorByHSV(hsv, null);
+                    ChangeColorByHsv(hsv, null);
                     break;
             }
         }
@@ -582,7 +777,14 @@ namespace NiVE3.UI.Primitive
 
             if (!colorPicker.IsValueChanging)
             {
-                colorPicker.ChangeColorByHSV(new Hsv((float)colorPicker.Hue, (float)(colorPicker.Saturation * 0.01), (float)(colorPicker.Value * 0.01)), e.Property);
+                if (colorPicker.UseOkHSV)
+                {
+                    colorPicker.ChangeColorByOkHsv(new OkHsv((float)colorPicker.Hue, (float)(colorPicker.Saturation * 0.01), (float)(colorPicker.Value * 0.01)), e.Property);
+                }
+                else
+                {
+                    colorPicker.ChangeColorByHsv(new Hsv((float)colorPicker.Hue, (float)(colorPicker.Saturation * 0.01), (float)(colorPicker.Value * 0.01)), e.Property);
+                }
             }
         }
 

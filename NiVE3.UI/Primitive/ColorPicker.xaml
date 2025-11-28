@@ -12,9 +12,9 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
-        
-        <Thickness x:Key="ValueMargin">0,8,0,0</Thickness>
-        
+
+        <Thickness x:Key="ValueMargin">0,4,0,0</Thickness>
+
         <Style x:Key="PickTypeRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource {x:Type RadioButton}}">
             <Setter Property="Margin" Value="0,0,10,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -71,14 +71,14 @@
         <StackPanel Grid.Column="2" Margin="4,5,0,5" Grid.IsSharedSizeScope="True">
             <Border BorderBrush="{gm:AppearanceResource ResourceKey=BorderBrush}" BorderThickness="1">
                 <Grid>
-                    <StackPanel>
-                        <Rectangle x:Name="NewColorPreview" Width="100" Height="30"/>
-                        <Rectangle x:Name="OldColorPreview" Width="100" Height="30"/>
+                    <StackPanel MinWidth="100">
+                        <Rectangle x:Name="NewColorPreview" Height="30"/>
+                        <Rectangle x:Name="OldColorPreview" Height="30"/>
                     </StackPanel>
                     <Rectangle Style="{StaticResource DeactiveCoverStyle}"/>
                 </Grid>
             </Border>
-            <Grid Margin="0,12,0,0">
+            <Grid Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
                     <ColumnDefinition />
@@ -102,7 +102,8 @@
                 <RadioButton x:Name="VColorMap" Content="B:" IsChecked="{Binding ElementName=Root, Path=ColorPickType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static local:ColorPickType.V}, Mode=TwoWay}" Style="{StaticResource PickTypeRadioButton}"/>
                 <local:SlidableNumberTextBox x:Name="VValue" Grid.Column="1" Value="{Binding ElementName=Root, Path=Value}" Maximum="100" Minimum="0" Digit="0"/>
             </Grid>
-            <Grid Margin="0,12,0,0">
+            <CheckBox Margin="0,4,0,0" Content="OKHSV色空間で表示" IsChecked="{Binding ElementName=Root, Path=UseOkHSV}"/>
+            <Grid Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" SharedSizeGroup="ColorLabel"/>
                     <ColumnDefinition />
