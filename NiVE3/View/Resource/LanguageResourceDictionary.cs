@@ -1914,11 +1914,14 @@ namespace NiVE3.View.Resource
 
         // ShortcutKeyNames
 
+        [DefaultValue("プリコンポーズ")]
+        public static readonly string ShortcutKeyName_PrecomposeGesture = nameof(ShortcutKeyName_PrecomposeGesture);
+
         [DefaultValue("プリセットを適用")]
-        public static readonly string ShortcutKeyName_LoadPropertyPresetGesture = nameof(ShortcutKeyName_LoadPropertyPresetGesture);
+        public static readonly string ShortcutKeyName_LoadPresetGesture = nameof(ShortcutKeyName_LoadPresetGesture);
 
         [DefaultValue("プリセットとして保存")]
-        public static readonly string ShortcutKeyName_SavePropertyPresetGesture = nameof(ShortcutKeyName_SavePropertyPresetGesture);
+        public static readonly string ShortcutKeyName_SavePresetGesture = nameof(ShortcutKeyName_SavePresetGesture);
 
         [DefaultValue("再生・停止")]
         public static readonly string ShortcutKeyName_PlayOrStopGesture = nameof(ShortcutKeyName_PlayOrStopGesture);

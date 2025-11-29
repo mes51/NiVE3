@@ -29,7 +29,7 @@ namespace NiVE3.Plugin.Resource
 
         public string GetText(string key)
         {
-            return (this[key] as string) ?? "";
+            return (this[key] as string) ?? key;
         }
 
         internal static LanguageResourceDictionaryBase? GetLanguageResourceDictionary(Type? type)
