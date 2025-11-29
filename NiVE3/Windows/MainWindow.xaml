@@ -334,6 +334,11 @@
                         </HierarchicalDataTemplate>
                     </MenuItem.ItemTemplate>
                 </MenuItem>
+                <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Composition}">
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Composition_AddRenderQueue}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=OpenRenderSettingGesture}"/>
+                    <Separator />
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Composition_OpenCompositionSetting}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=OpenCompositionSettingGesture}"/>
+                </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_View}" ItemsSource="{Binding SingletonViewModels}">
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource {x:Type MenuItem}}">

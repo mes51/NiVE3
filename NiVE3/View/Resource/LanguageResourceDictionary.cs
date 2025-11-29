@@ -35,6 +35,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト(_P)")]
         public static readonly string MainWindow_Menu_Effect = nameof(MainWindow_Menu_Effect);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("コンポジション(_C)")]
+        public static readonly string MainWindow_Menu_Composition = nameof(MainWindow_Menu_Composition);
+
         [ShowInMarkup, LanguageKey, DefaultValue("表示(_V)")]
         public static readonly string MainWindow_Menu_View = nameof(MainWindow_Menu_View);
 
@@ -103,6 +106,12 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("すべて選択(_A)")]
         public static readonly string MainWindow_MenuItem_Edit_SelectAll = nameof(MainWindow_MenuItem_Edit_SelectAll);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューに追加...(_R)")]
+        public static readonly string MainWindow_MenuItem_Composition_AddRenderQueue = nameof(MainWindow_MenuItem_Composition_AddRenderQueue);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コンポジション設定...(_O)")]
+        public static readonly string MainWindow_MenuItem_Composition_OpenCompositionSetting = nameof(MainWindow_MenuItem_Composition_OpenCompositionSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("環境設定(_O)...")]
         public static readonly string MainWindow_MenuItem_Tool_OpenSetting = nameof(MainWindow_MenuItem_Tool_OpenSetting);
