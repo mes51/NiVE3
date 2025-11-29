@@ -110,6 +110,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューに追加...(_R)")]
         public static readonly string MainWindow_MenuItem_Composition_AddRenderQueue = nameof(MainWindow_MenuItem_Composition_AddRenderQueue);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("現在の時間のフレームを保存...(_F)")]
+        public static readonly string MainWindow_MenuItem_Composition_SaveCurrentTimeFrame = nameof(MainWindow_MenuItem_Composition_SaveCurrentTimeFrame);
+
         [ShowInMarkup, LanguageKey, DefaultValue("コンポジション設定...(_O)")]
         public static readonly string MainWindow_MenuItem_Composition_OpenCompositionSetting = nameof(MainWindow_MenuItem_Composition_OpenCompositionSetting);
 
@@ -1922,6 +1925,9 @@ namespace NiVE3.View.Resource
         public static readonly string LayerModel_NewMaskTemplate = nameof(LayerModel_NewMaskTemplate);
 
         // ShortcutKeyNames
+
+        [DefaultValue("現在の時間のフレームを保存")]
+        public static readonly string ShortcutKeyName_SaveCurrentFrameGesture = nameof(ShortcutKeyName_SaveCurrentFrameGesture);
 
         [DefaultValue("プリコンポーズ")]
         public static readonly string ShortcutKeyName_PrecomposeGesture = nameof(ShortcutKeyName_PrecomposeGesture);

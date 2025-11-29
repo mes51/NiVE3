@@ -501,6 +501,21 @@ namespace NiVE3.Config
             new PropertyMetadata(new KeyGesture(Key.None))
         );
 
+        public static readonly DependencyProperty SaveCurrentFrameGestureProperty = DependencyProperty.Register(
+            nameof(SaveCurrentFrameGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.None))
+        );
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Composition)]
+        [ShowInMarkup]
+        public InputGesture SaveCurrentFrameGesture
+        {
+            get { return (InputGesture)GetValue(SaveCurrentFrameGestureProperty); }
+            set { SetValue(SaveCurrentFrameGestureProperty, value); }
+        }
+
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
         [ShowInMarkup]
         public InputGesture PrecomposeGesture

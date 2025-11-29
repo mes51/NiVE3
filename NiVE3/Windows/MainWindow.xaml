@@ -336,6 +336,7 @@
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Composition}">
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Composition_AddRenderQueue}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=OpenRenderSettingGesture}"/>
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Composition_SaveCurrentTimeFrame}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=SaveCurrentFrameGesture}"/>
                     <Separator />
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Composition_OpenCompositionSetting}" a:MenuItemGestureBindingProperty.InputBinding="{sgm:ShortcutKeyBinding ResourceKey=OpenCompositionSettingGesture}"/>
                 </MenuItem>

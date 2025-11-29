@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -10,12 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using DryIoc.ImTools;
 using GongSolutions.Wpf.DragDrop;
 using Microsoft.Win32;
 using NiVE3.Config;
 using NiVE3.Data.Clipboard;
 using NiVE3.Data.Json.Project;
+using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Model;
 using NiVE3.Model.UI;
@@ -25,8 +29,8 @@ using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
-using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
+using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.Util;
 using NiVE3.ValueObject;
 using NiVE3.View.Command;
@@ -93,6 +97,7 @@ namespace NiVE3.ViewModel
     [CommandHandling(nameof(SavePresetCommand), nameof(ShortcutKeySetting.SavePresetGesture))]
     [CommandHandling(nameof(LoadPresetCommand), nameof(ShortcutKeySetting.LoadPresetGesture))]
     [CommandHandling(nameof(PrecomposeCommand), nameof(ShortcutKeySetting.PrecomposeGesture))]
+    [CommandHandling(nameof(SaveCurrentTimeFrameCommand), nameof(ShortcutKeySetting.SaveCurrentFrameGesture))]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
@@ -445,6 +450,8 @@ namespace NiVE3.ViewModel
 
         public ICommand PrecomposeCommand { get; }
 
+        public ICommand SaveCurrentTimeFrameCommand { get; }
+
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> CurrentTimeChangeByUser
         {
@@ -479,6 +486,8 @@ namespace NiVE3.ViewModel
 
         EventHubModel EventHubModel { get; }
 
+        ApplicationModel ApplicationModel { get; }
+
         IDialogService DialogService { get; }
 
         bool IsUsingTool { get; set; }
@@ -491,7 +500,7 @@ namespace NiVE3.ViewModel
 
         DurationManipulationStateBase? DurationManipulation { get; set; }
 
-        public TimelineViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, ProceduralInputListModel proceduralInputListModel, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, IDialogService dialogService)
+        public TimelineViewModel(ViewStateModel viewState, EffectListStateModel effectListStateModel, ProceduralInputListModel proceduralInputListModel, AudioPlayerModel audioPlayerModel, HistoryModel historyModel, EventHubModel eventHubModel, ApplicationModel applicationModel, IDialogService dialogService)
         {
             ViewState = viewState;
             EffectListStateModel = effectListStateModel;
@@ -499,6 +508,7 @@ namespace NiVE3.ViewModel
             AudioPlayerModel = audioPlayerModel;
             HistoryModel = historyModel;
             EventHubModel = eventHubModel;
+            ApplicationModel = applicationModel;
             DialogService = dialogService;
             Title = LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.Timeline_EmptyTitle);
             SelectedLayers = [];
@@ -1312,6 +1322,49 @@ namespace NiVE3.ViewModel
             }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.Any(l => !l.IsNotRenderable))
                 .ObservesProperty(() => CompositionModel)
                 .ObservesProperty(() => SelectedLayers);
+
+            SaveCurrentTimeFrameCommand = new DelegateCommand(() =>
+            {
+                if (CompositionModel == null)
+                {
+                    return;
+                }
+
+                var save = new SaveFileDialog
+                {
+                    Filter = "PNG(*.png)|*.png|JPEG(*.jpg)|*.jpg|GIF(*.gif)|*.gif|TIFF(*.tiff)|*.tiff"
+                };
+                if (!(save.ShowDialog() ?? false))
+                {
+                    return;
+                }
+
+                using var image = CompositionModel.RenderFrame(CurrentTime, 1.0F, true, ApplicationModel.UseGpu);
+                var managedImage = image.ToManaged();
+                var imageBuffer = ArrayPool<int>.Shared.Rent(managedImage.DataLength);
+                imageBuffer.AsSpan(0, managedImage.DataLength).Clear();
+                ImageConversion.ConvertToBGRA32(managedImage.Data, imageBuffer, managedImage.DataLength);
+                var writableBitmap = new WriteableBitmap(managedImage.Width, managedImage.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                writableBitmap.WritePixels(new Int32Rect(0, 0, managedImage.Width, managedImage.Height), imageBuffer, managedImage.Width * 4, 0);
+
+                using var stream = new FileStream(save.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+                var encoder = Path.GetExtension(save.FileName) switch
+                {
+                    ".bmp" => new BmpBitmapEncoder(),
+                    ".jpg" => new JpegBitmapEncoder { QualityLevel = 100 },
+                    ".gif" => new GifBitmapEncoder(),
+                    ".tiff" => new TiffBitmapEncoder(),
+                    _ => (BitmapEncoder)new PngBitmapEncoder()
+                };
+                encoder.Frames.Add(BitmapFrame.Create(writableBitmap));
+                encoder.Save(stream);
+
+                ArrayPool<int>.Shared.Return(imageBuffer);
+                if (managedImage != image)
+                {
+                    managedImage.Dispose();
+                }
+            }, () => CompositionModel != null).ObservesProperty(() => CompositionModel);
 
             AudioPlayerModel = audioPlayerModel;
         }
