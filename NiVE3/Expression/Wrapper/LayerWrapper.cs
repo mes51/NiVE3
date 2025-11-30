@@ -137,6 +137,9 @@ namespace NiVE3.Expression.Wrapper
         public LayerAudioLevelPropertiesWrapper? audioLevel { get; } = LayerModel.AudioOptionProperties != null ? new LayerAudioLevelPropertiesWrapper(LayerModel.AudioOptionProperties, GlobalTime) : null;
 
         [ExpressionPublicMember]
+        public LayerAudioLevelValuePropertyWrapper? audioLevelValue { get; } = LayerModel.AudioLevelValueProperties != null ? new LayerAudioLevelValuePropertyWrapper(LayerModel.AudioLevelValueProperties, GlobalTime) : null;
+
+        [ExpressionPublicMember]
         public LayerTextPropertyWrapper? text { get; } = LayerModel.TextProperties != null ? new LayerTextPropertyWrapper(LayerModel.TextProperties, GlobalTime) : null;
 
         [ExpressionPublicMember]

@@ -48,6 +48,12 @@ namespace NiVE3.Model
     [UseReactiveProperty]
     partial class LayerModel : WeakPropertyChangedBindingBase, IDisposable, ILayerObject, IFootageSourceUsingLayerObject
     {
+        public const string AudioLevelValueLeftId = nameof(AudioLevelValueLeftId);
+
+        public const string AudioLevelValueRightId = nameof(AudioLevelValueRightId);
+
+        public const string AudioLevelValueBothId = nameof(AudioLevelValueBothId);
+
         const string TransformGroupId = nameof(TransformGroupId);
 
         const string LayerOptionGroupId = nameof(LayerOptionGroupId);
@@ -61,12 +67,6 @@ namespace NiVE3.Model
         const string AudioOptionGroupId = nameof(AudioOptionGroupId);
 
         const string AudioLevelValueGroupId = nameof(AudioLevelValueGroupId);
-
-        const string AudioLevelValueLeftId = nameof(AudioLevelValueLeftId);
-
-        const string AudioLevelValueRightId = nameof(AudioLevelValueRightId);
-
-        const string AudioLevelValueBothId = nameof(AudioLevelValueBothId);
 
         [ReactiveProperty]
         public partial string Name { get; set; } = "";
