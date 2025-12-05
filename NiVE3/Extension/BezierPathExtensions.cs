@@ -22,6 +22,7 @@ namespace NiVE3.Extension
             var pathBuilder = new PathBuilder();
             pathBuilder.StartFigure();
             pathBuilder.MoveTo((Vector2)path.BeginPoint);
+            var lastPoint = path.BeginPoint;
             foreach (var p in path.Points)
             {
                 if (p.IsLinear)
@@ -30,8 +31,9 @@ namespace NiVE3.Extension
                 }
                 else
                 {
-                    pathBuilder.CubicBezierTo((Vector2)p.ControlPoint1, (Vector2)p.ControlPoint2, (Vector2)p.EndPoint);
+                    pathBuilder.CubicBezierTo((Vector2)(p.ControlPoint1 + lastPoint), (Vector2)(p.ControlPoint2 + p.EndPoint), (Vector2)p.EndPoint);
                 }
+                lastPoint = p.EndPoint;
             }
 
             if (path.IsClosed)
