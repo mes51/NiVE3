@@ -147,7 +147,7 @@ namespace NiVE3.Property.Types
                 return false;
             }
 
-            var points = new List<BeziePoint>(pointsArrayValue.Length);
+            var points = new List<BezierPoint>(pointsArrayValue.Length);
             foreach (var pv in pointsArrayValue)
             {
                 if (pv is not IDictionary<string, object> pointDictionary ||
@@ -167,11 +167,11 @@ namespace NiVE3.Property.Types
                     !TryConvertFromExpressionValueVector2d(controlPoint1Value, out var controlPoint1) ||
                     !TryConvertFromExpressionValueVector2d(controlPoint2Value, out var controlPoint2))
                 {
-                    points.Add(new BeziePoint(Vector2d.Zero, Vector2d.Zero, endPoint, true));
+                    points.Add(new BezierPoint(Vector2d.Zero, Vector2d.Zero, endPoint, true));
                 }
                 else
                 {
-                    points.Add(new BeziePoint(controlPoint1, controlPoint2, endPoint, false));
+                    points.Add(new BezierPoint(controlPoint1, controlPoint2, endPoint, false));
                 }
             }
 
@@ -179,7 +179,7 @@ namespace NiVE3.Property.Types
             return true;
         }
 
-        static BeziePoint[] InterpolatePoints(in Vector2d beginPoint, ImmutableArray<BeziePoint> prevPoints, ImmutableArray<BeziePoint> nextPoints, double t)
+        static BezierPoint[] InterpolatePoints(in Vector2d beginPoint, ImmutableArray<BezierPoint> prevPoints, ImmutableArray<BezierPoint> nextPoints, double t)
         {
             if (t <= 0.0)
             {
@@ -190,7 +190,7 @@ namespace NiVE3.Property.Types
                 return [..nextPoints];
             }
 
-            var currentPoints = new List<BeziePoint>();
+            var currentPoints = new List<BezierPoint>();
             var minPointCount = Math.Min(prevPoints.Length, nextPoints.Length);
 
             var prevBeginPoint = beginPoint;
@@ -203,7 +203,7 @@ namespace NiVE3.Property.Types
                 var prevControlPoint2 = prevPoint.IsLinear ? prevBeginPoint : prevPoint.ControlPoint2;
                 var nextControlPoint1 = nextPoint.IsLinear ? nextBeginPoint : nextPoint.ControlPoint1;
                 var nextControlPoint2 = nextPoint.IsLinear ? nextBeginPoint : nextPoint.ControlPoint2;
-                currentPoints.Add(new BeziePoint(
+                currentPoints.Add(new BezierPoint(
                     Vector2d.Lerp(prevControlPoint1, nextControlPoint1, t),
                     Vector2d.Lerp(prevControlPoint2, nextControlPoint2, t),
                     Vector2d.Lerp(prevPoint.EndPoint, nextPoint.EndPoint, t),
@@ -223,7 +223,7 @@ namespace NiVE3.Property.Types
                     var prevPoint = prevPoints[i];
                     var prevControlPoint1 = prevPoint.IsLinear ? prevBeginPoint : prevPoint.ControlPoint1;
                     var prevControlPoint2 = prevPoint.IsLinear ? prevBeginPoint : prevPoint.ControlPoint2;
-                    currentPoints.Add(new BeziePoint(
+                    currentPoints.Add(new BezierPoint(
                         Vector2d.Lerp(prevControlPoint1, lastNextControlPoint1, t),
                         Vector2d.Lerp(prevControlPoint2, lastNextControlPoint2, t),
                         Vector2d.Lerp(prevPoint.EndPoint, lastNextPoint.EndPoint, t),
@@ -243,7 +243,7 @@ namespace NiVE3.Property.Types
                     var nextPoint = nextPoints[i];
                     var nextControlPoint1 = nextPoint.IsLinear ? nextBeginPoint : nextPoint.ControlPoint1;
                     var nextControlPoint2 = nextPoint.IsLinear ? nextBeginPoint : nextPoint.ControlPoint2;
-                    currentPoints.Add(new BeziePoint(
+                    currentPoints.Add(new BezierPoint(
                         Vector2d.Lerp(lastPrevControlPoint1, nextControlPoint1, t),
                         Vector2d.Lerp(lastPrevControlPoint2, nextControlPoint2, t),
                         Vector2d.Lerp(lastPrevPoint.EndPoint, nextPoint.EndPoint, t),

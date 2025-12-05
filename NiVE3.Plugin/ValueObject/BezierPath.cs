@@ -20,18 +20,18 @@ namespace NiVE3.Plugin.ValueObject
 
         public Vector2d BeginPoint { get; }
 
-        public ImmutableArray<BeziePoint> Points { get; }
+        public ImmutableArray<BezierPoint> Points { get; }
 
         public bool IsClosed { get; }
 
-        public BezierPath(Vector2d beginPoint, IEnumerable<BeziePoint> points, bool isClosed)
+        public BezierPath(Vector2d beginPoint, IEnumerable<BezierPoint> points, bool isClosed)
         {
             BeginPoint = beginPoint;
             Points = [..points];
             IsClosed = isClosed;
         }
 
-        public BezierPath(Vector2d beginPoint, BeziePoint[] points, bool isClosed)
+        public BezierPath(Vector2d beginPoint, BezierPoint[] points, bool isClosed)
         {
             BeginPoint = beginPoint;
             Points = ImmutableArray.Create(points);
@@ -66,10 +66,10 @@ namespace NiVE3.Plugin.ValueObject
                 return null;
             }
 
-            var points = new List<BeziePoint>();
+            var points = new List<BezierPoint>();
             foreach (var p in pointsValueArray)
             {
-                var bezierPoint = BeziePoint.Deserialize(p);
+                var bezierPoint = BezierPoint.Deserialize(p);
                 if (bezierPoint == null)
                 {
                     return null;
@@ -85,24 +85,24 @@ namespace NiVE3.Plugin.ValueObject
         {
             var matrixD = new Matrix3x2d(matrix);
 
-            var newPoints = new BeziePoint[Points.Length];
+            var newPoints = new BezierPoint[Points.Length];
             for (var i = 0; i < Points.Length; i++)
             {
                 var p = Points[i];
                 if (p.IsLinear)
                 {
-                    newPoints[i] = new BeziePoint(Vector2d.Zero, Vector2d.Zero, matrixD.Transform(p.EndPoint), true);
+                    newPoints[i] = new BezierPoint(Vector2d.Zero, Vector2d.Zero, matrixD.Transform(p.EndPoint), true);
                 }
                 else
                 {
-                    newPoints[i] = new BeziePoint(matrixD.Transform(p.ControlPoint1), matrixD.Transform(p.ControlPoint2), matrixD.Transform(p.EndPoint), false);
+                    newPoints[i] = new BezierPoint(matrixD.Transform(p.ControlPoint1), matrixD.Transform(p.ControlPoint2), matrixD.Transform(p.EndPoint), false);
                 }
             }
             return new BezierPath(matrixD.Transform(BeginPoint), newPoints, IsClosed);
         }
     }
 
-    public record BeziePoint(Vector2d ControlPoint1, Vector2d ControlPoint2, Vector2d EndPoint, bool IsLinear)
+    public record BezierPoint(Vector2d ControlPoint1, Vector2d ControlPoint2, Vector2d EndPoint, bool IsLinear)
     {
         public object? Serialize()
         {
@@ -115,9 +115,9 @@ namespace NiVE3.Plugin.ValueObject
             };
         }
 
-        public static BeziePoint? Deserialize(object? serializedValue)
+        public static BezierPoint? Deserialize(object? serializedValue)
         {
-            if (serializedValue is BeziePoint point)
+            if (serializedValue is BezierPoint point)
             {
                 return point;
             }
@@ -131,7 +131,7 @@ namespace NiVE3.Plugin.ValueObject
                      VectorSerializer.TryDeserializeVector2d(endPointValue, out var endPoint) &&
                      isLinearValue is bool isLinear)
             {
-                return new BeziePoint(controlPoint1, controlPoint2, endPoint, isLinear);
+                return new BezierPoint(controlPoint1, controlPoint2, endPoint, isLinear);
             }
 
             return null;
