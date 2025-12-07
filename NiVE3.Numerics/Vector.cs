@@ -297,6 +297,18 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Size(Vector2d v)
+        {
+            return new Size(v.X, v.Y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2d(Size v)
+        {
+            return new Vector2d(v.Width, v.Height);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator System.Windows.Vector(Vector2d v)
         {
             return new System.Windows.Vector(v.X, v.Y);

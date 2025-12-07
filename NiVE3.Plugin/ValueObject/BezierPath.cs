@@ -16,7 +16,7 @@ namespace NiVE3.Plugin.ValueObject
 {
     public class BezierPath
     {
-        public static readonly BezierPath Empty = new BezierPath(Vector2d.Zero, [], false);
+        public static readonly BezierPath Empty = new BezierPath(new Vector2d(double.NaN), ImmutableArray<BezierPoint>.Empty, false);
 
         public Vector2d BeginPoint { get; }
 
@@ -38,9 +38,21 @@ namespace NiVE3.Plugin.ValueObject
             IsClosed = isClosed;
         }
 
+        private BezierPath(Vector2d beginPoint, ImmutableArray<BezierPoint> points, bool isClosed)
+        {
+            BeginPoint = beginPoint;
+            Points = points;
+            IsClosed = isClosed;
+        }
+
         public bool IsEmpty()
         {
             return Points.Length < 1;
+        }
+
+        public bool IsInvalid()
+        {
+            return BeginPoint.IsNaN();
         }
 
         public object? Serialize()
@@ -99,6 +111,18 @@ namespace NiVE3.Plugin.ValueObject
                 }
             }
             return new BezierPath(matrixD.Transform(BeginPoint), newPoints, IsClosed);
+        }
+
+        public BezierPath ClosePath()
+        {
+            if (IsClosed)
+            {
+                return this;
+            }
+            else
+            {
+                return new BezierPath(BeginPoint, Points, true);
+            }
         }
     }
 

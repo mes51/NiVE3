@@ -55,7 +55,17 @@ namespace NiVE3.Property.Types
                         var nextValue = (keyFrame2.Value as BezierPath) ?? BezierPath.Empty;
                         var tv = (float)(double)((time - keyFrame1.Time) / (keyFrame2.Time - keyFrame1.Time));
 
-                        var beginPoint = Vector2d.Lerp(prevValue.BeginPoint, nextValue.BeginPoint, tv);
+                        if (prevValue.IsInvalid() && nextValue.IsInvalid())
+                        {
+                            return BezierPath.Empty;
+                        }
+
+                        var beginPoint = (prevValue.IsInvalid(), nextValue.IsInvalid()) switch
+                        {
+                            (true, false) => nextValue.BeginPoint,
+                            (false, true) => prevValue.BeginPoint,
+                            _ => Vector2d.Lerp(prevValue.BeginPoint, nextValue.BeginPoint, tv)
+                        };
                         return new BezierPath(
                             beginPoint,
                             InterpolatePoints(beginPoint, prevValue.Points, nextValue.Points, tv),

@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
+using NiVE3.Plugin.Property.Interaction;
 using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Property.Interaction;
 using NiVE3.Property.Types;
 using NiVE3.View.Property;
 
@@ -35,6 +37,11 @@ namespace NiVE3.Property
         public override object? CoerceValue(object? value)
         {
             return value as BezierPath ?? BezierPath.Empty;
+        }
+
+        public override PropertyInteractionBase? CreatePropertyInteraction(IPropertyInteractionViewModel viewModel)
+        {
+            return new BezierPathPropertyInteraction(viewModel);
         }
     }
 }
