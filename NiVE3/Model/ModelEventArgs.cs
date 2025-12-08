@@ -9,6 +9,7 @@ using NiVE3.Exceptions;
 using NiVE3.Numerics;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
+using NiVE3.ViewModel;
 
 namespace NiVE3.Model
 {
@@ -65,6 +66,8 @@ namespace NiVE3.Model
         public Vector2d PreviewImageScale { get; }
 
         public Time CurrentTime { get; }
+
+        public SelectPreviewResult Selected { get; set; }
 
         public SelectLayerEventArgs(Guid compositionId, Vector2d screenPosition, Vector2d previewImageScale, Time currentTime)
         {

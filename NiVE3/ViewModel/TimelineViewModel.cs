@@ -1369,7 +1369,7 @@ namespace NiVE3.ViewModel
             AudioPlayerModel = audioPlayerModel;
         }
 
-        public void SelectLayer(Guid? layerId, bool isMultiSelect)
+        public bool SelectLayer(Guid? layerId, bool isMultiSelect)
         {
             if (layerId == null && !isMultiSelect)
             {
@@ -1427,13 +1427,15 @@ namespace NiVE3.ViewModel
                     LastSelectedObjectHashCode = 0;
                 }
             }
+
+            return SelectedItemType == SelectItemType.Layer;
         }
 
-        public void SelectByPreview(Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public SelectPreviewResult SelectByPreview(Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
             if (CompositionModel == null || Layers == null)
             {
-                return;
+                return SelectPreviewResult.None;
             }
 
             if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && SelectedTargetTree?.Last() is LayerViewModel selectedLayer)
@@ -1441,7 +1443,7 @@ namespace NiVE3.ViewModel
                 using var checker = CycleChecker.StartCheck();
                 if (interaction.HitTestInteraction(screenPos, previewImageScale, CompositionModel.GetCoordTransformer(currentTime, selectedLayer.LayerId)))
                 {
-                    return;
+                    return SelectPreviewResult.PropertyInteraction;
                 }
             }
 
@@ -1457,10 +1459,18 @@ namespace NiVE3.ViewModel
                 SelectedItemType = SelectItemType.None;
                 SelectedTargetTree = null;
                 LastSelectedObjectHashCode = 0;
-                return;
+
+                return SelectPreviewResult.None;
             }
             var layer = Layers.First(l => l.LayerId == layerId);
-            SelectLayer(layer.LayerId, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift));
+            if (SelectLayer(layer.LayerId, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
+            {
+                return SelectPreviewResult.Layer;
+            }
+            else
+            {
+                return SelectPreviewResult.None;
+            }
         }
 
         public void DragOver(IDropInfo dropInfo)
@@ -2121,5 +2131,12 @@ namespace NiVE3.ViewModel
         Property,
         PropertyGroup,
         KeyFrame,
+    }
+
+    enum SelectPreviewResult
+    {
+        None,
+        Layer,
+        PropertyInteraction
     }
 }

@@ -366,7 +366,15 @@ namespace NiVE3.View.Pane
                     var dpi = VisualTreeHelper.GetDpi(this);
                     var previewImageScale = (viewModel.Scale * 0.01) / new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
                     var beginPos = (Vector2d)(pos - prevPoint) * new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY) / (viewModel.Scale * 0.01);
-                    viewModel.SelectLayerCommand.Execute(Tuple.Create(beginPos, previewImageScale));
+                    var args = new PreviewSelectArgs(beginPos, previewImageScale);
+                    viewModel.SelectLayerCommand.Execute(args);
+
+                    // NOTE: PropertyInteraction.IsHitがtrueの時のみ、MouseDownでツールの使用を開始する
+                    if (args.Selected == SelectPreviewResult.PropertyInteraction)
+                    {
+                        viewModel.BeginUseToolCommand.Execute(Tuple.Create(beginPos, previewImageScale));
+                        IsMovedByTool = true;
+                    }
                 }
                 PreviewCanvas.CaptureMouse();
             }

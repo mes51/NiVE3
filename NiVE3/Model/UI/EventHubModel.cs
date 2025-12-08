@@ -9,6 +9,7 @@ using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
+using NiVE3.ViewModel;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
@@ -99,9 +100,11 @@ namespace NiVE3.Model.UI
             remove { RenderPreviewInteractionRequestPublisher.Unsubscribe(value); }
         }
 
-        public void NotifySelectLayer(Guid compositionId, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public SelectPreviewResult NotifySelectLayer(Guid compositionId, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
-            SelectLayerRequestPublisher.Publish(this, new SelectLayerEventArgs(compositionId, screenPos, previewImageScale, currentTime));
+            var eventArgs = new SelectLayerEventArgs(compositionId, screenPos, previewImageScale, currentTime);
+            SelectLayerRequestPublisher.Publish(this, eventArgs);
+            return eventArgs.Selected;
         }
 
         public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, Vector2d previewImageScale, BeginUseToolEventArgs.PropertyType propertyType, Time currentTime)

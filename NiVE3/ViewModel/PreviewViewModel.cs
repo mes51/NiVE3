@@ -338,15 +338,14 @@ namespace NiVE3.ViewModel
 
             ChangeCurrentTimeCommand = new DelegateCommand(() => CurrentTimeChangeByUserPublisher.Publish(this, EventArgs.Empty));
 
-            SelectLayerCommand = new DelegateCommand<Tuple<Vector2d, Vector2d>>(t =>
+            SelectLayerCommand = new DelegateCommand<PreviewSelectArgs>(args =>
             {
                 if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
 
-                var (pos, scale) = t;
-                EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, pos, scale, CurrentTime);
+                args.Selected = EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, args.Position, args.PreviewScale, CurrentTime);
             });
 
             BeginUseToolCommand = new DelegateCommand<Tuple<Vector2d, Vector2d>>(t =>
@@ -1231,5 +1230,20 @@ namespace NiVE3.ViewModel
         CameraOrbit = 7,
         CameraPan = 8,
         CameraDolly = 9
+    }
+
+    class PreviewSelectArgs
+    {
+        public Vector2d Position { get; }
+
+        public Vector2d PreviewScale { get; }
+
+        public SelectPreviewResult Selected { get; set; }
+
+        public PreviewSelectArgs(Vector2d position, Vector2d previewScale)
+        {
+            Position = position;
+            PreviewScale = previewScale;
+        }
     }
 }
