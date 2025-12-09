@@ -272,6 +272,8 @@ namespace NiVE3.View.Pane
 
         bool NeedPositionReset { get; set; } = true;
 
+        bool FirstMoveAfterCaptureMouse { get; set; }
+
         void UpdateScale()
         {
             var scale = ScaleList[SelectedScaleIndex];
@@ -376,6 +378,7 @@ namespace NiVE3.View.Pane
                         IsMovedByTool = true;
                     }
                 }
+                FirstMoveAfterCaptureMouse = true;
                 PreviewCanvas.CaptureMouse();
             }
         }
@@ -385,6 +388,13 @@ namespace NiVE3.View.Pane
             var viewModel = ViewModel;
             if (viewModel == null)
             {
+                return;
+            }
+
+            if (FirstMoveAfterCaptureMouse)
+            {
+                // NOTE: CaptureMouseを呼ぶと、マウスを動かしていなくてもMouseMoveが呼ばれてしまうようなので、最初の1回は無視する
+                FirstMoveAfterCaptureMouse = false;
                 return;
             }
 
@@ -471,8 +481,8 @@ namespace NiVE3.View.Pane
                     break;
             }
 
-            PreviewCanvas.ReleaseMouseCapture();
             IsMouseDown = false;
+            PreviewCanvas.ReleaseMouseCapture();
         }
 
         private void PreviewCanvas_MouseWheel(object sender, MouseWheelEventArgs e)

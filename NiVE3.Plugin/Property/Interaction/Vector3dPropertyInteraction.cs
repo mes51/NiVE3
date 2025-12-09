@@ -25,7 +25,7 @@ namespace NiVE3.Plugin.Property.Interaction
 
         bool Is3D { get; }
 
-        Vector2d InteractionStartPoint { get; set; }
+        bool IsMoved { get; set; }
 
         Vector3d InteractionStartValue { get; set; }
 
@@ -78,7 +78,6 @@ namespace NiVE3.Plugin.Property.Interaction
 
             if (Math.Abs(screenPos.X - mousePositionInPreview.X) <= hitArea.X && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= hitArea.Y)
             {
-                InteractionStartPoint = mousePositionInPreview;
                 InteractionStartValue = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                 PrevCurrentRawValue = value;
                 IsInteracting = true;
@@ -99,6 +98,7 @@ namespace NiVE3.Plugin.Property.Interaction
                 return;
             }
 
+            IsMoved = true;
             var pos = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             var diff = pos - InteractionStartValue;
 
@@ -116,6 +116,14 @@ namespace NiVE3.Plugin.Property.Interaction
                 return;
             }
 
+            if (!IsMoved)
+            {
+                ViewModel.AbortEditCommand.Execute(null);
+                IsInteracting = false;
+                IsMoved = false;
+                return;
+            }
+
             var pos = coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             var diff = pos - InteractionStartValue;
 
@@ -127,6 +135,7 @@ namespace NiVE3.Plugin.Property.Interaction
 
             ViewModel.EndEditCommand.Execute(null);
             IsInteracting = false;
+            IsMoved = false;
         }
 
         public override void AbortInteraction()

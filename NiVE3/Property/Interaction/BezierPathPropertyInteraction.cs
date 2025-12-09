@@ -31,6 +31,8 @@ namespace NiVE3.Property.Interaction
 
         int ClickedPointIndex { get; set; }
 
+        bool IsMoved { get; set; }
+
         public override bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
@@ -61,6 +63,10 @@ namespace NiVE3.Property.Interaction
 
         public override bool MouseLeftButtonDown(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
+            PrevValue = null;
+            ClickIsBegin = false;
+            ClickedPointIndex = -1;
+
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
             var hitArea = PointHandleArea / previewImageScale;
             if (value.IsClosed)
@@ -69,7 +75,6 @@ namespace NiVE3.Property.Interaction
                 {
                     PrevValue = value;
                     ClickIsBegin = true;
-                    ClickedPointIndex = -1;
                     IsInteracting = true;
                     ViewModel.BeginEditCommand.Execute(null);
                     return true;
@@ -82,7 +87,6 @@ namespace NiVE3.Property.Interaction
                         (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.ControlPoint1, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.ControlPoint2, coordTransformer))))
                     {
                         PrevValue = value;
-                        ClickIsBegin = false;
                         ClickedPointIndex = i;
                         IsInteracting = true;
                         ViewModel.BeginEditCommand.Execute(null);
@@ -90,9 +94,6 @@ namespace NiVE3.Property.Interaction
                     }
                 }
 
-                PrevValue = null;
-                ClickIsBegin = false;
-                ClickedPointIndex = -1;
                 return false;
             }
             else
@@ -101,27 +102,27 @@ namespace NiVE3.Property.Interaction
                 {
                     PrevValue = value;
                     ClickIsBegin = true;
-                    ClickedPointIndex = -1;
                     IsInteracting = true;
                     ViewModel.BeginEditCommand.Execute(null);
+
+                    var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(pos, [], false);
                 }
                 else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint, coordTransformer) && value.Points.Length > 1)
                 {
                     ViewModel.BeginEditCommand.Execute(null);
                     ViewModel.CurrentTimeRawValue = value.ClosePath();
                     ViewModel.EndEditCommand.Execute(null);
-
-                    PrevValue = null;
-                    ClickIsBegin = false;
-                    ClickedPointIndex = -1;
                 }
                 else
                 {
                     PrevValue = value;
-                    ClickIsBegin = false;
                     ClickedPointIndex = value.Points.Length;
                     IsInteracting = true;
                     ViewModel.BeginEditCommand.Execute(null);
+
+                    var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true)), false);
                 }
 
                 return true;
@@ -135,6 +136,7 @@ namespace NiVE3.Property.Interaction
                 return;
             }
 
+            IsMoved = true;
             var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             if (PrevValue.IsClosed)
             {
@@ -168,6 +170,16 @@ namespace NiVE3.Property.Interaction
                 return;
             }
 
+            if (!IsMoved && PrevValue.IsClosed)
+            {
+                ViewModel.AbortEditCommand.Execute(null);
+                IsInteracting = false;
+                PrevValue = null;
+                ClickIsBegin = false;
+                ClickedPointIndex = -1;
+                return;
+            }
+
             var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             if (PrevValue.IsClosed)
             {
@@ -198,6 +210,7 @@ namespace NiVE3.Property.Interaction
             PrevValue = null;
             ClickIsBegin = false;
             ClickedPointIndex = -1;
+            IsMoved = false;
         }
 
         public override void AbortInteraction()
