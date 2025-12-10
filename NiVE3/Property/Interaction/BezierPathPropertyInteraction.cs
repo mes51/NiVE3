@@ -39,7 +39,7 @@ namespace NiVE3.Property.Interaction
             var hitArea = PointHandleArea / previewImageScale;
             if (value.IsClosed)
             {
-                if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint, coordTransformer))
+                if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer))
                 {
                     return true;
                 }
@@ -47,7 +47,7 @@ namespace NiVE3.Property.Interaction
                 foreach (var p in value.Points)
                 {
                     if (IsHit(mousePositionInPreview, hitArea, p.EndPoint, coordTransformer) ||
-                        (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.ControlPoint1, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.ControlPoint2, coordTransformer))))
+                        (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.PrevControlPoint, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.NextControlPoint, coordTransformer))))
                     {
                         return true; 
                     }
@@ -57,7 +57,7 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
-                return !IsHit(mousePositionInPreview, hitArea, value.BeginPoint, coordTransformer) || value.Points.Length > 1;
+                return !IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) || value.Points.Length > 1;
             }
         }
 
@@ -71,7 +71,7 @@ namespace NiVE3.Property.Interaction
             var hitArea = PointHandleArea / previewImageScale;
             if (value.IsClosed)
             {
-                if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint, coordTransformer))
+                if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer))
                 {
                     PrevValue = value;
                     ClickIsBegin = true;
@@ -84,7 +84,7 @@ namespace NiVE3.Property.Interaction
                 {
                     var p = value.Points[i];
                     if (IsHit(mousePositionInPreview, hitArea, p.EndPoint, coordTransformer) ||
-                        (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.ControlPoint1, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.ControlPoint2, coordTransformer))))
+                        (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.PrevControlPoint, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.NextControlPoint, coordTransformer))))
                     {
                         PrevValue = value;
                         ClickedPointIndex = i;
@@ -108,7 +108,7 @@ namespace NiVE3.Property.Interaction
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                     ViewModel.CurrentTimeRawValue = new BezierPath(pos, [], false);
                 }
-                else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint, coordTransformer) && value.Points.Length > 1)
+                else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) && value.Points.Length > 1)
                 {
                     ViewModel.BeginEditCommand.Execute(null);
                     ViewModel.CurrentTimeRawValue = value.ClosePath();
@@ -147,7 +147,7 @@ namespace NiVE3.Property.Interaction
                 else
                 {
                     var point = PrevValue.Points[ClickedPointIndex];
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(ClickedPointIndex, new BezierPoint(point.ControlPoint1, point.ControlPoint2, pos, point.IsLinear)), true);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(ClickedPointIndex, new BezierPoint(point.PrevControlPoint, point.NextControlPoint, pos, point.IsLinear)), true);
                 }
             }
             else
@@ -190,7 +190,7 @@ namespace NiVE3.Property.Interaction
                 else
                 {
                     var point = PrevValue.Points[ClickedPointIndex];
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(ClickedPointIndex, new BezierPoint(point.ControlPoint1, point.ControlPoint2, pos, point.IsLinear)), true);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(ClickedPointIndex, new BezierPoint(point.PrevControlPoint, point.NextControlPoint, pos, point.IsLinear)), true);
                 }
             }
             else
@@ -232,7 +232,7 @@ namespace NiVE3.Property.Interaction
             }
 
             var brush = new SolidColorBrush(tagColor);
-            var screenBeginPos = coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint, globalTime) * previewImageScale + previewImagePosition;
+            var screenBeginPos = coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition;
             drawingContext.DrawRectangle(brush, null, new Rect((Point)(screenBeginPos - PointRadius), PointSize));
             foreach (var p in value.Points)
             {
@@ -254,11 +254,11 @@ namespace NiVE3.Property.Interaction
                     }
                     else
                     {
-                        var controlPoint1 = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint + point.ControlPoint1), globalTime) * previewImageScale + previewImagePosition);
-                        var controlPoint2 = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.ControlPoint2), globalTime) * previewImageScale + previewImagePosition);
+                        var controlPoint1 = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + point.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                        var controlPoint2 = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
                         context.BezierTo(controlPoint1, controlPoint2, screenEndPoint, true, true);
                     }
-                    lastPoint = point.EndPoint;
+                    lastPoint = point;
                 } 
             }
             drawingContext.DrawGeometry(null, new Pen(brush, LineThickness), geometry);

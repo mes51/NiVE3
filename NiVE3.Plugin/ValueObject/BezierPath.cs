@@ -18,27 +18,21 @@ namespace NiVE3.Plugin.ValueObject
     {
         public static readonly BezierPath Empty = new BezierPath(new Vector2d(double.NaN), ImmutableArray<BezierPoint>.Empty, false);
 
-        public Vector2d BeginPoint { get; }
+        public BezierPoint BeginPoint { get; }
 
         public ImmutableArray<BezierPoint> Points { get; }
 
         public bool IsClosed { get; }
 
-        public BezierPath(Vector2d beginPoint, IEnumerable<BezierPoint> points, bool isClosed)
-        {
-            BeginPoint = beginPoint;
-            Points = [..points];
-            IsClosed = isClosed;
-        }
+        public BezierPath(Vector2d beginPoint, IEnumerable<BezierPoint> points, bool isClosed) : this(new BezierPoint(Vector2d.Zero, Vector2d.Zero, beginPoint, true), ImmutableArray.Create([..points]), isClosed) { }
 
-        public BezierPath(Vector2d beginPoint, BezierPoint[] points, bool isClosed)
-        {
-            BeginPoint = beginPoint;
-            Points = ImmutableArray.Create(points);
-            IsClosed = isClosed;
-        }
+        public BezierPath(Vector2d beginPoint, BezierPoint[] points, bool isClosed) : this(new BezierPoint(Vector2d.Zero, Vector2d.Zero, beginPoint, true), ImmutableArray.Create(points), isClosed) { }
 
-        private BezierPath(Vector2d beginPoint, ImmutableArray<BezierPoint> points, bool isClosed)
+        public BezierPath(BezierPoint beginPoint, IEnumerable<BezierPoint> points, bool isClosed) : this(beginPoint, ImmutableArray.Create([..points]), isClosed) { }
+
+        public BezierPath(BezierPoint beginPoint, BezierPoint[] points, bool isClosed) : this(beginPoint, ImmutableArray.Create(points), isClosed) { }
+
+        private BezierPath(BezierPoint beginPoint, ImmutableArray<BezierPoint> points, bool isClosed)
         {
             BeginPoint = beginPoint;
             Points = points;
@@ -52,14 +46,14 @@ namespace NiVE3.Plugin.ValueObject
 
         public bool IsInvalid()
         {
-            return BeginPoint.IsNaN();
+            return BeginPoint.EndPoint.IsNaN();
         }
 
         public object? Serialize()
         {
             return new Dictionary<string, object>
             {
-                { nameof(BeginPoint), VectorSerializer.Serialize(BeginPoint) },
+                { nameof(BeginPoint), BeginPoint.Serialize() },
                 { nameof(Points), Points.Select(p => p.Serialize()).ToArray() },
                 { nameof(IsClosed), IsClosed }
             };
@@ -100,17 +94,9 @@ namespace NiVE3.Plugin.ValueObject
             var newPoints = new BezierPoint[Points.Length];
             for (var i = 0; i < Points.Length; i++)
             {
-                var p = Points[i];
-                if (p.IsLinear)
-                {
-                    newPoints[i] = new BezierPoint(Vector2d.Zero, Vector2d.Zero, matrixD.Transform(p.EndPoint), true);
-                }
-                else
-                {
-                    newPoints[i] = new BezierPoint(matrixD.Transform(p.ControlPoint1), matrixD.Transform(p.ControlPoint2), matrixD.Transform(p.EndPoint), false);
-                }
+                newPoints[i] = Points[i].Transform(matrixD);
             }
-            return new BezierPath(matrixD.Transform(BeginPoint), newPoints, IsClosed);
+            return new BezierPath(BeginPoint.Transform(matrixD), newPoints, IsClosed);
         }
 
         public BezierPath ClosePath()
@@ -126,17 +112,34 @@ namespace NiVE3.Plugin.ValueObject
         }
     }
 
-    public record BezierPoint(Vector2d ControlPoint1, Vector2d ControlPoint2, Vector2d EndPoint, bool IsLinear)
+    public record BezierPoint(Vector2d PrevControlPoint, Vector2d NextControlPoint, Vector2d EndPoint, bool IsLinear)
     {
-        public object? Serialize()
+        public object Serialize()
         {
             return new Dictionary<string, object>
             {
-                { nameof(ControlPoint1), VectorSerializer.Serialize(ControlPoint1) },
-                { nameof(ControlPoint2), VectorSerializer.Serialize(ControlPoint2) },
+                { nameof(PrevControlPoint), VectorSerializer.Serialize(PrevControlPoint) },
+                { nameof(NextControlPoint), VectorSerializer.Serialize(NextControlPoint) },
                 { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
                 { nameof(IsLinear), IsLinear }
             };
+        }
+
+        public BezierPoint Transform(in Matrix3x2 matrix)
+        {
+            return Transform(new Matrix3x2d(matrix));
+        }
+
+        internal BezierPoint Transform(in Matrix3x2d matrix)
+        {
+            if (IsLinear)
+            {
+                return new BezierPoint(Vector2d.Zero, Vector2d.Zero, matrix.Transform(EndPoint), true);
+            }
+            else
+            {
+                return new BezierPoint(matrix.Transform(PrevControlPoint), matrix.Transform(NextControlPoint), matrix.Transform(EndPoint), true);
+            }
         }
 
         public static BezierPoint? Deserialize(object? serializedValue)
@@ -146,8 +149,8 @@ namespace NiVE3.Plugin.ValueObject
                 return point;
             }
             else if (serializedValue is IDictionary<string, object?> dictionary &&
-                     dictionary.TryGetValue(nameof(ControlPoint1), out var controlPoint1Value) &&
-                     dictionary.TryGetValue(nameof(ControlPoint2), out var controlPoint2Value) &&
+                     dictionary.TryGetValue(nameof(PrevControlPoint), out var controlPoint1Value) &&
+                     dictionary.TryGetValue(nameof(NextControlPoint), out var controlPoint2Value) &&
                      dictionary.TryGetValue(nameof(EndPoint), out var endPointValue) &&
                      dictionary.TryGetValue(nameof(IsLinear), out var isLinearValue) &&
                      VectorSerializer.TryDeserializeVector2d(controlPoint1Value, out var controlPoint1) &&
@@ -162,7 +165,7 @@ namespace NiVE3.Plugin.ValueObject
         }
     }
 
-    file readonly ref struct Matrix3x2d
+    readonly ref struct Matrix3x2d
     {
         public readonly Vector128<double> RowX;
 

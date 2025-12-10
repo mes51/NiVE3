@@ -20,7 +20,7 @@ namespace NiVE3.PresetPlugin.Extension
 
             var pathBuilder = new PathBuilder();
             pathBuilder.StartFigure();
-            pathBuilder.MoveTo((Vector2)path.BeginPoint);
+            pathBuilder.MoveTo((Vector2)path.BeginPoint.EndPoint);
             var lastPoint = path.BeginPoint;
             foreach (var p in path.Points)
             {
@@ -30,13 +30,17 @@ namespace NiVE3.PresetPlugin.Extension
                 }
                 else
                 {
-                    pathBuilder.CubicBezierTo((Vector2)(p.ControlPoint1 + lastPoint), (Vector2)(p.ControlPoint2 + p.EndPoint), (Vector2)p.EndPoint);
+                    pathBuilder.CubicBezierTo((Vector2)(lastPoint.NextControlPoint + lastPoint.EndPoint), (Vector2)(p.PrevControlPoint + p.EndPoint), (Vector2)p.EndPoint);
                 }
-                lastPoint = p.EndPoint;
+                lastPoint = p;
             }
 
             if (path.IsClosed)
             {
+                if (!path.BeginPoint.IsLinear)
+                {
+                    pathBuilder.CubicBezierTo((Vector2)(lastPoint.NextControlPoint + lastPoint.EndPoint), (Vector2)(path.BeginPoint.PrevControlPoint + path.BeginPoint.EndPoint), (Vector2)path.BeginPoint.EndPoint);
+                }
                 pathBuilder.CloseFigure();
             }
 
