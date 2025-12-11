@@ -19,6 +19,8 @@ namespace NiVE3.Property.Interaction
 
         const double PointHandleArea = 5.0;
 
+        const double ControlPointCircleRadius = 2.0;
+
         static readonly Vector2d PointRadius = new Vector2d(3.0);
 
         static readonly Size PointSize = (Size)(PointRadius * 2.0);
@@ -32,6 +34,10 @@ namespace NiVE3.Property.Interaction
         int ClickedPointIndex { get; set; }
 
         bool IsMoved { get; set; }
+
+        Vector2d ClickedPosition { get; set; }
+
+        BezierPoint? CurrentCreatingPoint { get; set; }
 
         public override bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
@@ -66,6 +72,7 @@ namespace NiVE3.Property.Interaction
             PrevValue = null;
             ClickIsBegin = false;
             ClickedPointIndex = -1;
+            CurrentCreatingPoint = null;
 
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
             var hitArea = PointHandleArea / previewImageScale;
@@ -107,6 +114,7 @@ namespace NiVE3.Property.Interaction
 
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                     ViewModel.CurrentTimeRawValue = new BezierPath(pos, [], false);
+                    ClickedPosition = pos;
                 }
                 else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) && value.Points.Length > 1)
                 {
@@ -123,6 +131,7 @@ namespace NiVE3.Property.Interaction
 
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                     ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true)), false);
+                    ClickedPosition = pos;
                 }
 
                 return true;
@@ -142,7 +151,8 @@ namespace NiVE3.Property.Interaction
             {
                 if (ClickIsBegin)
                 {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(pos, PrevValue.Points, true);
+                    var newBeginPoint = new BezierPoint(PrevValue.BeginPoint.PrevControlPoint, PrevValue.BeginPoint.NextControlPoint, pos, PrevValue.BeginPoint.IsLinear);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, PrevValue.Points, true);
                 }
                 else
                 {
@@ -152,13 +162,15 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
+                var diff = pos - ClickedPosition;
+                CurrentCreatingPoint = new BezierPoint(-diff, diff, ClickedPosition, false);
                 if (ClickIsBegin)
                 {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(pos, [], false);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
                 }
                 else
                 {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true)), false);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(CurrentCreatingPoint), false);
                 }
             }
         }
@@ -185,7 +197,8 @@ namespace NiVE3.Property.Interaction
             {
                 if (ClickIsBegin)
                 {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(pos, PrevValue.Points, true);
+                    var newBeginPoint = new BezierPoint(PrevValue.BeginPoint.PrevControlPoint, PrevValue.BeginPoint.NextControlPoint, pos, PrevValue.BeginPoint.IsLinear);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, PrevValue.Points, true);
                 }
                 else
                 {
@@ -195,13 +208,15 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
+                var diff = pos - ClickedPosition;
+                CurrentCreatingPoint = IsMoved ? new BezierPoint(-diff, diff, ClickedPosition, false) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true);
                 if (ClickIsBegin)
                 {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(pos, [], false);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
                 }
                 else
                 {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true)), false);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(CurrentCreatingPoint), false);
                 }
             }
 
@@ -232,6 +247,7 @@ namespace NiVE3.Property.Interaction
             }
 
             var brush = new SolidColorBrush(tagColor);
+            var pen = new Pen(brush, LineThickness);
             var screenBeginPos = coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition;
             drawingContext.DrawRectangle(brush, null, new Rect((Point)(screenBeginPos - PointRadius), PointSize));
             foreach (var p in value.Points)
@@ -254,14 +270,31 @@ namespace NiVE3.Property.Interaction
                     }
                     else
                     {
-                        var controlPoint1 = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + point.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
-                        var controlPoint2 = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
-                        context.BezierTo(controlPoint1, controlPoint2, screenEndPoint, true, true);
+                        var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + lastPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                        var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                        context.BezierTo(prevControlPoint, nextControlPoint, screenEndPoint, true, true);
                     }
                     lastPoint = point;
-                } 
+                }
+
+                if (value.IsClosed && !value.BeginPoint.IsLinear)
+                {
+                    var screenEndPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition);
+                    var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + lastPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                    var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(value.BeginPoint.EndPoint + value.BeginPoint.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                    context.BezierTo(prevControlPoint, nextControlPoint, screenEndPoint, true, true);
+                }
             }
-            drawingContext.DrawGeometry(null, new Pen(brush, LineThickness), geometry);
+            drawingContext.DrawGeometry(null, pen, geometry);
+
+            if (IsInteracting && CurrentCreatingPoint != null)
+            {
+                var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(CurrentCreatingPoint.EndPoint + CurrentCreatingPoint.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(CurrentCreatingPoint.EndPoint + CurrentCreatingPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                drawingContext.DrawEllipse(brush, null, prevControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
+                drawingContext.DrawEllipse(brush, null, nextControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
+                drawingContext.DrawLine(pen, prevControlPoint, nextControlPoint);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
