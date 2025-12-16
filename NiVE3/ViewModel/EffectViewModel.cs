@@ -189,6 +189,7 @@ namespace NiVE3.ViewModel
         public void DeSelect()
         {
             Properties.DeSelect();
+            Properties.ClearInteractionState();
         }
 
         partial void WiringModel();

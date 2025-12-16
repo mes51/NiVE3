@@ -533,6 +533,11 @@ namespace NiVE3.ViewModel
             SelectedKeyFrameIds.Clear();
         }
 
+        public void ClearInteractionState()
+        {
+            PropertyInteraction?.ClearState();
+        }
+
         public void SelectAllKeyFrames()
         {
             IsSelectingAll = true;

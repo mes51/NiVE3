@@ -61,6 +61,11 @@ namespace NiVE3.Plugin.Property.Interaction
         public abstract void AbortInteraction();
 
         /// <summary>
+        /// インタラクションの状態をクリアします。
+        /// </summary>
+        public virtual void ClearState() { }
+
+        /// <summary>
         /// プレビューパネルに操作・および現在値のプロパティを描画します
         /// </summary>
         /// <param name="drawingContext">描画対象のDrawingContext</param>

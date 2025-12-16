@@ -54,6 +54,8 @@ namespace NiVE3.ViewModel
         event EventHandler<PropertyValueCommitedEventArgs> PropertyValueCommited;
 
         void DeSelect();
+
+        void ClearInteractionState();
     }
 
     static class InternalPropertyViewModel

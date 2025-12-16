@@ -383,9 +383,12 @@ namespace NiVE3.ViewModel
             foreach (var p in Children)
             {
                 p.DeSelect();
+                p.ClearInteractionState();
             }
             SelectedChildren.Clear();
         }
+
+        public void ClearInteractionState() { }
 
         partial void WiringModel();
 
@@ -407,6 +410,7 @@ namespace NiVE3.ViewModel
                     else
                     {
                         child.DeSelect();
+                        child.ClearInteractionState();
                     }
                 }
             }
@@ -416,6 +420,7 @@ namespace NiVE3.ViewModel
                 foreach (var notSelected in Children.Where(c => c != exclude))
                 {
                     notSelected.DeSelect();
+                    notSelected.ClearInteractionState();
                     SelectedChildren.Remove(notSelected);
                 }
                 if (exclude != null && !SelectedChildren.Contains(exclude))
@@ -437,6 +442,7 @@ namespace NiVE3.ViewModel
                 foreach (var child in Children)
                 {
                     child.DeSelect();
+                    child.ClearInteractionState();
                 }
             }
             else
@@ -444,6 +450,7 @@ namespace NiVE3.ViewModel
                 foreach (var old in e.OldItems?.OfType<IInternalPropertyViewModel>() ?? [])
                 {
                     old.DeSelect();
+                    old.ClearInteractionState();
                 }
             }
         }

@@ -1230,6 +1230,12 @@ namespace NiVE3.ViewModel
             ShapeProperties?.DeSelect();
             SourceOptionProperties?.DeSelect();
             AudioOptionProperties?.DeSelect();
+            TransformProperties?.ClearInteractionState();
+            LayerOptionProperties?.ClearInteractionState();
+            TextProperties?.ClearInteractionState();
+            ShapeProperties?.ClearInteractionState();
+            SourceOptionProperties?.ClearInteractionState();
+            AudioOptionProperties?.ClearInteractionState();
         }
 
         void RefreshLayerProxies()
@@ -1421,6 +1427,12 @@ namespace NiVE3.ViewModel
                     ShapeProperties?.DeSelect();
                     SourceOptionProperties?.DeSelect();
                     AudioOptionProperties?.DeSelect();
+                    TransformProperties?.ClearInteractionState();
+                    LayerOptionProperties?.ClearInteractionState();
+                    TextProperties?.ClearInteractionState();
+                    ShapeProperties?.ClearInteractionState();
+                    SourceOptionProperties?.ClearInteractionState();
+                    AudioOptionProperties?.ClearInteractionState();
                 }
             }
             else
@@ -1438,6 +1450,12 @@ namespace NiVE3.ViewModel
                 ShapeProperties?.DeSelect();
                 SourceOptionProperties?.DeSelect();
                 AudioOptionProperties?.DeSelect();
+                TransformProperties?.ClearInteractionState();
+                LayerOptionProperties?.ClearInteractionState();
+                TextProperties?.ClearInteractionState();
+                ShapeProperties?.ClearInteractionState();
+                SourceOptionProperties?.ClearInteractionState();
+                AudioOptionProperties?.ClearInteractionState();
             }
         }
 
@@ -1491,6 +1509,12 @@ namespace NiVE3.ViewModel
                     ShapeProperties?.DeSelect();
                     SourceOptionProperties?.DeSelect();
                     AudioOptionProperties?.DeSelect();
+                    TransformProperties?.ClearInteractionState();
+                    LayerOptionProperties?.ClearInteractionState();
+                    TextProperties?.ClearInteractionState();
+                    ShapeProperties?.ClearInteractionState();
+                    SourceOptionProperties?.ClearInteractionState();
+                    AudioOptionProperties?.ClearInteractionState();
                 }
             }
             else
@@ -1508,6 +1532,12 @@ namespace NiVE3.ViewModel
                 ShapeProperties?.DeSelect();
                 SourceOptionProperties?.DeSelect();
                 AudioOptionProperties?.DeSelect();
+                TransformProperties?.ClearInteractionState();
+                LayerOptionProperties?.ClearInteractionState();
+                TextProperties?.ClearInteractionState();
+                ShapeProperties?.ClearInteractionState();
+                SourceOptionProperties?.ClearInteractionState();
+                AudioOptionProperties?.ClearInteractionState();
             }
         }
 
@@ -1560,30 +1590,37 @@ namespace NiVE3.ViewModel
             if (!e.ObjectHierarchy.Contains(TransformProperties))
             {
                 TransformProperties?.DeSelect();
+                TransformProperties?.ClearInteractionState();
             }
             if (!e.ObjectHierarchy.Contains(LayerOptionProperties))
             {
                 LayerOptionProperties?.DeSelect();
+                LayerOptionProperties?.ClearInteractionState();
             }
             if (!e.ObjectHierarchy.Contains(TextProperties))
             {
                 TextProperties?.DeSelect();
+                TextProperties?.ClearInteractionState();
             }
             if (!e.ObjectHierarchy.Contains(ShapeProperties))
             {
                 ShapeProperties?.DeSelect();
+                ShapeProperties?.ClearInteractionState();
             }
             if (!e.ObjectHierarchy.Contains(SourceOptionProperties))
             {
                 SourceOptionProperties?.DeSelect();
+                SourceOptionProperties?.ClearInteractionState();
             }
             if (!e.ObjectHierarchy.Contains(AudioOptionProperties))
             {
                 AudioOptionProperties?.DeSelect();
+                AudioOptionProperties?.ClearInteractionState();
             }
             if (!e.ObjectHierarchy.Contains(AudioLevelValueProperties))
             {
                 AudioLevelValueProperties?.DeSelect();
+                AudioLevelValueProperties?.ClearInteractionState();
             }
         }
 

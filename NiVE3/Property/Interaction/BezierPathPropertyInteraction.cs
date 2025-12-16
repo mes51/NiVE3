@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
@@ -15,29 +16,35 @@ namespace NiVE3.Property.Interaction
 {
     class BezierPathPropertyInteraction : PropertyInteractionBase
     {
+        const int BeginPointIndex = -2;
+
         const double LineThickness = 1.0;
 
-        const double PointHandleArea = 5.0;
+        const double PointHandleArea = 8.0;
 
         const double ControlPointCircleRadius = 2.0;
 
-        static readonly Vector2d PointRadius = new Vector2d(3.0);
+        static readonly Vector2d PointRadius = new Vector2d(2.0);
+
+        static readonly Vector2d LargePointRadius = new Vector2d(4.0);
 
         static readonly Size PointSize = (Size)(PointRadius * 2.0);
+
+        static readonly Size LargePointSize = (Size)(LargePointRadius * 2.0);
 
         public BezierPathPropertyInteraction(IPropertyInteractionViewModel viewModel) : base(viewModel) { }
 
         BezierPath? PrevValue { get; set; }
 
-        bool ClickIsBegin { get; set; }
-
-        int ClickedPointIndex { get; set; }
+        bool ClickNewBegin { get; set; }
 
         bool IsMoved { get; set; }
 
         Vector2d ClickedPosition { get; set; }
 
         BezierPoint? CurrentCreatingPoint { get; set; }
+
+        List<int> SelectedPointIndices { get; } = [];
 
         public override bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
@@ -69,9 +76,13 @@ namespace NiVE3.Property.Interaction
 
         public override bool MouseLeftButtonDown(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
+            if (IsInteracting)
+            {
+                return true;
+            }
+
             PrevValue = null;
-            ClickIsBegin = false;
-            ClickedPointIndex = -1;
+            ClickNewBegin = false;
             CurrentCreatingPoint = null;
 
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
@@ -80,11 +91,39 @@ namespace NiVE3.Property.Interaction
             {
                 if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer))
                 {
-                    PrevValue = value;
-                    ClickIsBegin = true;
-                    IsInteracting = true;
-                    ViewModel.BeginEditCommand.Execute(null);
-                    return true;
+                    if (IsShiftKeyDown())
+                    {
+#pragma warning disable CA1868 // NOTE: 要素の削除や追加のみでは無いため無視する
+                        if (SelectedPointIndices.Contains(BeginPointIndex))
+#pragma warning restore CA1868
+                        {
+                            SelectedPointIndices.Remove(BeginPointIndex);
+                            return false;
+                        }
+                        else
+                        {
+                            SelectedPointIndices.Add(BeginPointIndex);
+                            SelectedPointIndices.Sort();
+                            PrevValue = value;
+                            IsInteracting = true;
+                            ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            ViewModel.BeginEditCommand.Execute(null);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        if (!SelectedPointIndices.Contains(BeginPointIndex))
+                        {
+                            SelectedPointIndices.Clear();
+                            SelectedPointIndices.Add(BeginPointIndex);
+                        }
+                        PrevValue = value;
+                        IsInteracting = true;
+                        ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                        ViewModel.BeginEditCommand.Execute(null);
+                        return true;
+                    }
                 }
 
                 for (var i = 0; i < value.Points.Length; i++)
@@ -93,11 +132,38 @@ namespace NiVE3.Property.Interaction
                     if (IsHit(mousePositionInPreview, hitArea, p.EndPoint, coordTransformer) ||
                         (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.PrevControlPoint, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.NextControlPoint, coordTransformer))))
                     {
-                        PrevValue = value;
-                        ClickedPointIndex = i;
-                        IsInteracting = true;
-                        ViewModel.BeginEditCommand.Execute(null);
-                        return true;
+                        if (IsShiftKeyDown())
+                        {
+#pragma warning disable CA1868 // NOTE: 要素の削除や追加のみでは無いため無視する
+                            if (SelectedPointIndices.Contains(i))
+#pragma warning restore CA1868
+                            {
+                                SelectedPointIndices.Remove(i);
+                                return false;
+                            }
+                            else
+                            {
+                                SelectedPointIndices.Add(i);
+                                SelectedPointIndices.Sort();
+                                PrevValue = value;
+                                IsInteracting = true;
+                                ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                                ViewModel.BeginEditCommand.Execute(null);
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            if (!SelectedPointIndices.Contains(i))
+                            {
+                                SelectedPointIndices.Clear();
+                                SelectedPointIndices.Add(i);
+                            }
+                            PrevValue = value;
+                            IsInteracting = true;
+                            ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            ViewModel.BeginEditCommand.Execute(null);
+                        }
                     }
                 }
 
@@ -108,7 +174,7 @@ namespace NiVE3.Property.Interaction
                 if (value.IsInvalid())
                 {
                     PrevValue = value;
-                    ClickIsBegin = true;
+                    ClickNewBegin = true;
                     IsInteracting = true;
                     ViewModel.BeginEditCommand.Execute(null);
 
@@ -125,7 +191,6 @@ namespace NiVE3.Property.Interaction
                 else
                 {
                     PrevValue = value;
-                    ClickedPointIndex = value.Points.Length;
                     IsInteracting = true;
                     ViewModel.BeginEditCommand.Execute(null);
 
@@ -149,22 +214,29 @@ namespace NiVE3.Property.Interaction
             var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             if (PrevValue.IsClosed)
             {
-                if (ClickIsBegin)
+                var diff = pos - ClickedPosition;
+                var newPoints = PrevValue.Points.ToArray();
+                var newBeginPoint = PrevValue.BeginPoint;
+                if (SelectedPointIndices.Contains(BeginPointIndex))
                 {
-                    var newBeginPoint = new BezierPoint(PrevValue.BeginPoint.PrevControlPoint, PrevValue.BeginPoint.NextControlPoint, pos, PrevValue.BeginPoint.IsLinear);
-                    ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, PrevValue.Points, true);
+                    newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear);
                 }
-                else
+                for (var i = 0; i < newPoints.Length; i++)
                 {
-                    var point = PrevValue.Points[ClickedPointIndex];
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(ClickedPointIndex, new BezierPoint(point.PrevControlPoint, point.NextControlPoint, pos, point.IsLinear)), true);
+                    if (SelectedPointIndices.Contains(i))
+                    {
+                        var oldPoint = newPoints[i];
+                        newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear);
+                    }
                 }
+
+                ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, true);
             }
             else
             {
                 var diff = pos - ClickedPosition;
                 CurrentCreatingPoint = new BezierPoint(-diff, diff, ClickedPosition, false);
-                if (ClickIsBegin)
+                if (ClickNewBegin)
                 {
                     ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
                 }
@@ -187,30 +259,35 @@ namespace NiVE3.Property.Interaction
                 ViewModel.AbortEditCommand.Execute(null);
                 IsInteracting = false;
                 PrevValue = null;
-                ClickIsBegin = false;
-                ClickedPointIndex = -1;
                 return;
             }
 
             var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             if (PrevValue.IsClosed)
             {
-                if (ClickIsBegin)
+                var diff = pos - ClickedPosition;
+                var newPoints = PrevValue.Points.ToArray();
+                var newBeginPoint = PrevValue.BeginPoint;
+                if (SelectedPointIndices.Contains(BeginPointIndex))
                 {
-                    var newBeginPoint = new BezierPoint(PrevValue.BeginPoint.PrevControlPoint, PrevValue.BeginPoint.NextControlPoint, pos, PrevValue.BeginPoint.IsLinear);
-                    ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, PrevValue.Points, true);
+                    newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear);
                 }
-                else
+                for (var i = 0; i < newPoints.Length; i++)
                 {
-                    var point = PrevValue.Points[ClickedPointIndex];
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(ClickedPointIndex, new BezierPoint(point.PrevControlPoint, point.NextControlPoint, pos, point.IsLinear)), true);
+                    if (SelectedPointIndices.Contains(i))
+                    {
+                        var oldPoint = newPoints[i];
+                        newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear);
+                    }
                 }
+
+                ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, true);
             }
             else
             {
                 var diff = pos - ClickedPosition;
                 CurrentCreatingPoint = IsMoved ? new BezierPoint(-diff, diff, ClickedPosition, false) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true);
-                if (ClickIsBegin)
+                if (ClickNewBegin)
                 {
                     ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
                 }
@@ -223,8 +300,7 @@ namespace NiVE3.Property.Interaction
             ViewModel.EndEditCommand.Execute(null);
             IsInteracting = false;
             PrevValue = null;
-            ClickIsBegin = false;
-            ClickedPointIndex = -1;
+            ClickNewBegin = false;
             IsMoved = false;
         }
 
@@ -233,8 +309,12 @@ namespace NiVE3.Property.Interaction
             ViewModel.AbortEditCommand.Execute(null);
             IsInteracting = false;
             PrevValue = null;
-            ClickIsBegin = false;
-            ClickedPointIndex = -1;
+            ClickNewBegin = false;
+        }
+
+        public override void ClearState()
+        {
+            SelectedPointIndices.Clear();
         }
 
         public override void Render(DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale, Time globalTime, double frameRate, int previewFrameRange, Color tagColor, ICoordTransformerObject coordTransformer)
@@ -246,19 +326,36 @@ namespace NiVE3.Property.Interaction
                 return;
             }
 
+            var selectedPoints = value.Points.Where((_, i) => SelectedPointIndices.Contains(i));
+            if (SelectedPointIndices.Contains(BeginPointIndex))
+            {
+                selectedPoints = selectedPoints.Prepend(value.BeginPoint);
+            }
+            if (IsInteracting && CurrentCreatingPoint != null)
+            {
+                selectedPoints = selectedPoints.Append(CurrentCreatingPoint);
+            }
+            var fixedSelectedPoints = selectedPoints.ToArray();
+
             var brush = new SolidColorBrush(tagColor);
             var pen = new Pen(brush, LineThickness);
-            var screenBeginPos = coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition;
-            drawingContext.DrawRectangle(brush, null, new Rect((Point)(screenBeginPos - PointRadius), PointSize));
-            foreach (var p in value.Points)
+            foreach (var p in value.Points.Prepend(value.BeginPoint))
             {
-                var screenPos = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)p.EndPoint, globalTime) * previewImageScale + previewImagePosition - PointRadius);
-                drawingContext.DrawRectangle(brush, null, new Rect(screenPos, PointSize));
+                var pointRadius = PointRadius;
+                var pointSize = PointSize;
+                if (fixedSelectedPoints.Contains(p))
+                {
+                    pointRadius = LargePointRadius;
+                    pointSize = LargePointSize;
+                }
+                var screenPos = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)p.EndPoint, globalTime) * previewImageScale + previewImagePosition - pointRadius);
+                drawingContext.DrawRectangle(brush, null, new Rect(screenPos, pointSize));
             }
 
             var geometry = new StreamGeometry();
             using (var context = geometry.Open())
             {
+                var screenBeginPos = coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition;
                 context.BeginFigure((Point)screenBeginPos, false, value.IsClosed);
                 var lastPoint = value.BeginPoint;
                 foreach (var point in value.Points)
@@ -287,10 +384,10 @@ namespace NiVE3.Property.Interaction
             }
             drawingContext.DrawGeometry(null, pen, geometry);
 
-            if (IsInteracting && CurrentCreatingPoint != null)
+            foreach (var point in fixedSelectedPoints.Where(p => !p.IsLinear))
             {
-                var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(CurrentCreatingPoint.EndPoint + CurrentCreatingPoint.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
-                var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(CurrentCreatingPoint.EndPoint + CurrentCreatingPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
                 drawingContext.DrawEllipse(brush, null, prevControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
                 drawingContext.DrawEllipse(brush, null, nextControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
                 drawingContext.DrawLine(pen, prevControlPoint, nextControlPoint);
@@ -302,6 +399,12 @@ namespace NiVE3.Property.Interaction
         {
             var screenPos = coordTransformer.LocalCoordToScreenCoord((Vector3d)point);
             return Math.Abs(screenPos.X - mousePositionInPreview.X) <= hitArea.X && Math.Abs(screenPos.Y - mousePositionInPreview.Y) <= hitArea.Y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsShiftKeyDown()
+        {
+            return Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
         }
     }
 }
