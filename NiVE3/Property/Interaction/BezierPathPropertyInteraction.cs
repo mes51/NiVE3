@@ -502,7 +502,7 @@ namespace NiVE3.Property.Interaction
                     lastPoint = point;
                 }
 
-                if (value.IsClosed && !value.BeginPoint.IsLinear)
+                if (value.IsClosed && (!value.BeginPoint.IsLinear || !lastPoint.IsLinear))
                 {
                     var screenEndPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition);
                     var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + lastPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);

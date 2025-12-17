@@ -38,7 +38,7 @@ namespace NiVE3.Extension
 
             if (path.IsClosed)
             {
-                if (!path.BeginPoint.IsLinear)
+                if (!path.BeginPoint.IsLinear || !lastPoint.IsLinear)
                 {
                     pathBuilder.CubicBezierTo((Vector2)(lastPoint.NextControlPoint + lastPoint.EndPoint), (Vector2)(path.BeginPoint.PrevControlPoint + path.BeginPoint.EndPoint), (Vector2)path.BeginPoint.EndPoint);
                 }
