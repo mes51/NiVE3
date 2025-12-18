@@ -219,12 +219,14 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
+                SelectedPointIndices.Clear();
                 if (value.IsInvalid())
                 {
                     PrevValue = value;
                     ClickNewBegin = true;
                     IsInteracting = true;
                     ClickedPointPosition = PointPosition.EndPoint;
+                    SelectedPointIndices.Add(BeginPointIndex);
                     ViewModel.BeginEditCommand.Execute(null);
 
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
@@ -233,6 +235,8 @@ namespace NiVE3.Property.Interaction
                 }
                 else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) && value.Points.Length > 1)
                 {
+                    SelectedPointIndices.Add(BeginPointIndex);
+
                     ViewModel.BeginEditCommand.Execute(null);
                     ViewModel.CurrentTimeRawValue = value.ClosePath();
                     ViewModel.EndEditCommand.Execute(null);
@@ -242,6 +246,7 @@ namespace NiVE3.Property.Interaction
                     PrevValue = value;
                     IsInteracting = true;
                     ClickedPointPosition = PointPosition.EndPoint;
+                    SelectedPointIndices.Add(value.Points.Length);
                     ViewModel.BeginEditCommand.Execute(null);
 
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
@@ -458,10 +463,6 @@ namespace NiVE3.Property.Interaction
             if (SelectedPointIndices.Contains(BeginPointIndex))
             {
                 selectedPoints = selectedPoints.Prepend(value.BeginPoint);
-            }
-            if (IsInteracting && CurrentCreatingPoint != null)
-            {
-                selectedPoints = selectedPoints.Append(CurrentCreatingPoint);
             }
             var fixedSelectedPoints = selectedPoints.ToArray();
 
