@@ -375,6 +375,7 @@ namespace NiVE3.View.Pane
                     if (args.Selected == SelectPreviewResult.PropertyInteraction)
                     {
                         viewModel.BeginUseToolCommand.Execute(Tuple.Create(beginPos, previewImageScale));
+                        PropertyInteractionView.InvalidateVisual();
                         IsMovedByTool = true;
                     }
                 }
