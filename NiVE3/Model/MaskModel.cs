@@ -446,7 +446,7 @@ namespace NiVE3.Model
             var bezierPoints = new BezierPoint[points.Length - 1];
             for (var i = 0; i < bezierPoints.Length; i++)
             {
-                bezierPoints[i] = new BezierPoint(Vector2d.Zero, Vector2d.Zero, (Vector2d)(Vector2)points[i + 1], true);
+                bezierPoints[i] = new BezierPoint(Vector2d.Zero, Vector2d.Zero, (Vector2d)(Vector2)points[i + 1], true, false);
             }
             return new BezierPath((Vector2d)(Vector2)points[0], bezierPoints, true);
         }

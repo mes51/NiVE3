@@ -235,11 +235,11 @@ namespace NiVE3.Property.Types
                 !TryConvertFromExpressionValueVector2d(controlPoint1Value, out var controlPoint1) ||
                 !TryConvertFromExpressionValueVector2d(controlPoint2Value, out var controlPoint2))
             {
-                return new BezierPoint(Vector2d.Zero, Vector2d.Zero, endPoint, true);
+                return new BezierPoint(Vector2d.Zero, Vector2d.Zero, endPoint, true, false);
             }
             else
             {
-                return new BezierPoint(controlPoint1, controlPoint2, endPoint, false);
+                return new BezierPoint(controlPoint1, controlPoint2, endPoint, false, false);
             }
         }
 
@@ -257,7 +257,7 @@ namespace NiVE3.Property.Types
             {
                 if (prevPoint.IsLinear && nextPoint.IsLinear)
                 {
-                    return new BezierPoint(Vector2d.Zero, Vector2d.Zero, Vector2d.Lerp(prevPoint.EndPoint, nextPoint.EndPoint, t), true);
+                    return new BezierPoint(Vector2d.Zero, Vector2d.Zero, Vector2d.Lerp(prevPoint.EndPoint, nextPoint.EndPoint, t), true, false);
                 }
                 else
                 {
@@ -265,7 +265,8 @@ namespace NiVE3.Property.Types
                         Vector2d.Lerp(prevPoint.PrevControlPoint, nextPoint.PrevControlPoint, t),
                         Vector2d.Lerp(prevPoint.NextControlPoint, nextPoint.NextControlPoint, t),
                         Vector2d.Lerp(prevPoint.EndPoint, nextPoint.EndPoint, t),
-                        true
+                        true,
+                        false
                     );
                 }
             }

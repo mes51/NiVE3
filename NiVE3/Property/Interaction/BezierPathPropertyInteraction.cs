@@ -46,6 +46,10 @@ namespace NiVE3.Property.Interaction
 
         BezierPoint? CurrentCreatingPoint { get; set; }
 
+        Vector2d LastOppositeControlPointPosition { get; set; }
+
+        bool ResetFreeControlPoint { get; set; }
+
         List<int> SelectedPointIndices { get; } = [];
 
         public override bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
@@ -115,6 +119,8 @@ namespace NiVE3.Property.Interaction
                         IsInteracting = true;
                         ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                         ClickedPointPosition = PointPosition.PrevControlPoint;
+                        ResetFreeControlPoint = !p.IsFreeControlPoint;
+                        LastOppositeControlPointPosition = p.NextControlPoint;
                         ViewModel.BeginEditCommand.Execute(null);
                         return true;
                     }
@@ -126,6 +132,8 @@ namespace NiVE3.Property.Interaction
                         IsInteracting = true;
                         ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                         ClickedPointPosition = PointPosition.NextControlPoint;
+                        ResetFreeControlPoint = !p.IsFreeControlPoint;
+                        LastOppositeControlPointPosition = p.PrevControlPoint;
                         ViewModel.BeginEditCommand.Execute(null);
                         return true;
                     }
@@ -250,7 +258,7 @@ namespace NiVE3.Property.Interaction
                     ViewModel.BeginEditCommand.Execute(null);
 
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true)), false);
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true, false)), false);
                     ClickedPosition = pos;
                 }
 
@@ -268,6 +276,7 @@ namespace NiVE3.Property.Interaction
             IsMoved = true;
             var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             var diff = pos - ClickedPosition;
+            var isAltDown = IsAltKeyDown();
             if (PrevValue.IsClosed)
             {
                 switch (ClickedPointPosition)
@@ -278,14 +287,14 @@ namespace NiVE3.Property.Interaction
                             var newBeginPoint = PrevValue.BeginPoint;
                             if (SelectedPointIndices.Contains(BeginPointIndex))
                             {
-                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear);
+                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear, newBeginPoint.IsFreeControlPoint);
                             }
                             for (var i = 0; i < newPoints.Length; i++)
                             {
                                 if (SelectedPointIndices.Contains(i))
                                 {
                                     var oldPoint = newPoints[i];
-                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear);
+                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear, oldPoint.IsFreeControlPoint);
                                 }
                             }
 
@@ -297,7 +306,21 @@ namespace NiVE3.Property.Interaction
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
                             var newControlPoint = pos - targetPoint.EndPoint;
-                            var newPoint = new BezierPoint(newControlPoint, -newControlPoint, targetPoint.EndPoint, false);
+                            if (!ResetFreeControlPoint)
+                            {
+                                if (isAltDown)
+                                {
+                                    ResetFreeControlPoint = true;
+                                }
+                            }
+                            if (ResetFreeControlPoint)
+                            {
+                                if (!isAltDown)
+                                {
+                                    LastOppositeControlPointPosition = -newControlPoint;
+                                }
+                            }
+                            var newPoint = new BezierPoint(newControlPoint, LastOppositeControlPointPosition, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
                             if (isBegin)
                             {
                                 ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
@@ -313,7 +336,21 @@ namespace NiVE3.Property.Interaction
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
                             var newControlPoint = pos - targetPoint.EndPoint;
-                            var newPoint = new BezierPoint(-newControlPoint, newControlPoint, targetPoint.EndPoint, false);
+                            if (!ResetFreeControlPoint)
+                            {
+                                if (isAltDown)
+                                {
+                                    ResetFreeControlPoint = true;
+                                }
+                            }
+                            if (ResetFreeControlPoint)
+                            {
+                                if (!isAltDown)
+                                {
+                                    LastOppositeControlPointPosition = -newControlPoint;
+                                }
+                            }
+                            var newPoint = new BezierPoint(LastOppositeControlPointPosition, newControlPoint, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
                             if (isBegin)
                             {
                                 ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
@@ -328,7 +365,11 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
-                CurrentCreatingPoint = new BezierPoint(-diff, diff, ClickedPosition, false);
+                if (!isAltDown)
+                {
+                    LastOppositeControlPointPosition = -diff;
+                }
+                CurrentCreatingPoint = new BezierPoint(LastOppositeControlPointPosition, diff, ClickedPosition, false, isAltDown);
                 if (ClickNewBegin)
                 {
                     ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
@@ -358,6 +399,7 @@ namespace NiVE3.Property.Interaction
 
             var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
             var diff = pos - ClickedPosition;
+            var isAltDown = IsAltKeyDown();
             if (PrevValue.IsClosed)
             {
                 switch (ClickedPointPosition)
@@ -368,14 +410,14 @@ namespace NiVE3.Property.Interaction
                             var newBeginPoint = PrevValue.BeginPoint;
                             if (SelectedPointIndices.Contains(BeginPointIndex))
                             {
-                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear);
+                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear, newBeginPoint.IsFreeControlPoint);
                             }
                             for (var i = 0; i < newPoints.Length; i++)
                             {
                                 if (SelectedPointIndices.Contains(i))
                                 {
                                     var oldPoint = newPoints[i];
-                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear);
+                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear, oldPoint.IsFreeControlPoint);
                                 }
                             }
 
@@ -387,7 +429,21 @@ namespace NiVE3.Property.Interaction
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
                             var newControlPoint = pos - targetPoint.EndPoint;
-                            var newPoint = new BezierPoint(newControlPoint, -newControlPoint, targetPoint.EndPoint, false);
+                            if (!ResetFreeControlPoint)
+                            {
+                                if (isAltDown)
+                                {
+                                    ResetFreeControlPoint = true;
+                                }
+                            }
+                            if (ResetFreeControlPoint)
+                            {
+                                if (!isAltDown)
+                                {
+                                    LastOppositeControlPointPosition = -newControlPoint;
+                                }
+                            }
+                            var newPoint = new BezierPoint(newControlPoint, LastOppositeControlPointPosition, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
                             if (isBegin)
                             {
                                 ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
@@ -403,7 +459,21 @@ namespace NiVE3.Property.Interaction
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
                             var newControlPoint = pos - targetPoint.EndPoint;
-                            var newPoint = new BezierPoint(-newControlPoint, newControlPoint, targetPoint.EndPoint, false);
+                            if (!ResetFreeControlPoint)
+                            {
+                                if (isAltDown)
+                                {
+                                    ResetFreeControlPoint = true;
+                                }
+                            }
+                            if (ResetFreeControlPoint)
+                            {
+                                if (!isAltDown)
+                                {
+                                    LastOppositeControlPointPosition = -newControlPoint;
+                                }
+                            }
+                            var newPoint = new BezierPoint(LastOppositeControlPointPosition, newControlPoint, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
                             if (isBegin)
                             {
                                 ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
@@ -418,7 +488,11 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
-                CurrentCreatingPoint = IsMoved ? new BezierPoint(-diff, diff, ClickedPosition, false) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true);
+                if (!isAltDown)
+                {
+                    LastOppositeControlPointPosition = -diff;
+                }
+                CurrentCreatingPoint = IsMoved ? new BezierPoint(LastOppositeControlPointPosition, diff, ClickedPosition, false, isAltDown) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true, false);
                 if (ClickNewBegin)
                 {
                     ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
@@ -443,6 +517,7 @@ namespace NiVE3.Property.Interaction
             IsInteracting = false;
             PrevValue = null;
             ClickNewBegin = false;
+            IsMoved = false;
         }
 
         public override void ClearState()
@@ -515,11 +590,13 @@ namespace NiVE3.Property.Interaction
 
             foreach (var point in fixedSelectedPoints.Where(p => !p.IsLinear))
             {
+                var endPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)point.EndPoint, globalTime) * previewImageScale + previewImagePosition);
                 var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
                 var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
                 drawingContext.DrawEllipse(brush, null, prevControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
                 drawingContext.DrawEllipse(brush, null, nextControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
-                drawingContext.DrawLine(pen, prevControlPoint, nextControlPoint);
+                drawingContext.DrawLine(pen, prevControlPoint, endPoint);
+                drawingContext.DrawLine(pen, endPoint, nextControlPoint);
             }
         }
 
@@ -534,6 +611,12 @@ namespace NiVE3.Property.Interaction
         static bool IsShiftKeyDown()
         {
             return Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsAltKeyDown()
+        {
+            return Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt);
         }
     }
 

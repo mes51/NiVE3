@@ -24,9 +24,9 @@ namespace NiVE3.Plugin.ValueObject
 
         public bool IsClosed { get; }
 
-        public BezierPath(Vector2d beginPoint, IEnumerable<BezierPoint> points, bool isClosed) : this(new BezierPoint(Vector2d.Zero, Vector2d.Zero, beginPoint, true), ImmutableArray.Create([..points]), isClosed) { }
+        public BezierPath(Vector2d beginPoint, IEnumerable<BezierPoint> points, bool isClosed) : this(new BezierPoint(Vector2d.Zero, Vector2d.Zero, beginPoint, true, false), ImmutableArray.Create([..points]), isClosed) { }
 
-        public BezierPath(Vector2d beginPoint, BezierPoint[] points, bool isClosed) : this(new BezierPoint(Vector2d.Zero, Vector2d.Zero, beginPoint, true), ImmutableArray.Create(points), isClosed) { }
+        public BezierPath(Vector2d beginPoint, BezierPoint[] points, bool isClosed) : this(new BezierPoint(Vector2d.Zero, Vector2d.Zero, beginPoint, true, false), ImmutableArray.Create(points), isClosed) { }
 
         public BezierPath(BezierPoint beginPoint, IEnumerable<BezierPoint> points, bool isClosed) : this(beginPoint, ImmutableArray.Create([..points]), isClosed) { }
 
@@ -112,7 +112,7 @@ namespace NiVE3.Plugin.ValueObject
         }
     }
 
-    public record BezierPoint(Vector2d PrevControlPoint, Vector2d NextControlPoint, Vector2d EndPoint, bool IsLinear)
+    public record BezierPoint(Vector2d PrevControlPoint, Vector2d NextControlPoint, Vector2d EndPoint, bool IsLinear, bool IsFreeControlPoint)
     {
         public object Serialize()
         {
@@ -121,7 +121,8 @@ namespace NiVE3.Plugin.ValueObject
                 { nameof(PrevControlPoint), VectorSerializer.Serialize(PrevControlPoint) },
                 { nameof(NextControlPoint), VectorSerializer.Serialize(NextControlPoint) },
                 { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
-                { nameof(IsLinear), IsLinear }
+                { nameof(IsLinear), IsLinear },
+                { nameof(IsFreeControlPoint), IsFreeControlPoint }
             };
         }
 
@@ -134,11 +135,11 @@ namespace NiVE3.Plugin.ValueObject
         {
             if (IsLinear)
             {
-                return new BezierPoint(Vector2d.Zero, Vector2d.Zero, matrix.Transform(EndPoint), true);
+                return new BezierPoint(Vector2d.Zero, Vector2d.Zero, matrix.Transform(EndPoint), true, false);
             }
             else
             {
-                return new BezierPoint(matrix.Transform(PrevControlPoint), matrix.Transform(NextControlPoint), matrix.Transform(EndPoint), true);
+                return new BezierPoint(matrix.Transform(PrevControlPoint), matrix.Transform(NextControlPoint), matrix.Transform(EndPoint), true, IsFreeControlPoint);
             }
         }
 
@@ -153,12 +154,14 @@ namespace NiVE3.Plugin.ValueObject
                      dictionary.TryGetValue(nameof(NextControlPoint), out var controlPoint2Value) &&
                      dictionary.TryGetValue(nameof(EndPoint), out var endPointValue) &&
                      dictionary.TryGetValue(nameof(IsLinear), out var isLinearValue) &&
+                     dictionary.TryGetValue(nameof(IsFreeControlPoint), out var isFreeControlPointValue) &&
                      VectorSerializer.TryDeserializeVector2d(controlPoint1Value, out var controlPoint1) &&
                      VectorSerializer.TryDeserializeVector2d(controlPoint2Value, out var controlPoint2) &&
                      VectorSerializer.TryDeserializeVector2d(endPointValue, out var endPoint) &&
-                     isLinearValue is bool isLinear)
+                     isLinearValue is bool isLinear &&
+                     isFreeControlPointValue is bool isFreeControlPoint)
             {
-                return new BezierPoint(controlPoint1, controlPoint2, endPoint, isLinear);
+                return new BezierPoint(controlPoint1, controlPoint2, endPoint, isLinear, isFreeControlPoint);
             }
 
             return null;

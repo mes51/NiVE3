@@ -58,10 +58,10 @@ namespace NiVE3.Shape
             BezierPath = new BezierPath(
                 new Vector2d(position.X, leftTop.Y),
                 [
-                    new BezierPoint(new Vector2d(position.X + controlPointOffset.X, leftTop.Y), new Vector2d(rightBottom.X, position.Y - controlPointOffset.Y), new Vector2d(rightBottom.X, position.Y), false),
-                    new BezierPoint(new Vector2d(rightBottom.X, position.Y + controlPointOffset.Y), new Vector2d(position.X + controlPointOffset.X, rightBottom.Y), new Vector2d(position.X, rightBottom.Y), false),
-                    new BezierPoint(new Vector2d(position.X - controlPointOffset.X, rightBottom.Y), new Vector2d(leftTop.X, position.Y + controlPointOffset.Y), new Vector2d(leftTop.X, position.Y), false),
-                    new BezierPoint(new Vector2d(leftTop.X, position.Y - controlPointOffset.Y), new Vector2d(position.X - controlPointOffset.X, leftTop.Y), new Vector2d(position.X, leftTop.Y), false)
+                    new BezierPoint(new Vector2d(position.X + controlPointOffset.X, leftTop.Y), new Vector2d(rightBottom.X, position.Y - controlPointOffset.Y), new Vector2d(rightBottom.X, position.Y), false, false),
+                    new BezierPoint(new Vector2d(rightBottom.X, position.Y + controlPointOffset.Y), new Vector2d(position.X + controlPointOffset.X, rightBottom.Y), new Vector2d(position.X, rightBottom.Y), false, false),
+                    new BezierPoint(new Vector2d(position.X - controlPointOffset.X, rightBottom.Y), new Vector2d(leftTop.X, position.Y + controlPointOffset.Y), new Vector2d(leftTop.X, position.Y), false, false),
+                    new BezierPoint(new Vector2d(leftTop.X, position.Y - controlPointOffset.Y), new Vector2d(position.X - controlPointOffset.X, leftTop.Y), new Vector2d(position.X, leftTop.Y), false, false)
                 ],
                 true
             );
@@ -94,7 +94,7 @@ namespace NiVE3.Shape
             var controlPoints = NativeSegment.ControlPoints;
             BezierPath = new BezierPath(
                 (Vector2d)(Vector2)controlPoints[0],
-                controlPoints.Skip(1).Chunk(3).Select(p => new BezierPoint((Vector2d)(Vector2)p[0], (Vector2d)(Vector2)p[1], (Vector2d)(Vector2)p[2], false)),
+                controlPoints.Skip(1).Chunk(3).Select(p => new BezierPoint((Vector2d)(Vector2)p[0], (Vector2d)(Vector2)p[1], (Vector2d)(Vector2)p[2], false, false)),
                 true
             );
 
