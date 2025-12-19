@@ -83,7 +83,7 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
-                return !IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) || value.Points.Length > 1;
+                return !IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) || value.Points.Length > 0;
             }
         }
 
@@ -241,7 +241,7 @@ namespace NiVE3.Property.Interaction
                     ViewModel.CurrentTimeRawValue = new BezierPath(pos, [], false);
                     ClickedPosition = pos;
                 }
-                else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) && value.Points.Length > 1)
+                else if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer) && value.Points.Length > 0)
                 {
                     SelectedPointIndices.Add(BeginPointIndex);
 
