@@ -289,159 +289,7 @@ namespace NiVE3.Property.Interaction
             }
 
             IsMoved = true;
-            var isAltDown = IsAltKeyDown();
-            if (PrevValue.IsClosed)
-            {
-                switch (ClickedPointPosition)
-                {
-                    case PointPosition.EndPoint:
-                        {
-                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            var diff = pos - ClickedPosition;
-                            var newPoints = PrevValue.Points.ToArray();
-                            var newBeginPoint = PrevValue.BeginPoint;
-                            if (SelectedPointIndices.Contains(BeginPointIndex))
-                            {
-                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear, newBeginPoint.IsFreeControlPoint);
-                            }
-                            for (var i = 0; i < newPoints.Length; i++)
-                            {
-                                if (SelectedPointIndices.Contains(i))
-                                {
-                                    var oldPoint = newPoints[i];
-                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear, oldPoint.IsFreeControlPoint);
-                                }
-                            }
-
-                            ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, true);
-                        }
-                        break;
-                    case PointPosition.PrevControlPoint:
-                        {
-                            var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
-                            var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
-                            if (IsShiftKeyDown())
-                            {
-                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
-                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
-                                if (mouseDiff.X >= mouseDiff.Y)
-                                {
-                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
-                                }
-                                else
-                                {
-                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
-                                }
-                            }
-
-                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            var diff = pos - ClickedPosition;
-                            var newControlPoint = pos - targetPoint.EndPoint;
-                            if (!ResetFreeControlPoint)
-                            {
-                                if (isAltDown)
-                                {
-                                    ResetFreeControlPoint = true;
-                                }
-                            }
-                            if (ResetFreeControlPoint)
-                            {
-                                if (!isAltDown)
-                                {
-                                    LastOppositeControlPointPosition = -newControlPoint;
-                                }
-                            }
-                            var newPoint = new BezierPoint(newControlPoint, LastOppositeControlPointPosition, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
-                            if (isBegin)
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
-                            }
-                            else
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(SelectedPointIndices[0], newPoint), PrevValue.IsClosed);
-                            }
-                        }
-                        break;
-                    case PointPosition.NextControlPoint:
-                        {
-                            var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
-                            var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
-                            if (IsShiftKeyDown())
-                            {
-                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
-                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
-                                if (mouseDiff.X >= mouseDiff.Y)
-                                {
-                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
-                                }
-                                else
-                                {
-                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
-                                }
-                            }
-
-                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            var diff = pos - ClickedPosition;
-                            var newControlPoint = pos - targetPoint.EndPoint;
-                            if (!ResetFreeControlPoint)
-                            {
-                                if (isAltDown)
-                                {
-                                    ResetFreeControlPoint = true;
-                                }
-                            }
-                            if (ResetFreeControlPoint)
-                            {
-                                if (!isAltDown)
-                                {
-                                    LastOppositeControlPointPosition = -newControlPoint;
-                                }
-                            }
-                            var newPoint = new BezierPoint(LastOppositeControlPointPosition, newControlPoint, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
-                            if (isBegin)
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
-                            }
-                            else
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(SelectedPointIndices[0], newPoint), PrevValue.IsClosed);
-                            }
-                        }
-                        break;
-                }
-            }
-            else
-            {
-                if (IsShiftKeyDown())
-                {
-                    var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)ClickedPosition);
-                    var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
-                    if (mouseDiff.X >= mouseDiff.Y)
-                    {
-                        mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
-                    }
-                    else
-                    {
-                        mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
-                    }
-                }
-
-                var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                var diff = pos - ClickedPosition;
-                if (!isAltDown)
-                {
-                    LastOppositeControlPointPosition = -diff;
-                }
-                CurrentCreatingPoint = new BezierPoint(LastOppositeControlPointPosition, diff, ClickedPosition, false, isAltDown);
-                if (ClickNewBegin)
-                {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
-                }
-                else
-                {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(CurrentCreatingPoint), false);
-                }
-            }
+            UpdateCurrentRawValue(mousePositionInPreview, coordTransformer);
         }
 
         public override void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
@@ -460,159 +308,7 @@ namespace NiVE3.Property.Interaction
                 return;
             }
 
-            var isAltDown = IsAltKeyDown();
-            if (PrevValue.IsClosed)
-            {
-                switch (ClickedPointPosition)
-                {
-                    case PointPosition.EndPoint:
-                        {
-                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            var diff = pos - ClickedPosition;
-                            var newPoints = PrevValue.Points.ToArray();
-                            var newBeginPoint = PrevValue.BeginPoint;
-                            if (SelectedPointIndices.Contains(BeginPointIndex))
-                            {
-                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear, newBeginPoint.IsFreeControlPoint);
-                            }
-                            for (var i = 0; i < newPoints.Length; i++)
-                            {
-                                if (SelectedPointIndices.Contains(i))
-                                {
-                                    var oldPoint = newPoints[i];
-                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear, oldPoint.IsFreeControlPoint);
-                                }
-                            }
-
-                            ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, true);
-                        }
-                        break;
-                    case PointPosition.PrevControlPoint:
-                        {
-                            var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
-                            var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
-                            if (IsShiftKeyDown())
-                            {
-                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
-                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
-                                if (mouseDiff.X >= mouseDiff.Y)
-                                {
-                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
-                                }
-                                else
-                                {
-                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
-                                }
-                            }
-
-                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            var diff = pos - ClickedPosition;
-                            var newControlPoint = pos - targetPoint.EndPoint;
-                            if (!ResetFreeControlPoint)
-                            {
-                                if (isAltDown)
-                                {
-                                    ResetFreeControlPoint = true;
-                                }
-                            }
-                            if (ResetFreeControlPoint)
-                            {
-                                if (!isAltDown)
-                                {
-                                    LastOppositeControlPointPosition = -newControlPoint;
-                                }
-                            }
-                            var newPoint = new BezierPoint(newControlPoint, LastOppositeControlPointPosition, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
-                            if (isBegin)
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
-                            }
-                            else
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(SelectedPointIndices[0], newPoint), PrevValue.IsClosed);
-                            }
-                        }
-                        break;
-                    case PointPosition.NextControlPoint:
-                        {
-                            var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
-                            var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
-                            if (IsShiftKeyDown())
-                            {
-                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
-                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
-                                if (mouseDiff.X >= mouseDiff.Y)
-                                {
-                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
-                                }
-                                else
-                                {
-                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
-                                }
-                            }
-
-                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            var diff = pos - ClickedPosition;
-                            var newControlPoint = pos - targetPoint.EndPoint;
-                            if (!ResetFreeControlPoint)
-                            {
-                                if (isAltDown)
-                                {
-                                    ResetFreeControlPoint = true;
-                                }
-                            }
-                            if (ResetFreeControlPoint)
-                            {
-                                if (!isAltDown)
-                                {
-                                    LastOppositeControlPointPosition = -newControlPoint;
-                                }
-                            }
-                            var newPoint = new BezierPoint(LastOppositeControlPointPosition, newControlPoint, targetPoint.EndPoint, false, targetPoint.IsFreeControlPoint);
-                            if (isBegin)
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
-                            }
-                            else
-                            {
-                                ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(SelectedPointIndices[0], newPoint), PrevValue.IsClosed);
-                            }
-                        }
-                        break;
-                }
-            }
-            else
-            {
-                if (IsShiftKeyDown())
-                {
-                    var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)ClickedPosition);
-                    var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
-                    if (mouseDiff.X >= mouseDiff.Y)
-                    {
-                        mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
-                    }
-                    else
-                    {
-                        mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
-                    }
-                }
-
-                var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                var diff = pos - ClickedPosition;
-                if (!isAltDown)
-                {
-                    LastOppositeControlPointPosition = -diff;
-                }
-                CurrentCreatingPoint = IsMoved ? new BezierPoint(LastOppositeControlPointPosition, diff, ClickedPosition, false, isAltDown) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true, false);
-                if (ClickNewBegin)
-                {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
-                }
-                else
-                {
-                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(CurrentCreatingPoint), false);
-                }
-            }
+            UpdateCurrentRawValue(mousePositionInPreview, coordTransformer);
 
             ViewModel.EndEditCommand.Execute(null);
             ClickedPointPosition = PointPosition.None;
@@ -708,6 +404,156 @@ namespace NiVE3.Property.Interaction
                 drawingContext.DrawEllipse(brush, null, nextControlPoint, ControlPointCircleRadius, ControlPointCircleRadius);
                 drawingContext.DrawLine(pen, prevControlPoint, endPoint);
                 drawingContext.DrawLine(pen, endPoint, nextControlPoint);
+            }
+        }
+
+        void UpdateCurrentRawValue(Vector2d mousePositionInPreview, ICoordTransformerObject coordTransformer)
+        {
+            if (PrevValue == null)
+            {
+                return;
+            }
+
+            var isAltDown = IsAltKeyDown();
+            if (PrevValue.IsClosed)
+            {
+                switch (ClickedPointPosition)
+                {
+                    case PointPosition.EndPoint:
+                        {
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
+                            var newPoints = PrevValue.Points.ToArray();
+                            var newBeginPoint = PrevValue.BeginPoint;
+                            if (SelectedPointIndices.Contains(BeginPointIndex))
+                            {
+                                newBeginPoint = new BezierPoint(newBeginPoint.PrevControlPoint, newBeginPoint.NextControlPoint, newBeginPoint.EndPoint + diff, newBeginPoint.IsLinear, newBeginPoint.IsFreeControlPoint);
+                            }
+                            for (var i = 0; i < newPoints.Length; i++)
+                            {
+                                if (SelectedPointIndices.Contains(i))
+                                {
+                                    var oldPoint = newPoints[i];
+                                    newPoints[i] = new BezierPoint(oldPoint.PrevControlPoint, oldPoint.NextControlPoint, oldPoint.EndPoint + diff, oldPoint.IsLinear, oldPoint.IsFreeControlPoint);
+                                }
+                            }
+
+                            ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, true);
+                        }
+                        break;
+                    case PointPosition.PrevControlPoint:
+                        {
+                            var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
+                            var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
+                            if (IsShiftKeyDown())
+                            {
+                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
+                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                                if (mouseDiff.X >= mouseDiff.Y)
+                                {
+                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                                }
+                                else
+                                {
+                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                                }
+                            }
+
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
+                            var newControlPoint = pos - targetPoint.EndPoint;
+                            if (!ResetFreeControlPoint && isAltDown)
+                            {
+                                ResetFreeControlPoint = true;
+                            }
+                            if (ResetFreeControlPoint && !isAltDown)
+                            {
+                                LastOppositeControlPointPosition = -newControlPoint;
+                            }
+                            var newPoint = new BezierPoint(newControlPoint, LastOppositeControlPointPosition, targetPoint.EndPoint, false, !ResetFreeControlPoint || isAltDown);
+                            if (isBegin)
+                            {
+                                ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
+                            }
+                            else
+                            {
+                                ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(SelectedPointIndices[0], newPoint), PrevValue.IsClosed);
+                            }
+                        }
+                        break;
+                    case PointPosition.NextControlPoint:
+                        {
+                            var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
+                            var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
+                            if (IsShiftKeyDown())
+                            {
+                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
+                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                                if (mouseDiff.X >= mouseDiff.Y)
+                                {
+                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                                }
+                                else
+                                {
+                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                                }
+                            }
+
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
+                            var newControlPoint = pos - targetPoint.EndPoint;
+                            if (!ResetFreeControlPoint && isAltDown)
+                            {
+                                ResetFreeControlPoint = true;
+                            }
+                            if (ResetFreeControlPoint && !isAltDown)
+                            {
+                                LastOppositeControlPointPosition = -newControlPoint;
+                            }
+                            var newPoint = new BezierPoint(LastOppositeControlPointPosition, newControlPoint, targetPoint.EndPoint, false, !ResetFreeControlPoint || isAltDown);
+                            if (isBegin)
+                            {
+                                ViewModel.CurrentTimeRawValue = new BezierPath(newPoint, PrevValue.Points, PrevValue.IsClosed);
+                            }
+                            else
+                            {
+                                ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.SetItem(SelectedPointIndices[0], newPoint), PrevValue.IsClosed);
+                            }
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                if (IsShiftKeyDown())
+                {
+                    var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)ClickedPosition);
+                    var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                    if (mouseDiff.X >= mouseDiff.Y)
+                    {
+                        mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                    }
+                    else
+                    {
+                        mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                    }
+                }
+
+                var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                var diff = pos - ClickedPosition;
+                if (!isAltDown)
+                {
+                    LastOppositeControlPointPosition = -diff;
+                }
+                CurrentCreatingPoint = IsMoved ? new BezierPoint(LastOppositeControlPointPosition, diff, ClickedPosition, false, isAltDown) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true, false);
+                if (ClickNewBegin)
+                {
+                    ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
+                }
+                else
+                {
+                    ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(CurrentCreatingPoint), false);
+                }
             }
         }
 
