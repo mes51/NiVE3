@@ -134,6 +134,13 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2d Abs(in Vector2d v)
+        {
+            var v128 = Unsafe.BitCast<Vector2d, Vector128<double>>(v);
+            return (Vector2d)Vector128.Abs(v128);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2d MinWithoutNaN(in Vector2d a, in Vector2d b)
         {
             return new Vector2d(

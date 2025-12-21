@@ -257,6 +257,21 @@ namespace NiVE3.Property.Interaction
                     SelectedPointIndices.Add(value.Points.Length);
                     ViewModel.BeginEditCommand.Execute(null);
 
+                    if (IsShiftKeyDown())
+                    {
+                        var lastPoint = value.Points.Length > 0 ? value.Points[^1] : value.BeginPoint;
+                        var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)lastPoint.EndPoint);
+                        var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                        if (mouseDiff.X >= mouseDiff.Y)
+                        {
+                            mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                        }
+                        else
+                        {
+                            mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                        }
+                    }
+
                     var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                     ViewModel.CurrentTimeRawValue = new BezierPath(PrevValue.BeginPoint, PrevValue.Points.Append(new BezierPoint(Vector2d.Zero, Vector2d.Zero, pos, true, false)), false);
                     ClickedPosition = pos;
@@ -274,8 +289,6 @@ namespace NiVE3.Property.Interaction
             }
 
             IsMoved = true;
-            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-            var diff = pos - ClickedPosition;
             var isAltDown = IsAltKeyDown();
             if (PrevValue.IsClosed)
             {
@@ -283,6 +296,8 @@ namespace NiVE3.Property.Interaction
                 {
                     case PointPosition.EndPoint:
                         {
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
                             var newPoints = PrevValue.Points.ToArray();
                             var newBeginPoint = PrevValue.BeginPoint;
                             if (SelectedPointIndices.Contains(BeginPointIndex))
@@ -305,6 +320,22 @@ namespace NiVE3.Property.Interaction
                         {
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
+                            if (IsShiftKeyDown())
+                            {
+                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
+                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                                if (mouseDiff.X >= mouseDiff.Y)
+                                {
+                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                                }
+                                else
+                                {
+                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                                }
+                            }
+
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
                             var newControlPoint = pos - targetPoint.EndPoint;
                             if (!ResetFreeControlPoint)
                             {
@@ -335,6 +366,22 @@ namespace NiVE3.Property.Interaction
                         {
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
+                            if (IsShiftKeyDown())
+                            {
+                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
+                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                                if (mouseDiff.X >= mouseDiff.Y)
+                                {
+                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                                }
+                                else
+                                {
+                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                                }
+                            }
+
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
                             var newControlPoint = pos - targetPoint.EndPoint;
                             if (!ResetFreeControlPoint)
                             {
@@ -365,6 +412,22 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
+                if (IsShiftKeyDown())
+                {
+                    var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)ClickedPosition);
+                    var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                    if (mouseDiff.X >= mouseDiff.Y)
+                    {
+                        mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                    }
+                    else
+                    {
+                        mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                    }
+                }
+
+                var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                var diff = pos - ClickedPosition;
                 if (!isAltDown)
                 {
                     LastOppositeControlPointPosition = -diff;
@@ -397,8 +460,6 @@ namespace NiVE3.Property.Interaction
                 return;
             }
 
-            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-            var diff = pos - ClickedPosition;
             var isAltDown = IsAltKeyDown();
             if (PrevValue.IsClosed)
             {
@@ -406,6 +467,8 @@ namespace NiVE3.Property.Interaction
                 {
                     case PointPosition.EndPoint:
                         {
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
                             var newPoints = PrevValue.Points.ToArray();
                             var newBeginPoint = PrevValue.BeginPoint;
                             if (SelectedPointIndices.Contains(BeginPointIndex))
@@ -428,6 +491,22 @@ namespace NiVE3.Property.Interaction
                         {
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
+                            if (IsShiftKeyDown())
+                            {
+                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
+                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                                if (mouseDiff.X >= mouseDiff.Y)
+                                {
+                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                                }
+                                else
+                                {
+                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                                }
+                            }
+
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
                             var newControlPoint = pos - targetPoint.EndPoint;
                             if (!ResetFreeControlPoint)
                             {
@@ -458,6 +537,22 @@ namespace NiVE3.Property.Interaction
                         {
                             var isBegin = SelectedPointIndices.Contains(BeginPointIndex);
                             var targetPoint = isBegin ? PrevValue.BeginPoint : PrevValue.Points[SelectedPointIndices[0]];
+                            if (IsShiftKeyDown())
+                            {
+                                var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)targetPoint.EndPoint);
+                                var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                                if (mouseDiff.X >= mouseDiff.Y)
+                                {
+                                    mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                                }
+                                else
+                                {
+                                    mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                                }
+                            }
+
+                            var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                            var diff = pos - ClickedPosition;
                             var newControlPoint = pos - targetPoint.EndPoint;
                             if (!ResetFreeControlPoint)
                             {
@@ -488,6 +583,22 @@ namespace NiVE3.Property.Interaction
             }
             else
             {
+                if (IsShiftKeyDown())
+                {
+                    var lastMousePosition = coordTransformer.LocalCoordToScreenCoord((Vector3d)ClickedPosition);
+                    var mouseDiff = Vector2d.Abs(mousePositionInPreview - lastMousePosition);
+                    if (mouseDiff.X >= mouseDiff.Y)
+                    {
+                        mousePositionInPreview = new Vector2d(mousePositionInPreview.X, lastMousePosition.Y);
+                    }
+                    else
+                    {
+                        mousePositionInPreview = new Vector2d(lastMousePosition.X, mousePositionInPreview.Y);
+                    }
+                }
+
+                var pos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                var diff = pos - ClickedPosition;
                 if (!isAltDown)
                 {
                     LastOppositeControlPointPosition = -diff;
