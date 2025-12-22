@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
@@ -24,6 +25,10 @@ namespace NiVE3.ViewModel
         void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
         void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
+
+        void ModifierKeyDown(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
+
+        void ModifierKeyUp(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
         void AbortInteraction();
 

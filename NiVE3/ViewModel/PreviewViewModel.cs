@@ -203,6 +203,10 @@ namespace NiVE3.ViewModel
 
         public ICommand BeginUseToolCommand { get; }
 
+        public ICommand ModifierKeyDownWhenUsingToolCommand { get; }
+
+        public ICommand ModifierKeyUpWhenUsingToolCommand { get; }
+
         public ICommand MoveLayersByToolCommand { get; }
 
         public ICommand AbortUseToolCommand { get; }
@@ -371,6 +375,28 @@ namespace NiVE3.ViewModel
                 IsUsingTool = true;
                 var (pos, scale) = t;
                 EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, pos, scale, propertyType, CurrentTime);
+            });
+
+            ModifierKeyDownWhenUsingToolCommand = new DelegateCommand<Tuple<Key, Vector2d, Vector2d>>(t =>
+            {
+                if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                var (key, pos, scale) = t;
+                EventHubModel.NotifyModifierKeyDownWhenUsingTool(compositionPreviewModel.Composition.CompositionId, key, pos, scale, CurrentTime);
+            });
+
+            ModifierKeyUpWhenUsingToolCommand = new DelegateCommand<Tuple<Key, Vector2d, Vector2d>>(t =>
+            {
+                if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                var (key, pos, scale) = t;
+                EventHubModel.NotifyModifierKeyUpWhenUsingTool(compositionPreviewModel.Composition.CompositionId, key, pos, scale, CurrentTime);
             });
 
             MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, Vector2d, bool>>(t =>

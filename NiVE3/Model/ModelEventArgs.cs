@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Exceptions;
 using NiVE3.Numerics;
@@ -114,6 +115,28 @@ namespace NiVE3.Model
             CameraOrbit = CameraProperty | 0x01,
             CameraPan = CameraProperty | 0x02,
             CameraDolly = CameraProperty | 0x4
+        }
+    }
+
+    class ModifierKeyEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Key ModifierKey { get; }
+
+        public Vector2d ScreenPos { get; }
+
+        public Vector2d PreviewImageScale { get; }
+
+        public Time CurrentTime { get; }
+
+        public ModifierKeyEventArgs(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        {
+            CompositionId = compositionId;
+            ModifierKey = modifierKey;
+            ScreenPos = screenPos;
+            PreviewImageScale = previewImageScale;
+            CurrentTime = currentTime;
         }
     }
 

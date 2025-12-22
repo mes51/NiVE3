@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Mvvm;
 using NiVE3.Numerics;
@@ -28,6 +29,20 @@ namespace NiVE3.Model.UI
         {
             add { BeginUseToolRequestPublisher.Subscribe(value); }
             remove { BeginUseToolRequestPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<ModifierKeyEventArgs> ModifierKeyDownWhenUsingToolPublisher { get; } = new WeakEventPublisher<ModifierKeyEventArgs>();
+        public event EventHandler<ModifierKeyEventArgs> ModifierKeyDownWhenUsingTool
+        {
+            add { ModifierKeyDownWhenUsingToolPublisher.Subscribe(value); }
+            remove { ModifierKeyDownWhenUsingToolPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<ModifierKeyEventArgs> ModifierKeyUpWhenUsingToolPublisher { get; } = new WeakEventPublisher<ModifierKeyEventArgs>();
+        public event EventHandler<ModifierKeyEventArgs> ModifierKeyUpWhenUsingTool
+        {
+            add { ModifierKeyUpWhenUsingToolPublisher.Subscribe(value); }
+            remove { ModifierKeyUpWhenUsingToolPublisher.Unsubscribe(value); }
         }
 
         WeakEventPublisher<MoveLayersByToolEventArgs> MoveLayersByToolRequestPublisher { get; } = new WeakEventPublisher<MoveLayersByToolEventArgs>();
@@ -110,6 +125,16 @@ namespace NiVE3.Model.UI
         public void NotifyBeginUseTool(Guid compositionId, Vector2d startScreenPos, Vector2d previewImageScale, BeginUseToolEventArgs.PropertyType propertyType, Time currentTime)
         {
             BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, previewImageScale, propertyType, currentTime));
+        }
+
+        public void NotifyModifierKeyDownWhenUsingTool(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        {
+            ModifierKeyDownWhenUsingToolPublisher.Publish(this, new ModifierKeyEventArgs(compositionId, modifierKey, screenPos, previewImageScale, currentTime));
+        }
+
+        public void NotifyModifierKeyUpWhenUsingTool(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        {
+            ModifierKeyUpWhenUsingToolPublisher.Publish(this, new ModifierKeyEventArgs(compositionId, modifierKey, screenPos, previewImageScale, currentTime));
         }
 
         public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, Vector2d previewImageScale, bool isCommit, Time currentTime)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
@@ -54,6 +55,24 @@ namespace NiVE3.Plugin.Property.Interaction
         /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
         /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
         public abstract void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
+
+        /// <summary>
+        /// 修飾キーが押されたときの処理を実行します
+        /// </summary>
+        /// <param name="modifierKey">押された修飾キー</param>
+        /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
+        public virtual void ModifierKeyDown(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer) { }
+
+        /// <summary>
+        /// 修飾キーが離されたときの処理を実行します
+        /// </summary>
+        /// <param name="modifierKey">離された修飾キー</param>
+        /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
+        /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
+        /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
+        public virtual void ModifierKeyUp(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer) { }
 
         /// <summary>
         /// インタラクションを中断します

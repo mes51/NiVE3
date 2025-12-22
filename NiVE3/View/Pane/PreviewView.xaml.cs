@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -532,6 +533,68 @@ namespace NiVE3.View.Pane
             {
                 LayoutCenterPreviewArea();
             }
+        }
+
+        private void PreviewBorder_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Left || e.Key == Key.Up || e.Key == Key.Right || e.Key == Key.Down || e.Key == Key.Tab)
+            {
+                e.Handled = true;
+            }
+
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift || e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl || e.Key == Key.LeftAlt || e.Key == Key.RightAlt || e.Key == Key.System)
+            {
+                var key = e.Key;
+                if (key == Key.System)
+                {
+                    key = e.SystemKey;
+                }
+
+                var dpi = VisualTreeHelper.GetDpi(this);
+                var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                var mousePos = Mouse.GetPosition(PreviewCanvas);
+                var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
+                var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
+                var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
+                viewModel.ModifierKeyDownWhenUsingToolCommand.Execute(Tuple.Create(e.Key, screenPos, previewImageScale));
+            }
+        }
+
+        private void PreviewBorder_KeyUp(object sender, KeyEventArgs e)
+        {
+            var viewModel = ViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift || e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl || e.Key == Key.LeftAlt || e.Key == Key.RightAlt || e.Key == Key.System)
+            {
+                var key = e.Key;
+                if (key == Key.System)
+                {
+                    key = e.SystemKey;
+                }
+
+                var dpi = VisualTreeHelper.GetDpi(this);
+                var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+                var mousePos = Mouse.GetPosition(PreviewCanvas);
+                var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
+                var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
+                var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
+                viewModel.ModifierKeyUpWhenUsingToolCommand.Execute(Tuple.Create(e.Key, screenPos, previewImageScale));
+            }
+        }
+
+        private void PreviewBorder_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            PreviewBorder.Focus();
         }
 
         private void Root_SizeChanged(object sender, SizeChangedEventArgs e)

@@ -531,6 +531,8 @@ namespace NiVE3.ViewModel
             eventHubModel.BeginUseToolRequest += EventHubModel_BeginUseToolRequest;
             eventHubModel.MoveLayersByToolRequest += EventHubModel_MoveLayersByToolRequest;
             eventHubModel.AbortUseToolRequest += EventHubModel_AbortUseToolRequest;
+            eventHubModel.ModifierKeyDownWhenUsingTool += EventHubModel_ModifierKeyDownWhenUsingTool;
+            eventHubModel.ModifierKeyUpWhenUsingTool += EventHubModel_ModifierKeyUpWhenUsingTool;
             eventHubModel.AddEffectToSelectedLayers += EventHubModel_AddEffectToSelectedLayers;
             eventHubModel.BeginEditDurationRequest += EventHubModel_BeginEditDurationRequest;
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
@@ -1639,6 +1641,34 @@ namespace NiVE3.ViewModel
             else if (SelectedLayers != null && SelectedLayers.Count > 0)
             {
                 CompositionModel.AddEffectsToLayers([.. SelectedLayers.Select(l => l.LayerId)], e.EffectPluginIds);
+            }
+        }
+
+        private void EventHubModel_ModifierKeyDownWhenUsingTool(object? sender, ModifierKeyEventArgs e)
+        {
+            if (CompositionModel == null || e.CompositionId != CompositionId)
+            {
+                return;
+            }
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
+            {
+                using var checker = CycleChecker.StartCheck();
+                interaction.ModifierKeyDown(e.ModifierKey, e.ScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+            }
+        }
+
+        private void EventHubModel_ModifierKeyUpWhenUsingTool(object? sender, ModifierKeyEventArgs e)
+        {
+            if (CompositionModel == null || e.CompositionId != CompositionId)
+            {
+                return;
+            }
+
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
+            {
+                using var checker = CycleChecker.StartCheck();
+                interaction.ModifierKeyUp(e.ModifierKey, e.ScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
             }
         }
 

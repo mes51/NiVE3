@@ -318,6 +318,28 @@ namespace NiVE3.Property.Interaction
             IsMoved = false;
         }
 
+        public override void ModifierKeyDown(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        {
+            if (!IsInteracting || PrevValue == null)
+            {
+                return;
+            }
+
+            IsMoved = true;
+            UpdateCurrentRawValue(mousePositionInPreview, coordTransformer);
+        }
+
+        public override void ModifierKeyUp(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        {
+            if (!IsInteracting || PrevValue == null)
+            {
+                return;
+            }
+
+            IsMoved = true;
+            UpdateCurrentRawValue(mousePositionInPreview, coordTransformer);
+        }
+
         public override void AbortInteraction()
         {
             ViewModel.AbortEditCommand.Execute(null);
