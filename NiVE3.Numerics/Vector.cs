@@ -178,6 +178,12 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Distance(Vector2d a, Vector2d b)
+        {
+            return Math.Sqrt((Unsafe.BitCast<Vector2d, Vector128<double>>(a) - Unsafe.BitCast<Vector2d, Vector128<double>>(b)).LengthSquared());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2d operator +(Vector2d a)
         {
             return a;

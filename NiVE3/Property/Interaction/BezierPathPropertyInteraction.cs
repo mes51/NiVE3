@@ -24,6 +24,8 @@ namespace NiVE3.Property.Interaction
 
         const double ControlPointCircleRadius = 2.0;
 
+        const double MoveStartThreshold = 3.0;
+
         static readonly Vector2d PointRadius = new Vector2d(2.0);
 
         static readonly Vector2d LargePointRadius = new Vector2d(4.0);
@@ -47,6 +49,8 @@ namespace NiVE3.Property.Interaction
         BezierPoint? CurrentCreatingPoint { get; set; }
 
         Vector2d LastOppositeControlPointPosition { get; set; }
+
+        Vector2d FirstMousePositionInPreview { get; set; }
 
         bool ResetFreeControlPoint { get; set; }
 
@@ -98,6 +102,7 @@ namespace NiVE3.Property.Interaction
             ClickNewBegin = false;
             CurrentCreatingPoint = null;
             ClickedPointPosition = PointPosition.None;
+            FirstMousePositionInPreview = mousePositionInPreview;
 
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
             var hitArea = PointHandleArea / previewImageScale;
@@ -284,6 +289,11 @@ namespace NiVE3.Property.Interaction
         public override void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             if (!IsInteracting || PrevValue == null)
+            {
+                return;
+            }
+
+            if (!IsMoved && Vector2d.Distance(FirstMousePositionInPreview, mousePositionInPreview) < MoveStartThreshold)
             {
                 return;
             }
