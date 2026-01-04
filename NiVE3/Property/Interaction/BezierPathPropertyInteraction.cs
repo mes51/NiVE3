@@ -328,8 +328,33 @@ namespace NiVE3.Property.Interaction
             IsMoved = false;
         }
 
-        public override bool KeyDown(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public override bool KeyDown(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
+            if (key == Key.Delete && SelectedPointIndices.Count > 0)
+            {
+                var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
+                var newPoints = value.Points.Where((_, index) => !SelectedPointIndices.Contains(index)).ToArray();
+                ViewModel.BeginEditCommand.Execute(null);
+                if (newPoints.Length < 1 && SelectedPointIndices.Contains(BeginPointIndex))
+                {
+                    ViewModel.CurrentTimeRawValue = BezierPath.Empty;
+                }
+                else
+                {
+                    if (SelectedPointIndices.Contains(BeginPointIndex))
+                    {
+                        ViewModel.CurrentTimeRawValue = new BezierPath(newPoints[0], newPoints[1..], newPoints.Length > 2 && value.IsClosed);
+                    }
+                    else
+                    {
+                        ViewModel.CurrentTimeRawValue = new BezierPath(value.BeginPoint, newPoints, newPoints.Length > 1 && value.IsClosed);
+                    }
+                }
+                ViewModel.EndEditCommand.Execute(null);
+                SelectedPointIndices.Clear();
+                return true;
+            }
+
             if (!IsInteracting || PrevValue == null)
             {
                 return false;
@@ -340,9 +365,9 @@ namespace NiVE3.Property.Interaction
             return true;
         }
 
-        public override bool KeyUp(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public override bool KeyUp(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            if (!IsInteracting || PrevValue == null)
+            if (!IsInteracting || PrevValue == null || key == Key.Delete)
             {
                 return false;
             }

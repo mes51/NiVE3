@@ -548,24 +548,21 @@ namespace NiVE3.View.Pane
                 return;
             }
 
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift || e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl || e.Key == Key.LeftAlt || e.Key == Key.RightAlt || e.Key == Key.System)
+            var key = e.Key;
+            if (key == Key.System)
             {
-                var key = e.Key;
-                if (key == Key.System)
-                {
-                    key = e.SystemKey;
-                }
-
-                var dpi = VisualTreeHelper.GetDpi(this);
-                var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
-                var mousePos = Mouse.GetPosition(PreviewCanvas);
-                var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
-                var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
-                var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
-                var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
-                viewModel.KeyDownWhenUsingToolCommand.Execute(args);
-                e.Handled = args.Processed;
+                key = e.SystemKey;
             }
+
+            var dpi = VisualTreeHelper.GetDpi(this);
+            var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+            var mousePos = Mouse.GetPosition(PreviewCanvas);
+            var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
+            var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
+            var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
+            var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
+            viewModel.KeyDownWhenUsingToolCommand.Execute(args);
+            e.Handled = args.Processed;
         }
 
         private void PreviewBorder_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -576,24 +573,21 @@ namespace NiVE3.View.Pane
                 return;
             }
 
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift || e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl || e.Key == Key.LeftAlt || e.Key == Key.RightAlt || e.Key == Key.System)
+            var key = e.Key;
+            if (key == Key.System)
             {
-                var key = e.Key;
-                if (key == Key.System)
-                {
-                    key = e.SystemKey;
-                }
-
-                var dpi = VisualTreeHelper.GetDpi(this);
-                var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
-                var mousePos = Mouse.GetPosition(PreviewCanvas);
-                var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
-                var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
-                var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
-                var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
-                viewModel.KeyUpWhenUsingToolCommand.Execute(args);
-                e.Handled = args.Processed;
+                key = e.SystemKey;
             }
+
+            var dpi = VisualTreeHelper.GetDpi(this);
+            var dpiScale = new Vector2d(dpi.DpiScaleX, dpi.DpiScaleY);
+            var mousePos = Mouse.GetPosition(PreviewCanvas);
+            var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
+            var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
+            var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
+            var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
+            viewModel.KeyUpWhenUsingToolCommand.Execute(args);
+            e.Handled = args.Processed;
         }
 
         private void PreviewBorder_MouseDown(object sender, MouseButtonEventArgs e)

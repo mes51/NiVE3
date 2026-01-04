@@ -379,7 +379,7 @@ namespace NiVE3.ViewModel
 
             KeyDownWhenUsingToolCommand = new DelegateCommand<PropertyInteractionKeyArgs>(args =>
             {
-                if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
@@ -389,7 +389,7 @@ namespace NiVE3.ViewModel
 
             KeyUpWhenUsingToolCommand = new DelegateCommand<PropertyInteractionKeyArgs>(args =>
             {
-                if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
