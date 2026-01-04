@@ -203,9 +203,9 @@ namespace NiVE3.ViewModel
 
         public ICommand BeginUseToolCommand { get; }
 
-        public ICommand ModifierKeyDownWhenUsingToolCommand { get; }
+        public ICommand KeyDownWhenUsingToolCommand { get; }
 
-        public ICommand ModifierKeyUpWhenUsingToolCommand { get; }
+        public ICommand KeyUpWhenUsingToolCommand { get; }
 
         public ICommand MoveLayersByToolCommand { get; }
 
@@ -377,26 +377,24 @@ namespace NiVE3.ViewModel
                 EventHubModel.NotifyBeginUseTool(compositionPreviewModel.Composition.CompositionId, pos, scale, propertyType, CurrentTime);
             });
 
-            ModifierKeyDownWhenUsingToolCommand = new DelegateCommand<Tuple<Key, Vector2d, Vector2d>>(t =>
+            KeyDownWhenUsingToolCommand = new DelegateCommand<PropertyInteractionKeyArgs>(args =>
             {
                 if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
 
-                var (key, pos, scale) = t;
-                EventHubModel.NotifyModifierKeyDownWhenUsingTool(compositionPreviewModel.Composition.CompositionId, key, pos, scale, CurrentTime);
+                args.Processed = EventHubModel.NotifyKeyDownWhenUsingTool(compositionPreviewModel.Composition.CompositionId, args.Key, args.Position, args.PreviewScale, CurrentTime);
             });
 
-            ModifierKeyUpWhenUsingToolCommand = new DelegateCommand<Tuple<Key, Vector2d, Vector2d>>(t =>
+            KeyUpWhenUsingToolCommand = new DelegateCommand<PropertyInteractionKeyArgs>(args =>
             {
                 if (!IsUsingTool || PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
                 {
                     return;
                 }
 
-                var (key, pos, scale) = t;
-                EventHubModel.NotifyModifierKeyUpWhenUsingTool(compositionPreviewModel.Composition.CompositionId, key, pos, scale, CurrentTime);
+                args.Processed = EventHubModel.NotifyKeyUpWhenUsingTool(compositionPreviewModel.Composition.CompositionId, args.Key, args.Position, args.PreviewScale, CurrentTime);
             });
 
             MoveLayersByToolCommand = new DelegateCommand<Tuple<Vector2d, Vector2d, bool>>(t =>
@@ -1268,6 +1266,24 @@ namespace NiVE3.ViewModel
 
         public PreviewSelectArgs(Vector2d position, Vector2d previewScale)
         {
+            Position = position;
+            PreviewScale = previewScale;
+        }
+    }
+
+    class PropertyInteractionKeyArgs
+    {
+        public Key Key { get; }
+
+        public Vector2d Position { get; }
+
+        public Vector2d PreviewScale { get; }
+
+        public bool Processed { get; set; }
+
+        public PropertyInteractionKeyArgs(Key key, Vector2d position, Vector2d previewScale)
+        {
+            Key = key;
             Position = position;
             PreviewScale = previewScale;
         }

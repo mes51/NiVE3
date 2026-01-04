@@ -118,11 +118,11 @@ namespace NiVE3.Model
         }
     }
 
-    class ModifierKeyEventArgs : EventArgs
+    class InteractionKeyEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
 
-        public Key ModifierKey { get; }
+        public Key Key { get; }
 
         public Vector2d ScreenPos { get; }
 
@@ -130,10 +130,12 @@ namespace NiVE3.Model
 
         public Time CurrentTime { get; }
 
-        public ModifierKeyEventArgs(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public bool Processed { get; set; }
+
+        public InteractionKeyEventArgs(Guid compositionId, Key key, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
             CompositionId = compositionId;
-            ModifierKey = modifierKey;
+            Key = key;
             ScreenPos = screenPos;
             PreviewImageScale = previewImageScale;
             CurrentTime = currentTime;

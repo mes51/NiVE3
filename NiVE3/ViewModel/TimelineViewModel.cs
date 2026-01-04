@@ -531,8 +531,8 @@ namespace NiVE3.ViewModel
             eventHubModel.BeginUseToolRequest += EventHubModel_BeginUseToolRequest;
             eventHubModel.MoveLayersByToolRequest += EventHubModel_MoveLayersByToolRequest;
             eventHubModel.AbortUseToolRequest += EventHubModel_AbortUseToolRequest;
-            eventHubModel.ModifierKeyDownWhenUsingTool += EventHubModel_ModifierKeyDownWhenUsingTool;
-            eventHubModel.ModifierKeyUpWhenUsingTool += EventHubModel_ModifierKeyUpWhenUsingTool;
+            eventHubModel.KeyDownWhenUsingTool += EventHubModel_KeyDownWhenUsingTool;
+            eventHubModel.KeyUpWhenUsingTool += EventHubModel_KeyUpWhenUsingTool;
             eventHubModel.AddEffectToSelectedLayers += EventHubModel_AddEffectToSelectedLayers;
             eventHubModel.BeginEditDurationRequest += EventHubModel_BeginEditDurationRequest;
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
@@ -1644,31 +1644,31 @@ namespace NiVE3.ViewModel
             }
         }
 
-        private void EventHubModel_ModifierKeyDownWhenUsingTool(object? sender, ModifierKeyEventArgs e)
+        private void EventHubModel_KeyDownWhenUsingTool(object? sender, InteractionKeyEventArgs e)
         {
             if (CompositionModel == null || e.CompositionId != CompositionId)
             {
                 return;
             }
 
-            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction)
             {
                 using var checker = CycleChecker.StartCheck();
-                interaction.ModifierKeyDown(e.ModifierKey, e.ScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                e.Processed = interaction.KeyDown(e.Key, e.ScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
             }
         }
 
-        private void EventHubModel_ModifierKeyUpWhenUsingTool(object? sender, ModifierKeyEventArgs e)
+        private void EventHubModel_KeyUpWhenUsingTool(object? sender, InteractionKeyEventArgs e)
         {
             if (CompositionModel == null || e.CompositionId != CompositionId)
             {
                 return;
             }
 
-            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction && interaction.IsInteracting)
+            if (SelectedPreviewInteractionTarget is IPreviewInteractionTarget interaction)
             {
                 using var checker = CycleChecker.StartCheck();
-                interaction.ModifierKeyUp(e.ModifierKey, e.ScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
+                e.Processed = interaction.KeyUp(e.Key, e.ScreenPos, e.PreviewImageScale, CompositionModel.GetCoordTransformer(e.CurrentTime, interaction.ParentLayerId));
             }
         }
 

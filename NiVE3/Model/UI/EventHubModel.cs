@@ -31,18 +31,18 @@ namespace NiVE3.Model.UI
             remove { BeginUseToolRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<ModifierKeyEventArgs> ModifierKeyDownWhenUsingToolPublisher { get; } = new WeakEventPublisher<ModifierKeyEventArgs>();
-        public event EventHandler<ModifierKeyEventArgs> ModifierKeyDownWhenUsingTool
+        WeakEventPublisher<InteractionKeyEventArgs> KeyDownWhenUsingToolPublisher { get; } = new WeakEventPublisher<InteractionKeyEventArgs>();
+        public event EventHandler<InteractionKeyEventArgs> KeyDownWhenUsingTool
         {
-            add { ModifierKeyDownWhenUsingToolPublisher.Subscribe(value); }
-            remove { ModifierKeyDownWhenUsingToolPublisher.Unsubscribe(value); }
+            add { KeyDownWhenUsingToolPublisher.Subscribe(value); }
+            remove { KeyDownWhenUsingToolPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<ModifierKeyEventArgs> ModifierKeyUpWhenUsingToolPublisher { get; } = new WeakEventPublisher<ModifierKeyEventArgs>();
-        public event EventHandler<ModifierKeyEventArgs> ModifierKeyUpWhenUsingTool
+        WeakEventPublisher<InteractionKeyEventArgs> KeyUpWhenUsingToolPublisher { get; } = new WeakEventPublisher<InteractionKeyEventArgs>();
+        public event EventHandler<InteractionKeyEventArgs> KeyUpWhenUsingTool
         {
-            add { ModifierKeyUpWhenUsingToolPublisher.Subscribe(value); }
-            remove { ModifierKeyUpWhenUsingToolPublisher.Unsubscribe(value); }
+            add { KeyUpWhenUsingToolPublisher.Subscribe(value); }
+            remove { KeyUpWhenUsingToolPublisher.Unsubscribe(value); }
         }
 
         WeakEventPublisher<MoveLayersByToolEventArgs> MoveLayersByToolRequestPublisher { get; } = new WeakEventPublisher<MoveLayersByToolEventArgs>();
@@ -127,14 +127,18 @@ namespace NiVE3.Model.UI
             BeginUseToolRequestPublisher.Publish(this, new BeginUseToolEventArgs(compositionId, startScreenPos, previewImageScale, propertyType, currentTime));
         }
 
-        public void NotifyModifierKeyDownWhenUsingTool(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public bool NotifyKeyDownWhenUsingTool(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
-            ModifierKeyDownWhenUsingToolPublisher.Publish(this, new ModifierKeyEventArgs(compositionId, modifierKey, screenPos, previewImageScale, currentTime));
+            var eventArgs = new InteractionKeyEventArgs(compositionId, modifierKey, screenPos, previewImageScale, currentTime);
+            KeyDownWhenUsingToolPublisher.Publish(this, eventArgs);
+            return eventArgs.Processed;
         }
 
-        public void NotifyModifierKeyUpWhenUsingTool(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public bool NotifyKeyUpWhenUsingTool(Guid compositionId, Key modifierKey, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
-            ModifierKeyUpWhenUsingToolPublisher.Publish(this, new ModifierKeyEventArgs(compositionId, modifierKey, screenPos, previewImageScale, currentTime));
+            var eventArgs = new InteractionKeyEventArgs(compositionId, modifierKey, screenPos, previewImageScale, currentTime);
+            KeyUpWhenUsingToolPublisher.Publish(this, eventArgs);
+            return eventArgs.Processed;
         }
 
         public void NotifyMoveLayersByTool(Guid compositionId, Vector2d nextScreenPos, Vector2d previewImageScale, bool isCommit, Time currentTime)

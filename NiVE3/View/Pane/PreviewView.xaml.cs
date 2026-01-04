@@ -535,7 +535,7 @@ namespace NiVE3.View.Pane
             }
         }
 
-        private void PreviewBorder_KeyDown(object sender, KeyEventArgs e)
+        private void PreviewBorder_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Left || e.Key == Key.Up || e.Key == Key.Right || e.Key == Key.Down || e.Key == Key.Tab)
             {
@@ -562,11 +562,13 @@ namespace NiVE3.View.Pane
                 var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
                 var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
                 var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
-                viewModel.ModifierKeyDownWhenUsingToolCommand.Execute(Tuple.Create(e.Key, screenPos, previewImageScale));
+                var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
+                viewModel.KeyDownWhenUsingToolCommand.Execute(args);
+                e.Handled = args.Processed;
             }
         }
 
-        private void PreviewBorder_KeyUp(object sender, KeyEventArgs e)
+        private void PreviewBorder_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             var viewModel = ViewModel;
             if (viewModel == null)
@@ -588,7 +590,9 @@ namespace NiVE3.View.Pane
                 var compositionPos = new Vector2d(viewModel.ScreenX, viewModel.ScreenY);
                 var screenPos = ((Vector2d)mousePos - compositionPos) * dpiScale / (viewModel.Scale * 0.01);
                 var previewImageScale = (viewModel.Scale * 0.01) / dpiScale;
-                viewModel.ModifierKeyUpWhenUsingToolCommand.Execute(Tuple.Create(e.Key, screenPos, previewImageScale));
+                var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
+                viewModel.KeyUpWhenUsingToolCommand.Execute(args);
+                e.Handled = args.Processed;
             }
         }
 

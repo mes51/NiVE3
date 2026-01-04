@@ -569,14 +569,14 @@ namespace NiVE3.ViewModel
             PropertyInteraction?.MouseLeftButtonUp(mousePositionInPreview, previewImageScale, coordTransformer);
         }
 
-        public void ModifierKeyDown(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public bool KeyDown(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            PropertyInteraction?.ModifierKeyDown(modifierKey, mousePositionInPreview, previewImageScale, coordTransformer);
+            return PropertyInteraction?.KeyDown(key, mousePositionInPreview, previewImageScale, coordTransformer) ?? false;
         }
 
-        public void ModifierKeyUp(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        public bool KeyUp(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            PropertyInteraction?.ModifierKeyUp(modifierKey, mousePositionInPreview, previewImageScale, coordTransformer);
+            return PropertyInteraction?.KeyUp(key, mousePositionInPreview, previewImageScale, coordTransformer) ?? false;
         }
 
         public void AbortInteraction()

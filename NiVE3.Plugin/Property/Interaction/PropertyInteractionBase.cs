@@ -57,22 +57,30 @@ namespace NiVE3.Plugin.Property.Interaction
         public abstract void MouseLeftButtonUp(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer);
 
         /// <summary>
-        /// 修飾キーが押されたときの処理を実行します
+        /// キーが押されたときの処理を実行します
         /// </summary>
-        /// <param name="modifierKey">押された修飾キー</param>
+        /// <param name="key">押されたキー</param>
         /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
         /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
         /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
-        public virtual void ModifierKeyDown(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer) { }
+        /// <returns>キーを処理した場合はtrue、何もしなかった場合はfalse</returns>
+        public virtual bool KeyDown(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        {
+            return false;
+        }
 
         /// <summary>
-        /// 修飾キーが離されたときの処理を実行します
+        /// キーが離されたときの処理を実行します
         /// </summary>
-        /// <param name="modifierKey">離された修飾キー</param>
+        /// <param name="key">離されたキー</param>
         /// <param name="mousePositionInPreview">プレビューパネル上のマウスの位置。これはDPIの補正、拡大率を適用した後の値です</param>
         /// <param name="previewImageScale">プレビューエリアの拡大率。これはDPIによる補正も含みます</param>
         /// <param name="coordTransformer">現在のコンポジションの座標系を表すICoordTransformerObject</param>
-        public virtual void ModifierKeyUp(Key modifierKey, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer) { }
+        /// <returns>キーを処理した場合はtrue、何もしなかった場合はfalse</returns>
+        public virtual bool KeyUp(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
+        {
+            return false;
+        }
 
         /// <summary>
         /// インタラクションを中断します
