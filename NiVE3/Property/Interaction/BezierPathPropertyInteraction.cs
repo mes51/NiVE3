@@ -105,6 +105,15 @@ namespace NiVE3.Property.Interaction
             FirstMousePositionInPreview = mousePositionInPreview;
 
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
+            if (value.IsInvalid())
+            {
+                SelectedPointIndices.Clear();
+            }
+            else
+            {
+                SelectedPointIndices.RemoveAll(i => i >= value.Points.Length);
+            }
+
             var hitArea = PointHandleArea / previewImageScale;
             if (value.IsClosed)
             {
