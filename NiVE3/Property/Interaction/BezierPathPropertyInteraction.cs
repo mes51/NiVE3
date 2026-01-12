@@ -38,7 +38,7 @@ namespace NiVE3.Property.Interaction
 
         BezierPath? PrevValue { get; set; }
 
-        bool ClickNewBegin { get; set; }
+        EditMode EditMode { get; set; }
 
         bool IsMoved { get; set; }
 
@@ -99,7 +99,7 @@ namespace NiVE3.Property.Interaction
             }
 
             PrevValue = null;
-            ClickNewBegin = false;
+            EditMode = EditMode.None;
             CurrentCreatingPoint = null;
             ClickedPointPosition = PointPosition.None;
             FirstMousePositionInPreview = mousePositionInPreview;
@@ -115,62 +115,110 @@ namespace NiVE3.Property.Interaction
             }
 
             var hitArea = PointHandleArea / previewImageScale;
-            if (value.IsClosed)
-            {
-                // 制御点の編集
-                var selectedPoints = SelectedPointIndices.Where(i => i > -1 && !value.Points[i].IsLinear).Select(i => (i, value.Points[i]));
-                if (SelectedPointIndices.Contains(BeginPointIndex) && !value.BeginPoint.IsLinear)
-                {
-                    selectedPoints = selectedPoints.Prepend((BeginPointIndex, value.BeginPoint));
-                }
-                foreach (var (i, p) in selectedPoints)
-                {
-                    if (IsHit(mousePositionInPreview, hitArea, p.EndPoint + p.PrevControlPoint, coordTransformer))
-                    {
-                        SelectedPointIndices.Clear();
-                        SelectedPointIndices.Add(i);
-                        PrevValue = value;
-                        IsInteracting = true;
-                        ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                        ClickedPointPosition = PointPosition.PrevControlPoint;
-                        ResetFreeControlPoint = !p.IsFreeControlPoint;
-                        LastOppositeControlPointPosition = p.NextControlPoint;
-                        ViewModel.BeginEditCommand.Execute(null);
-                        return true;
-                    }
-                    else if (IsHit(mousePositionInPreview, hitArea, p.EndPoint + p.NextControlPoint, coordTransformer))
-                    {
-                        SelectedPointIndices.Clear();
-                        SelectedPointIndices.Add(i);
-                        PrevValue = value;
-                        IsInteracting = true;
-                        ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                        ClickedPointPosition = PointPosition.NextControlPoint;
-                        ResetFreeControlPoint = !p.IsFreeControlPoint;
-                        LastOppositeControlPointPosition = p.PrevControlPoint;
-                        ViewModel.BeginEditCommand.Execute(null);
-                        return true;
-                    }
-                }
 
-                // 始点の編集
-                if (IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer))
+            // 制御点の編集
+            var selectedPoints = SelectedPointIndices.Where(i => i > -1 && !value.Points[i].IsLinear).Select(i => (i, value.Points[i]));
+            if (SelectedPointIndices.Contains(BeginPointIndex) && !value.BeginPoint.IsLinear)
+            {
+                selectedPoints = selectedPoints.Prepend((BeginPointIndex, value.BeginPoint));
+            }
+            foreach (var (i, p) in selectedPoints)
+            {
+                if (IsHit(mousePositionInPreview, hitArea, p.EndPoint + p.PrevControlPoint, coordTransformer))
+                {
+                    SelectedPointIndices.Clear();
+                    SelectedPointIndices.Add(i);
+                    PrevValue = value;
+                    IsInteracting = true;
+                    EditMode = EditMode.EditPoint;
+                    ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                    ClickedPointPosition = PointPosition.PrevControlPoint;
+                    ResetFreeControlPoint = !p.IsFreeControlPoint;
+                    LastOppositeControlPointPosition = p.NextControlPoint;
+                    ViewModel.BeginEditCommand.Execute(null);
+                    return true;
+                }
+                else if (IsHit(mousePositionInPreview, hitArea, p.EndPoint + p.NextControlPoint, coordTransformer))
+                {
+                    SelectedPointIndices.Clear();
+                    SelectedPointIndices.Add(i);
+                    PrevValue = value;
+                    IsInteracting = true;
+                    EditMode = EditMode.EditPoint;
+                    ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                    ClickedPointPosition = PointPosition.NextControlPoint;
+                    ResetFreeControlPoint = !p.IsFreeControlPoint;
+                    LastOppositeControlPointPosition = p.PrevControlPoint;
+                    ViewModel.BeginEditCommand.Execute(null);
+                    return true;
+                }
+            }
+
+            // 始点の編集(パスが閉じている場合)
+            if (value.IsClosed && IsHit(mousePositionInPreview, hitArea, value.BeginPoint.EndPoint, coordTransformer))
+            {
+                if (IsShiftKeyDown())
+                {
+#pragma warning disable CA1868 // NOTE: 要素の削除や追加のみでは無いため無視する
+                    if (SelectedPointIndices.Contains(BeginPointIndex))
+#pragma warning restore CA1868
+                    {
+                        SelectedPointIndices.Remove(BeginPointIndex);
+                        return false;
+                    }
+                    else
+                    {
+                        SelectedPointIndices.Add(BeginPointIndex);
+                        SelectedPointIndices.Sort();
+                        PrevValue = value;
+                        IsInteracting = true;
+                        EditMode = EditMode.EditPoint;
+                        ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                        ClickedPointPosition = PointPosition.EndPoint;
+                        ViewModel.BeginEditCommand.Execute(null);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (!SelectedPointIndices.Contains(BeginPointIndex))
+                    {
+                        SelectedPointIndices.Clear();
+                        SelectedPointIndices.Add(BeginPointIndex);
+                    }
+                    PrevValue = value;
+                    IsInteracting = true;
+                    EditMode = EditMode.EditPoint;
+                    ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                    ClickedPointPosition = PointPosition.EndPoint;
+                    ViewModel.BeginEditCommand.Execute(null);
+                    return true;
+                }
+            }
+
+            // 各点の編集
+            for (var i = 0; i < value.Points.Length; i++)
+            {
+                var p = value.Points[i];
+                if (IsHit(mousePositionInPreview, hitArea, p.EndPoint, coordTransformer) ||
+                    (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.PrevControlPoint, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.NextControlPoint, coordTransformer))))
                 {
                     if (IsShiftKeyDown())
                     {
 #pragma warning disable CA1868 // NOTE: 要素の削除や追加のみでは無いため無視する
-                        if (SelectedPointIndices.Contains(BeginPointIndex))
+                        if (SelectedPointIndices.Contains(i))
 #pragma warning restore CA1868
                         {
-                            SelectedPointIndices.Remove(BeginPointIndex);
+                            SelectedPointIndices.Remove(i);
                             return false;
                         }
                         else
                         {
-                            SelectedPointIndices.Add(BeginPointIndex);
+                            SelectedPointIndices.Add(i);
                             SelectedPointIndices.Sort();
                             PrevValue = value;
                             IsInteracting = true;
+                            EditMode = EditMode.EditPoint;
                             ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                             ClickedPointPosition = PointPosition.EndPoint;
                             ViewModel.BeginEditCommand.Execute(null);
@@ -179,73 +227,30 @@ namespace NiVE3.Property.Interaction
                     }
                     else
                     {
-                        if (!SelectedPointIndices.Contains(BeginPointIndex))
+                        if (!SelectedPointIndices.Contains(i))
                         {
                             SelectedPointIndices.Clear();
-                            SelectedPointIndices.Add(BeginPointIndex);
+                            SelectedPointIndices.Add(i);
                         }
                         PrevValue = value;
                         IsInteracting = true;
+                        EditMode = EditMode.EditPoint;
                         ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
                         ClickedPointPosition = PointPosition.EndPoint;
                         ViewModel.BeginEditCommand.Execute(null);
                         return true;
                     }
                 }
-
-                // 各点の編集
-                for (var i = 0; i < value.Points.Length; i++)
-                {
-                    var p = value.Points[i];
-                    if (IsHit(mousePositionInPreview, hitArea, p.EndPoint, coordTransformer) ||
-                        (!p.IsLinear && (IsHit(mousePositionInPreview, hitArea, p.PrevControlPoint, coordTransformer) || IsHit(mousePositionInPreview, hitArea, p.NextControlPoint, coordTransformer))))
-                    {
-                        if (IsShiftKeyDown())
-                        {
-#pragma warning disable CA1868 // NOTE: 要素の削除や追加のみでは無いため無視する
-                            if (SelectedPointIndices.Contains(i))
-#pragma warning restore CA1868
-                            {
-                                SelectedPointIndices.Remove(i);
-                                return false;
-                            }
-                            else
-                            {
-                                SelectedPointIndices.Add(i);
-                                SelectedPointIndices.Sort();
-                                PrevValue = value;
-                                IsInteracting = true;
-                                ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                                ClickedPointPosition = PointPosition.EndPoint;
-                                ViewModel.BeginEditCommand.Execute(null);
-                                return true;
-                            }
-                        }
-                        else
-                        {
-                            if (!SelectedPointIndices.Contains(i))
-                            {
-                                SelectedPointIndices.Clear();
-                                SelectedPointIndices.Add(i);
-                            }
-                            PrevValue = value;
-                            IsInteracting = true;
-                            ClickedPosition = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
-                            ClickedPointPosition = PointPosition.EndPoint;
-                            ViewModel.BeginEditCommand.Execute(null);
-                        }
-                    }
-                }
-
-                return false;
             }
-            else
+
+            // 既存の点の編集ではない&閉じていないパスの場合は点の追加
+            if (!value.IsClosed)
             {
                 SelectedPointIndices.Clear();
                 if (value.IsInvalid())
                 {
                     PrevValue = value;
-                    ClickNewBegin = true;
+                    EditMode = EditMode.NewBegin;
                     IsInteracting = true;
                     ClickedPointPosition = PointPosition.EndPoint;
                     SelectedPointIndices.Add(BeginPointIndex);
@@ -267,6 +272,7 @@ namespace NiVE3.Property.Interaction
                 {
                     PrevValue = value;
                     IsInteracting = true;
+                    EditMode = EditMode.NewPoint;
                     ClickedPointPosition = PointPosition.EndPoint;
                     SelectedPointIndices.Add(value.Points.Length);
                     ViewModel.BeginEditCommand.Execute(null);
@@ -293,6 +299,8 @@ namespace NiVE3.Property.Interaction
 
                 return true;
             }
+
+            return false;
         }
 
         public override void MouseLeftButtonDrag(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
@@ -323,6 +331,7 @@ namespace NiVE3.Property.Interaction
                 ViewModel.AbortEditCommand.Execute(null);
                 ClickedPointPosition = PointPosition.None;
                 IsInteracting = false;
+                EditMode = EditMode.None;
                 PrevValue = null;
                 return;
             }
@@ -332,8 +341,8 @@ namespace NiVE3.Property.Interaction
             ViewModel.EndEditCommand.Execute(null);
             ClickedPointPosition = PointPosition.None;
             IsInteracting = false;
+            EditMode = EditMode.None;
             PrevValue = null;
-            ClickNewBegin = false;
             IsMoved = false;
         }
 
@@ -389,9 +398,10 @@ namespace NiVE3.Property.Interaction
         public override void AbortInteraction()
         {
             ViewModel.AbortEditCommand.Execute(null);
+            ClickedPointPosition = PointPosition.None;
             IsInteracting = false;
+            EditMode = EditMode.None;
             PrevValue = null;
-            ClickNewBegin = false;
             IsMoved = false;
         }
 
@@ -487,7 +497,7 @@ namespace NiVE3.Property.Interaction
             }
 
             var isAltDown = IsAltKeyDown();
-            if (PrevValue.IsClosed)
+            if (EditMode == EditMode.EditPoint)
             {
                 switch (ClickedPointPosition)
                 {
@@ -510,7 +520,7 @@ namespace NiVE3.Property.Interaction
                                 }
                             }
 
-                            ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, true);
+                            ViewModel.CurrentTimeRawValue = new BezierPath(newBeginPoint, newPoints, PrevValue.IsClosed);
                         }
                         break;
                     case PointPosition.PrevControlPoint:
@@ -618,7 +628,7 @@ namespace NiVE3.Property.Interaction
                     LastOppositeControlPointPosition = -diff;
                 }
                 CurrentCreatingPoint = IsMoved ? new BezierPoint(LastOppositeControlPointPosition, diff, ClickedPosition, false, isAltDown) : new BezierPoint(Vector2d.Zero, Vector2d.Zero, ClickedPosition, true, false);
-                if (ClickNewBegin)
+                if (EditMode == EditMode.NewBegin)
                 {
                     ViewModel.CurrentTimeRawValue = new BezierPath(CurrentCreatingPoint, [], false);
                 }
@@ -655,5 +665,13 @@ namespace NiVE3.Property.Interaction
         EndPoint,
         PrevControlPoint,
         NextControlPoint
+    }
+
+    enum EditMode
+    {
+        None,
+        EditPoint,
+        NewBegin,
+        NewPoint
     }
 }
