@@ -275,7 +275,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border x:Name="PreviewBorder" Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}" Focusable="True" FocusManager.IsFocusScope="True" PreviewKeyDown="PreviewBorder_PreviewKeyDown" PreviewKeyUp="PreviewBorder_PreviewKeyUp" MouseDown="PreviewBorder_MouseDown">
+        <Border x:Name="PreviewBorder" Grid.Row="0" Style="{StaticResource PreviewColorChannelBorder}" Focusable="True" FocusManager.IsFocusScope="True" PreviewKeyDown="PreviewBorder_PreviewKeyDown" PreviewKeyUp="PreviewBorder_PreviewKeyUp" KeyDown="PreviewBorder_KeyDown" MouseDown="PreviewBorder_MouseDown">
             <Grid ClipToBounds="True">
                 <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DragSourceIgnore="False">
                     <Canvas.ContextMenu>

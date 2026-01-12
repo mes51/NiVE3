@@ -537,9 +537,9 @@ namespace NiVE3.View.Pane
 
         private void PreviewBorder_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Left || e.Key == Key.Up || e.Key == Key.Right || e.Key == Key.Down || e.Key == Key.Tab)
+            if (e.IsRepeat)
             {
-                e.Handled = true;
+                return;
             }
 
             var viewModel = ViewModel;
@@ -588,6 +588,14 @@ namespace NiVE3.View.Pane
             var args = new PropertyInteractionKeyArgs(key, screenPos, previewImageScale);
             viewModel.KeyUpWhenUsingToolCommand.Execute(args);
             e.Handled = args.Processed;
+        }
+
+        private void PreviewBorder_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Left || e.Key == Key.Up || e.Key == Key.Right || e.Key == Key.Down || e.Key == Key.Tab)
+            {
+                e.Handled = true;
+            }
         }
 
         private void PreviewBorder_MouseDown(object sender, MouseButtonEventArgs e)

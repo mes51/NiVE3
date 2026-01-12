@@ -56,8 +56,6 @@ namespace NiVE3.Property.Interaction
 
         List<int> SelectedPointIndices { get; } = [];
 
-        bool IsKeyDowned { get; set; }
-
         public override bool HitTestInteraction(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
             var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
@@ -119,9 +117,6 @@ namespace NiVE3.Property.Interaction
             var hitArea = PointHandleArea / previewImageScale;
             if (value.IsClosed)
             {
-                // すでにShiftかAltを押している場合はIsKeyDownedをtrueにする
-                IsKeyDowned = IsShiftKeyDown() || IsAltKeyDown();
-
                 // 制御点の編集
                 var selectedPoints = SelectedPointIndices.Where(i => i > -1 && !value.Points[i].IsLinear).Select(i => (i, value.Points[i]));
                 if (SelectedPointIndices.Contains(BeginPointIndex) && !value.BeginPoint.IsLinear)
@@ -329,7 +324,6 @@ namespace NiVE3.Property.Interaction
                 ClickedPointPosition = PointPosition.None;
                 IsInteracting = false;
                 PrevValue = null;
-                IsKeyDowned = false;
                 return;
             }
 
@@ -341,16 +335,10 @@ namespace NiVE3.Property.Interaction
             PrevValue = null;
             ClickNewBegin = false;
             IsMoved = false;
-            IsKeyDowned = false;
         }
 
         public override bool KeyDown(Key key, Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer)
         {
-            if (IsKeyDowned)
-            {
-                return false;
-            }
-
             if (key == Key.Delete && SelectedPointIndices.Count > 0)
             {
                 var value = (BezierPath)(ViewModel.CurrentTimeValue ?? BezierPath.Empty);
@@ -381,7 +369,6 @@ namespace NiVE3.Property.Interaction
                 return false;
             }
 
-            IsKeyDowned = true;
             IsMoved = true;
             UpdateCurrentRawValue(mousePositionInPreview, coordTransformer);
             return true;
@@ -391,14 +378,9 @@ namespace NiVE3.Property.Interaction
         {
             if (!IsInteracting || PrevValue == null || key == Key.Delete)
             {
-                if (key != Key.Delete)
-                {
-                    IsKeyDowned = false;
-                }
                 return false;
             }
 
-            IsKeyDowned = false;
             IsMoved = true;
             UpdateCurrentRawValue(mousePositionInPreview, coordTransformer);
             return true;
@@ -411,7 +393,6 @@ namespace NiVE3.Property.Interaction
             PrevValue = null;
             ClickNewBegin = false;
             IsMoved = false;
-            IsKeyDowned = false;
         }
 
         public override void ClearState()
