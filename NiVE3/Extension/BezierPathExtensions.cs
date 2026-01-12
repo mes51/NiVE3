@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Numerics;
 using NiVE3.Plugin.ValueObject;
 using SixLabors.ImageSharp.Drawing;
 
@@ -25,13 +26,15 @@ namespace NiVE3.Extension
             var lastPoint = path.BeginPoint;
             foreach (var p in path.Points)
             {
-                if (p.IsLinear)
+                if (p.IsLinear && lastPoint.IsLinear)
                 {
                     pathBuilder.LineTo((Vector2)p.EndPoint);
                 }
                 else
                 {
-                    pathBuilder.CubicBezierTo((Vector2)(lastPoint.NextControlPoint + lastPoint.EndPoint), (Vector2)(p.PrevControlPoint + p.EndPoint), (Vector2)p.EndPoint);
+                    var nextControlPoint = (Vector2)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
+                    var prevControlPoint = (Vector2)(p.EndPoint + (p.IsLinear ? Vector2d.Zero : p.PrevControlPoint));
+                    pathBuilder.CubicBezierTo(nextControlPoint, prevControlPoint, (Vector2)p.EndPoint);
                 }
                 lastPoint = p;
             }
@@ -40,7 +43,9 @@ namespace NiVE3.Extension
             {
                 if (!path.BeginPoint.IsLinear || !lastPoint.IsLinear)
                 {
-                    pathBuilder.CubicBezierTo((Vector2)(lastPoint.NextControlPoint + lastPoint.EndPoint), (Vector2)(path.BeginPoint.PrevControlPoint + path.BeginPoint.EndPoint), (Vector2)path.BeginPoint.EndPoint);
+                    var nextControlPoint = (Vector2)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
+                    var prevControlPoint = (Vector2)(path.BeginPoint.EndPoint + (path.BeginPoint.IsLinear ? Vector2d.Zero : path.BeginPoint.PrevControlPoint));
+                    pathBuilder.CubicBezierTo(nextControlPoint, prevControlPoint, (Vector2)path.BeginPoint.EndPoint);
                 }
                 pathBuilder.CloseFigure();
             }

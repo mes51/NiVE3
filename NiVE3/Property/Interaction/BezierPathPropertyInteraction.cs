@@ -459,14 +459,16 @@ namespace NiVE3.Property.Interaction
                 foreach (var point in value.Points)
                 {
                     var screenEndPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)point.EndPoint, globalTime) * previewImageScale + previewImagePosition);
-                    if (point.IsLinear)
+                    if (point.IsLinear && lastPoint.IsLinear)
                     {
                         context.LineTo(screenEndPoint, true, true);
                     }
                     else
                     {
-                        var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + lastPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
-                        var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(point.EndPoint + point.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                        var baseNextControlPoint = (Vector3d)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
+                        var basePrevControlPoint = (Vector3d)(point.EndPoint + (point.IsLinear ? Vector2d.Zero : point.PrevControlPoint));
+                        var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(baseNextControlPoint, globalTime) * previewImageScale + previewImagePosition);
+                        var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(basePrevControlPoint, globalTime) * previewImageScale + previewImagePosition);
                         context.BezierTo(prevControlPoint, nextControlPoint, screenEndPoint, true, true);
                     }
                     lastPoint = point;
@@ -474,9 +476,11 @@ namespace NiVE3.Property.Interaction
 
                 if (value.IsClosed && (!value.BeginPoint.IsLinear || !lastPoint.IsLinear))
                 {
+                    var baseNextControlPoint = (Vector3d)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
+                    var basePrevControlPoint = (Vector3d)(value.BeginPoint.EndPoint + (value.BeginPoint.IsLinear ? Vector2d.Zero : value.BeginPoint.PrevControlPoint));
                     var screenEndPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition);
-                    var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(lastPoint.EndPoint + lastPoint.NextControlPoint), globalTime) * previewImageScale + previewImagePosition);
-                    var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)(value.BeginPoint.EndPoint + value.BeginPoint.PrevControlPoint), globalTime) * previewImageScale + previewImagePosition);
+                    var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(baseNextControlPoint, globalTime) * previewImageScale + previewImagePosition);
+                    var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(basePrevControlPoint, globalTime) * previewImageScale + previewImagePosition);
                     context.BezierTo(prevControlPoint, nextControlPoint, screenEndPoint, true, true);
                 }
             }
