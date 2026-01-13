@@ -25,6 +25,9 @@ namespace NiVE3.Util
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetMonitorInfo(nint hMonitor, ref MONITORINFO lpmi);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetDoubleClickTime();
+
         #endregion user32.dll
 
         #region shell32.dll
