@@ -922,7 +922,9 @@ namespace NiVE3.Property.Interaction
                     (_, _) => path.BeginPoint,
                 };
 
-                var diff = nextPoint.EndPoint - prevPoint.EndPoint;
+                var prevControlPoint = prevPoint.EndPoint + (prevPoint.IsLinear ? Vector2d.Zero : prevPoint.NextControlPoint);
+                var nextControlPoint = nextPoint.EndPoint + (nextPoint.IsLinear ? Vector2d.Zero : nextPoint.PrevControlPoint);
+                var diff = nextControlPoint - prevControlPoint;
                 var diffLength = diff.Length();
                 if (diffLength <= 0.0)
                 {
@@ -980,7 +982,7 @@ namespace NiVE3.Property.Interaction
         NewPoint
     }
 
-    static class SegmentUtil
+    file static class SegmentUtil
     {
         public static (Vector2d point, double t) FindNearestPointInSegment(BezierPoint firstPoint, BezierPoint secondPoint, in Vector2d targetPoint)
         {
