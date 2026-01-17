@@ -324,8 +324,8 @@ namespace NiVE3.Property.Interaction
                     }
                     else
                     {
-                        var baseNextControlPoint = (Vector3d)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
-                        var basePrevControlPoint = (Vector3d)(point.EndPoint + (point.IsLinear ? Vector2d.Zero : point.PrevControlPoint));
+                        var baseNextControlPoint = (Vector3d)lastPoint.GetAbsoluteNextControlPoint();
+                        var basePrevControlPoint = (Vector3d)point.GetAbsolutePrevControlPoint();
                         var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(baseNextControlPoint, globalTime) * previewImageScale + previewImagePosition);
                         var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(basePrevControlPoint, globalTime) * previewImageScale + previewImagePosition);
                         context.BezierTo(prevControlPoint, nextControlPoint, screenEndPoint, true, true);
@@ -335,8 +335,8 @@ namespace NiVE3.Property.Interaction
 
                 if (value.IsClosed && (!value.BeginPoint.IsLinear || !lastPoint.IsLinear))
                 {
-                    var baseNextControlPoint = (Vector3d)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
-                    var basePrevControlPoint = (Vector3d)(value.BeginPoint.EndPoint + (value.BeginPoint.IsLinear ? Vector2d.Zero : value.BeginPoint.PrevControlPoint));
+                    var baseNextControlPoint = (Vector3d)lastPoint.GetAbsoluteNextControlPoint();
+                    var basePrevControlPoint = (Vector3d)value.BeginPoint.GetAbsolutePrevControlPoint();
                     var screenEndPoint = (Point)(coordTransformer.LocalCoordToScreenCoord((Vector3d)value.BeginPoint.EndPoint, globalTime) * previewImageScale + previewImagePosition);
                     var prevControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(baseNextControlPoint, globalTime) * previewImageScale + previewImagePosition);
                     var nextControlPoint = (Point)(coordTransformer.LocalCoordToScreenCoord(basePrevControlPoint, globalTime) * previewImageScale + previewImagePosition);
@@ -796,11 +796,11 @@ namespace NiVE3.Property.Interaction
                         var selectIndex = nextIndex;
                         if (!prevPoint.IsLinear || !nextPoint.IsLinear)
                         {
-                            var prevControlPoint = prevPoint.EndPoint + (prevPoint.IsLinear ? Vector2d.Zero : prevPoint.NextControlPoint);
-                            var nextControlPoint = nextPoint.EndPoint + (nextPoint.IsLinear ? Vector2d.Zero : nextPoint.PrevControlPoint);
-                            var p01 = Vector2d.Lerp(prevPoint.EndPoint, prevControlPoint, nearestT);
-                            var p12 = Vector2d.Lerp(prevControlPoint, nextControlPoint, nearestT);
-                            var p23 = Vector2d.Lerp(nextControlPoint, nextPoint.EndPoint, nearestT);
+                            var prevPointControlPoint = prevPoint.GetAbsoluteNextControlPoint();
+                            var nextPointControlPoint = nextPoint.GetAbsolutePrevControlPoint();
+                            var p01 = Vector2d.Lerp(prevPoint.EndPoint, prevPointControlPoint, nearestT);
+                            var p12 = Vector2d.Lerp(prevPointControlPoint, nextPointControlPoint, nearestT);
+                            var p23 = Vector2d.Lerp(nextPointControlPoint, nextPoint.EndPoint, nearestT);
 
                             var leftHandle = Vector2d.Lerp(p01, p12, nearestT);
                             var rightHandle = Vector2d.Lerp(p12, p23, nearestT);
@@ -922,9 +922,9 @@ namespace NiVE3.Property.Interaction
                     (_, _) => path.BeginPoint,
                 };
 
-                var prevControlPoint = prevPoint.EndPoint + (prevPoint.IsLinear ? Vector2d.Zero : prevPoint.NextControlPoint);
-                var nextControlPoint = nextPoint.EndPoint + (nextPoint.IsLinear ? Vector2d.Zero : nextPoint.PrevControlPoint);
-                var diff = nextControlPoint - prevControlPoint;
+                var prevPointControlPoint = prevPoint.GetAbsoluteNextControlPoint();
+                var nextPointControlPoint = nextPoint.GetAbsolutePrevControlPoint();
+                var diff = nextPointControlPoint - prevPointControlPoint;
                 var diffLength = diff.Length();
                 if (diffLength <= 0.0)
                 {
@@ -986,11 +986,11 @@ namespace NiVE3.Property.Interaction
     {
         public static (Vector2d point, double t) FindNearestPointInSegment(BezierPoint firstPoint, BezierPoint secondPoint, in Vector2d targetPoint)
         {
-            var prevControlPoint = firstPoint.EndPoint + (firstPoint.IsLinear ? Vector2d.Zero : firstPoint.NextControlPoint);
-            var nextControlPoint = secondPoint.EndPoint + (secondPoint.IsLinear ? Vector2d.Zero : secondPoint.PrevControlPoint);
-            var t = FindT(firstPoint.EndPoint, secondPoint.EndPoint, prevControlPoint, nextControlPoint, targetPoint);
+            var prevPointControlPoint = firstPoint.GetAbsoluteNextControlPoint();
+            var nextPointControlPoint = secondPoint.GetAbsolutePrevControlPoint();
+            var t = FindT(firstPoint.EndPoint, secondPoint.EndPoint, prevPointControlPoint, nextPointControlPoint, targetPoint);
 
-            return (CalcBezierPosition(firstPoint.EndPoint, secondPoint.EndPoint, prevControlPoint, nextControlPoint, t), t);
+            return (CalcBezierPosition(firstPoint.EndPoint, secondPoint.EndPoint, prevPointControlPoint, nextPointControlPoint, t), t);
         }
 
         static double FindT(in Vector2d a, in Vector2d b, in Vector2d c1, in Vector2d c2, in Vector2d targetPoint)

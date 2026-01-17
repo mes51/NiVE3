@@ -114,23 +114,25 @@ namespace NiVE3.Plugin.ValueObject
 
     public record BezierPoint(Vector2d PrevControlPoint, Vector2d NextControlPoint, Vector2d EndPoint, bool IsLinear, bool IsFreeControlPoint)
     {
-        public object Serialize()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2d GetAbsolutePrevControlPoint()
         {
-            return new Dictionary<string, object>
-            {
-                { nameof(PrevControlPoint), VectorSerializer.Serialize(PrevControlPoint) },
-                { nameof(NextControlPoint), VectorSerializer.Serialize(NextControlPoint) },
-                { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
-                { nameof(IsLinear), IsLinear },
-                { nameof(IsFreeControlPoint), IsFreeControlPoint }
-            };
+            return EndPoint + (IsLinear ? Vector2d.Zero : PrevControlPoint);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2d GetAbsoluteNextControlPoint()
+        {
+            return EndPoint + (IsLinear ? Vector2d.Zero : NextControlPoint);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BezierPoint Transform(in Matrix3x2 matrix)
         {
             return Transform(new Matrix3x2d(matrix));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal BezierPoint Transform(in Matrix3x2d matrix)
         {
             if (IsLinear)
@@ -141,6 +143,18 @@ namespace NiVE3.Plugin.ValueObject
             {
                 return new BezierPoint(matrix.Transform(PrevControlPoint), matrix.Transform(NextControlPoint), matrix.Transform(EndPoint), true, IsFreeControlPoint);
             }
+        }
+
+        public object Serialize()
+        {
+            return new Dictionary<string, object>
+            {
+                { nameof(PrevControlPoint), VectorSerializer.Serialize(PrevControlPoint) },
+                { nameof(NextControlPoint), VectorSerializer.Serialize(NextControlPoint) },
+                { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
+                { nameof(IsLinear), IsLinear },
+                { nameof(IsFreeControlPoint), IsFreeControlPoint }
+            };
         }
 
         public static BezierPoint? Deserialize(object? serializedValue)

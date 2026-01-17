@@ -31,8 +31,8 @@ namespace NiVE3.PresetPlugin.Extension
                 }
                 else
                 {
-                    var nextControlPoint = (Vector2)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
-                    var prevControlPoint = (Vector2)(p.EndPoint + (p.IsLinear ? Vector2d.Zero : p.PrevControlPoint));
+                    var nextControlPoint = (Vector2)lastPoint.GetAbsoluteNextControlPoint();
+                    var prevControlPoint = (Vector2)p.GetAbsolutePrevControlPoint();
                     pathBuilder.CubicBezierTo(nextControlPoint, prevControlPoint, (Vector2)p.EndPoint);
                 }
                 lastPoint = p;
@@ -42,8 +42,8 @@ namespace NiVE3.PresetPlugin.Extension
             {
                 if (!path.BeginPoint.IsLinear || !lastPoint.IsLinear)
                 {
-                    var nextControlPoint = (Vector2)(lastPoint.EndPoint + (lastPoint.IsLinear ? Vector2d.Zero : lastPoint.NextControlPoint));
-                    var prevControlPoint = (Vector2)(path.BeginPoint.EndPoint + (path.BeginPoint.IsLinear ? Vector2d.Zero : path.BeginPoint.PrevControlPoint));
+                    var nextControlPoint = (Vector2)lastPoint.GetAbsoluteNextControlPoint();
+                    var prevControlPoint = (Vector2)path.BeginPoint.GetAbsolutePrevControlPoint();
                     pathBuilder.CubicBezierTo(nextControlPoint, prevControlPoint, (Vector2)path.BeginPoint.EndPoint);
                 }
                 pathBuilder.CloseFigure();
