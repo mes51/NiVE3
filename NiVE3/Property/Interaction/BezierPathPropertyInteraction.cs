@@ -81,7 +81,7 @@ namespace NiVE3.Property.Interaction
                     }
                 }
 
-                var selectedPoints = SelectedPointIndices.Where(i => i > -1 && !value.Points[i].IsLinear).Select(i => value.Points[i]);
+                var selectedPoints = SelectedPointIndices.Where(i => i > -1 && i < value.Points.Length && !value.Points[i].IsLinear).Select(i => value.Points[i]);
                 if (SelectedPointIndices.Contains(BeginPointIndex) && !value.BeginPoint.IsLinear)
                 {
                     selectedPoints = selectedPoints.Prepend(value.BeginPoint);
@@ -92,6 +92,12 @@ namespace NiVE3.Property.Interaction
                     {
                         return true;
                     }
+                }
+
+                var (_, minDistance, _, _) = FindNearestPointInPath(value, (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview));
+                if (minDistance <= PointHandleArea)
+                {
+                    return true;
                 }
 
                 return false;
@@ -150,6 +156,12 @@ namespace NiVE3.Property.Interaction
 
             // 既存の点の編集ではない&閉じていないパスの場合は点の追加
             if (TryEnterEditOpenPath(mousePositionInPreview, previewImageScale, coordTransformer, value))
+            {
+                return true;
+            }
+
+            // 閉じているパスへの点の追加
+            if (TryAddPoint(mousePositionInPreview, previewImageScale, coordTransformer, value))
             {
                 return true;
             }
@@ -682,10 +694,10 @@ namespace NiVE3.Property.Interaction
 
         bool TryEnterEditOpenPath(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer, BezierPath path)
         {
-            var hitArea = PointHandleArea / previewImageScale;
-
             if (!path.IsClosed)
             {
+                var hitArea = PointHandleArea / previewImageScale;
+
                 SelectedPointIndices.Clear();
                 if (path.IsInvalid())
                 {
@@ -749,6 +761,99 @@ namespace NiVE3.Property.Interaction
             {
                 return false;
             }
+        }
+
+        bool TryAddPoint(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer, BezierPath path)
+        {
+            if (path.IsClosed)
+            {
+                var localPos = (Vector2d)coordTransformer.ScreenCoordToLocalCoord(mousePositionInPreview);
+                var (nearestPoint, minDistance, nearestT, pointIndex) = FindNearestPointInPath(path, localPos);
+
+                if (minDistance < PointHandleArea)
+                {
+                    SelectedPointIndices.Clear();
+                    ViewModel.BeginEditCommand.Execute(null);
+
+                    var nextIndex = pointIndex == BeginPointIndex ? 0 : (pointIndex == path.Points.Length - 1 ? BeginPointIndex : pointIndex + 1);
+                    var prevPoint = pointIndex == BeginPointIndex ? path.BeginPoint : path.Points[pointIndex];
+                    var nextPoint = nextIndex == BeginPointIndex ? path.BeginPoint : path.Points[nextIndex];
+                    var selectIndex = nextIndex;
+                    if (!prevPoint.IsLinear || !nextPoint.IsLinear)
+                    {
+                        var prevControlPoint = prevPoint.EndPoint + (prevPoint.IsLinear ? Vector2d.Zero : prevPoint.NextControlPoint);
+                        var nextControlPoint = nextPoint.EndPoint + (nextPoint.IsLinear ? Vector2d.Zero : nextPoint.PrevControlPoint);
+                        var p01 = Vector2d.Lerp(prevPoint.EndPoint, prevControlPoint, nearestT);
+                        var p12 = Vector2d.Lerp(prevControlPoint, nextControlPoint, nearestT);
+                        var p23 = Vector2d.Lerp(nextControlPoint, nextPoint.EndPoint, nearestT);
+
+                        var leftHandle = Vector2d.Lerp(p01, p12, nearestT);
+                        var rightHandle = Vector2d.Lerp(p12, p23, nearestT);
+                        var newPoint = new BezierPoint(leftHandle - nearestPoint, rightHandle - nearestPoint, nearestPoint, false, true);
+                        var newPrevPoint = new BezierPoint(prevPoint.PrevControlPoint, p01 - prevPoint.EndPoint, prevPoint.EndPoint, prevPoint.IsLinear, true);
+                        var newNextPoint = new BezierPoint(p23 - nextPoint.EndPoint, nextPoint.NextControlPoint, nextPoint.EndPoint, nextPoint.IsLinear, true);
+
+                        var newPath = (pointIndex, nextIndex) switch
+                        {
+                            (BeginPointIndex, _) => new BezierPath(newPrevPoint, path.Points.SetItem(nextIndex, newNextPoint).Insert(nextIndex, newPoint), path.IsClosed),
+                            (_, BeginPointIndex) => new BezierPath(newNextPoint, path.Points.SetItem(pointIndex, newPrevPoint).Insert(path.Points.Length, newPoint), path.IsClosed),
+                            (_, _) => new BezierPath(path.BeginPoint, path.Points.SetItem(pointIndex, newPrevPoint).SetItem(nextIndex, newNextPoint).Insert(nextIndex, newPoint), path.IsClosed)
+                        };
+                        if (nextIndex == BeginPointIndex)
+                        {
+                            selectIndex = newPath.Points.Length - 1;
+                        }
+                        ViewModel.CurrentTimeRawValue = newPath;
+                    }
+                    else
+                    {
+                        var newPoint = new BezierPoint(Vector2d.Zero, Vector2d.Zero, nearestPoint, true, false);
+                        if (pointIndex == BeginPointIndex)
+                        {
+                            ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points.Prepend(newPoint), path.IsClosed);
+                        }
+                        else
+                        {
+                            ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points.Insert(pointIndex + 1, newPoint), path.IsClosed);
+                        }
+                    }
+                    SelectedPointIndices.Add(selectIndex);
+                    ViewModel.EndEditCommand.Execute(null);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (Vector2d nearestPoint, double minDistance, double nearestT, int pointIndex) FindNearestPointInPath(BezierPath path, Vector2d targetPos)
+        {
+            var minDistance = double.MaxValue;
+            var nearestPoint = Vector2d.Zero;
+            var nearestT = 0.0;
+            var pointIndex = -1;
+            foreach (var (p, n, i) in path.Points.Prepend(path.BeginPoint).Zip(path.Points.Append(path.BeginPoint), Enumerable.Range(-1, path.Points.Length + 1)))
+            {
+                var (np, t) = SegmentUtil.FindNearestPointInSegment(p, n, targetPos);
+                var distance = Vector2d.DistanceSquared(targetPos, np);
+                if (minDistance > distance)
+                {
+                    minDistance = distance;
+                    nearestPoint = np;
+                    nearestT = t;
+                    if (i == -1)
+                    {
+                        pointIndex = BeginPointIndex;
+                    }
+                    else
+                    {
+                        pointIndex = i;
+                    }
+                }
+            }
+
+            return (nearestPoint, Math.Sqrt(minDistance), nearestT, pointIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -856,5 +961,73 @@ namespace NiVE3.Property.Interaction
         EditPoint,
         NewBegin,
         NewPoint
+    }
+
+    static class SegmentUtil
+    {
+        public static (Vector2d point, double t) FindNearestPointInSegment(BezierPoint firstPoint, BezierPoint secondPoint, in Vector2d targetPoint)
+        {
+            var prevControlPoint = firstPoint.EndPoint + (firstPoint.IsLinear ? Vector2d.Zero : firstPoint.NextControlPoint);
+            var nextControlPoint = secondPoint.EndPoint + (secondPoint.IsLinear ? Vector2d.Zero : secondPoint.PrevControlPoint);
+            var t = FindT(firstPoint.EndPoint, secondPoint.EndPoint, prevControlPoint, nextControlPoint, targetPoint);
+
+            return (CalcBezierPosition(firstPoint.EndPoint, secondPoint.EndPoint, prevControlPoint, nextControlPoint, t), t);
+        }
+
+        static double FindT(in Vector2d a, in Vector2d b, in Vector2d c1, in Vector2d c2, in Vector2d targetPoint)
+        {
+            const int SegmentCount = 10;
+            const int IterationCount = 20;
+
+            var bestT = 0.0;
+            var minDistance = double.MaxValue;
+
+            for (var i = 0; i < SegmentCount; i++)
+            {
+                var t = (double)i / SegmentCount;
+                var posInBezier = CalcBezierPosition(a, b, c1, c2, t);
+                var distance = Vector2d.DistanceSquared(targetPoint, posInBezier);
+
+                if (minDistance > distance)
+                {
+                    bestT = t;
+                    minDistance = distance;
+                }
+            }
+
+            var step = 0.5 / SegmentCount;
+            for (var i = 0; i < IterationCount; i++, step *= 0.5)
+            {
+                var leftT = Math.Max(bestT - step, 0.0);
+                var rightT = Math.Min(bestT + step, 1.0);
+
+                var left = CalcBezierPosition(a, b, c1, c2, leftT);
+                var right = CalcBezierPosition(a, b, c1, c2, rightT);
+
+                var leftDistance = Vector2d.DistanceSquared(targetPoint, left);
+                var rightDistance = Vector2d.DistanceSquared(targetPoint, right);
+
+                if (minDistance > leftDistance)
+                {
+                    minDistance = leftDistance;
+                    bestT = leftT;
+                }
+                if (minDistance > rightDistance)
+                {
+                    minDistance = rightDistance;
+                    bestT = rightT;
+                }
+            }
+
+            return bestT;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Vector2d CalcBezierPosition(in Vector2d a, in Vector2d b, in Vector2d c1, in Vector2d c2, double t)
+        {
+            var u = 1.0 - t;
+
+            return (a * u * u * u) + (3.0 * u * u * t * c1) + (3.0 * u * t * t * c2) + (t * t * t * b);
+        }
     }
 }
