@@ -161,7 +161,7 @@ namespace NiVE3.Property.Interaction
             }
 
             // 閉じているパスへの点の追加
-            if (TryAddPoint(mousePositionInPreview, previewImageScale, coordTransformer, value))
+            if (TryAddPointOrOpenPath(mousePositionInPreview, previewImageScale, coordTransformer, value))
             {
                 return true;
             }
@@ -763,7 +763,7 @@ namespace NiVE3.Property.Interaction
             }
         }
 
-        bool TryAddPoint(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer, BezierPath path)
+        bool TryAddPointOrOpenPath(Vector2d mousePositionInPreview, Vector2d previewImageScale, ICoordTransformerObject coordTransformer, BezierPath path)
         {
             if (path.IsClosed)
             {
@@ -775,49 +775,66 @@ namespace NiVE3.Property.Interaction
                     SelectedPointIndices.Clear();
                     ViewModel.BeginEditCommand.Execute(null);
 
-                    var nextIndex = pointIndex == BeginPointIndex ? 0 : (pointIndex == path.Points.Length - 1 ? BeginPointIndex : pointIndex + 1);
-                    var prevPoint = pointIndex == BeginPointIndex ? path.BeginPoint : path.Points[pointIndex];
-                    var nextPoint = nextIndex == BeginPointIndex ? path.BeginPoint : path.Points[nextIndex];
-                    var selectIndex = nextIndex;
-                    if (!prevPoint.IsLinear || !nextPoint.IsLinear)
+                    if (IsAltKeyDown())
                     {
-                        var prevControlPoint = prevPoint.EndPoint + (prevPoint.IsLinear ? Vector2d.Zero : prevPoint.NextControlPoint);
-                        var nextControlPoint = nextPoint.EndPoint + (nextPoint.IsLinear ? Vector2d.Zero : nextPoint.PrevControlPoint);
-                        var p01 = Vector2d.Lerp(prevPoint.EndPoint, prevControlPoint, nearestT);
-                        var p12 = Vector2d.Lerp(prevControlPoint, nextControlPoint, nearestT);
-                        var p23 = Vector2d.Lerp(nextControlPoint, nextPoint.EndPoint, nearestT);
-
-                        var leftHandle = Vector2d.Lerp(p01, p12, nearestT);
-                        var rightHandle = Vector2d.Lerp(p12, p23, nearestT);
-                        var newPoint = new BezierPoint(leftHandle - nearestPoint, rightHandle - nearestPoint, nearestPoint, false, true);
-                        var newPrevPoint = new BezierPoint(prevPoint.PrevControlPoint, p01 - prevPoint.EndPoint, prevPoint.EndPoint, prevPoint.IsLinear, true);
-                        var newNextPoint = new BezierPoint(p23 - nextPoint.EndPoint, nextPoint.NextControlPoint, nextPoint.EndPoint, nextPoint.IsLinear, true);
-
-                        var newPath = (pointIndex, nextIndex) switch
+                        if (pointIndex == path.Points.Length - 1)
                         {
-                            (BeginPointIndex, _) => new BezierPath(newPrevPoint, path.Points.SetItem(nextIndex, newNextPoint).Insert(nextIndex, newPoint), path.IsClosed),
-                            (_, BeginPointIndex) => new BezierPath(newNextPoint, path.Points.SetItem(pointIndex, newPrevPoint).Insert(path.Points.Length, newPoint), path.IsClosed),
-                            (_, _) => new BezierPath(path.BeginPoint, path.Points.SetItem(pointIndex, newPrevPoint).SetItem(nextIndex, newNextPoint).Insert(nextIndex, newPoint), path.IsClosed)
-                        };
-                        if (nextIndex == BeginPointIndex)
-                        {
-                            selectIndex = newPath.Points.Length - 1;
-                        }
-                        ViewModel.CurrentTimeRawValue = newPath;
-                    }
-                    else
-                    {
-                        var newPoint = new BezierPoint(Vector2d.Zero, Vector2d.Zero, nearestPoint, true, false);
-                        if (pointIndex == BeginPointIndex)
-                        {
-                            ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points.Prepend(newPoint), path.IsClosed);
+                            ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points, false);
                         }
                         else
                         {
-                            ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points.Insert(pointIndex + 1, newPoint), path.IsClosed);
+                            var nextIndex = pointIndex == BeginPointIndex ? 0 : pointIndex + 1;
+                            ViewModel.CurrentTimeRawValue = new BezierPath(path.Points[nextIndex], path.Points.Append(path.BeginPoint).Concat(path.Points).Skip(nextIndex + 1).Take(path.Points.Length), false);
                         }
                     }
-                    SelectedPointIndices.Add(selectIndex);
+                    else
+                    {
+
+                        var nextIndex = pointIndex == BeginPointIndex ? 0 : (pointIndex == path.Points.Length - 1 ? BeginPointIndex : pointIndex + 1);
+                        var prevPoint = pointIndex == BeginPointIndex ? path.BeginPoint : path.Points[pointIndex];
+                        var nextPoint = nextIndex == BeginPointIndex ? path.BeginPoint : path.Points[nextIndex];
+                        var selectIndex = nextIndex;
+                        if (!prevPoint.IsLinear || !nextPoint.IsLinear)
+                        {
+                            var prevControlPoint = prevPoint.EndPoint + (prevPoint.IsLinear ? Vector2d.Zero : prevPoint.NextControlPoint);
+                            var nextControlPoint = nextPoint.EndPoint + (nextPoint.IsLinear ? Vector2d.Zero : nextPoint.PrevControlPoint);
+                            var p01 = Vector2d.Lerp(prevPoint.EndPoint, prevControlPoint, nearestT);
+                            var p12 = Vector2d.Lerp(prevControlPoint, nextControlPoint, nearestT);
+                            var p23 = Vector2d.Lerp(nextControlPoint, nextPoint.EndPoint, nearestT);
+
+                            var leftHandle = Vector2d.Lerp(p01, p12, nearestT);
+                            var rightHandle = Vector2d.Lerp(p12, p23, nearestT);
+                            var newPoint = new BezierPoint(leftHandle - nearestPoint, rightHandle - nearestPoint, nearestPoint, false, true);
+                            var newPrevPoint = new BezierPoint(prevPoint.PrevControlPoint, p01 - prevPoint.EndPoint, prevPoint.EndPoint, prevPoint.IsLinear, true);
+                            var newNextPoint = new BezierPoint(p23 - nextPoint.EndPoint, nextPoint.NextControlPoint, nextPoint.EndPoint, nextPoint.IsLinear, true);
+
+                            var newPath = (pointIndex, nextIndex) switch
+                            {
+                                (BeginPointIndex, _) => new BezierPath(newPrevPoint, path.Points.SetItem(nextIndex, newNextPoint).Insert(nextIndex, newPoint), path.IsClosed),
+                                (_, BeginPointIndex) => new BezierPath(newNextPoint, path.Points.SetItem(pointIndex, newPrevPoint).Insert(path.Points.Length, newPoint), path.IsClosed),
+                                (_, _) => new BezierPath(path.BeginPoint, path.Points.SetItem(pointIndex, newPrevPoint).SetItem(nextIndex, newNextPoint).Insert(nextIndex, newPoint), path.IsClosed)
+                            };
+                            if (nextIndex == BeginPointIndex)
+                            {
+                                selectIndex = newPath.Points.Length - 1;
+                            }
+                            ViewModel.CurrentTimeRawValue = newPath;
+                        }
+                        else
+                        {
+                            var newPoint = new BezierPoint(Vector2d.Zero, Vector2d.Zero, nearestPoint, true, false);
+                            if (pointIndex == BeginPointIndex)
+                            {
+                                ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points.Prepend(newPoint), path.IsClosed);
+                            }
+                            else
+                            {
+                                ViewModel.CurrentTimeRawValue = new BezierPath(path.BeginPoint, path.Points.Insert(pointIndex + 1, newPoint), path.IsClosed);
+                            }
+                        }
+                        SelectedPointIndices.Add(selectIndex);
+                    }
+
                     ViewModel.EndEditCommand.Execute(null);
                     return true;
                 }
