@@ -35,10 +35,25 @@ namespace NiVE3.Image.Color
         /// <param name="position">0～1の位置</param>
         /// <param name="useLabInterpolation">色の補間にOkLab色空間を使用するかどうか</param>
         /// <returns>補完された色</returns>
-        public Vector4 GetrColor(float position, bool useLabInterpolation = false)
+        public Vector4 GetColor(float position, bool useLabInterpolation = false)
         {
             var color = GetRgb(position, useLabInterpolation);
             color.W = GetOpacity(position);
+
+            return color;
+        }
+
+        /// <summary>
+        /// 指定した位置の色を取得します。色は円形にループします
+        /// </summary>
+        /// <param name="position">0～360の位置</param>
+        /// <param name="useLabInterpolation">色の補間にOkLab色空間を使用するかどうか</param>
+        /// <returns>補完された色</returns>
+        public Vector4 GetLoopColor(float position, bool useLabInterpolation = false)
+        {
+            var phase = (((position % 360.0F) + 360.0F) % 360.0F) / 360.0F;
+            var color = GetLoopRgb(phase, useLabInterpolation);
+            color.W = GetLoopOpacity(phase);
 
             return color;
         }
@@ -97,6 +112,54 @@ namespace NiVE3.Image.Color
             }
         }
 
+        Vector4 GetLoopRgb(float phase, bool useLabInterpolation = false)
+        {
+            if (ColorStops.Count < 1)
+            {
+                return Vector4.One;
+            }
+            else if (ColorStops.Count < 2)
+            {
+                return ColorStops[0].Color;
+            }
+
+            var p = ColorStops.LastOrDefault(c => c.Position <= phase);
+            var n = ColorStops.FirstOrDefault(c => c.Position > phase);
+            if (p == n && p != null)
+            {
+                return p.Color;
+            }
+
+            if (p == null)
+            {
+                p = new ColorStop(ColorStops[^1].Color, ColorStops[^1].Position - 1.0F);
+            }
+            else if (p.Position == phase)
+            {
+                return p.Color;
+            }
+            if (n == null)
+            {
+                n = new ColorStop(ColorStops[0].Color, ColorStops[0].Position + 1.0F);
+            }
+            else if (n.Position == phase)
+            {
+                return n.Color;
+            }
+
+            if (useLabInterpolation)
+            {
+                ref var pLab = ref Unsafe.As<OkLab, Vector4>(ref p.OkLabColor);
+                ref var nLab = ref Unsafe.As<OkLab, Vector4>(ref n.OkLabColor);
+                var resultLab = Vector4.Lerp(pLab, nLab, (phase - p.Position) / (n.Position - p.Position));
+                return Unsafe.As<Vector4, OkLab>(ref resultLab).ToRgb();
+            }
+            else
+            {
+                return Vector4.Lerp(p.Color, n.Color, (phase - p.Position) / (n.Position - p.Position));
+            }
+        }
+
         float GetOpacity(float position)
         {
             if (OpacityStops.Count < 1)
@@ -119,6 +182,43 @@ namespace NiVE3.Image.Color
             {
                 return float.Lerp(p.Opacity, n.Opacity, (position - p.Position) / (n.Position - p.Position));
             }
+        }
+
+        float GetLoopOpacity(float phase)
+        {
+            if (OpacityStops.Count < 1)
+            {
+                return 1.0F;
+            }
+            else if (OpacityStops.Count < 2)
+            {
+                return OpacityStops[0].Opacity;
+            }
+
+            var p = OpacityStops.LastOrDefault(o => o.Position <= phase);
+            var n = OpacityStops.FirstOrDefault(o => o.Position > phase);
+            if (p == n && p != null)
+            {
+                return p.Opacity;
+            }
+
+            if (p == null)
+            {
+                p = new OpacityStop(OpacityStops[^1].Opacity, OpacityStops[^1].Position - 1.0F);
+            }
+            else if (p.Position == phase)
+            {
+                return p.Opacity;
+            }
+            if (n == null)
+            {
+                n = new OpacityStop(OpacityStops[0].Opacity, OpacityStops[0].Position + 1.0F);
+            }
+            else if (n.Position == phase)
+            {
+                return n.Opacity;
+            }
+            return float.Lerp(p.Opacity, n.Opacity, (phase - p.Position) / (n.Position - p.Position));
         }
     }
 

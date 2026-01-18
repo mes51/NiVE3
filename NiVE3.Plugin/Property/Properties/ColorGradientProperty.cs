@@ -21,22 +21,26 @@ namespace NiVE3.Plugin.Property.Properties
 
         bool ShowPreviewOKLabInterpolation { get; }
 
-        public ColorGradientProperty(string id, string displayName, string editButtonText, string okButtonText, string cancelButtonText, ColorGradient? defaultValue = null, bool isSupportKeyFrame = true, bool showPreviewOKLabInterpolation = false) :
+        bool EnableLoopInterpolation { get; }
+
+        public ColorGradientProperty(string id, string displayName, string editButtonText, string okButtonText, string cancelButtonText, ColorGradient? defaultValue = null, bool isSupportKeyFrame = true, bool showPreviewOKLabInterpolation = false, bool enableLoopInterpolation = false) :
             base(id, displayName, ColorGradientPropertyType.Instance, defaultValue ?? ColorGradient.WhiteBlackGradient, isSupportKeyFrame)
         {
             EditButtonText = editButtonText;
             OKButtonText = okButtonText;
             CancelButtonText = cancelButtonText;
             ShowPreviewOKLabInterpolation = showPreviewOKLabInterpolation;
+            EnableLoopInterpolation = enableLoopInterpolation;
         }
 
-        public ColorGradientProperty(string id, LanguageResourceKey displayNameKey, LanguageResourceKey editButtonTextKey, LanguageResourceKey okButtonTextKey, LanguageResourceKey cancelButtonTextKey, ColorGradient? defaultValue = null, bool isSupportKeyFrame = true, bool showPreviewOKLabInterpolation = false) :
+        public ColorGradientProperty(string id, LanguageResourceKey displayNameKey, LanguageResourceKey editButtonTextKey, LanguageResourceKey okButtonTextKey, LanguageResourceKey cancelButtonTextKey, ColorGradient? defaultValue = null, bool isSupportKeyFrame = true, bool showPreviewOKLabInterpolation = false, bool enableLoopInterpolation = false) :
             base(id, displayNameKey, ColorGradientPropertyType.Instance, defaultValue ?? ColorGradient.WhiteBlackGradient, isSupportKeyFrame)
         {
             EditButtonText = editButtonTextKey.GetText() ?? "";
             OKButtonText = okButtonTextKey.GetText() ?? "";
             CancelButtonText = cancelButtonTextKey.GetText() ?? "";
             ShowPreviewOKLabInterpolation = showPreviewOKLabInterpolation;
+            EnableLoopInterpolation = enableLoopInterpolation;
         }
 
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
@@ -46,7 +50,8 @@ namespace NiVE3.Plugin.Property.Properties
                 EditButtonText = EditButtonText,
                 DialogOKButtonText = OKButtonText,
                 DialogCancelButtonText = CancelButtonText,
-                ShowPreviewOKLabInterpolation = ShowPreviewOKLabInterpolation
+                ShowPreviewOKLabInterpolation = ShowPreviewOKLabInterpolation,
+                EnableLoopInterpolation = EnableLoopInterpolation
             };
             return control;
         }

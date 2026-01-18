@@ -52,7 +52,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return
             [
                 new UseLayerImageProperty(PropertySourceLayerId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_SourceLayer, 90.0),
-                new EnumProperty(PropertyChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_Channel, typeof(DisplacemenMapChannelType), typeof(LanguageResourceDictionary), DisplacemenMapChannelType.Luminance, selectBoxWidth: 90.0),
+                new EnumProperty(PropertyChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_Channel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.Luminance, selectBoxWidth: 90.0),
                 new EnumProperty(PropertySourceLayerPositionId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_SourceLayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                 new DoubleProperty(PropertyRateId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_Rate, 50.0, -100.0, 100.0, digit: 2),
                 new DoubleProperty(PropertyDisplacementAmountId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_DisplacementAmount, 100.0, -1000.0, 1000.0, digit: 2)
@@ -62,7 +62,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var targetLayerId = properties.GetValue(PropertySourceLayerId, layerTime, UseLayerImageTarget.Empty);
-            var channel = properties.GetValue(PropertyChannelId, layerTime, DisplacemenMapChannelType.Luminance);
+            var channel = properties.GetValue(PropertyChannelId, layerTime, WithHSLLOnOffChannelType.Luminance);
             var position = properties.GetValue(PropertySourceLayerPositionId, layerTime, SourceLayerPositionType.Center);
             var rate = (float)properties.GetValue(PropertyRateId, layerTime, 0.0) * 0.01F;
             var displacement = (float)properties.GetValue(PropertyDisplacementAmountId, layerTime, 0.0);
@@ -91,7 +91,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, float rate, float displacementAmount, DisplacemenMapChannelType channel, SourceLayerPositionType position)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, float rate, float displacementAmount, WithHSLLOnOffChannelType channel, SourceLayerPositionType position)
         {
             var managedImage = image.ToManaged();
             var managedSourceImage = sourceImage.ToManaged();
@@ -139,7 +139,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, float rate, float displacementAmount, DisplacemenMapChannelType channel, SourceLayerPositionType position)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, float rate, float displacementAmount, WithHSLLOnOffChannelType channel, SourceLayerPositionType position)
         {
             var gpuImage = image.ToGpu(device);
             var gpuSourceImage = sourceImage.ToGpu(device);

@@ -119,6 +119,19 @@ namespace NiVE3.Plugin.Internal.Dialog
             new FrameworkPropertyMetadata(false, UseOkLabInterpolationChanged)
         );
 
+        public static readonly DependencyProperty EnableLoopInterpolationProperty = DependencyProperty.Register(
+            nameof(EnableLoopInterpolation),
+            typeof(bool),
+            typeof(ColorGradientEditDialog),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure)
+        );
+
+        public bool EnableLoopInterpolation
+        {
+            get { return (bool)GetValue(EnableLoopInterpolationProperty); }
+            set { SetValue(EnableLoopInterpolationProperty, value); }
+        }
+
         public bool ShowPreviewOKLabInterpolation
         {
             get { return (bool)GetValue(ShowPreviewOKLabInterpolationProperty); }
@@ -247,9 +260,19 @@ namespace NiVE3.Plugin.Internal.Dialog
             var useOkLabInterpolation = UseOkLabInterpolation;
 
             var data = ArrayPool<int>.Shared.Rent(width);
-            for (var i = 0; i < data.Length; i++)
+            if (EnableLoopInterpolation)
             {
-                data[i] = colorGradient.GetrColor(i / (float)width, useOkLabInterpolation).ToIntColor();
+                for (var i = 0; i < data.Length; i++)
+                {
+                    data[i] = colorGradient.GetLoopColor(i / (float)width * 360.0F, useOkLabInterpolation).ToIntColor();
+                }
+            }
+            else
+            {
+                for (var i = 0; i < data.Length; i++)
+                {
+                    data[i] = colorGradient.GetColor(i / (float)width, useOkLabInterpolation).ToIntColor();
+                }
             }
             newImage.WritePixels(new Int32Rect(0, 0, width, 1), data, width * 4, 0);
             ArrayPool<int>.Shared.Return(data);

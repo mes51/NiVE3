@@ -939,6 +939,56 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("量")]
         public const string ColorCollection_Exposure_Exposure = nameof(ColorCollection_Exposure_Exposure);
 
+        // Exposure
+
+        [DefaultValue("カラーリマップ")]
+        public const string ColorCollection_ColorRemap_Name = nameof(ColorCollection_ColorRemap_Name);
+
+        [DefaultValue("指定されたチャンネルの値を元に色を置換します")]
+        public const string ColorCollection_ColorRemap_Description = nameof(ColorCollection_ColorRemap_Description);
+
+        [LanguageKey, DefaultValue("ソース")]
+        public const string ColorCollection_ColorRemap_Source = nameof(ColorCollection_ColorRemap_Source);
+
+        [LanguageKey, DefaultValue("ソースチャンネル")]
+        public const string ColorCollection_ColorRemap_Source_SourceChannel = nameof(ColorCollection_ColorRemap_Source_SourceChannel);
+
+        [LanguageKey, DefaultValue("追加のソースレイヤー")]
+        public const string ColorCollection_ColorRemap_Source_AdditionalSourceLayer = nameof(ColorCollection_ColorRemap_Source_AdditionalSourceLayer);
+
+        [LanguageKey, DefaultValue("追加のソースレイヤーの配置")]
+        public const string ColorCollection_ColorRemap_Source_AdditionalSourceLayerPosition = nameof(ColorCollection_ColorRemap_Source_AdditionalSourceLayerPosition);
+
+        [LanguageKey, DefaultValue("追加のソースチャンネル")]
+        public const string ColorCollection_ColorRemap_Source_AdditionalSourceChannel = nameof(ColorCollection_ColorRemap_Source_AdditionalSourceChannel);
+
+        [LanguageKey, DefaultValue("ソースのブレンドモード")]
+        public const string ColorCollection_ColorRemap_Source_SourceBlendMode = nameof(ColorCollection_ColorRemap_Source_SourceBlendMode);
+
+        [LanguageKey, DefaultValue("ソースのループ")]
+        public const string ColorCollection_ColorRemap_Source_SourcePhaseLoopMode = nameof(ColorCollection_ColorRemap_Source_SourcePhaseLoopMode);
+
+        [LanguageKey, DefaultValue("ソースのシフト")]
+        public const string ColorCollection_ColorRemap_Source_SourcePhaseShift = nameof(ColorCollection_ColorRemap_Source_SourcePhaseShift);
+
+        [LanguageKey, DefaultValue("出力")]
+        public const string ColorCollection_ColorRemap_Output = nameof(ColorCollection_ColorRemap_Output);
+
+        [LanguageKey, DefaultValue("カラーマップ")]
+        public const string ColorCollection_ColorRemap_Output_ColorMap = nameof(ColorCollection_ColorRemap_Output_ColorMap);
+
+        [LanguageKey, DefaultValue("カラーマップの編集")]
+        public const string ColorCollection_ColorRemap_Output_ColorMap_EditText = nameof(ColorCollection_ColorRemap_Output_ColorMap_EditText);
+
+        [LanguageKey, DefaultValue("OKLab色空間で補間する")]
+        public const string ColorCollection_ColorRemap_Output_UseOkLabInterpolation = nameof(ColorCollection_ColorRemap_Output_UseOkLabInterpolation);
+
+        [LanguageKey, DefaultValue("サイクル数")]
+        public const string ColorCollection_ColorRemap_Output_CycleCount = nameof(ColorCollection_ColorRemap_Output_CycleCount);
+
+        [LanguageKey, DefaultValue("元画像のブレンド")]
+        public const string ColorCollection_ColorRemap_BlendOriginal = nameof(ColorCollection_ColorRemap_BlendOriginal);
+
         // RandomNoise
 
         [DefaultValue("ノイズ")]
@@ -2472,70 +2522,37 @@ namespace NiVE3.PresetPlugin.Resource
         public const string NoiseType_Parlin = nameof(NoiseType_Parlin);
 
         [DefaultValue("赤")]
-        public const string DisplacemenMapChannelType_R = nameof(DisplacemenMapChannelType_R);
+        public const string WithHSLLOnOffChannelType_R = nameof(WithHSLLOnOffChannelType_R);
 
         [DefaultValue("緑")]
-        public const string DisplacemenMapChannelType_G = nameof(DisplacemenMapChannelType_G);
+        public const string WithHSLLOnOffChannelType_G = nameof(WithHSLLOnOffChannelType_G);
 
         [DefaultValue("青")]
-        public const string DisplacemenMapChannelType_B = nameof(DisplacemenMapChannelType_B);
+        public const string WithHSLLOnOffChannelType_B = nameof(WithHSLLOnOffChannelType_B);
 
         [DefaultValue("アルファ")]
-        public const string DisplacemenMapChannelType_A = nameof(DisplacemenMapChannelType_A);
+        public const string WithHSLLOnOffChannelType_A = nameof(WithHSLLOnOffChannelType_A);
 
         [DefaultValue("輝度")]
-        public const string DisplacemenMapChannelType_Luminance = nameof(DisplacemenMapChannelType_Luminance);
+        public const string WithHSLLOnOffChannelType_Luminance = nameof(WithHSLLOnOffChannelType_Luminance);
 
         [DefaultValue("色相")]
-        public const string DisplacemenMapChannelType_Hue = nameof(DisplacemenMapChannelType_Hue);
+        public const string WithHSLLOnOffChannelType_Hue = nameof(WithHSLLOnOffChannelType_Hue);
 
         [DefaultValue("彩度")]
-        public const string DisplacemenMapChannelType_Saturation = nameof(DisplacemenMapChannelType_Saturation);
+        public const string WithHSLLOnOffChannelType_Saturation = nameof(WithHSLLOnOffChannelType_Saturation);
 
         [DefaultValue("明度")]
-        public const string DisplacemenMapChannelType_Lightness = nameof(DisplacemenMapChannelType_Lightness);
+        public const string WithHSLLOnOffChannelType_Lightness = nameof(WithHSLLOnOffChannelType_Lightness);
 
         [DefaultValue("オン")]
-        public const string DisplacemenMapChannelType_On = nameof(DisplacemenMapChannelType_On);
+        public const string WithHSLLOnOffChannelType_On = nameof(WithHSLLOnOffChannelType_On);
 
         [DefaultValue("半分")]
-        public const string DisplacemenMapChannelType_Half = nameof(DisplacemenMapChannelType_Half);
+        public const string WithHSLLOnOffChannelType_Half = nameof(WithHSLLOnOffChannelType_Half);
 
         [DefaultValue("オフ")]
-        public const string DisplacemenMapChannelType_Off = nameof(DisplacemenMapChannelType_Off);
-
-        [DefaultValue("赤")]
-        public const string ChannelShiftChannelType_R = nameof(ChannelShiftChannelType_R);
-
-        [DefaultValue("緑")]
-        public const string ChannelShiftChannelType_G = nameof(ChannelShiftChannelType_G);
-
-        [DefaultValue("青")]
-        public const string ChannelShiftChannelType_B = nameof(ChannelShiftChannelType_B);
-
-        [DefaultValue("アルファ")]
-        public const string ChannelShiftChannelType_A = nameof(ChannelShiftChannelType_A);
-
-        [DefaultValue("輝度")]
-        public const string ChannelShiftChannelType_Luminance = nameof(ChannelShiftChannelType_Luminance);
-
-        [DefaultValue("色相")]
-        public const string ChannelShiftChannelType_Hue = nameof(ChannelShiftChannelType_Hue);
-
-        [DefaultValue("彩度")]
-        public const string ChannelShiftChannelType_Saturation = nameof(ChannelShiftChannelType_Saturation);
-
-        [DefaultValue("明度")]
-        public const string ChannelShiftChannelType_Lightness = nameof(ChannelShiftChannelType_Lightness);
-
-        [DefaultValue("オン")]
-        public const string ChannelShiftChannelType_On = nameof(ChannelShiftChannelType_On);
-
-        [DefaultValue("半分")]
-        public const string ChannelShiftChannelType_Half = nameof(ChannelShiftChannelType_Half);
-
-        [DefaultValue("オフ")]
-        public const string ChannelShiftChannelType_Off = nameof(ChannelShiftChannelType_Off);
+        public const string WithHSLLOnOffChannelType_Off = nameof(WithHSLLOnOffChannelType_Off);
 
         [DefaultValue("中央配置")]
         public const string SourceLayerPositionType_Center = nameof(SourceLayerPositionType_Center);
@@ -2830,6 +2847,27 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("幅と高さ")]
         public const string GridLineGridSizeType_WidthAndHeight = nameof(GridLineGridSizeType_WidthAndHeight);
+
+        [DefaultValue("加算")]
+        public const string SourcePhaseBlendModeType_Add = nameof(SourcePhaseBlendModeType_Add);
+
+        [DefaultValue("減算")]
+        public const string SourcePhaseBlendModeType_Subtract = nameof(SourcePhaseBlendModeType_Subtract);
+
+        [DefaultValue("乗算")]
+        public const string SourcePhaseBlendModeType_Multiply = nameof(SourcePhaseBlendModeType_Multiply);
+
+        [DefaultValue("平均")]
+        public const string SourcePhaseBlendModeType_Average = nameof(SourcePhaseBlendModeType_Average);
+
+        [DefaultValue("クランプ")]
+        public const string SourcePhaseLoopModeType_Clamp = nameof(SourcePhaseLoopModeType_Clamp);
+
+        [DefaultValue("リピート")]
+        public const string SourcePhaseLoopModeType_Repeat = nameof(SourcePhaseLoopModeType_Repeat);
+
+        [DefaultValue("ミラー")]
+        public const string SourcePhaseLoopModeType_Mirror = nameof(SourcePhaseLoopModeType_Mirror);
 
         // unit
 

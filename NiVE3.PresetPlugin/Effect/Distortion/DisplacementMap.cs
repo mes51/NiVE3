@@ -58,9 +58,9 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return
             [
                 new UseLayerImageProperty(PropertySourceLayerId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_SourceLayer),
-                new EnumProperty(PropertyHorizontalChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_HorizontalChannel, typeof(DisplacemenMapChannelType), typeof(LanguageResourceDictionary), DisplacemenMapChannelType.R),
+                new EnumProperty(PropertyHorizontalChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_HorizontalChannel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.R),
                 new DoubleProperty(PropertyHorizontalMaxMoveId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_HorizontalMaxMove, 5.0, double.MinValue, double.MaxValue, digit: 2),
-                new EnumProperty(PropertyVerticalChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_VerticalChannel, typeof(DisplacemenMapChannelType), typeof(LanguageResourceDictionary), DisplacemenMapChannelType.G),
+                new EnumProperty(PropertyVerticalChannelId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_VerticalChannel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.G),
                 new DoubleProperty(PropertyVerticalMaxMoveId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_VerticalMaxMove, 5.0, double.MinValue, double.MaxValue, digit: 2),
                 new EnumProperty(PropertySourceLayerPositionId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_SourceLayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center),
                 new CheckBoxProperty(PropertyIsLoopImageId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_IsLoopImage, false)
@@ -70,9 +70,9 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var targetLayerId = properties.GetValue(PropertySourceLayerId, layerTime, UseLayerImageTarget.Empty);
-            var horizontalChannel = properties.GetValue(PropertyHorizontalChannelId, layerTime, DisplacemenMapChannelType.R);
+            var horizontalChannel = properties.GetValue(PropertyHorizontalChannelId, layerTime, WithHSLLOnOffChannelType.R);
             var horizontalMaxMove = (float)properties.GetValue(PropertyHorizontalMaxMoveId, layerTime, 0.0);
-            var verticalChannel = properties.GetValue(PropertyVerticalChannelId, layerTime, DisplacemenMapChannelType.R);
+            var verticalChannel = properties.GetValue(PropertyVerticalChannelId, layerTime, WithHSLLOnOffChannelType.R);
             var verticalMaxMove = (float)properties.GetValue(PropertyVerticalMaxMoveId, layerTime, 0.0);
             var sourceLayerPosition = properties.GetValue(PropertySourceLayerPositionId, layerTime, SourceLayerPositionType.Center);
             var isLoopImage = properties.GetValue(PropertyIsLoopImageId, layerTime, false);
@@ -101,7 +101,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, DisplacemenMapChannelType horizontalChannel, float horizontalMaxMove, DisplacemenMapChannelType verticalChannel, float verticalMaxMove, SourceLayerPositionType position, bool isLoopImage)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, NImage sourceImage, WithHSLLOnOffChannelType horizontalChannel, float horizontalMaxMove, WithHSLLOnOffChannelType verticalChannel, float verticalMaxMove, SourceLayerPositionType position, bool isLoopImage)
         {
             var managedImage = image.ToManaged();
             var managedSourceImage = sourceImage.ToManaged();
@@ -146,7 +146,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, DisplacemenMapChannelType horizontalChannel, float horizontalMaxMove, DisplacemenMapChannelType verticalChannel, float verticalMaxMove, SourceLayerPositionType position, bool isLoopImage)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, WithHSLLOnOffChannelType horizontalChannel, float horizontalMaxMove, WithHSLLOnOffChannelType verticalChannel, float verticalMaxMove, SourceLayerPositionType position, bool isLoopImage)
         {
             var gpuImage = image.ToGpu(device);
             var gpuSourceImage = sourceImage.ToGpu(device);
@@ -188,21 +188,21 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float CalcMoveRate(in Vector4 color, DisplacemenMapChannelType channelType)
+        static float CalcMoveRate(in Vector4 color, WithHSLLOnOffChannelType channelType)
         {
             switch (channelType)
             {
-                case DisplacemenMapChannelType.R:
+                case WithHSLLOnOffChannelType.R:
                     return (color.Z - 0.5F) * 2.0F;
-                case DisplacemenMapChannelType.G:
+                case WithHSLLOnOffChannelType.G:
                     return (color.Y - 0.5F) * 2.0F;
-                case DisplacemenMapChannelType.B:
+                case WithHSLLOnOffChannelType.B:
                     return (color.X - 0.5F) * 2.0F;
-                case DisplacemenMapChannelType.A:
+                case WithHSLLOnOffChannelType.A:
                     return (color.W - 0.5F) * 2.0F;
-                case DisplacemenMapChannelType.Luminance:
+                case WithHSLLOnOffChannelType.Luminance:
                     return (Vector4.Dot(color, Const.ConvertToGrayScale) - 0.5F) * 2.0F;
-                case DisplacemenMapChannelType.Hue:
+                case WithHSLLOnOffChannelType.Hue:
                     {
                         var min = color.HorizontalMinBy3Element();
                         var max = color.HorizontalMaxBy3Element();
@@ -216,7 +216,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
 
                         return (h - 180.0F) / 180.0F;
                     }
-                case DisplacemenMapChannelType.Saturation:
+                case WithHSLLOnOffChannelType.Saturation:
                     {
                         var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
                         var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
@@ -229,15 +229,15 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                             return 0.5F;
                         }
                     }
-                case DisplacemenMapChannelType.Lightness:
+                case WithHSLLOnOffChannelType.Lightness:
                     {
                         var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
                         var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
                         return max + min - 1.0F; // ((max + min) * 0.5F - 0.5F) * 2.0F;
                     }
-                case DisplacemenMapChannelType.On:
+                case WithHSLLOnOffChannelType.On:
                     return 1.0F;
-                case DisplacemenMapChannelType.Off:
+                case WithHSLLOnOffChannelType.Off:
                     return -1.0F;
                 default:
                     return 0.0F;

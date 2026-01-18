@@ -47,4 +47,19 @@ namespace NiVE3.PresetPlugin.Effect.Util
         Stretch,
         Loop
     }
+
+    enum WithHSLLOnOffChannelType : int
+    {
+        R,
+        G,
+        B,
+        A,
+        Luminance,
+        Hue,
+        Saturation,
+        Lightness,
+        On,
+        Half,
+        Off
+    }
 }

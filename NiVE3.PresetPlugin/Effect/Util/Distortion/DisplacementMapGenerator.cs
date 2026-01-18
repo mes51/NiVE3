@@ -20,7 +20,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
     static class DisplacementMapGenerator
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float[] Generate(NManagedImage sourceImage, int targetWidth, int targetHeight, DisplacemenMapChannelType channel, SourceLayerPositionType position)
+        public static float[] Generate(NManagedImage sourceImage, int targetWidth, int targetHeight, WithHSLLOnOffChannelType channel, SourceLayerPositionType position)
         {
             var map = ArrayPool<float>.Shared.Rent(targetWidth * targetHeight);
 
@@ -92,7 +92,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
             return map;
         }
 
-        public static ReadWriteBuffer<float> Generate(GraphicsDevice device, NGPUImage gpuImage, int targetWidth, int targetHeight, DisplacemenMapChannelType channel, SourceLayerPositionType position)
+        public static ReadWriteBuffer<float> Generate(GraphicsDevice device, NGPUImage gpuImage, int targetWidth, int targetHeight, WithHSLLOnOffChannelType channel, SourceLayerPositionType position)
         {
             var map = device.AllocateReadWriteBuffer<float>(targetWidth * targetHeight);
 
@@ -110,13 +110,13 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CalcMapValues(NManagedImage sourceImage, float[] map, DisplacemenMapChannelType type)
+        static void CalcMapValues(NManagedImage sourceImage, float[] map, WithHSLLOnOffChannelType type)
         {
             var sourceImageData = sourceImage.Data;
             var width = sourceImage.Width;
             switch (type)
             {
-                case DisplacemenMapChannelType.R:
+                case WithHSLLOnOffChannelType.R:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -128,7 +128,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.G:
+                case WithHSLLOnOffChannelType.G:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -140,7 +140,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.B:
+                case WithHSLLOnOffChannelType.B:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -152,7 +152,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.A:
+                case WithHSLLOnOffChannelType.A:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -164,7 +164,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.Luminance:
+                case WithHSLLOnOffChannelType.Luminance:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -176,7 +176,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.Hue:
+                case WithHSLLOnOffChannelType.Hue:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -199,7 +199,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.Saturation:
+                case WithHSLLOnOffChannelType.Saturation:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -221,7 +221,7 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.Lightness:
+                case WithHSLLOnOffChannelType.Lightness:
                     Parallel.For(0, sourceImage.Height, y =>
                     {
                         var sourceImageDataSpan = sourceImageData.AsSpan(y * width, width);
@@ -236,10 +236,10 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
                         }
                     });
                     break;
-                case DisplacemenMapChannelType.On:
+                case WithHSLLOnOffChannelType.On:
                     map.AsSpan(sourceImage.Width * sourceImage.Height).Fill(1.0F);
                     break;
-                case DisplacemenMapChannelType.Off:
+                case WithHSLLOnOffChannelType.Off:
                     map.AsSpan(sourceImage.Width * sourceImage.Height).Fill(-1.0F);
                     break;
                 default:

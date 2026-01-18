@@ -185,7 +185,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                                 {
                                     if (!rendered)
                                     {
-                                        var shadowColor = gradient.GetrColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
+                                        var shadowColor = gradient.GetColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
                                         shadowImageDataSpan[x] = Blend.Process(BlendMode.Normal, shadowColor, shadowImageDataSpan[x]);
                                         rendered = true;
                                     }
@@ -197,7 +197,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
                             if (!rendered && a > 0.0F)
                             {
-                                var shadowColor = gradient.GetrColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
+                                var shadowColor = gradient.GetColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
                                 shadowImageDataSpan[x] = Blend.Process(BlendMode.Normal, shadowColor, shadowImageDataSpan[x]);
                             }
                         }
@@ -233,7 +233,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                                 {
                                     if (!rendered)
                                     {
-                                        var shadowColor = gradient.GetrColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
+                                        var shadowColor = gradient.GetColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
                                         shadowImageDataSpan[x] = Blend.Process(BlendMode.Normal, shadowColor, shadowImageDataSpan[x]);
                                         rendered = true;
                                     }
@@ -245,7 +245,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
                             if (!rendered && a > 0.0F)
                             {
-                                var shadowColor = gradient.GetrColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
+                                var shadowColor = gradient.GetColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
                                 shadowImageDataSpan[x] = Blend.Process(BlendMode.Normal, shadowColor, shadowImageDataSpan[x]);
                             }
                         }
@@ -280,7 +280,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                                     {
                                         if (!rendered)
                                         {
-                                            var shadowColor = gradient.GetrColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
+                                            var shadowColor = gradient.GetColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
                                             shadowImageDataSpan[x] = Blend.Process(BlendMode.Normal, shadowColor, shadowImageDataSpan[x]);
                                             rendered = true;
                                         }
@@ -292,7 +292,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
                                 if (!rendered && a > 0.0F)
                                 {
-                                    var shadowColor = gradient.GetrColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
+                                    var shadowColor = gradient.GetColor(hitLength / length, useOkLabInterpolation) * new Vector4(1.0F, 1.0F, 1.0F, a);
                                     shadowImageDataSpan[x] = Blend.Process(BlendMode.Normal, shadowColor, shadowImageDataSpan[x]);
                                 }
                             }

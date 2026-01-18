@@ -51,6 +51,19 @@ namespace NiVE3.Plugin.Property.Control
             new FrameworkPropertyMetadata(false)
         );
 
+        public static readonly DependencyProperty EnableLoopInterpolationProperty = DependencyProperty.Register(
+            nameof(EnableLoopInterpolation),
+            typeof(bool),
+            typeof(ColorGradientPropertyControl),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool EnableLoopInterpolation
+        {
+            get { return (bool)GetValue(EnableLoopInterpolationProperty); }
+            set { SetValue(EnableLoopInterpolationProperty, value); }
+        }
+
         public bool ShowPreviewOKLabInterpolation
         {
             get { return (bool)GetValue(ShowPreviewOKLabInterpolationProperty); }
@@ -90,7 +103,9 @@ namespace NiVE3.Plugin.Property.Control
                 var dialog = new ColorGradientEditDialog((ColorGradient)(ViewModel?.CurrentTimeRawValue ?? ColorGradient.WhiteBlackGradient))
                 {
                     Owner = Application.Current.MainWindow,
-                    ShowPreviewOKLabInterpolation = ShowPreviewOKLabInterpolation
+                    Title = EditButtonText,
+                    ShowPreviewOKLabInterpolation = ShowPreviewOKLabInterpolation,
+                    EnableLoopInterpolation = EnableLoopInterpolation
                 };
                 if (dialog.ShowDialog() ?? false)
                 {

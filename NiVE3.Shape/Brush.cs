@@ -89,7 +89,7 @@ namespace NiVE3.Shape
         {
             var p = Sin * (x - Begin.X) + Cos * (y - Begin.Y);
             var pos = (Reversed ? Length - p : p) / Length;
-            var color = ColorGradient.GetrColor(pos, UseOkLabInterpolation);
+            var color = ColorGradient.GetColor(pos, UseOkLabInterpolation);
             color.W *= Opacity;
             return color;
         }
@@ -145,7 +145,7 @@ namespace NiVE3.Shape
         public override Vector4 GetColor(float x, float y)
         {
             var pos = Vector2.Distance(new Vector2(x, y), Begin) / Length;
-            var color = ColorGradient.GetrColor(pos, UseOkLabInterpolation);
+            var color = ColorGradient.GetColor(pos, UseOkLabInterpolation);
             color.W *= Opacity;
             return color;
         }

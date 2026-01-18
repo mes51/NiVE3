@@ -15,6 +15,7 @@ using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
@@ -47,21 +48,21 @@ namespace NiVE3.PresetPlugin.Effect.Channel
         {
             return
             [
-                new EnumProperty(PropertyRId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_R, typeof(ChannelShiftChannelType), typeof(LanguageResourceDictionary), ChannelShiftChannelType.R, selectBoxWidth: 90.0),
-                new EnumProperty(PropertyGId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_G, typeof(ChannelShiftChannelType), typeof(LanguageResourceDictionary), ChannelShiftChannelType.G, selectBoxWidth: 90.0),
-                new EnumProperty(PropertyBId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_B, typeof(ChannelShiftChannelType), typeof(LanguageResourceDictionary), ChannelShiftChannelType.B, selectBoxWidth: 90.0),
-                new EnumProperty(PropertyAId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_A, typeof(ChannelShiftChannelType), typeof(LanguageResourceDictionary), ChannelShiftChannelType.A, selectBoxWidth: 90.0),
+                new EnumProperty(PropertyRId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_R, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.R, selectBoxWidth: 90.0),
+                new EnumProperty(PropertyGId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_G, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.G, selectBoxWidth: 90.0),
+                new EnumProperty(PropertyBId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_B, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.B, selectBoxWidth: 90.0),
+                new EnumProperty(PropertyAId, LanguageResourceDictionary.ResourceKeys.Channel_ChannelShift_A, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.A, selectBoxWidth: 90.0),
             ];
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
-            var rType = properties.GetValue(PropertyRId, layerTime, ChannelShiftChannelType.R);
-            var gType = properties.GetValue(PropertyGId, layerTime, ChannelShiftChannelType.G);
-            var bType = properties.GetValue(PropertyBId, layerTime, ChannelShiftChannelType.B);
-            var aType = properties.GetValue(PropertyAId, layerTime, ChannelShiftChannelType.A);
+            var rType = properties.GetValue(PropertyRId, layerTime, WithHSLLOnOffChannelType.R);
+            var gType = properties.GetValue(PropertyGId, layerTime, WithHSLLOnOffChannelType.G);
+            var bType = properties.GetValue(PropertyBId, layerTime, WithHSLLOnOffChannelType.B);
+            var aType = properties.GetValue(PropertyAId, layerTime, WithHSLLOnOffChannelType.A);
 
-            if (rType == ChannelShiftChannelType.R && gType == ChannelShiftChannelType.G && bType == ChannelShiftChannelType.B && aType == ChannelShiftChannelType.A)
+            if (rType == WithHSLLOnOffChannelType.R && gType == WithHSLLOnOffChannelType.G && bType == WithHSLLOnOffChannelType.B && aType == WithHSLLOnOffChannelType.A)
             {
                 return image;
             }
@@ -83,7 +84,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, ChannelShiftChannelType rType, ChannelShiftChannelType gType, ChannelShiftChannelType bType, ChannelShiftChannelType aType)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, WithHSLLOnOffChannelType rType, WithHSLLOnOffChannelType gType, WithHSLLOnOffChannelType bType, WithHSLLOnOffChannelType aType)
         {
             var managedImage = image.ToManaged();
 
@@ -109,7 +110,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, ChannelShiftChannelType rType, ChannelShiftChannelType gType, ChannelShiftChannelType bType, ChannelShiftChannelType aType)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, WithHSLLOnOffChannelType rType, WithHSLLOnOffChannelType gType, WithHSLLOnOffChannelType bType, WithHSLLOnOffChannelType aType)
         {
             var gpuImage = image.ToGpu(device);
 
@@ -119,21 +120,21 @@ namespace NiVE3.PresetPlugin.Effect.Channel
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float CalcShiftedValue(in Vector4 color, ChannelShiftChannelType channelType)
+        static float CalcShiftedValue(in Vector4 color, WithHSLLOnOffChannelType channelType)
         {
             switch (channelType)
             {
-                case ChannelShiftChannelType.R:
+                case WithHSLLOnOffChannelType.R:
                     return color.Z;
-                case ChannelShiftChannelType.G:
+                case WithHSLLOnOffChannelType.G:
                     return color.Y;
-                case ChannelShiftChannelType.B:
+                case WithHSLLOnOffChannelType.B:
                     return color.X;
-                case ChannelShiftChannelType.A:
+                case WithHSLLOnOffChannelType.A:
                     return color.W;
-                case ChannelShiftChannelType.Luminance:
+                case WithHSLLOnOffChannelType.Luminance:
                     return Vector4.Dot(color, Const.ConvertToGrayScale);
-                case ChannelShiftChannelType.Hue:
+                case WithHSLLOnOffChannelType.Hue:
                     {
                         var clamped = Vector4.Clamp(color, Vector4.Zero, Vector4.One);
                         var min = clamped.HorizontalMinBy3Element();
@@ -148,7 +149,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
                         return hue / 360.0F;
                     }
-                case ChannelShiftChannelType.Saturation:
+                case WithHSLLOnOffChannelType.Saturation:
                     {
                         var clamped = Vector4.Clamp(color, Vector4.Zero, Vector4.One);
                         var min = clamped.AsVector128().HorizontalMinBy3Element().GetElement(0);
@@ -162,16 +163,16 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                             return 0.0F;
                         }
                     }
-                case ChannelShiftChannelType.Lightness:
+                case WithHSLLOnOffChannelType.Lightness:
                     {
                         var clamped = Vector4.Clamp(color, Vector4.Zero, Vector4.One);
                         var min = clamped.AsVector128().HorizontalMinBy3Element().GetElement(0);
                         var max = clamped.AsVector128().HorizontalMaxBy3Element().GetElement(0);
                         return max + min; // ((max + min) * 0.5F - 0.5F) * 2.0F;
                     }
-                case ChannelShiftChannelType.On:
+                case WithHSLLOnOffChannelType.On:
                     return 1.0F;
-                case ChannelShiftChannelType.Off:
+                case WithHSLLOnOffChannelType.Off:
                     return 0.0F;
                 default:
                     return 0.5F;
@@ -265,20 +266,5 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                     return 0.5F;
             }
         }
-    }
-
-    enum ChannelShiftChannelType : int
-    {
-        R,
-        G,
-        B,
-        A,
-        Luminance,
-        Hue,
-        Saturation,
-        Lightness,
-        On,
-        Half,
-        Off
     }
 }
