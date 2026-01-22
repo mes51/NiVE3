@@ -1203,6 +1203,17 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("中心点")]
         public const string Distortion_Twist_Center = nameof(Distortion_Twist_Center);
 
+        // DotScaling
+
+        [DefaultValue("ドット絵拡大")]
+        public const string Distortion_DotScaling_Name = nameof(Distortion_DotScaling_Name);
+
+        [DefaultValue("画像のドット感を維持したまま滑らかに拡大します")]
+        public const string Distortion_DotScaling_Description = nameof(Distortion_DotScaling_Description);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Distortion_DotScaling_Scale = nameof(Distortion_DotScaling_Scale);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
