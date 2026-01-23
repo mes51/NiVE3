@@ -66,8 +66,13 @@ namespace NiVE3.Plugin.ValueObject
                 !dictionary.TryGetValue(nameof(Points), out var pointsValue) ||
                 !dictionary.TryGetValue(nameof(IsClosed), out var isClosedValue) ||
                 pointsValue is not object[] pointsValueArray ||
-                !VectorSerializer.TryDeserializeVector2d(beginPointValue, out var beginPoint) ||
                 isClosedValue is not bool isClosed)
+            {
+                return null;
+            }
+
+            var beginPoint = BezierPoint.Deserialize(beginPointValue);
+            if (beginPoint == null)
             {
                 return null;
             }

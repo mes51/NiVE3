@@ -76,6 +76,7 @@ namespace NiVE3.Expression
             Engine.SetValue("Interpolation", typeof(ExpressionInterpolation));
             Engine.SetValue("VectorMath", typeof(ExpressionVectorMath));
             Engine.SetValue("StringUtil", typeof(ExpressionStringUtil));
+            Engine.SetValue("BezierPathUtil", typeof(ExpressionBezierPathUtil));
         }
 
         public object? Evaluate(ExpressionScript script, object? value)
