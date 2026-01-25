@@ -39,7 +39,7 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
         {
             return
             [
-                new Vector3dProperty(PropertyScaleId, LanguageResourceDictionary.ResourceKeys.Distortion_DotScaling_Scale, new Vector3d(100.0, 100.0, 0.0), new Vector3d(100.0, 100.0, 0.0), new Vector3d(double.MaxValue), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, useLinkRatio: true)
+                new Vector3dProperty(PropertyScaleId, LanguageResourceDictionary.ResourceKeys.Distortion_DotScaling_Scale, new Vector3d(100.0, 100.0, 0.0), new Vector3d(100.0, 100.0, 0.0), new Vector3d(double.MaxValue), digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true)
             ];
         }
 

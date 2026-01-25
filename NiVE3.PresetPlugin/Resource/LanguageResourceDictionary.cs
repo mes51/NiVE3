@@ -2027,6 +2027,200 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("Z回転")]
         public const string Simulation_Panorama_RotateZ = nameof(Simulation_Panorama_RotateZ);
 
+        // SphereGrid
+
+        [DefaultValue("スフィアグリッド")]
+        public const string Simulation_SphereGrid_Name = nameof(Simulation_SphereGrid_Name);
+
+        [DefaultValue("等間隔に並べた球状のパーティクルを描画します")]
+        public const string Simulation_SphereGrid_Description = nameof(Simulation_SphereGrid_Description);
+
+        [LanguageKey, DefaultValue("配置")]
+        public const string Simulation_SphereGrid_Arrangment = nameof(Simulation_SphereGrid_Arrangment);
+
+        [LanguageKey, DefaultValue("グリッドのサイズ")]
+        public const string Simulation_SphereGrid_Arrangment_GridSize = nameof(Simulation_SphereGrid_Arrangment_GridSize);
+
+        [LanguageKey, DefaultValue("パーティクルの数")]
+        public const string Simulation_SphereGrid_Arrangment_ParticleCount = nameof(Simulation_SphereGrid_Arrangment_ParticleCount);
+
+        [LanguageKey, DefaultValue("ねじれ")]
+        public const string Simulation_SphereGrid_Arrangment_Twist = nameof(Simulation_SphereGrid_Arrangment_Twist);
+
+        [LanguageKey, DefaultValue("拡散")]
+        public const string Simulation_SphereGrid_Arrangment_Scattering = nameof(Simulation_SphereGrid_Arrangment_Scattering);
+
+        [LanguageKey, DefaultValue("拡散のランダムシード")]
+        public const string Simulation_SphereGrid_Arrangment_ScatteringRandomSeed = nameof(Simulation_SphereGrid_Arrangment_ScatteringRandomSeed);
+
+        [LanguageKey, DefaultValue("パーティクル")]
+        public const string Simulation_SphereGrid_Particle = nameof(Simulation_SphereGrid_Particle);
+
+        [LanguageKey, DefaultValue("パーティクルのサイズ")]
+        public const string Simulation_SphereGrid_Particle_Size = nameof(Simulation_SphereGrid_Particle_Size);
+
+        [LanguageKey, DefaultValue("柔らかさ")]
+        public const string Simulation_SphereGrid_Particle_Softness = nameof(Simulation_SphereGrid_Particle_Softness);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Simulation_SphereGrid_Particle_Color = nameof(Simulation_SphereGrid_Particle_Color);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Simulation_SphereGrid_Particle_Opacity = nameof(Simulation_SphereGrid_Particle_Opacity);
+
+        [LanguageKey, DefaultValue("フラクタルノイズ")]
+        public const string Simulation_SphereGrid_FractalNoise = nameof(Simulation_SphereGrid_FractalNoise);
+
+        [LanguageKey, DefaultValue("複雑度")]
+        public const string Simulation_SphereGrid_FractalNoise_Octave = nameof(Simulation_SphereGrid_FractalNoise_Octave);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Simulation_SphereGrid_FractalNoise_Scale = nameof(Simulation_SphereGrid_FractalNoise_Scale);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Simulation_SphereGrid_FractalNoise_Position = nameof(Simulation_SphereGrid_FractalNoise_Position);
+
+        [LanguageKey, DefaultValue("展開")]
+        public const string Simulation_SphereGrid_FractalNoise_Evolution = nameof(Simulation_SphereGrid_FractalNoise_Evolution);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Simulation_SphereGrid_FractalNoise_RandomSeed = nameof(Simulation_SphereGrid_FractalNoise_RandomSeed);
+
+        [LanguageKey, DefaultValue("サイズへの適用")]
+        public const string Simulation_SphereGrid_FractalNoise_ApplySize = nameof(Simulation_SphereGrid_FractalNoise_ApplySize);
+
+        [LanguageKey, DefaultValue("不透明度への適用")]
+        public const string Simulation_SphereGrid_FractalNoise_ApplyOpacity = nameof(Simulation_SphereGrid_FractalNoise_ApplyOpacity);
+
+        [LanguageKey, DefaultValue("拡散への適用")]
+        public const string Simulation_SphereGrid_FractalNoise_ApplyScattering = nameof(Simulation_SphereGrid_FractalNoise_ApplyScattering);
+
+        [LanguageKey, DefaultValue("ディスプレースメントマップ")]
+        public const string Simulation_SphereGrid_FractalNoise_ApplyDisplacement = nameof(Simulation_SphereGrid_FractalNoise_ApplyDisplacement);
+
+        [LanguageKey, DefaultValue("トランスフォーム")]
+        public const string Simulation_SphereGrid_Transform = nameof(Simulation_SphereGrid_Transform);
+
+        [LanguageKey, DefaultValue("アンカーポイント")]
+        public const string Simulation_SphereGrid_Transform_AnchorPoint = nameof(Simulation_SphereGrid_Transform_AnchorPoint);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Simulation_SphereGrid_Transform_Position = nameof(Simulation_SphereGrid_Transform_Position);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Simulation_SphereGrid_Transform_Scale = nameof(Simulation_SphereGrid_Transform_Scale);
+
+        [LanguageKey, DefaultValue("X回転")]
+        public const string Simulation_SphereGrid_Transform_XAngle = nameof(Simulation_SphereGrid_Transform_XAngle);
+
+        [LanguageKey, DefaultValue("Y回転")]
+        public const string Simulation_SphereGrid_Transform_YAngle = nameof(Simulation_SphereGrid_Transform_YAngle);
+
+        [LanguageKey, DefaultValue("Z回転")]
+        public const string Simulation_SphereGrid_Transform_ZAngle = nameof(Simulation_SphereGrid_Transform_ZAngle);
+
+        [LanguageKey, DefaultValue("カメラ")]
+        public const string Simulation_SphereGrid_Camera = nameof(Simulation_SphereGrid_Camera);
+
+        [LanguageKey, DefaultValue("グラフマップ")]
+        public const string Simulation_SphereGrid_GraphMap = nameof(Simulation_SphereGrid_GraphMap);
+
+        [LanguageKey, DefaultValue("サイズ")]
+        public const string Simulation_SphereGrid_GraphMap_Size = nameof(Simulation_SphereGrid_GraphMap_Size);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Simulation_SphereGrid_GraphMap_Opacity = nameof(Simulation_SphereGrid_GraphMap_Opacity);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Simulation_SphereGrid_GraphMap_Color = nameof(Simulation_SphereGrid_GraphMap_Color);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Simulation_SphereGrid_GraphMap_Color_Color = nameof(Simulation_SphereGrid_GraphMap_Color_Color);
+
+        [LanguageKey, DefaultValue("拡散")]
+        public const string Simulation_SphereGrid_GraphMap_Scattering = nameof(Simulation_SphereGrid_GraphMap_Scattering);
+
+        [LanguageKey, DefaultValue("フラクタルノイズ")]
+        public const string Simulation_SphereGrid_GraphMap_FractalNoise = nameof(Simulation_SphereGrid_GraphMap_FractalNoise);
+
+        [LanguageKey, DefaultValue("グラフ")]
+        public const string Simulation_SphereGrid_GraphMap_Value_Graph = nameof(Simulation_SphereGrid_GraphMap_Value_Graph);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Simulation_SphereGrid_GraphMap_Value_Direction = nameof(Simulation_SphereGrid_GraphMap_Value_Direction);
+
+        [LanguageKey, DefaultValue("マップレイヤー")]
+        public const string Simulation_SphereGrid_LayerMap = nameof(Simulation_SphereGrid_LayerMap);
+
+        [LanguageKey, DefaultValue("ディスプレースメントマップ")]
+        public const string Simulation_SphereGrid_LayerMap_Displacement = nameof(Simulation_SphereGrid_LayerMap_Displacement);
+
+        [LanguageKey, DefaultValue("X軸のチャンネル")]
+        public const string Simulation_SphereGrid_LayerMap_Displacement_XChannel = nameof(Simulation_SphereGrid_LayerMap_Displacement_XChannel);
+
+        [LanguageKey, DefaultValue("Y軸のチャンネル")]
+        public const string Simulation_SphereGrid_LayerMap_Displacement_YChannel = nameof(Simulation_SphereGrid_LayerMap_Displacement_YChannel);
+
+        [LanguageKey, DefaultValue("Z軸のチャンネル")]
+        public const string Simulation_SphereGrid_LayerMap_Displacement_ZChannel = nameof(Simulation_SphereGrid_LayerMap_Displacement_ZChannel);
+
+        [LanguageKey, DefaultValue("移動量")]
+        public const string Simulation_SphereGrid_LayerMap_Displacement_Move = nameof(Simulation_SphereGrid_LayerMap_Displacement_Move);
+
+        [LanguageKey, DefaultValue("レイヤーのカラー")]
+        public const string Simulation_SphereGrid_LayerMap_LayerColor = nameof(Simulation_SphereGrid_LayerMap_LayerColor);
+
+        [LanguageKey, DefaultValue("取得するチャンネル")]
+        public const string Simulation_SphereGrid_LayerMap_LayerColor_Channel = nameof(Simulation_SphereGrid_LayerMap_LayerColor_Channel);
+
+        [LanguageKey, DefaultValue("サイズ")]
+        public const string Simulation_SphereGrid_LayerMap_Size = nameof(Simulation_SphereGrid_LayerMap_Size);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Simulation_SphereGrid_LayerMap_Opacity = nameof(Simulation_SphereGrid_LayerMap_Opacity);
+
+        [LanguageKey, DefaultValue("拡散")]
+        public const string Simulation_SphereGrid_LayerMap_Scattering = nameof(Simulation_SphereGrid_LayerMap_Scattering);
+
+        [LanguageKey, DefaultValue("フラクタルノイズ")]
+        public const string Simulation_SphereGrid_LayerMap_FractalNoise = nameof(Simulation_SphereGrid_LayerMap_FractalNoise);
+
+        [LanguageKey, DefaultValue("レイヤー")]
+        public const string Simulation_SphereGrid_LayerMap_Value_Layer = nameof(Simulation_SphereGrid_LayerMap_Value_Layer);
+
+        [LanguageKey, DefaultValue("参照するレイヤー時間を指定する")]
+        public const string Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime = nameof(Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime);
+
+        [LanguageKey, DefaultValue("参照するレイヤー時間")]
+        public const string Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime = nameof(Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime);
+
+        [LanguageKey, DefaultValue("マップ方向")]
+        public const string Simulation_SphereGrid_LayerMap_Value_MapDirection = nameof(Simulation_SphereGrid_LayerMap_Value_MapDirection);
+
+        [LanguageKey, DefaultValue("チャンネル")]
+        public const string Simulation_SphereGrid_LayerMap_Value_Channel = nameof(Simulation_SphereGrid_LayerMap_Value_Channel);
+
+        [LanguageKey, DefaultValue("適用量")]
+        public const string Simulation_SphereGrid_LayerMap_Value_Apply = nameof(Simulation_SphereGrid_LayerMap_Value_Apply);
+
+        [LanguageKey, DefaultValue("レンダリング")]
+        public const string Simulation_SphereGrid_Rendering = nameof(Simulation_SphereGrid_Rendering);
+
+        [LanguageKey, DefaultValue("アンチエイリアス")]
+        public const string Simulation_SphereGrid_Rendering_AntiAlias = nameof(Simulation_SphereGrid_Rendering_AntiAlias);
+
+        [LanguageKey, DefaultValue("パーティクル同士のブレンドモード")]
+        public const string Simulation_SphereGrid_Rendering_ParticleBlendMode = nameof(Simulation_SphereGrid_Rendering_ParticleBlendMode);
+
+        [LanguageKey, DefaultValue("パーティクルのみをレンダリング")]
+        public const string Simulation_SphereGrid_Rendering_ParticleOnly = nameof(Simulation_SphereGrid_Rendering_ParticleOnly);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Simulation_SphereGrid_Rendering_BlendMode = nameof(Simulation_SphereGrid_Rendering_BlendMode);
+
+        [LanguageKey, DefaultValue("合成順")]
+        public const string Simulation_SphereGrid_Rendering_CompositeOrder = nameof(Simulation_SphereGrid_Rendering_CompositeOrder);
+
         // ColorKey
 
         [DefaultValue("カラーキー")]
@@ -2879,6 +3073,42 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("ミラー")]
         public const string SourcePhaseLoopModeType_Mirror = nameof(SourcePhaseLoopModeType_Mirror);
+
+        [DefaultValue("なし")]
+        public const string SphereGridGraphMapDirectionType_None = nameof(SphereGridGraphMapDirectionType_None);
+
+        [DefaultValue("X")]
+        public const string SphereGridGraphMapDirectionType_X = nameof(SphereGridGraphMapDirectionType_X);
+
+        [DefaultValue("Y")]
+        public const string SphereGridGraphMapDirectionType_Y = nameof(SphereGridGraphMapDirectionType_Y);
+
+        [DefaultValue("Z")]
+        public const string SphereGridGraphMapDirectionType_Z = nameof(SphereGridGraphMapDirectionType_Z);
+
+        [DefaultValue("なし")]
+        public const string SphereGridLayerMapDirectionType_None = nameof(SphereGridLayerMapDirectionType_None);
+
+        [DefaultValue("XY")]
+        public const string SphereGridLayerMapDirectionType_XY = nameof(SphereGridLayerMapDirectionType_XY);
+
+        [DefaultValue("XZ")]
+        public const string SphereGridLayerMapDirectionType_XZ = nameof(SphereGridLayerMapDirectionType_XZ);
+
+        [DefaultValue("YZ")]
+        public const string SphereGridLayerMapDirectionType_YZ = nameof(SphereGridLayerMapDirectionType_YZ);
+
+        [DefaultValue("なし")]
+        public const string SphereGridLayerMapLayerColorType_None = nameof(SphereGridLayerMapLayerColorType_None);
+
+        [DefaultValue("RGB")]
+        public const string SphereGridLayerMapLayerColorType_RGB = nameof(SphereGridLayerMapLayerColorType_RGB);
+
+        [DefaultValue("ARGB")]
+        public const string SphereGridLayerMapLayerColorType_ARGB = nameof(SphereGridLayerMapLayerColorType_ARGB);
+
+        [DefaultValue("A")]
+        public const string SphereGridLayerMapLayerColorType_A = nameof(SphereGridLayerMapLayerColorType_A);
 
         // unit
 
