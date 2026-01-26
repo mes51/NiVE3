@@ -467,7 +467,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
     record PreProcessedSphere(Vector256<double> Position, Vector4 Color, double Radius, float Softness);
 
-    file record RasterizableSphere(Vector3 Position, Vector4 Color, float Radius, float Softness)
+    file record RasterizableSphere(Vector3 Position, Vector4 Color, float Radius, float Softness) : IComparable<RasterizableSphere>
     {
         public float Top { get; } = Position.Y - Radius;
 
@@ -486,6 +486,12 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         public float InvertedRadius { get; } = 1.0F / Radius;
 
         public float InvertedSoftness { get; } = Softness > 0.0F ? 1.0F / Softness : float.MaxValue;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(RasterizableSphere? other)
+        {
+            return Z.CompareTo(other?.Z ?? float.MinValue);
+        }
     }
 
     file readonly record struct RasterizedPixel(Vector4 Color, float Depth) : IComparable<RasterizedPixel>
@@ -563,53 +569,38 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var length = (pos - top).Length();
                 var dv = (pos + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(RenderSize * 0.5, RenderSize * 0.5, 1.0, 1.0);
                 var transformedRadius = length * RenderSize;
-                if (length > 0.0 && dv.GetElement(0) + transformedRadius >= 0.0 && dv.GetElement(0) - transformedRadius <= RenderSize && dv.GetElement(1) + transformedRadius >= 0.0 && dv.GetElement(1) - transformedRadius <= RenderSize)
+                
+                if (length > 0.0 && 
+                    dv.GetElement(0) + transformedRadius - OffsetX >= roi.Left &&
+                    dv.GetElement(0) - transformedRadius - OffsetX <= roi.Right &&
+                    dv.GetElement(1) + transformedRadius - OffsetY >= roi.Top &&
+                    dv.GetElement(1) - transformedRadius - OffsetY <= roi.Bottom)
                 {
                     rasterizableSpheres[rasterizableCount] = new RasterizableSphere(new Vector3((float)dv.GetElement(0), (float)dv.GetElement(1), (float)dv.GetElement(2)), s.Color, (float)transformedRadius, s.Softness);
                     rasterizableCount++;
                 }
             }
 
+            if (rasterizableCount < 1)
+            {
+                return;
+            }
+
             var imageWidth = Canvas.Width;
             var imageData = Canvas.Data;
-            Parallel.For(roi.Top, roi.Bottom, y =>
+            var rasterizableSphereSpan = rasterizableSpheres.AsSpan(0, rasterizableCount);
+            rasterizableSphereSpan.Sort();
+            for (var i = 0; i < rasterizableSphereSpan.Length; i++)
             {
-                var sy = y + OffsetY;
-                var targetSpheres = ArrayPool<RasterizableSphere>.Shared.Rent(rasterizableCount); // new RasterizableSphere[rasterizableCount];
-                int targetCount = 0;
-                for (var i = 0; i < rasterizableCount; i++)
+                var s = rasterizableSphereSpan[i];
+                Parallel.For(Math.Max(roi.Top, (int)MathF.Floor(s.Top - OffsetY)), Math.Min(roi.Bottom, (int)MathF.Ceiling(s.Bottom - OffsetY)), y =>
                 {
-                    var s = rasterizableSpheres[i];
-                    if (sy >= s.Top && sy <= s.Bottom)
+                    var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
+                    var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
+                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                    for (var x = bx; x < ex; x++)
                     {
-                        targetSpheres[targetCount] = s;
-                        targetCount++;
-                    }
-                }
-                if (targetCount < 1)
-                {
-                    ArrayPool<RasterizableSphere>.Shared.Return(targetSpheres);
-                    return;
-                }
-
-                var pixels = ArrayPool<RasterizedPixel>.Shared.Rent(targetCount);
-                var targetSphereSpan = targetSpheres.AsSpan(0, targetCount);
-                var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-
-                for (var x = roi.Left; x < roi.Right; x++)
-                {
-                    var count = 0;
-                    var sx = x + OffsetX;
-                    var sp = new Vector2(sx, sy);
-                    for (var i = 0; i < targetSphereSpan.Length; i++)
-                    {
-                        var s = targetSphereSpan[i];
-                        if (sx < s.Left || sx > s.Right)
-                        {
-                            continue;
-                        }
-
-                        var lengthSquared = (sp - s.ScreenPosition).LengthSquared();
+                        var lengthSquared = (new Vector2(x + OffsetX, y + OffsetY) - s.ScreenPosition).LengthSquared();
                         var length = MathF.Sqrt(lengthSquared);
                         if (s.Radius < length)
                         {
@@ -621,26 +612,10 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         {
                             color.W *= (1.0F - length * s.InvertedRadius) * s.InvertedSoftness;
                         }
-                        pixels[count] = new RasterizedPixel(color, s.Z - MathF.Sqrt(s.RadiusSquared - lengthSquared));
-                        count++;
+                        imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], color);
                     }
-
-                    if (count < 1)
-                    {
-                        continue;
-                    }
-
-                    var pixelSpan = pixels.AsSpan(0, count);
-                    pixelSpan.Sort();
-                    for (var i = pixelSpan.Length - 1; i > -1; i--)
-                    {
-                        imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], pixelSpan[i].Color);
-                    }
-                }
-
-                ArrayPool<RasterizedPixel>.Shared.Return(pixels);
-                ArrayPool<RasterizableSphere>.Shared.Return(targetSpheres);
-            });
+                });
+            }
 
             ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
         }
