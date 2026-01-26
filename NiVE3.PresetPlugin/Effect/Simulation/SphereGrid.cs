@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Text;
+using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
 using NiVE3.Numerics;
@@ -19,6 +20,7 @@ using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Effect.Util.General;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
+using NiVE3.PresetPlugin.Internal.ComputeShader;
 using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
@@ -388,24 +390,49 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
             var mvt = transformMatrix * viewMatrix * offsetMatrix;
 
-            var managedImage = image.ToManaged();
-            using var canvas = new NManagedImage(managedImage.Width, managedImage.Height);
-            var renderer = new SphereRendererCpu(mvt, fov, canvas);
-            for (var i = 0; i < spheres.Length; i++)
+            if (useGpu && AcceleratorObject != null)
             {
-                var s = spheres[i];
-                var radius = s.Radius * s.InfluenceRadius;
-                if (radius <= 0.0)
+                var device = AcceleratorObject.CurrentDevice;
+                var gpuImage = image.ToGpu(device);
+                using var canvas = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
+                var renderer = new SphereRendererGpu(mvt, fov, device, canvas);
+                for (var i = 0; i < spheres.Length; i++)
                 {
-                    continue;
+                    var s = spheres[i];
+                    var radius = s.Radius * s.InfluenceRadius;
+                    if (radius <= 0.0)
+                    {
+                        continue;
+                    }
+                    renderer.AddSphere(s.Position, s.Color, s.Radius, s.Softness);
                 }
-                renderer.AddSphere(s.Position, s.Color, s.Radius, s.Softness);
+
+                renderer.Render(roi, BlendMode.Add);
+                ImageBlendProcessor.SameSizeNoSkipTransparentFrontGpu(device, gpuImage, canvas, roi, BlendMode.Replace);
+
+                return gpuImage;
             }
+            else
+            {
+                var managedImage = image.ToManaged();
+                using var canvas = new NManagedImage(managedImage.Width, managedImage.Height);
+                var renderer = new SphereRendererCpu(mvt, fov, canvas);
+                for (var i = 0; i < spheres.Length; i++)
+                {
+                    var s = spheres[i];
+                    var radius = s.Radius * s.InfluenceRadius;
+                    if (radius <= 0.0)
+                    {
+                        continue;
+                    }
+                    renderer.AddSphere(s.Position, s.Color, s.Radius, s.Softness);
+                }
 
-            renderer.Render(roi, BlendMode.Add);
-            ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, canvas, roi, BlendMode.Replace);
+                renderer.Render(roi, BlendMode.Add);
+                ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, canvas, roi, BlendMode.Replace);
 
-            return managedImage;
+                return managedImage;
+            }
         }
 
         public float[] Process(float[] audio, Time startTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)
@@ -494,15 +521,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         }
     }
 
-    file readonly record struct RasterizedPixel(Vector4 Color, float Depth) : IComparable<RasterizedPixel>
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CompareTo(RasterizedPixel other)
-        {
-            return Depth.CompareTo(other.Depth);
-        }
-    }
-
     file abstract class SphereRendererBase
     {
         protected Matrix4x4d ModelViewMatrix { get; }
@@ -515,6 +533,10 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         protected double MaxZ { get; private set; } = double.MinValue;
 
+        protected float OffsetX { get; }
+
+        protected float OffsetY { get; }
+
         protected int RenderSize { get; }
 
         public SphereRendererBase(in Matrix4x4d modelViewMatrix, double fov, int canvasWidth, int canvasHeight)
@@ -522,7 +544,11 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             ModelViewMatrix = modelViewMatrix;
             FieldOfView = fov;
             RenderSize = Math.Max(canvasWidth, canvasHeight);
+            OffsetX = (RenderSize - canvasWidth) * 0.5F;
+            OffsetY = (RenderSize - canvasHeight) * 0.5F;
         }
+
+        public abstract void Render(ROI roi, BlendMode blendMode);
 
         public void AddSphere(in Vector3d position, in Vector4 color, double radius, float softness)
         {
@@ -537,25 +563,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             MinZ = Math.Min(MinZ, mvp.GetElement(2));
             MaxZ = Math.Max(MaxZ, mvp.GetElement(2));
         }
-    }
 
-    file class SphereRendererCpu : SphereRendererBase
-    {
-        NManagedImage Canvas { get; }
-
-        float OffsetX { get; }
-
-        float OffsetY { get; }
-
-        public SphereRendererCpu(in Matrix4x4d modelViewMatrix, double fov, NManagedImage canvas) : base(modelViewMatrix, fov, canvas.Width, canvas.Height)
-        {
-            Canvas = canvas;
-            var size = Math.Max(canvas.Width, canvas.Height);
-            OffsetX = (size - canvas.Width) * 0.5F;
-            OffsetY = (size - canvas.Height) * 0.5F;
-        }
-
-        public void Render(ROI roi, BlendMode blendMode)
+        /// <summary>
+        /// 要ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
+        /// </summary>
+        /// <param name="roi"></param>
+        /// <returns></returns>
+        protected (int rasterizableCount, RasterizableSphere[] rasterizableSpheres) GenerateRasterizableSpheres(ROI roi)
         {
             var rasterizableSpheres = ArrayPool<RasterizableSphere>.Shared.Rent(Spheres.Count);
             var rasterizableCount = 0;
@@ -569,8 +583,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var length = (pos - top).Length();
                 var dv = (pos + Vector256.Create(1.0, 1.0, 0.0, 0.0)) * Vector256.Create(RenderSize * 0.5, RenderSize * 0.5, 1.0, 1.0);
                 var transformedRadius = length * RenderSize;
-                
-                if (length > 0.0 && 
+
+                if (length > 0.0 &&
                     dv.GetElement(0) + transformedRadius - OffsetX >= roi.Left &&
                     dv.GetElement(0) - transformedRadius - OffsetX <= roi.Right &&
                     dv.GetElement(1) + transformedRadius - OffsetY >= roi.Top &&
@@ -583,25 +597,54 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             if (rasterizableCount < 1)
             {
+                ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
+                return (0, []);
+            }
+
+            rasterizableSpheres.AsSpan(0, rasterizableCount).Sort();
+
+            return (rasterizableCount, rasterizableSpheres);
+        }
+    }
+
+    file class SphereRendererCpu : SphereRendererBase
+    {
+        NManagedImage Canvas { get; }
+
+        public SphereRendererCpu(in Matrix4x4d modelViewMatrix, double fov, NManagedImage canvas) : base(modelViewMatrix, fov, canvas.Width, canvas.Height)
+        {
+            Canvas = canvas;
+        }
+
+        public override void Render(ROI roi, BlendMode blendMode)
+        {
+            var (rasterizableCount, rasterizableSpheres) = GenerateRasterizableSpheres(roi);
+
+            if (rasterizableCount < 1)
+            {
                 return;
             }
 
             var imageWidth = Canvas.Width;
             var imageData = Canvas.Data;
             var rasterizableSphereSpan = rasterizableSpheres.AsSpan(0, rasterizableCount);
-            rasterizableSphereSpan.Sort();
             for (var i = 0; i < rasterizableSphereSpan.Length; i++)
             {
                 var s = rasterizableSphereSpan[i];
-                Parallel.For(Math.Max(roi.Top, (int)MathF.Floor(s.Top - OffsetY)), Math.Min(roi.Bottom, (int)MathF.Ceiling(s.Bottom - OffsetY)), y =>
+                var top = Math.Max(roi.Top, (int)MathF.Floor(s.Top - OffsetY));
+                var bottom = Math.Min(roi.Bottom, (int)MathF.Ceiling(s.Bottom - OffsetY));
+                if (top >= bottom)
+                {
+                    continue;
+                }
+                Parallel.For(top, bottom, y =>
                 {
                     var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
                     var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
                     var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
                     for (var x = bx; x < ex; x++)
                     {
-                        var lengthSquared = (new Vector2(x + OffsetX, y + OffsetY) - s.ScreenPosition).LengthSquared();
-                        var length = MathF.Sqrt(lengthSquared);
+                        var length = Vector2.Distance(new Vector2(x + OffsetX, y + OffsetY), s.ScreenPosition);
                         if (s.Radius < length)
                         {
                             continue;
@@ -618,6 +661,81 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
+        }
+    }
+
+    file class SphereRendererGpu : SphereRendererBase
+    {
+        GraphicsDevice Device { get; }
+
+        NGPUImage Canvas { get; }
+
+        public SphereRendererGpu(in Matrix4x4d modelViewMatrix, double fov, GraphicsDevice device, NGPUImage canvas) : base(modelViewMatrix, fov, canvas.Width, canvas.Height)
+        {
+            Device = device;
+            Canvas = canvas;
+        }
+
+        public override void Render(ROI roi, BlendMode blendMode)
+        {
+            var (rasterizableCount, rasterizableSpheres) = GenerateRasterizableSpheres(roi);
+
+            if (rasterizableCount < 1)
+            {
+                return;
+            }
+
+            using var context = Device.CreateComputeContext();
+            var imageData = Canvas.Data;
+            var rasterizableSphereSpan = rasterizableSpheres.AsSpan(0, rasterizableCount);
+            var intBlendMode = (int)blendMode;
+            for (var i = 0; i < rasterizableSphereSpan.Length; i++)
+            {
+                var s = rasterizableSphereSpan[i];
+                var top = Math.Max(roi.Top, (int)MathF.Floor(s.Top - OffsetY));
+                var bottom = Math.Min(roi.Bottom, (int)MathF.Ceiling(s.Bottom - OffsetY));
+                if (top >= bottom)
+                {
+                    continue;
+                }
+
+                var left = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
+                var right = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
+                if (left >= right)
+                {
+                    continue;
+                }
+
+                context.For(right - left, bottom - top, new SphereGridRenderProcess(imageData, Canvas.Width, OffsetX, OffsetY, s.Radius, s.ScreenPosition, s.Color, s.InvertedSoftness, intBlendMode, left, top));
+                context.Barrier(imageData);
+            }
+
+            ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct SphereGridRenderProcess(ReadWriteBuffer<Float4> image, int width, float offsetX, float offsetY, float radius, Float2 screenPosition, Float4 color, float invertedSoftness, int blendMode, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var x = ThreadIds.X + startX;
+            var y = ThreadIds.Y + startY;
+
+            var length = Hlsl.Distance(new Float2(x + offsetX, y + offsetY), screenPosition);
+            if (radius < length)
+            {
+                return;
+            }
+
+            var resultColor = color;
+            if (invertedSoftness < float.MaxValue)
+            {
+                resultColor.W *= (1.0F - length * (1.0F / radius)) * invertedSoftness;
+            }
+            var pos = y * width + x;
+            image[pos] = BlendMethods.Process(blendMode, image[pos], resultColor);
         }
     }
 }
