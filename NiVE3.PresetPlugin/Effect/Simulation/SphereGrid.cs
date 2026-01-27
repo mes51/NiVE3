@@ -192,8 +192,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     new DoubleProperty(PropertyParticleSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Particle_Size, 5.0, 0.0, double.MaxValue, digit: 2),
                     new DoubleProperty(PropertyParticleSoftnessId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Particle_Softness, 50.0, 0.0, 100.0, digit: 2),
                     new ColorProperty(PropertyParticleColorId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Particle_Color, colorDialogTitle, dialogOk, dialogCancel, Vector4.One),
-                    new DoubleProperty(PropertyParticleOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Particle_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                    new EnumProperty(PropertyRenderingParticleBlendModeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Rendering_ParticleBlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Add, selectBoxWidth: 90.0)
+                    new DoubleProperty(PropertyParticleOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Particle_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                 ]),
                 new PropertyGroup(PropertyFractalNoiseGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise,
                 [
@@ -451,6 +450,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             var softness = (float)(particleGroup.GetValue(PropertyParticleSoftnessId, layerTime, 0.0) * 0.01);
             var color = particleGroup.GetValue(PropertyParticleColorId, layerTime, Vector4.Zero);
+            var opacity = (float)(particleGroup.GetValue(PropertyParticleOpacityId, layerTime, 0.0) * 0.01);
             var gridSize = arrangementGroup.GetValue(PropertyArrangementGridSizeId, layerTime, Vector3d.Zero);
             var twist = arrangementGroup.GetValue(PropertyArrangementTwistId, layerTime, Vector3d.Zero);
             var gridCenter = new Vector3d(
@@ -481,7 +481,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     {
                         var matrix = Matrix4x4d.AffineTransform(gridSizeDiff * new Vector3d(x, y, z) - gridCenter, Vector3d.One, twistOffset + twistRate * new Vector3d(x, y, z), 0.0, 0.0, 0.0, screenCenter);
                         var pos = (Vector3d)matrix.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0));
-                        spheres[p] = new Sphere(pos, Vector4.One, particleSize, softness);
+                        spheres[p] = new Sphere(pos, color * new Vector4(1.0F, 1.0F, 1.0F, opacity), particleSize, softness);
                     }
                 }
             }
