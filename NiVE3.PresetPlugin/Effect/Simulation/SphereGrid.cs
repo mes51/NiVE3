@@ -700,27 +700,46 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 {
                     continue;
                 }
-                Parallel.For(top, bottom, y =>
+                if (s.InvertedSoftness < float.MaxValue)
                 {
-                    var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
-                    var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
-                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-                    for (var x = bx; x < ex; x++)
+                    Parallel.For(top, bottom, y =>
                     {
-                        var length = Vector2.Distance(new Vector2(x + OffsetX, y + OffsetY), s.ScreenPosition);
-                        if (s.Radius < length)
+                        var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
+                        var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
+                        var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                        for (var x = bx; x < ex; x++)
                         {
-                            continue;
-                        }
+                            var length = Vector2.Distance(new Vector2(x + OffsetX, y + OffsetY), s.ScreenPosition);
+                            if (s.Radius < length)
+                            {
+                                continue;
+                            }
 
-                        var color = s.Color;
-                        if (s.InvertedSoftness < float.MaxValue)
-                        {
-                            color.W *= (1.0F - length * s.InvertedRadius) * s.InvertedSoftness;
+                            var color = s.Color;
+                            color.W *= Math.Clamp((1.0F - length * s.InvertedRadius) * s.InvertedSoftness, 0.0F, 1.0F);
+                            imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], color);
                         }
-                        imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], color);
-                    }
-                });
+                    });
+                }
+                else
+                {
+                    Parallel.For(top, bottom, y =>
+                    {
+                        var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
+                        var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
+                        var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                        for (var x = bx; x < ex; x++)
+                        {
+                            var length = Vector2.Distance(new Vector2(x + OffsetX, y + OffsetY), s.ScreenPosition);
+                            if (s.Radius < length)
+                            {
+                                continue;
+                            }
+
+                            imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], s.Color);
+                        }
+                    });
+                }
             }
 
             ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
@@ -751,17 +770,17 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 {
                     continue;
                 }
-                Parallel.For(top, bottom, y =>
+                if (s.InvertedSoftness < float.MaxValue)
                 {
-                    var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
-                    var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
-                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-                    for (var x = bx; x < ex; x++)
+                    Parallel.For(top, bottom, y =>
                     {
-                        var alpha = 0.0F;
-                        var sp = new Vector2(x + OffsetX, y + OffsetY);
-                        if (s.InvertedSoftness < float.MaxValue)
+                        var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
+                        var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
+                        var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                        for (var x = bx; x < ex; x++)
                         {
+                            var alpha = 0.0F;
+                            var sp = new Vector2(x + OffsetX, y + OffsetY);
                             for (var fy = 0; fy < SuperSamplingCount; fy++)
                             {
                                 for (var fx = 0; fx < SuperSamplingCount; fx++)
@@ -772,12 +791,27 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                                         continue;
                                     }
 
-                                    alpha += (1.0F - length * s.InvertedRadius) * s.InvertedSoftness;
+                                    alpha += Math.Clamp((1.0F - length * s.InvertedRadius) * s.InvertedSoftness, 0.0F, 1.0F);
                                 }
                             }
+
+                            var color = s.Color;
+                            color.W *= alpha / TotalSuperSamplingCount;
+                            imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], color);
                         }
-                        else
+                    });
+                }
+                else
+                {
+                    Parallel.For(top, bottom, y =>
+                    {
+                        var bx = Math.Max(roi.Left, (int)MathF.Floor(s.Left - OffsetX));
+                        var ex = Math.Min(roi.Right, (int)MathF.Ceiling(s.Right - OffsetX));
+                        var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                        for (var x = bx; x < ex; x++)
                         {
+                            var alpha = 0.0F;
+                            var sp = new Vector2(x + OffsetX, y + OffsetY);
                             for (var fy = 0; fy < SuperSamplingCount; fy++)
                             {
                                 for (var fx = 0; fx < SuperSamplingCount; fx++)
@@ -791,13 +825,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                                     alpha += 1.0F;
                                 }
                             }
-                        }
 
-                        var color = s.Color;
-                        color.W *= alpha / TotalSuperSamplingCount;
-                        imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], color);
-                    }
-                });
+                            var color = s.Color;
+                            color.W *= alpha / TotalSuperSamplingCount;
+                            imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], color);
+                        }
+                    });
+                }
             }
 
             ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
@@ -943,7 +977,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var resultColor = color;
             if (invertedSoftness < float.MaxValue)
             {
-                resultColor.W *= (1.0F - length * (1.0F / radius)) * invertedSoftness;
+                resultColor.W *= Hlsl.Clamp((1.0F - length * (1.0F / radius)) * invertedSoftness, 0.0F, 1.0F);
             }
             var pos = y * width + x;
             image[pos] = BlendMethods.Process(blendMode, image[pos], resultColor);
@@ -1015,7 +1049,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         continue;
                     }
 
-                    alpha += (1.0F - length * (1.0F / radius)) * invertedSoftness;
+                    alpha += Hlsl.Clamp((1.0F - length * (1.0F / radius)) * invertedSoftness, 0.0F, 1.0F);
                 }
             }
 
