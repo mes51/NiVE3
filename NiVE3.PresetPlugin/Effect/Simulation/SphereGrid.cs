@@ -25,6 +25,7 @@ using NiVE3.PresetPlugin.Internal.Drawing;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
+using NiVE3.Shared.Util;
 
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
@@ -181,9 +182,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 new PropertyGroup(PropertyArrangmentGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment,
                 [
                     new Vector3dProperty(PropertyArrangementGridSizeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_GridSize, new Vector3d(300.0, 300.0, 300.0), Vector3d.Zero, new Vector3d(double.MaxValue), digit: 2, is3D: true),
-                    new Vector3dProperty(PropertyArrangementParticleCountId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_ParticleCount, new Vector3d(25.0, 25.0, 3.0), digit: 0, is3D: true),
+                    new Vector3dProperty(PropertyArrangementParticleCountId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_ParticleCount, new Vector3d(25.0, 25.0, 3.0), Vector3d.Zero, new Vector3d(int.MaxValue), digit: 0, is3D: true),
                     new Vector3dProperty(PropertyArrangementTwistId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_Twist, Vector3d.Zero, digit: 2, is3D: true, separator: ",", unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Angle),
-                    new DoubleProperty(PropertyArrangementScatteringId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_Scattering, 0.0, 0.0, double.MaxValue, digit: 2),
+                    new Vector3dProperty(PropertyArrangementScatteringId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_Scattering, Vector3d.Zero, Vector3d.Zero, new Vector3d(double.MaxValue), digit: 2, is3D: true),
                     new DoubleProperty(PropertyArrangementScatteringRandomSeedId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Arrangment_ScatteringRandomSeed, 0, int.MinValue, int.MaxValue, digit: 0)
                 ]),
                 new PropertyGroup(PropertyParticleGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Particle,
@@ -338,40 +339,27 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var layerMap = properties.First(p => p.Id == PropertyLayerMapId).GetChildren() ?? [];
             var renderGroup = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
 
-            var particleSize = particleGroup.GetValue(PropertyParticleSizeId, layerTime, 0.0) * 0.5;
-            var particleCount = arrangementGroup.GetValue(PropertyArrangementParticleCountId, layerTime, Vector3d.Zero);
-            var particleCountX = (int)particleCount.X;
-            var particleCountY = (int)particleCount.Y;
-            var particleCountZ = (int)particleCount.Z;
-            if (particleCountX < 1 || particleCountY < 0 || particleCountZ < 0 || particleSize <= 0.0)
+            var spheres = GenerateSpheres(arrangementGroup, particleGroup, layerTime, image.Width, image.Height);
+            if (spheres.Length < 1)
             {
-                return image;
-            }
-
-            var softness = (float)(particleGroup.GetValue(PropertyParticleSoftnessId, layerTime, 0.0) * 0.01);
-            var color = particleGroup.GetValue(PropertyParticleColorId, layerTime, Vector4.Zero);
-            var gridSize = arrangementGroup.GetValue(PropertyArrangementGridSizeId, layerTime, Vector3d.Zero);
-            var gridCenter = new Vector3d(
-                particleCountX > 1 ? gridSize.X : 0.0,
-                particleCountY > 1 ? gridSize.Y : 0.0,
-                particleCountZ > 1 ? gridSize.Z : 0.0
-            ) * 0.5;
-            var sphereOffset = new Vector3d(image.Width, image.Height, 0.0) * 0.5 - gridCenter;
-
-            var gridSizeDiff = new Vector3d(
-                particleCountX > 1 ? gridSize.X / (particleCountX - 1) : 0.0,
-                particleCountY > 1 ? gridSize.Y / (particleCountY - 1) : 0.0,
-                particleCountZ > 1 ? gridSize.Z / (particleCountZ - 1) : 0.0
-            );
-            var spheres = new Sphere[particleCountX * particleCountY * particleCountZ];
-            for (int z = 0, p = 0; z < particleCountZ; z++)
-            {
-                for (var y = 0; y < particleCountY; y++)
+                if (renderGroup.GetValue(PropertyRenderingParticleOnlyId, layerTime, false))
                 {
-                    for (var x = 0; x < particleCountX; x++, p++)
+                    if (useGpu && AcceleratorObject != null)
                     {
-                        spheres[p] = new Sphere(gridSizeDiff * new Vector3d(x, y, z) + sphereOffset, Vector4.One, particleSize, softness);
+                        var gpuImage = image.ToGpu(AcceleratorObject.CurrentDevice);
+                        ImageClearProcessor.ClearGpu(AcceleratorObject.CurrentDevice, gpuImage, roi);
+                        return gpuImage;
                     }
+                    else
+                    {
+                        var managedImage = image.ToManaged();
+                        ImageClearProcessor.ClearCpu(managedImage, roi);
+                        return managedImage;
+                    }
+                }
+                else
+                {
+                    return image;
                 }
             }
 
@@ -390,62 +378,53 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var offsetMatrix = Matrix4x4d.CreateTranslate(offsetX, offsetY, 0.0);
             var mvt = transformMatrix * viewMatrix * offsetMatrix;
 
+            NImage canvas;
+            SphereRendererBase renderer;
+            if (useGpu && AcceleratorObject != null)
+            {
+                var device = AcceleratorObject.CurrentDevice;
+                canvas = new NGPUImage(image.Width, image.Height, device);
+                renderer = new SphereRendererGpu(mvt, fov, device, (NGPUImage)canvas);
+            }
+            else
+            {
+                canvas = new NManagedImage(image.Width, image.Height);
+                renderer = new SphereRendererCpu(mvt, fov, (NManagedImage)canvas);
+            }
+
+            for (var i = 0; i < spheres.Length; i++)
+            {
+                var s = spheres[i];
+                var radius = s.Radius * s.InfluenceRadius;
+                if (radius <= 0.0)
+                {
+                    continue;
+                }
+                renderer.AddSphere(s.Position + s.ScatteringPosition * s.InfluenceScattering, s.Color, s.Radius, s.Softness);
+            }
+
             var antiAlias = renderGroup.GetValue(PropertyRenderingAntiAliasId, layerTime, false);
+            if (antiAlias)
+            {
+                renderer.RenderAntiAlias(roi, BlendMode.Add);
+            }
+            else
+            {
+                renderer.Render(roi, BlendMode.Add);
+            }
+
             if (useGpu && AcceleratorObject != null)
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                using var canvas = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
-                var renderer = new SphereRendererGpu(mvt, fov, device, canvas);
-                for (var i = 0; i < spheres.Length; i++)
-                {
-                    var s = spheres[i];
-                    var radius = s.Radius * s.InfluenceRadius;
-                    if (radius <= 0.0)
-                    {
-                        continue;
-                    }
-                    renderer.AddSphere(s.Position, s.Color, s.Radius, s.Softness);
-                }
-
-
-                if (antiAlias)
-                {
-                    renderer.RenderAntiAlias(roi, BlendMode.Add);
-                }
-                else
-                {
-                    renderer.Render(roi, BlendMode.Add);
-                }
-                ImageBlendProcessor.SameSizeNoSkipTransparentFrontGpu(device, gpuImage, canvas, roi, BlendMode.Replace);
+                ImageBlendProcessor.SameSizeNoSkipTransparentFrontGpu(device, gpuImage, (NGPUImage)canvas, roi, BlendMode.Replace);
 
                 return gpuImage;
             }
             else
             {
                 var managedImage = image.ToManaged();
-                using var canvas = new NManagedImage(managedImage.Width, managedImage.Height);
-                var renderer = new SphereRendererCpu(mvt, fov, canvas);
-                for (var i = 0; i < spheres.Length; i++)
-                {
-                    var s = spheres[i];
-                    var radius = s.Radius * s.InfluenceRadius;
-                    if (radius <= 0.0)
-                    {
-                        continue;
-                    }
-                    renderer.AddSphere(s.Position, s.Color, s.Radius, s.Softness);
-                }
-
-                if (antiAlias)
-                {
-                    renderer.RenderAntiAlias(roi, BlendMode.Add);
-                }
-                else
-                {
-                    renderer.Render(roi, BlendMode.Add);
-                }
-                ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, canvas, roi, BlendMode.Replace);
+                ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, (NManagedImage)canvas, roi, BlendMode.Replace);
 
                 return managedImage;
             }
@@ -457,6 +436,70 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         }
 
         public void Dispose() { }
+
+        static Sphere[] GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, in Time layerTime, int imageWidth, int imageHeight)
+        {
+            var particleSize = particleGroup.GetValue(PropertyParticleSizeId, layerTime, 0.0) * 0.5;
+            var particleCount = arrangementGroup.GetValue(PropertyArrangementParticleCountId, layerTime, Vector3d.Zero);
+            var particleCountX = (int)particleCount.X;
+            var particleCountY = (int)particleCount.Y;
+            var particleCountZ = (int)particleCount.Z;
+            if (particleCountX < 1 || particleCountY < 0 || particleCountZ < 0 || particleSize <= 0.0)
+            {
+                return [];
+            }
+
+            var softness = (float)(particleGroup.GetValue(PropertyParticleSoftnessId, layerTime, 0.0) * 0.01);
+            var color = particleGroup.GetValue(PropertyParticleColorId, layerTime, Vector4.Zero);
+            var gridSize = arrangementGroup.GetValue(PropertyArrangementGridSizeId, layerTime, Vector3d.Zero);
+            var twist = arrangementGroup.GetValue(PropertyArrangementTwistId, layerTime, Vector3d.Zero);
+            var gridCenter = new Vector3d(
+                particleCountX > 1 ? gridSize.X : 0.0,
+                particleCountY > 1 ? gridSize.Y : 0.0,
+                particleCountZ > 1 ? gridSize.Z : 0.0
+            ) * 0.5;
+            var screenCenter = new Vector3d(imageWidth, imageHeight, 0.0) * 0.5;
+            var sphereOffset = screenCenter - gridCenter;
+            var twistRate = new Vector3d(
+                particleCountX > 1 ? twist.X / (particleCountX - 1) : 0.0,
+                particleCountY > 1 ? twist.Y / (particleCountY - 1) : 0.0,
+                particleCountZ > 1 ? twist.Z / (particleCountZ - 1) : 0.0
+            );
+            var twistOffset = twistRate * new Vector3d(particleCountX, particleCountY, particleCountZ) * 0.5 - twist;
+
+            var gridSizeDiff = new Vector3d(
+                particleCountX > 1 ? gridSize.X / (particleCountX - 1) : 0.0,
+                particleCountY > 1 ? gridSize.Y / (particleCountY - 1) : 0.0,
+                particleCountZ > 1 ? gridSize.Z / (particleCountZ - 1) : 0.0
+            );
+            var spheres = new Sphere[particleCountX * particleCountY * particleCountZ];
+            for (int z = 0, p = 0; z < particleCountZ; z++)
+            {
+                for (var y = 0; y < particleCountY; y++)
+                {
+                    for (var x = 0; x < particleCountX; x++, p++)
+                    {
+                        var matrix = Matrix4x4d.AffineTransform(gridSizeDiff * new Vector3d(x, y, z) - gridCenter, Vector3d.One, twistOffset + twistRate * new Vector3d(x, y, z), 0.0, 0.0, 0.0, screenCenter);
+                        var pos = (Vector3d)matrix.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0));
+                        spheres[p] = new Sphere(pos, Vector4.One, particleSize, softness);
+                    }
+                }
+            }
+
+            var scattering = arrangementGroup.GetValue(PropertyArrangementScatteringId, layerTime, Vector3d.Zero);
+            if (scattering != Vector3d.Zero)
+            {
+                var scatteringRandomSeed = (int)arrangementGroup.GetValue(PropertyArrangementScatteringRandomSeedId, layerTime, 0.0);
+                var rand = new Xoroshiro(scatteringRandomSeed);
+
+                for (var i = 0; i < spheres.Length; i++)
+                {
+                    spheres[i].ScatteringPosition = (new Vector3d(rand.NextDouble(), rand.NextDouble(), rand.NextDouble()) * 2.0 - new Vector3d(1.0)) * scattering;
+                }
+            }
+
+            return spheres;
+        }
     }
 
     enum SphereGridGraphMapDirectionType
@@ -492,6 +535,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         public double Radius { get; set; }
 
         public float Softness { get; set; }
+
+        public Vector3d ScatteringPosition { get; set; }
 
         public double InfluenceRadius { get; set; } = 1.0;
 

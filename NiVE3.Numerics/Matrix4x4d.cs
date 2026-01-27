@@ -580,7 +580,7 @@ namespace NiVE3.Numerics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3d Transform(this in Matrix4x4d matrix, in Vector3d v)
         {
-            return (Vector3d)matrix.Transform(v.AsVector256());
+            return (Vector3d)matrix.Transform(v.ToHomogeneousCoord());
         }
     }
 }
