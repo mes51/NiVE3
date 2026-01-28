@@ -18,6 +18,7 @@ using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
 using NiVE3.PresetPlugin.Effect.Util.General;
+using NiVE3.PresetPlugin.Effect.Util.Noise;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.ComputeShader;
@@ -61,7 +62,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyFractalNoiseGroupId = nameof(PropertyFractalNoiseGroupId);
 
-        const string PropertyFractalNoiseOctarveId = nameof(PropertyFractalNoiseOctarveId);
+        const string PropertyFractalNoiseOctaveId = nameof(PropertyFractalNoiseOctaveId);
 
         const string PropertyFractalNoiseScaleId = nameof(PropertyFractalNoiseScaleId);
 
@@ -75,7 +76,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyFractalNoiseApplyOpacityId = nameof(PropertyFractalNoiseApplyOpacityId);
 
-        const string PropertyFractalNoiseApplyScattering = nameof(PropertyFractalNoiseApplyScattering);
+        const string PropertyFractalNoiseApplyScatteringId = nameof(PropertyFractalNoiseApplyScatteringId);
 
         const string PropertyFractalNoiseApplyDisplacement = nameof(PropertyFractalNoiseApplyDisplacement);
 
@@ -163,6 +164,10 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         #endregion Property ids
 
+        const float FractalNoiseOctaveAmount = 0.7F;
+
+        const double FractalNoiseOctarveScale = 0.56;
+
         IAcceleratorObject? AcceleratorObject { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
@@ -196,14 +201,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 ]),
                 new PropertyGroup(PropertyFractalNoiseGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise,
                 [
-                    new DoubleProperty(PropertyFractalNoiseOctarveId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Octave, 6.0, 1.0, 20.0, digit: 2, slideChangeValue: 0.1),
-                    new Vector3dProperty(PropertyFractalNoiseScaleId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Scale, new Vector3d(100.0), Vector3d.Zero, new Vector3d(double.MaxValue), digit: 2, is3D: true, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true),
-                    new Vector3dProperty(PropertyFractalNoisePositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Position, center, digit: 2, is3D: true, useInteraction: true),
+                    new DoubleProperty(PropertyFractalNoiseOctaveId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Octave, 6.0, 1.0, 20.0, digit: 2, slideChangeValue: 0.1),
+                    new Vector3dProperty(PropertyFractalNoiseScaleId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Scale, new Vector3d(100.0), new Vector3d(0.01), new Vector3d(double.MaxValue), digit: 2, is3D: true, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true),
+                    new Vector3dProperty(PropertyFractalNoisePositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Position, Vector3d.Zero, digit: 2, is3D: true, useInteraction: true),
                     new AngleProperty(PropertyFractalNoiseEvolutionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Evolution, 0.0, digit: 2),
                     new DoubleProperty(PropertyFractalNoiseRandomSeedId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_RandomSeed, 0, int.MinValue, int.MaxValue, digit: 0),
                     new DoubleProperty(PropertyFractalNoiseApplySizeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_ApplySize, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                     new DoubleProperty(PropertyFractalNoiseApplyOpacityId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_ApplyOpacity, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                    new DoubleProperty(PropertyFractalNoiseApplyScattering, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_ApplyScattering, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                    new DoubleProperty(PropertyFractalNoiseApplyScatteringId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_ApplyScattering, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                     new Vector3dProperty(PropertyFractalNoiseApplyDisplacement, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_ApplyDisplacement, Vector3d.Zero, digit: 2, is3D: true)
                 ]),
                 new PropertyGroup(PropertyTransformGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Transform,
@@ -338,7 +343,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var layerMap = properties.First(p => p.Id == PropertyLayerMapId).GetChildren() ?? [];
             var renderGroup = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
 
-            var spheres = GenerateSpheres(arrangementGroup, particleGroup, layerTime, image.Width, image.Height);
+            var spheres = GenerateSpheres(arrangementGroup, particleGroup, fractalNoiseGroup, layerTime, image.Width, image.Height);
             if (spheres.Length < 1)
             {
                 if (renderGroup.GetValue(PropertyRenderingParticleOnlyId, layerTime, false))
@@ -394,12 +399,15 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             for (var i = 0; i < spheres.Length; i++)
             {
                 var s = spheres[i];
-                var radius = s.Radius * s.InfluenceRadius;
+                var radius = s.Radius * s.InfluenceRadius * double.Lerp(1.0, s.FractalNoiseValue, s.FractalNoiseSizeApplyRate);
                 if (radius <= 0.0)
                 {
                     continue;
                 }
-                renderer.AddSphere(s.Position + s.ScatteringPosition * s.InfluenceScattering, s.Color, s.Radius, s.Softness);
+                var color = s.Color;
+                color.W *= float.Lerp(1.0F, s.FractalNoiseValue, s.FractalNoiseOpacityApplyRate);
+                var pos = s.Position + s.ScatteringPosition * s.InfluenceScattering * double.Lerp(1.0, s.FractalNoiseValue, s.FractalNoiseScatteringApplyRate) + s.FractalNoiseDisplacement * (s.FractalNoiseValue - 0.5) * 2.0;
+                renderer.AddSphere(pos, color, s.Radius, s.Softness);
             }
 
             var antiAlias = renderGroup.GetValue(PropertyRenderingAntiAliasId, layerTime, false);
@@ -436,7 +444,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         public void Dispose() { }
 
-        static Sphere[] GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, in Time layerTime, int imageWidth, int imageHeight)
+        static Sphere[] GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, IReadOnlyCollection<IPropertyObject> fractalNoiseGroup, in Time layerTime, int imageWidth, int imageHeight)
         {
             var particleSize = particleGroup.GetValue(PropertyParticleSizeId, layerTime, 0.0) * 0.5;
             var particleCount = arrangementGroup.GetValue(PropertyArrangementParticleCountId, layerTime, Vector3d.Zero);
@@ -472,6 +480,11 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 particleCountY > 1 ? gridSize.Y / (particleCountY - 1) : 0.0,
                 particleCountZ > 1 ? gridSize.Z / (particleCountZ - 1) : 0.0
             );
+
+            var fractalNoiseSizeApplyRate = fractalNoiseGroup.GetValue(PropertyFractalNoiseApplySizeId, layerTime, 0.0) * 0.01;
+            var fractalNoiseOpacityApplyRate = (float)(fractalNoiseGroup.GetValue(PropertyFractalNoiseApplyOpacityId, layerTime, 0.0) * 0.01);
+            var fractalNoiseScatteringApplyRate = fractalNoiseGroup.GetValue(PropertyFractalNoiseApplyScatteringId, layerTime, 0.0) * 0.01;
+            var fractalNoiseDisplacement = fractalNoiseGroup.GetValue(PropertyFractalNoiseApplyDisplacement, layerTime, Vector3d.Zero);
             var spheres = new Sphere[particleCountX * particleCountY * particleCountZ];
             for (int z = 0, p = 0; z < particleCountZ; z++)
             {
@@ -479,9 +492,16 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 {
                     for (var x = 0; x < particleCountX; x++, p++)
                     {
-                        var matrix = Matrix4x4d.AffineTransform(gridSizeDiff * new Vector3d(x, y, z) - gridCenter, Vector3d.One, twistOffset + twistRate * new Vector3d(x, y, z), 0.0, 0.0, 0.0, screenCenter);
+                        var gridPosition = gridSizeDiff * new Vector3d(x, y, z) - gridCenter;
+                        var matrix = Matrix4x4d.AffineTransform(gridPosition, Vector3d.One, twistOffset + twistRate * new Vector3d(x, y, z), 0.0, 0.0, 0.0, screenCenter);
                         var pos = (Vector3d)matrix.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0));
-                        spheres[p] = new Sphere(pos, color * new Vector4(1.0F, 1.0F, 1.0F, opacity), particleSize, softness);
+                        spheres[p] = new Sphere(pos, gridPosition, color * new Vector4(1.0F, 1.0F, 1.0F, opacity), particleSize, softness)
+                        {
+                            FractalNoiseSizeApplyRate = fractalNoiseSizeApplyRate,
+                            FractalNoiseOpacityApplyRate = fractalNoiseOpacityApplyRate,
+                            FractalNoiseScatteringApplyRate = fractalNoiseScatteringApplyRate,
+                            FractalNoiseDisplacement = fractalNoiseDisplacement
+                        };
                     }
                 }
             }
@@ -495,6 +515,50 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 for (var i = 0; i < spheres.Length; i++)
                 {
                     spheres[i].ScatteringPosition = (new Vector3d(rand.NextDouble(), rand.NextDouble(), rand.NextDouble()) * 2.0 - new Vector3d(1.0)) * scattering;
+                }
+            }
+
+            if (fractalNoiseSizeApplyRate > 0.0 || fractalNoiseOpacityApplyRate > 0.0F || fractalNoiseScatteringApplyRate > 0.0F || fractalNoiseDisplacement != Vector3d.Zero)
+            {
+                var fractalNoiseRandomSeed = (long)fractalNoiseGroup.GetValue(PropertyFractalNoiseRandomSeedId, layerTime, 0.0);
+                var octave = (float)fractalNoiseGroup.GetValue(PropertyFractalNoiseOctaveId, layerTime, 0.0);
+                var fractalNoiseScale = fractalNoiseGroup.GetValue(PropertyFractalNoiseScaleId, layerTime, Vector3d.Zero) * 0.01;
+                var fractalNoisePosition = fractalNoiseGroup.GetValue(PropertyFractalNoisePositionId, layerTime, Vector3d.Zero);
+                var evolution = fractalNoiseGroup.GetValue(PropertyFractalNoiseEvolutionId, layerTime, 0.0);
+                var octaveLimit = (int)Math.Ceiling(octave);
+                var matrix = Matrix4x4d.AffineTransform(Vector3d.Zero, fractalNoiseScale * 40.0, Vector3d.Zero, 0.0, 0.0, 0.0, fractalNoisePosition);
+                for (var i = 0; i < spheres.Length; i++)
+                {
+                    var s = spheres[i];
+                    var denom = 0.0F;
+                    var noise = 0.0F;
+                    for (var o = 0; o < octaveLimit; o++)
+                    {
+                        var subTransform = Matrix4x4d.AffineTransform(new Vector3d(0.3, 0.7, 0.1) * o * 2.0, new Vector3d(Math.Pow(FractalNoiseOctarveScale, o)), Vector3d.Zero, 0.0, 0.0, 0.0, Vector3d.Zero) * matrix;
+                        if (!Matrix4x4d.Invert(subTransform, out var inverted))
+                        {
+                            continue;
+                        }
+
+                        var amount = MathF.Pow(FractalNoiseOctaveAmount, Math.Min(o, (int)octave)) * FractalNoiseOctaveAmount * Math.Min(octave - o, 1.0F);
+                        if (amount <= 0.0F)
+                        {
+                            if (o > 0)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                amount = 1.0F;
+                            }
+                        }
+                        denom += amount;
+
+                        var noisePosition = inverted.Transform(s.GridPosition);
+                        noise += Simplex4D.Noise(fractalNoiseRandomSeed, noisePosition.X, noisePosition.Y, noisePosition.Z, evolution);
+                    }
+
+                    s.FractalNoiseValue = Math.Clamp(noise / denom, 0.0F, 1.0F);
                 }
             }
 
@@ -530,6 +594,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
     {
         public Vector3d Position { get; set; }
 
+        public Vector3d GridPosition { get; set; }
+
         public Vector4 Color { get; set; }
 
         public double Radius { get; set; }
@@ -538,15 +604,26 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         public Vector3d ScatteringPosition { get; set; }
 
+        public float FractalNoiseValue { get; set; } = 1.0F;
+
+        public double FractalNoiseSizeApplyRate { get; set; } = 0.0;
+
+        public float FractalNoiseOpacityApplyRate { get; set; } = 0.0F;
+
+        public double FractalNoiseScatteringApplyRate { get; set; } = 0.0;
+
+        public Vector3d FractalNoiseDisplacement { get; set; }
+
         public double InfluenceRadius { get; set; } = 1.0;
 
         public double InfluenceScattering { get; set; } = 1.0;
 
-        public double InfluenceFractalNoise { get; set; } = 1.0;
+        public float InfluenceFractalNoise { get; set; } = 1.0F;
 
-        public Sphere(in Vector3d position, in Vector4 color, double radius, float softness)
+        public Sphere(in Vector3d position, in Vector3d gridPosition, in Vector4 color, double radius, float softness)
         {
             Position = position;
+            GridPosition = gridPosition;
             Color = color;
             Radius = radius;
             Softness = softness;
