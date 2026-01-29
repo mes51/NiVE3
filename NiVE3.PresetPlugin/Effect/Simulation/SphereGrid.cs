@@ -62,6 +62,12 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyFractalNoiseGroupId = nameof(PropertyFractalNoiseGroupId);
 
+        const string PropertyFractalNoiseContrastId = nameof(PropertyFractalNoiseContrastId);
+
+        const string PropertyFractalNoiseLuminanceId = nameof(PropertyFractalNoiseLuminanceId);
+
+        const string PropertyFractalNoiseIsInvertId = nameof(PropertyFractalNoiseIsInvertId);
+
         const string PropertyFractalNoiseOctaveId = nameof(PropertyFractalNoiseOctaveId);
 
         const string PropertyFractalNoiseScaleId = nameof(PropertyFractalNoiseScaleId);
@@ -201,6 +207,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 ]),
                 new PropertyGroup(PropertyFractalNoiseGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise,
                 [
+                    new DoubleProperty(PropertyFractalNoiseContrastId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Contrast, 100.0, 0.0, 10000.0, digit: 2),
+                    new DoubleProperty(PropertyFractalNoiseLuminanceId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Luminance, 0.0, -10000.0, 10000.0, digit: 2),
+                    new CheckBoxProperty(PropertyFractalNoiseIsInvertId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_IsInvert, false),
                     new DoubleProperty(PropertyFractalNoiseOctaveId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Octave, 6.0, 1.0, 20.0, digit: 2, slideChangeValue: 0.1),
                     new Vector3dProperty(PropertyFractalNoiseScaleId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Scale, new Vector3d(100.0), new Vector3d(0.01), new Vector3d(double.MaxValue), digit: 2, is3D: true, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent, separator: ",", useLinkRatio: true),
                     new Vector3dProperty(PropertyFractalNoisePositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_FractalNoise_Position, Vector3d.Zero, digit: 2, is3D: true, useInteraction: true),
@@ -520,14 +529,17 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             if (fractalNoiseSizeApplyRate > 0.0 || fractalNoiseOpacityApplyRate > 0.0F || fractalNoiseScatteringApplyRate > 0.0F || fractalNoiseDisplacement != Vector3d.Zero)
             {
-                var fractalNoiseRandomSeed = (long)fractalNoiseGroup.GetValue(PropertyFractalNoiseRandomSeedId, layerTime, 0.0);
+                var contrast = (float)(fractalNoiseGroup.GetValue(PropertyFractalNoiseContrastId, layerTime, 0.0) * 0.01);
+                var luminance = (float)(fractalNoiseGroup.GetValue(PropertyFractalNoiseLuminanceId, layerTime, 0.0) * 0.01);
+                var isInvert = fractalNoiseGroup.GetValue(PropertyFractalNoiseIsInvertId, layerTime, false);
                 var octave = (float)fractalNoiseGroup.GetValue(PropertyFractalNoiseOctaveId, layerTime, 0.0);
                 var fractalNoiseScale = fractalNoiseGroup.GetValue(PropertyFractalNoiseScaleId, layerTime, Vector3d.Zero) * 0.01;
                 var fractalNoisePosition = fractalNoiseGroup.GetValue(PropertyFractalNoisePositionId, layerTime, Vector3d.Zero);
+                var fractalNoiseRandomSeed = (long)fractalNoiseGroup.GetValue(PropertyFractalNoiseRandomSeedId, layerTime, 0.0);
                 var evolution = fractalNoiseGroup.GetValue(PropertyFractalNoiseEvolutionId, layerTime, 0.0);
                 var octaveLimit = (int)Math.Ceiling(octave);
                 var matrix = Matrix4x4d.AffineTransform(Vector3d.Zero, fractalNoiseScale * 40.0, Vector3d.Zero, 0.0, 0.0, 0.0, fractalNoisePosition);
-                for (var i = 0; i < spheres.Length; i++)
+                Parallel.For(0, spheres.Length, i =>
                 {
                     var s = spheres[i];
                     var denom = 0.0F;
@@ -558,8 +570,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         noise += Simplex4D.Noise(fractalNoiseRandomSeed, noisePosition.X, noisePosition.Y, noisePosition.Z, evolution);
                     }
 
-                    s.FractalNoiseValue = Math.Clamp(noise / denom + 0.5F, 0.0F, 1.0F);
-                }
+                    var value = noise / denom + 0.5F;
+                    if (isInvert)
+                    {
+                        value = 1.0F - value;
+                    }
+                    s.FractalNoiseValue = Math.Clamp((value - 0.5F) * contrast + 0.5F + luminance, 0.0F, 1.0F);
+                });
             }
 
             return spheres;

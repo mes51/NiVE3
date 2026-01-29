@@ -2071,6 +2071,15 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("フラクタルノイズ")]
         public const string Simulation_SphereGrid_FractalNoise = nameof(Simulation_SphereGrid_FractalNoise);
 
+        [LanguageKey, DefaultValue("コントラスト")]
+        public const string Simulation_SphereGrid_FractalNoise_Contrast = nameof(Simulation_SphereGrid_FractalNoise_Contrast);
+
+        [LanguageKey, DefaultValue("明るさ")]
+        public const string Simulation_SphereGrid_FractalNoise_Luminance = nameof(Simulation_SphereGrid_FractalNoise_Luminance);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Simulation_SphereGrid_FractalNoise_IsInvert = nameof(Simulation_SphereGrid_FractalNoise_IsInvert);
+
         [LanguageKey, DefaultValue("複雑度")]
         public const string Simulation_SphereGrid_FractalNoise_Octave = nameof(Simulation_SphereGrid_FractalNoise_Octave);
 
