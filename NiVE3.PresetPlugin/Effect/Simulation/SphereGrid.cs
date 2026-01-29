@@ -558,7 +558,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         noise += Simplex4D.Noise(fractalNoiseRandomSeed, noisePosition.X, noisePosition.Y, noisePosition.Z, evolution);
                     }
 
-                    s.FractalNoiseValue = Math.Clamp(noise / denom, 0.0F, 1.0F);
+                    s.FractalNoiseValue = Math.Clamp(noise / denom + 0.5F, 0.0F, 1.0F);
                 }
             }
 
