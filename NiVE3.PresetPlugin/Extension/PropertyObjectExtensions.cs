@@ -13,12 +13,12 @@ namespace NiVE3.PresetPlugin.Extension
     {
         public static T GetValue<T>(this IReadOnlyCollection<IPropertyObject> properties, string id, Time time, T defaultValue) where T : notnull
         {
-            return (T)(properties.First(p => p.Id == id).GetValue(time) ?? defaultValue);
+            return (T)(properties.FirstOrDefault(p => p.Id == id)?.GetValue(time) ?? defaultValue);
         }
 
         public static T? GetValue<T>(this IReadOnlyCollection<IPropertyObject> properties, string id, Time time)
         {
-            return (T?)properties.First(p => p.Id == id).GetValue(time);
+            return (T?)properties.FirstOrDefault(p => p.Id == id)?.GetValue(time);
         }
 
         public static T GetValue<T>(this IPropertyObject property, Time time, T defaultValue) where T : notnull

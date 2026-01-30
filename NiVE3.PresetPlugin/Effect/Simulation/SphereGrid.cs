@@ -23,6 +23,7 @@ using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.ComputeShader;
 using NiVE3.PresetPlugin.Internal.Drawing;
+using NiVE3.PresetPlugin.Property;
 using NiVE3.PresetPlugin.Property.Properties;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
@@ -376,6 +377,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 }
             }
 
+            ApplyGraphMap(spheres, graphMap, layerTime);
+
             var transformMatrix = Matrix4x4d.AffineTransform(
                 transformGroup.GetValue(PropertyTransformAnchorPointId, layerTime, Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0) / renderSize,
                 transformGroup.GetValue(PropertyTransformScaleId, layerTime, Vector3d.Zero) * 0.01,
@@ -416,7 +419,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var color = s.Color;
                 color.W *= float.Lerp(1.0F, s.FractalNoiseValue, s.FractalNoiseOpacityApplyRate);
                 var pos = s.Position + s.ScatteringPosition * s.InfluenceScattering * double.Lerp(1.0, s.FractalNoiseValue, s.FractalNoiseScatteringApplyRate) + s.FractalNoiseDisplacement * (s.FractalNoiseValue - 0.5) * 2.0;
-                renderer.AddSphere(pos, color, s.Radius, s.Softness);
+                renderer.AddSphere(pos, color, radius, s.Softness);
             }
 
             var antiAlias = renderGroup.GetValue(PropertyRenderingAntiAliasId, layerTime, false);
@@ -476,7 +479,6 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 particleCountZ > 1 ? gridSize.Z : 0.0
             ) * 0.5;
             var screenCenter = new Vector3d(imageWidth, imageHeight, 0.0) * 0.5;
-            var sphereOffset = screenCenter - gridCenter;
             var twistRate = new Vector3d(
                 particleCountX > 1 ? twist.X / (particleCountX - 1) : 0.0,
                 particleCountY > 1 ? twist.Y / (particleCountY - 1) : 0.0,
@@ -489,6 +491,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 particleCountY > 1 ? gridSize.Y / (particleCountY - 1) : 0.0,
                 particleCountZ > 1 ? gridSize.Z / (particleCountZ - 1) : 0.0
             );
+            var normalizedGridDiffX = particleCountX > 1 ? 1.0 / (particleCountX - 1) : 0.0;
+            var normalizedGridDiffY = particleCountY > 1 ? 1.0 / (particleCountY - 1) : 0.0;
+            var normalizedGridDiffZ = particleCountZ > 1 ? 1.0 / (particleCountZ - 1) : 0.0;
 
             var fractalNoiseSizeApplyRate = fractalNoiseGroup.GetValue(PropertyFractalNoiseApplySizeId, layerTime, 0.0) * 0.01;
             var fractalNoiseOpacityApplyRate = (float)(fractalNoiseGroup.GetValue(PropertyFractalNoiseApplyOpacityId, layerTime, 0.0) * 0.01);
@@ -497,19 +502,24 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var spheres = new Sphere[particleCountX * particleCountY * particleCountZ];
             for (int z = 0, p = 0; z < particleCountZ; z++)
             {
+                var normalizedGridZ = particleCountZ > 1 ?(float)(z * normalizedGridDiffZ) : 1.0F;
                 for (var y = 0; y < particleCountY; y++)
                 {
+                    var normalizedGridY = particleCountY > 1 ? (float)(y * normalizedGridDiffY) : 1.0F;
                     for (var x = 0; x < particleCountX; x++, p++)
                     {
                         var gridPosition = gridSizeDiff * new Vector3d(x, y, z) - gridCenter;
-                        var matrix = Matrix4x4d.AffineTransform(gridPosition, Vector3d.One, twistOffset + twistRate * new Vector3d(x, y, z), 0.0, 0.0, 0.0, screenCenter);
+                        var matrix = Matrix4x4d.AffineTransform(-gridPosition, Vector3d.One, twistOffset + twistRate * new Vector3d(x, y, z), 0.0, 0.0, 0.0, screenCenter);
                         var pos = (Vector3d)matrix.Transform(Vector256.Create(0.0, 0.0, 0.0, 1.0));
                         spheres[p] = new Sphere(pos, gridPosition, color * new Vector4(1.0F, 1.0F, 1.0F, opacity), particleSize, softness)
                         {
                             FractalNoiseSizeApplyRate = fractalNoiseSizeApplyRate,
                             FractalNoiseOpacityApplyRate = fractalNoiseOpacityApplyRate,
                             FractalNoiseScatteringApplyRate = fractalNoiseScatteringApplyRate,
-                            FractalNoiseDisplacement = fractalNoiseDisplacement
+                            FractalNoiseDisplacement = fractalNoiseDisplacement,
+                            NormalizedGridX = particleCountX > 1 ? (float)(x * normalizedGridDiffX) : 1.0F,
+                            NormalizedGridY = normalizedGridY,
+                            NormalizedGridZ = normalizedGridZ,
                         };
                     }
                 }
@@ -581,6 +591,56 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
             return spheres;
         }
+
+        static void ApplyGraphMap(Sphere[] spheres, IReadOnlyCollection<IPropertyObject> graphMap, in Time layerTime)
+        {
+            foreach (var map in graphMap.Where(p => p.IsEnable))
+            {
+                var graphMapProperties = map.GetChildren() ?? [];
+                var direction = graphMapProperties.GetValue(PropertyGraphMapValueDirectionId, layerTime, SphereGridGraphMapDirectionType.None);
+                if (direction == SphereGridGraphMapDirectionType.None)
+                {
+                    continue;
+                }
+
+                var mapValue = graphMapProperties.GetValue(PropertyGraphMapValueGraphId, layerTime, GraphValueParameter.Identity);
+                var newColor = graphMapProperties.GetValue(PropertyGraphMapColorColorId, layerTime, Vector4.One);
+                Action<Sphere, double> mapFunction = map.Id switch
+                {
+                    PropertyGraphMapSizeItemId => static (Sphere s, double value) => s.InfluenceRadius *= value,
+                    PropertyGraphMapOpacityItemId => static (Sphere s, double value) => s.Color *= new Vector4(1.0F, 1.0F, 1.0F, (float)value),
+                    PropertyGraphMapColorItemId => (Sphere s, double value) => s.Color = Vector4.Lerp(s.Color, newColor, (float)value),
+                    PropertyGraphMapScatteringItemId => static (Sphere s, double value) => s.InfluenceScattering *= value,
+                    PropertyGraphMapFractalNoiseItemId => static (Sphere s, double value) => s.InfluenceFractalNoise *= (float)value,
+                    _ => static (Sphere s, double value) => { }
+                };
+
+                switch (direction)
+                {
+                    case SphereGridGraphMapDirectionType.X:
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            mapFunction(s, mapValue.Interpolation(0.0F, 1.0F, s.NormalizedGridX));
+                        });
+                        break;
+                    case SphereGridGraphMapDirectionType.Y:
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            mapFunction(s, mapValue.Interpolation(0.0F, 1.0F, s.NormalizedGridY));
+                        });
+                        break;
+                    case SphereGridGraphMapDirectionType.Z:
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            mapFunction(s, mapValue.Interpolation(0.0F, 1.0F, s.NormalizedGridZ));
+                        });
+                        break;
+                }
+            }
+        }
     }
 
     enum SphereGridGraphMapDirectionType
@@ -636,6 +696,12 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         public double InfluenceScattering { get; set; } = 1.0;
 
         public float InfluenceFractalNoise { get; set; } = 1.0F;
+
+        public float NormalizedGridX { get; init; }
+
+        public float NormalizedGridY { get; init; }
+
+        public float NormalizedGridZ { get; init; }
 
         public Sphere(in Vector3d position, in Vector3d gridPosition, in Vector4 color, double radius, float softness)
         {
