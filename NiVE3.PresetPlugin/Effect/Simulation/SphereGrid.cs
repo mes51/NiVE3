@@ -353,7 +353,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var layerMap = properties.First(p => p.Id == PropertyLayerMapId).GetChildren() ?? [];
             var renderGroup = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
 
-            var spheres = GenerateSpheres(arrangementGroup, particleGroup, fractalNoiseGroup, layerTime, image.Width, image.Height);
+            var spheres = GenerateSpheres(arrangementGroup, particleGroup, fractalNoiseGroup, layerTime, image.Width, image.Height, downSamplingRateX, downSamplingRateY);
             if (spheres.Length < 1)
             {
                 if (renderGroup.GetValue(PropertyRenderingParticleOnlyId, layerTime, false))
@@ -456,9 +456,10 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         public void Dispose() { }
 
-        static Sphere[] GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, IReadOnlyCollection<IPropertyObject> fractalNoiseGroup, in Time layerTime, int imageWidth, int imageHeight)
+        static Sphere[] GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, IReadOnlyCollection<IPropertyObject> fractalNoiseGroup, in Time layerTime, int imageWidth, int imageHeight, double downSamplingRateX, double downSamplingRateY)
         {
-            var particleSize = particleGroup.GetValue(PropertyParticleSizeId, layerTime, 0.0) * 0.5;
+            var downSamplingRateVector = new Vector3d(downSamplingRateX, downSamplingRateY, imageWidth > imageHeight ? downSamplingRateX : downSamplingRateY);
+            var particleSize = particleGroup.GetValue(PropertyParticleSizeId, layerTime, 0.0) * 0.5 / downSamplingRateX;
             var particleCount = arrangementGroup.GetValue(PropertyArrangementParticleCountId, layerTime, Vector3d.Zero);
             var particleCountX = (int)particleCount.X;
             var particleCountY = (int)particleCount.Y;
@@ -471,7 +472,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var softness = (float)(particleGroup.GetValue(PropertyParticleSoftnessId, layerTime, 0.0) * 0.01);
             var color = particleGroup.GetValue(PropertyParticleColorId, layerTime, Vector4.Zero);
             var opacity = (float)(particleGroup.GetValue(PropertyParticleOpacityId, layerTime, 0.0) * 0.01);
-            var gridSize = arrangementGroup.GetValue(PropertyArrangementGridSizeId, layerTime, Vector3d.Zero);
+            var gridSize = arrangementGroup.GetValue(PropertyArrangementGridSizeId, layerTime, Vector3d.Zero) / downSamplingRateVector;
             var twist = arrangementGroup.GetValue(PropertyArrangementTwistId, layerTime, Vector3d.Zero);
             var gridCenter = new Vector3d(
                 particleCountX > 1 ? gridSize.X : 0.0,
@@ -525,7 +526,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 }
             }
 
-            var scattering = arrangementGroup.GetValue(PropertyArrangementScatteringId, layerTime, Vector3d.Zero);
+            var scattering = arrangementGroup.GetValue(PropertyArrangementScatteringId, layerTime, Vector3d.Zero) / downSamplingRateVector;
             if (scattering != Vector3d.Zero)
             {
                 var scatteringRandomSeed = (int)arrangementGroup.GetValue(PropertyArrangementScatteringRandomSeedId, layerTime, 0.0);
@@ -543,8 +544,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var luminance = (float)(fractalNoiseGroup.GetValue(PropertyFractalNoiseLuminanceId, layerTime, 0.0) * 0.01);
                 var isInvert = fractalNoiseGroup.GetValue(PropertyFractalNoiseIsInvertId, layerTime, false);
                 var octave = (float)fractalNoiseGroup.GetValue(PropertyFractalNoiseOctaveId, layerTime, 0.0);
-                var fractalNoiseScale = fractalNoiseGroup.GetValue(PropertyFractalNoiseScaleId, layerTime, Vector3d.Zero) * 0.01;
-                var fractalNoisePosition = fractalNoiseGroup.GetValue(PropertyFractalNoisePositionId, layerTime, Vector3d.Zero);
+                var fractalNoiseScale = fractalNoiseGroup.GetValue(PropertyFractalNoiseScaleId, layerTime, Vector3d.Zero) * 0.01 / downSamplingRateVector;
+                var fractalNoisePosition = fractalNoiseGroup.GetValue(PropertyFractalNoisePositionId, layerTime, Vector3d.Zero) / downSamplingRateVector;
                 var fractalNoiseRandomSeed = (long)fractalNoiseGroup.GetValue(PropertyFractalNoiseRandomSeedId, layerTime, 0.0);
                 var evolution = fractalNoiseGroup.GetValue(PropertyFractalNoiseEvolutionId, layerTime, 0.0);
                 var octaveLimit = (int)Math.Ceiling(octave);
