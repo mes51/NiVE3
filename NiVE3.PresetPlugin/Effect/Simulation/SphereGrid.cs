@@ -433,29 +433,75 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             var antiAlias = renderGroup.GetValue(PropertyRenderingAntiAliasId, layerTime, false);
+            var sphereBlendMode = renderGroup.GetValue(PropertyRenderingParticleBlendModeId, layerTime, BlendMode.Add);
             if (antiAlias)
             {
-                renderer.RenderAntiAlias(roi, BlendMode.Add);
+                renderer.RenderAntiAlias(roi, sphereBlendMode);
             }
             else
             {
-                renderer.Render(roi, BlendMode.Add);
+                renderer.Render(roi, sphereBlendMode);
             }
 
+            var blendMode = renderGroup.GetValue(PropertyRenderingBlendModeId, layerTime, BlendMode.Normal);
+            var particleOnly = renderGroup.GetValue(PropertyRenderingParticleOnlyId, layerTime, false);
+            var compositeOrder = renderGroup.GetValue(PropertyRenderingCompositeOrderId, layerTime, CompositeOrder.Front);
             if (useGpu && AcceleratorObject != null)
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                ImageBlendProcessor.SameSizeNoSkipTransparentFrontGpu(device, gpuImage, (NGPUImage)canvas, roi, BlendMode.Replace);
-
-                return gpuImage;
+                if (particleOnly)
+                {
+                    ImageBlendProcessor.SameSizeNoSkipTransparentFrontGpu(device, gpuImage, (NGPUImage)canvas, roi, BlendMode.Replace);
+                    canvas.Dispose();
+                    return gpuImage;
+                }
+                else
+                {
+                    if (compositeOrder == CompositeOrder.Front)
+                    {
+                        ImageBlendProcessor.SameSizeGpu(device, gpuImage, (NGPUImage)canvas, roi, blendMode);
+                        canvas.Dispose();
+                        return gpuImage;
+                    }
+                    else
+                    {
+                        ImageBlendProcessor.SameSizeGpu(device, (NGPUImage)canvas, gpuImage, roi, blendMode);
+                        if (gpuImage != image)
+                        {
+                            gpuImage.Dispose();
+                        }
+                        return canvas;
+                    }
+                }
             }
             else
             {
                 var managedImage = image.ToManaged();
-                ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, (NManagedImage)canvas, roi, BlendMode.Replace);
-
-                return managedImage;
+                if (particleOnly)
+                {
+                    ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, (NManagedImage)canvas, roi, BlendMode.Replace);
+                    canvas.Dispose();
+                    return managedImage;
+                }
+                else
+                {
+                    if (compositeOrder == CompositeOrder.Front)
+                    {
+                        ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu(managedImage, (NManagedImage)canvas, roi, blendMode);
+                        canvas.Dispose();
+                        return managedImage;
+                    }
+                    else
+                    {
+                        ImageBlendProcessor.SameSizeNoSkipTransparentFrontCpu((NManagedImage)canvas, managedImage, roi, blendMode);
+                        if (managedImage != image)
+                        {
+                            managedImage.Dispose();
+                        }
+                        return canvas;
+                    }
+                }
             }
         }
 
