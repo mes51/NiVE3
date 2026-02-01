@@ -110,6 +110,63 @@ namespace NiVE3.PresetPlugin.Effect.Util.Distortion
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float CalcMoveRate(in Vector4 color, WithHSLLOnOffChannelType channelType)
+        {
+            switch (channelType)
+            {
+                case WithHSLLOnOffChannelType.R:
+                    return (color.Z - 0.5F) * 2.0F;
+                case WithHSLLOnOffChannelType.G:
+                    return (color.Y - 0.5F) * 2.0F;
+                case WithHSLLOnOffChannelType.B:
+                    return (color.X - 0.5F) * 2.0F;
+                case WithHSLLOnOffChannelType.A:
+                    return (color.W - 0.5F) * 2.0F;
+                case WithHSLLOnOffChannelType.Luminance:
+                    return (Vector4.Dot(color, Const.ConvertToGrayScale) - 0.5F) * 2.0F;
+                case WithHSLLOnOffChannelType.Hue:
+                    {
+                        var min = color.HorizontalMinBy3Element();
+                        var max = color.HorizontalMaxBy3Element();
+                        var diff = max - min;
+                        var h = diff != 0.0F ? max switch
+                        {
+                            _ when max == color.X => (color.Z - color.Y) / diff * 60.0F + 240.0F,
+                            _ when max == color.Y => (color.X - color.Z) / diff * 60.0F + 120.0F,
+                            _ => (color.Y - color.X) / diff * 60.0F
+                        } : 180.0F;
+
+                        return (h - 180.0F) / 180.0F;
+                    }
+                case WithHSLLOnOffChannelType.Saturation:
+                    {
+                        var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
+                        var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
+                        if (max > 0.0F)
+                        {
+                            return ((max - min) / max - 0.5F) * 2.0F;
+                        }
+                        else
+                        {
+                            return 0.5F;
+                        }
+                    }
+                case WithHSLLOnOffChannelType.Lightness:
+                    {
+                        var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
+                        var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
+                        return max + min - 1.0F; // ((max + min) * 0.5F - 0.5F) * 2.0F;
+                    }
+                case WithHSLLOnOffChannelType.On:
+                    return 1.0F;
+                case WithHSLLOnOffChannelType.Off:
+                    return -1.0F;
+                default:
+                    return 0.0F;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void CalcMapValues(NManagedImage sourceImage, float[] map, WithHSLLOnOffChannelType type)
         {
             var sourceImageData = sourceImage.Data;

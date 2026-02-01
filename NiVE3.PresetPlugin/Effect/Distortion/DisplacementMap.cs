@@ -16,6 +16,7 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Effect.Util.Distortion;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Internal.Drawing;
@@ -131,8 +132,8 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 {
                     var mapColor = position == SourceLayerPositionType.Loop ? ImageInterpolation.BilinearLoop(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY) : EdgeRepeatBilinear(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY, Half);
 
-                    var distortedX = x + CalcMoveRate(mapColor, horizontalChannel) * horizontalMaxMove;
-                    var distortedY = y + CalcMoveRate(mapColor, verticalChannel) * verticalMaxMove;
+                    var distortedX = x + DisplacementMapGenerator.CalcMoveRate(mapColor, horizontalChannel) * horizontalMaxMove;
+                    var distortedY = y + DisplacementMapGenerator.CalcMoveRate(mapColor, verticalChannel) * verticalMaxMove;
 
                     imageDataLineSpan[x] = isLoopImage ? ImageInterpolation.BilinearLoop(originalImageDataSpan, managedImage.Width, managedImage.Height, distortedX, distortedY) : ImageInterpolation.Bilinear(originalImageDataSpan, managedImage.Width, managedImage.Height, distortedX, distortedY);
                 }
@@ -185,63 +186,6 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
             }
 
             return gpuImage;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float CalcMoveRate(in Vector4 color, WithHSLLOnOffChannelType channelType)
-        {
-            switch (channelType)
-            {
-                case WithHSLLOnOffChannelType.R:
-                    return (color.Z - 0.5F) * 2.0F;
-                case WithHSLLOnOffChannelType.G:
-                    return (color.Y - 0.5F) * 2.0F;
-                case WithHSLLOnOffChannelType.B:
-                    return (color.X - 0.5F) * 2.0F;
-                case WithHSLLOnOffChannelType.A:
-                    return (color.W - 0.5F) * 2.0F;
-                case WithHSLLOnOffChannelType.Luminance:
-                    return (Vector4.Dot(color, Const.ConvertToGrayScale) - 0.5F) * 2.0F;
-                case WithHSLLOnOffChannelType.Hue:
-                    {
-                        var min = color.HorizontalMinBy3Element();
-                        var max = color.HorizontalMaxBy3Element();
-                        var diff = max - min;
-                        var h = diff != 0.0F ? max switch
-                        {
-                            _ when max == color.X => (color.Z - color.Y) / diff * 60.0F + 240.0F,
-                            _ when max == color.Y => (color.X - color.Z) / diff * 60.0F + 120.0F,
-                            _ => (color.Y - color.X) / diff * 60.0F
-                        } : 180.0F;
-
-                        return (h - 180.0F) / 180.0F;
-                    }
-                case WithHSLLOnOffChannelType.Saturation:
-                    {
-                        var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
-                        var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
-                        if (max > 0.0F)
-                        {
-                            return ((max - min) / max - 0.5F) * 2.0F;
-                        }
-                        else
-                        {
-                            return 0.5F;
-                        }
-                    }
-                case WithHSLLOnOffChannelType.Lightness:
-                    {
-                        var min = color.AsVector128().HorizontalMinBy3Element().GetElement(0);
-                        var max = color.AsVector128().HorizontalMaxBy3Element().GetElement(0);
-                        return max + min - 1.0F; // ((max + min) * 0.5F - 0.5F) * 2.0F;
-                    }
-                case WithHSLLOnOffChannelType.On:
-                    return 1.0F;
-                case WithHSLLOnOffChannelType.Off:
-                    return -1.0F;
-                default:
-                    return 0.0F;
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

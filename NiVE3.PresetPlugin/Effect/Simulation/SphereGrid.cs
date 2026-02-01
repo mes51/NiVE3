@@ -17,6 +17,7 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util;
+using NiVE3.PresetPlugin.Effect.Util.Distortion;
 using NiVE3.PresetPlugin.Effect.Util.General;
 using NiVE3.PresetPlugin.Effect.Util.Noise;
 using NiVE3.PresetPlugin.Extension;
@@ -151,11 +152,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyLayerMapValueSpecificReferenceTimeId = nameof(PropertyLayerMapValueSpecificReferenceTimeId);
 
+        const string PropertyLayerMapValueLayerPositionId = nameof(PropertyLayerMapValueLayerPositionId);
+
         const string PropertyLayerMapValueMapDirectionId = nameof(PropertyLayerMapValueMapDirectionId);
 
         const string PropertyLayerMapValueChannelId = nameof(PropertyLayerMapValueChannelId);
 
-        const string PropertyLayerMapValueApplyId = nameof(PropertyLayerMapValueApplyId);
+        const string PropertyLayerMapValueApplyRateId = nameof(PropertyLayerMapValueApplyRateId);
 
         const string PropertyRenderingGroupId = nameof(PropertyRenderingGroupId);
 
@@ -277,6 +280,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         new UseLayerImageProperty(PropertyLayerMapValueLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Layer, selectBoxWidth: 90.0),
                         new CheckBoxProperty(PropertyLayerMapValueUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime, false),
                         new DoubleProperty(PropertyLayerMapValueSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                        new EnumProperty(PropertyLayerMapValueLayerPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_LayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueMapDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_MapDirection, typeof(SphereGridLayerMapDirectionType), typeof(LanguageResourceDictionary), SphereGridLayerMapDirectionType.XY, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapDisplacementXChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Displacement_XChannel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.R, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapDisplacementYChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Displacement_YChannel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.G, selectBoxWidth: 90.0),
@@ -288,8 +292,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         new UseLayerImageProperty(PropertyLayerMapValueLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Layer, selectBoxWidth: 90.0),
                         new CheckBoxProperty(PropertyLayerMapValueUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime, false),
                         new DoubleProperty(PropertyLayerMapValueSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                        new EnumProperty(PropertyLayerMapValueLayerPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_LayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueMapDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_MapDirection, typeof(SphereGridLayerMapDirectionType), typeof(LanguageResourceDictionary), SphereGridLayerMapDirectionType.XY, selectBoxWidth: 90.0),
-                        new DoubleProperty(PropertyLayerMapValueApplyId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Apply, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
+                        new DoubleProperty(PropertyLayerMapValueApplyRateId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_ApplyRate, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new EnumProperty(PropertyLayerMapLayerColorChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_LayerColor_Channel, typeof(SphereGridLayerMapLayerColorType), typeof(LanguageResourceDictionary), SphereGridLayerMapLayerColorType.RGB, selectBoxWidth: 90.0)
                     ])),
                     new AppendablePropertyItem(PropertyLayerMapSizeItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Size, () => new PropertyGroup(PropertyLayerMapSizeItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Size,
@@ -297,36 +302,40 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         new UseLayerImageProperty(PropertyLayerMapValueLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Layer, selectBoxWidth: 90.0),
                         new CheckBoxProperty(PropertyLayerMapValueUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime, false),
                         new DoubleProperty(PropertyLayerMapValueSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                        new EnumProperty(PropertyLayerMapValueLayerPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_LayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueMapDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_MapDirection, typeof(SphereGridLayerMapDirectionType), typeof(LanguageResourceDictionary), SphereGridLayerMapDirectionType.XY, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Channel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.Luminance, selectBoxWidth: 90.0),
-                        new DoubleProperty(PropertyLayerMapValueApplyId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Apply, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
+                        new DoubleProperty(PropertyLayerMapValueApplyRateId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_ApplyRate, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                     ])),
                     new AppendablePropertyItem(PropertyLayerMapOpacityItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Opacity, () => new PropertyGroup(PropertyLayerMapOpacityItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Opacity,
                     [
                         new UseLayerImageProperty(PropertyLayerMapValueLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Layer, selectBoxWidth: 90.0),
                         new CheckBoxProperty(PropertyLayerMapValueUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime, false),
                         new DoubleProperty(PropertyLayerMapValueSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                        new EnumProperty(PropertyLayerMapValueLayerPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_LayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueMapDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_MapDirection, typeof(SphereGridLayerMapDirectionType), typeof(LanguageResourceDictionary), SphereGridLayerMapDirectionType.XY, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Channel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.Luminance, selectBoxWidth: 90.0),
-                        new DoubleProperty(PropertyLayerMapValueApplyId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Apply, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
+                        new DoubleProperty(PropertyLayerMapValueApplyRateId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_ApplyRate, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                     ])),
                     new AppendablePropertyItem(PropertyLayerMapScatteringItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Scattering, () => new PropertyGroup(PropertyLayerMapScatteringItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Scattering,
                     [
                         new UseLayerImageProperty(PropertyLayerMapValueLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Layer, selectBoxWidth: 90.0),
                         new CheckBoxProperty(PropertyLayerMapValueUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime, false),
                         new DoubleProperty(PropertyLayerMapValueSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                        new EnumProperty(PropertyLayerMapValueLayerPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_LayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueMapDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_MapDirection, typeof(SphereGridLayerMapDirectionType), typeof(LanguageResourceDictionary), SphereGridLayerMapDirectionType.XY, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Channel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.Luminance, selectBoxWidth: 90.0),
-                        new DoubleProperty(PropertyLayerMapValueApplyId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Apply, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
+                        new DoubleProperty(PropertyLayerMapValueApplyRateId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_ApplyRate, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                     ])),
                     new AppendablePropertyItem(PropertyLayerMapFractalNoiseItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_FractalNoise, () => new PropertyGroup(PropertyLayerMapFractalNoiseItemId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_FractalNoise,
                     [
                         new UseLayerImageProperty(PropertyLayerMapValueLayerId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Layer, selectBoxWidth: 90.0),
                         new CheckBoxProperty(PropertyLayerMapValueUseSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime, false),
                         new DoubleProperty(PropertyLayerMapValueSpecificReferenceTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_SpecificReferenceTime, 0.0, 0.0, double.MaxValue, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                        new EnumProperty(PropertyLayerMapValueLayerPositionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_LayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueMapDirectionId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_MapDirection, typeof(SphereGridLayerMapDirectionType), typeof(LanguageResourceDictionary), SphereGridLayerMapDirectionType.XY, selectBoxWidth: 90.0),
                         new EnumProperty(PropertyLayerMapValueChannelId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Channel, typeof(WithHSLLOnOffChannelType), typeof(LanguageResourceDictionary), WithHSLLOnOffChannelType.Luminance, selectBoxWidth: 90.0),
-                        new DoubleProperty(PropertyLayerMapValueApplyId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_Apply, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
+                        new DoubleProperty(PropertyLayerMapValueApplyRateId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_LayerMap_Value_ApplyRate, 0.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent)
                     ])),
                 ], useEnableSwitch: true),
                 new PropertyGroup(PropertyRenderingGroupId, LanguageResourceDictionary.ResourceKeys.Simulation_SphereGrid_Rendering,
@@ -353,7 +362,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var layerMap = properties.First(p => p.Id == PropertyLayerMapId).GetChildren() ?? [];
             var renderGroup = properties.First(p => p.Id == PropertyRenderingGroupId).GetChildren() ?? [];
 
-            var spheres = GenerateSpheres(arrangementGroup, particleGroup, fractalNoiseGroup, layerTime, image.Width, image.Height, downSamplingRateX, downSamplingRateY);
+            var (gridSize, spheres) = GenerateSpheres(arrangementGroup, particleGroup, fractalNoiseGroup, layerTime, image.Width, image.Height, downSamplingRateX, downSamplingRateY);
             if (spheres.Length < 1)
             {
                 if (renderGroup.GetValue(PropertyRenderingParticleOnlyId, layerTime, false))
@@ -378,6 +387,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             ApplyGraphMap(spheres, graphMap, layerTime);
+            ApplyLayerMap(spheres, layerMap, composition, gridSize, layerTime, downSamplingRateX, useGpu);
 
             var transformMatrix = Matrix4x4d.AffineTransform(
                 transformGroup.GetValue(PropertyTransformAnchorPointId, layerTime, Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0) / renderSize,
@@ -411,14 +421,14 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             for (var i = 0; i < spheres.Length; i++)
             {
                 var s = spheres[i];
-                var radius = s.Radius * s.InfluenceRadius * double.Lerp(1.0, s.FractalNoiseValue, s.FractalNoiseSizeApplyRate);
+                var radius = s.Radius * s.InfluenceRadius * double.Lerp(1.0, s.FractalNoiseValue, double.Lerp(0.0, s.FractalNoiseSizeApplyRate, s.InfluenceFractalNoise));
                 if (radius <= 0.0)
                 {
                     continue;
                 }
                 var color = s.Color;
-                color.W *= float.Lerp(1.0F, s.FractalNoiseValue, s.FractalNoiseOpacityApplyRate);
-                var pos = s.Position + s.ScatteringPosition * s.InfluenceScattering * double.Lerp(1.0, s.FractalNoiseValue, s.FractalNoiseScatteringApplyRate) + s.FractalNoiseDisplacement * (s.FractalNoiseValue - 0.5) * 2.0;
+                color.W *= float.Lerp(1.0F, s.FractalNoiseValue, float.Lerp(0.0F, s.FractalNoiseOpacityApplyRate, s.InfluenceFractalNoise));
+                var pos = s.Position + s.ScatteringPosition * s.InfluenceScattering * double.Lerp(1.0, s.FractalNoiseValue, double.Lerp(0.0, s.FractalNoiseScatteringApplyRate, s.InfluenceFractalNoise)) + s.FractalNoiseDisplacement * (s.FractalNoiseValue - 0.5) * 2.0 * s.InfluenceFractalNoise;
                 renderer.AddSphere(pos, color, radius, s.Softness);
             }
 
@@ -456,7 +466,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         public void Dispose() { }
 
-        static Sphere[] GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, IReadOnlyCollection<IPropertyObject> fractalNoiseGroup, in Time layerTime, int imageWidth, int imageHeight, double downSamplingRateX, double downSamplingRateY)
+        static (Vector3d gridSize, Sphere[] spheres) GenerateSpheres(IReadOnlyCollection<IPropertyObject> arrangementGroup, IReadOnlyCollection<IPropertyObject> particleGroup, IReadOnlyCollection<IPropertyObject> fractalNoiseGroup, in Time layerTime, int imageWidth, int imageHeight, double downSamplingRateX, double downSamplingRateY)
         {
             var downSamplingRateVector = new Vector3d(downSamplingRateX, downSamplingRateY, imageWidth > imageHeight ? downSamplingRateX : downSamplingRateY);
             var particleSize = particleGroup.GetValue(PropertyParticleSizeId, layerTime, 0.0) * 0.5 / downSamplingRateX;
@@ -466,7 +476,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             var particleCountZ = (int)particleCount.Z;
             if (particleCountX < 1 || particleCountY < 0 || particleCountZ < 0 || particleSize <= 0.0)
             {
-                return [];
+                return (Vector3d.Zero, []);
             }
 
             var softness = (float)(particleGroup.GetValue(PropertyParticleSoftnessId, layerTime, 0.0) * 0.01);
@@ -590,7 +600,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 });
             }
 
-            return spheres;
+            return (gridSize, spheres);
         }
 
         static void ApplyGraphMap(Sphere[] spheres, IReadOnlyCollection<IPropertyObject> graphMap, in Time layerTime)
@@ -640,6 +650,511 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         });
                         break;
                 }
+            }
+        }
+
+        static void ApplyLayerMap(Sphere[] spheres, IReadOnlyCollection<IPropertyObject> layerMap, ICompositionObject composition, Vector3d gridSize, in Time layerTime, double downSamplingRate, bool useGpu)
+        {
+            var imageCache = new Dictionary<LayerMapCacheKey, NManagedImage>();
+
+            foreach (var map in layerMap.Where(p => p.IsEnable))
+            {
+                var layerMapProperties = map.GetChildren() ?? [];
+                var mapDirection = layerMapProperties.GetValue(PropertyLayerMapValueMapDirectionId, layerTime, SphereGridLayerMapDirectionType.None);
+                if (mapDirection == SphereGridLayerMapDirectionType.None)
+                {
+                    continue;
+                }
+                var layerKey = layerMapProperties.GetValue(PropertyLayerMapValueLayerId, layerTime, UseLayerImageTarget.Empty);
+                if (layerKey == UseLayerImageTarget.Empty)
+                {
+                    continue;
+                }
+
+                var useSpecificReferenceTime = layerMapProperties.GetValue(PropertyLayerMapValueUseSpecificReferenceTimeId, layerTime, false);
+                var referenceTime = useSpecificReferenceTime ? layerMapProperties.GetValue(PropertyLayerMapValueSpecificReferenceTimeId, layerTime, Time.Zero) : layerTime;
+                var cacheKey = new LayerMapCacheKey(layerKey.LayerId, referenceTime);
+                if (!imageCache.ContainsKey(cacheKey))
+                {
+                    var image = layerKey.GetImage(composition, referenceTime, downSamplingRate, useGpu);
+                    if (image == null)
+                    {
+                        continue;
+                    }
+
+                    var managedImage = image.ToManaged();
+                    imageCache.Add(cacheKey, managedImage);
+
+                    if (image != managedImage)
+                    {
+                        image.Dispose();
+                    }
+                }
+
+                var mapImage = imageCache[cacheKey];
+
+                switch (map.Id)
+                {
+                    case PropertyLayerMapDisplacementItemId:
+                        ApplyDisplacementLayerMap(spheres, mapDirection, layerMapProperties, mapImage, gridSize, layerTime);
+                        break;
+                    case PropertyLayerMapLayerColorItemId:
+                        ApplyLayerColorLayerMap(spheres, mapDirection, layerMapProperties, mapImage, gridSize, layerTime);
+                        break;
+                    case PropertyLayerMapSizeItemId:
+                        ApplyLayerMapAction(spheres, mapDirection, layerMapProperties, mapImage, gridSize, layerTime, static (Sphere s, float value, float applyRate) => s.InfluenceRadius *= float.Lerp(1.0F, value, applyRate));
+                        break;
+                    case PropertyLayerMapOpacityItemId:
+                        ApplyLayerMapAction(spheres, mapDirection, layerMapProperties, mapImage, gridSize, layerTime, static (Sphere s, float value, float applyRate) => s.Color *= new Vector4(1.0F, 1.0F, 1.0F, float.Lerp(1.0F, value, applyRate)));
+                        break;
+                    case PropertyLayerMapScatteringItemId:
+                        ApplyLayerMapAction(spheres, mapDirection, layerMapProperties, mapImage, gridSize, layerTime, static (Sphere s, float value, float applyRate) => s.InfluenceScattering *= float.Lerp(1.0F, value, applyRate));
+                        break;
+                    case PropertyLayerMapFractalNoiseItemId:
+                        ApplyLayerMapAction(spheres, mapDirection, layerMapProperties, mapImage, gridSize, layerTime, static (Sphere s, float value, float applyRate) => s.InfluenceFractalNoise *= float.Lerp(1.0F, value, applyRate));
+                        break;
+                }
+            }
+
+            foreach (var image in imageCache.Values)
+            {
+                image.Dispose();
+            }
+        }
+
+        static void ApplyDisplacementLayerMap(Sphere[] spheres, SphereGridLayerMapDirectionType mapDirection, IReadOnlyCollection<IPropertyObject> layerMapProperties, NManagedImage mapImage, Vector3d gridSize, in Time layerTime)
+        {
+            var displacement = layerMapProperties.GetValue(PropertyLayerMapDisplacementMoveId, layerTime, Vector3d.Zero);
+            if (displacement == Vector3d.Zero)
+            {
+                return;
+            }
+
+            var channelX = layerMapProperties.GetValue(PropertyLayerMapDisplacementXChannelId, layerTime, WithHSLLOnOffChannelType.Luminance);
+            var channelY = layerMapProperties.GetValue(PropertyLayerMapDisplacementYChannelId, layerTime, WithHSLLOnOffChannelType.Luminance);
+            var channelZ = layerMapProperties.GetValue(PropertyLayerMapDisplacementZChannelId, layerTime, WithHSLLOnOffChannelType.Luminance);
+            if (channelX == WithHSLLOnOffChannelType.Half && channelY == WithHSLLOnOffChannelType.Half && channelZ == WithHSLLOnOffChannelType.Half)
+            {
+                return;
+            }
+
+            var layerPosition = layerMapProperties.GetValue(PropertyLayerMapValueLayerPositionId, layerTime, SourceLayerPositionType.Center);
+            var gridCenter = gridSize * 0.5;
+
+            switch (mapDirection)
+            {
+                case SphereGridLayerMapDirectionType.XY:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.X) * 0.5, (mapImage.Height - gridSize.Y) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.X - 1.0), (mapImage.Height - 1) / (gridSize.Y - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            var sourceDataSpan = mapImage.GetDataSpan();
+                            var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                            var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Y + gridCenter.Y));
+
+                            var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                            s.Position += new Vector3d(
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelX),
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelY),
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelZ)
+                            ) * displacement;
+                        });
+                    }
+                    break;
+                case SphereGridLayerMapDirectionType.XZ:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.X) * 0.5, (mapImage.Height - gridSize.Z) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.X - 1.0), (mapImage.Height - 1) / (gridSize.Z - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            var sourceDataSpan = mapImage.GetDataSpan();
+                            var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                            var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                            var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                            s.Position += new Vector3d(
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelX),
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelY),
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelZ)
+                            ) * displacement;
+                        });
+                    }
+                    break;
+                case SphereGridLayerMapDirectionType.YZ:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.Y) * 0.5, (mapImage.Height - gridSize.Z) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.Y - 1.0), (mapImage.Height - 1) / (gridSize.Z - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            var sourceDataSpan = mapImage.GetDataSpan();
+                            var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.Y + gridCenter.Y));
+                            var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                            var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                            s.Position += new Vector3d(
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelX),
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelY),
+                                DisplacementMapGenerator.CalcMoveRate(mapColor, channelZ)
+                            ) * displacement;
+                        });
+                    }
+                    break;
+            }
+        }
+
+        static void ApplyLayerColorLayerMap(Sphere[] spheres, SphereGridLayerMapDirectionType mapDirection, IReadOnlyCollection<IPropertyObject> layerMapProperties, NManagedImage mapImage, Vector3d gridSize, in Time layerTime)
+        {
+            var applyColorChannel = layerMapProperties.GetValue(PropertyLayerMapLayerColorChannelId, layerTime, SphereGridLayerMapLayerColorType.None);
+            var applyRate = (float)(layerMapProperties.GetValue(PropertyLayerMapValueApplyRateId, layerTime, 0.0) * 0.01);
+            if (applyColorChannel == SphereGridLayerMapLayerColorType.None || applyRate <= 0.0F)
+            {
+                return;
+            }
+
+            var layerPosition = layerMapProperties.GetValue(PropertyLayerMapValueLayerPositionId, layerTime, SourceLayerPositionType.Center);
+            var gridCenter = gridSize * 0.5;
+
+            switch (mapDirection)
+            {
+                case SphereGridLayerMapDirectionType.XY:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.X) * 0.5, (mapImage.Height - gridSize.Y) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.X - 1.0), (mapImage.Height - 1) / (gridSize.Y - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        switch (applyColorChannel)
+                        {
+                            case SphereGridLayerMapLayerColorType.RGB:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Y + gridCenter.Y));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+                                    mapColor.W = s.Color.W;
+
+                                    s.Color = Vector4.Lerp(s.Color, mapColor, applyRate);
+                                });
+                                break;
+                            case SphereGridLayerMapLayerColorType.ARGB:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Y + gridCenter.Y));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                                    s.Color = Vector4.Lerp(s.Color, mapColor, applyRate);
+                                });
+                                break;
+                            case SphereGridLayerMapLayerColorType.A:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Y + gridCenter.Y));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+                                    var newColor = s.Color;
+                                    newColor.W = float.Lerp(newColor.W, mapColor.W, applyRate);
+
+                                    s.Color = newColor;
+                                });
+                                break;
+                        }
+                    }
+                    break;
+                case SphereGridLayerMapDirectionType.XZ:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.X) * 0.5, (mapImage.Height - gridSize.Z) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.X - 1.0), (mapImage.Height - 1) / (gridSize.Z - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        switch (applyColorChannel)
+                        {
+                            case SphereGridLayerMapLayerColorType.RGB:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+                                    mapColor.W = s.Color.W;
+
+                                    s.Color = Vector4.Lerp(s.Color, mapColor, applyRate);
+                                });
+                                break;
+                            case SphereGridLayerMapLayerColorType.ARGB:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                                    s.Color = Vector4.Lerp(s.Color, mapColor, applyRate);
+                                });
+                                break;
+                            case SphereGridLayerMapLayerColorType.A:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+                                    var newColor = s.Color;
+                                    newColor.W = float.Lerp(newColor.W, mapColor.W, applyRate);
+
+                                    s.Color = newColor;
+                                });
+                                break;
+                        }
+                    }
+                    break;
+                case SphereGridLayerMapDirectionType.YZ:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.Y) * 0.5, (mapImage.Height - gridSize.Z) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.Y - 1.0), (mapImage.Height - 1) / (gridSize.Z - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        switch (applyColorChannel)
+                        {
+                            case SphereGridLayerMapLayerColorType.RGB:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.Y + gridCenter.Y));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+                                    mapColor.W = s.Color.W;
+
+                                    s.Color = Vector4.Lerp(s.Color, mapColor, applyRate);
+                                });
+                                break;
+                            case SphereGridLayerMapLayerColorType.ARGB:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.Y + gridCenter.Y));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                                    s.Color = Vector4.Lerp(s.Color, mapColor, applyRate);
+                                });
+                                break;
+                            case SphereGridLayerMapLayerColorType.A:
+                                Parallel.For(0, spheres.Length, i =>
+                                {
+                                    var s = spheres[i];
+                                    var sourceDataSpan = mapImage.GetDataSpan();
+                                    var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.Y + gridCenter.Y));
+                                    var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                                    var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                        ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                        ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+                                    var newColor = s.Color;
+                                    newColor.W = float.Lerp(newColor.W, mapColor.W, applyRate);
+
+                                    s.Color = newColor;
+                                });
+                                break;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        static void ApplyLayerMapAction(Sphere[] spheres, SphereGridLayerMapDirectionType mapDirection, IReadOnlyCollection<IPropertyObject> layerMapProperties, NManagedImage mapImage, Vector3d gridSize, in Time layerTime, Action<Sphere, float, float> action)
+        {
+            var applyRate = (float)(layerMapProperties.GetValue(PropertyLayerMapValueApplyRateId, layerTime, 0.0) * 0.01);
+            if (applyRate <= 0.0F)
+            {
+                return;
+            }
+
+            var channel = layerMapProperties.GetValue(PropertyLayerMapValueChannelId, layerTime, WithHSLLOnOffChannelType.Luminance);
+            var layerPosition = layerMapProperties.GetValue(PropertyLayerMapValueLayerPositionId, layerTime, SourceLayerPositionType.Center);
+            var gridCenter = gridSize * 0.5;
+
+            switch (mapDirection)
+            {
+                case SphereGridLayerMapDirectionType.XY:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.X) * 0.5, (mapImage.Height - gridSize.Y) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.X - 1.0), (mapImage.Height - 1) / (gridSize.Y - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            var sourceDataSpan = mapImage.GetDataSpan();
+                            var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                            var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Y + gridCenter.Y));
+
+                            var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                            action(s, Math.Clamp(DisplacementMapGenerator.CalcMoveRate(mapColor, channel) * 0.5F + 0.5F, 0.0F, 1.0F), applyRate);
+                        });
+                    }
+                    break;
+                case SphereGridLayerMapDirectionType.XZ:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.X) * 0.5, (mapImage.Height - gridSize.Z) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.X - 1.0), (mapImage.Height - 1) / (gridSize.Z - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            var sourceDataSpan = mapImage.GetDataSpan();
+                            var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.X + gridCenter.X));
+                            var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                            var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                            action(s, Math.Clamp(DisplacementMapGenerator.CalcMoveRate(mapColor, channel) * 0.5F + 0.5F, 0.0F, 1.0F), applyRate);
+                        });
+                    }
+                    break;
+                case SphereGridLayerMapDirectionType.YZ:
+                    {
+                        var (sourceStartX, sourceStartY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => (0.0, 0.0),
+                            _ => ((mapImage.Width - gridSize.Y) * 0.5, (mapImage.Height - gridSize.Z) * 0.5)
+                        };
+                        var (sourceDiffX, sourceDiffY) = layerPosition switch
+                        {
+                            SourceLayerPositionType.Stretch => ((mapImage.Width - 1) / (gridSize.Y - 1.0), (mapImage.Height - 1) / (gridSize.Z - 1.0)),
+                            _ => (1.0, 1.0)
+                        };
+
+                        Parallel.For(0, spheres.Length, i =>
+                        {
+                            var s = spheres[i];
+                            var sourceDataSpan = mapImage.GetDataSpan();
+                            var sourceX = (float)(sourceStartX + sourceDiffX * (s.GridPosition.Y + gridCenter.Y));
+                            var sourceY = (float)(sourceStartY + sourceDiffY * (s.GridPosition.Z + gridCenter.Z));
+
+                            var mapColor = layerPosition == SourceLayerPositionType.Loop ?
+                                ImageInterpolation.BilinearLoop(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY) :
+                                ImageInterpolation.BilinearEdgeRepeat(sourceDataSpan, mapImage.Width, mapImage.Height, sourceX, sourceY);
+
+                            action(s, Math.Clamp(DisplacementMapGenerator.CalcMoveRate(mapColor, channel) * 0.5F + 0.5F, 0.0F, 1.0F), applyRate);
+                        });
+                    }
+                    break;
             }
         }
     }
@@ -1099,6 +1614,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             ArrayPool<RasterizableSphere>.Shared.Return(rasterizableSpheres);
         }
     }
+
+    file readonly record struct LayerMapCacheKey(Guid LayerId, Time layerTime);
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]

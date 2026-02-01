@@ -2197,6 +2197,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("レイヤー")]
         public const string Simulation_SphereGrid_LayerMap_Value_Layer = nameof(Simulation_SphereGrid_LayerMap_Value_Layer);
 
+        [LanguageKey, DefaultValue("レイヤーの配置")]
+        public const string Simulation_SphereGrid_LayerMap_Value_LayerPosition = nameof(Simulation_SphereGrid_LayerMap_Value_LayerPosition);
+
         [LanguageKey, DefaultValue("参照するレイヤー時間を指定する")]
         public const string Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime = nameof(Simulation_SphereGrid_LayerMap_Value_UseSpecificReferenceTime);
 
@@ -2210,7 +2213,7 @@ namespace NiVE3.PresetPlugin.Resource
         public const string Simulation_SphereGrid_LayerMap_Value_Channel = nameof(Simulation_SphereGrid_LayerMap_Value_Channel);
 
         [LanguageKey, DefaultValue("適用量")]
-        public const string Simulation_SphereGrid_LayerMap_Value_Apply = nameof(Simulation_SphereGrid_LayerMap_Value_Apply);
+        public const string Simulation_SphereGrid_LayerMap_Value_ApplyRate = nameof(Simulation_SphereGrid_LayerMap_Value_ApplyRate);
 
         [LanguageKey, DefaultValue("レンダリング")]
         public const string Simulation_SphereGrid_Rendering = nameof(Simulation_SphereGrid_Rendering);
