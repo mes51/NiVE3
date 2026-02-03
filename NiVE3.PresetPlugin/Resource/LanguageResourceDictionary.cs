@@ -1572,8 +1572,11 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("Unmult")]
         public const string Channel_Unmult_Name = nameof(Channel_Unmult_Name);
 
-        [DefaultValue("黒背景に合成された画像からαを復元します")]
+        [DefaultValue("黒、または白背景に合成された画像からαを復元します")]
         public const string Channel_Unmult_Description = nameof(Channel_Unmult_Description);
+
+        [LanguageKey, DefaultValue("背景色")]
+        public const string Channel_Unmult_BackgroundColor = nameof(Channel_Unmult_BackgroundColor);
 
         // SolidComposite
 
@@ -3121,6 +3124,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("A")]
         public const string SphereGridLayerMapLayerColorType_A = nameof(SphereGridLayerMapLayerColorType_A);
+
+        [DefaultValue("黒")]
+        public const string UnmultBackgroundType_Black = nameof(UnmultBackgroundType_Black);
+
+        [DefaultValue("白")]
+        public const string UnmultBackgroundType_White = nameof(UnmultBackgroundType_White);
 
         // unit
 

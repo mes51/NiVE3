@@ -12,8 +12,10 @@ using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Property;
+using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Internal;
 using NiVE3.PresetPlugin.Resource;
 using NiVE3.Shared.Extension;
@@ -26,6 +28,8 @@ namespace NiVE3.PresetPlugin.Effect.Channel
     {
         const string ID = "D8C5C374-9A30-44E3-9FED-14558B777736";
 
+        const string PropertyBackgroundColorId = nameof(PropertyBackgroundColorId);
+
         IAcceleratorObject? AcceleratorObject { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
@@ -35,18 +39,30 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
-            return [];
+            return
+            [
+                new EnumProperty(PropertyBackgroundColorId, LanguageResourceDictionary.ResourceKeys.Channel_Unmult_BackgroundColor, typeof(UnmultBackgroundType), typeof(LanguageResourceDictionary), UnmultBackgroundType.Black, selectBoxWidth: 90.0)
+            ];
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
+            var backgroundColor = properties.GetValue(PropertyBackgroundColorId, layerTime, UnmultBackgroundType.Black);
+
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, backgroundColor);
             }
             else
             {
-                return ProcessCpu(image, roi);
+                if (backgroundColor == UnmultBackgroundType.White)
+                {
+                    return ProcessCpuWhite(image, roi);
+                }
+                else
+                {
+                    return ProcessCpuBlack(image, roi);
+                }
             }
         }
 
@@ -57,7 +73,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi)
+        static NManagedImage ProcessCpuBlack(NImage image, ROI roi)
         {
             var managedImage = image.ToManaged();
 
@@ -107,12 +123,72 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi)
+        static NManagedImage ProcessCpuWhite(NImage image, ROI roi)
+        {
+            var managedImage = image.ToManaged();
+
+            var imageData = managedImage.Data;
+            Parallel.For(roi.Top, roi.Bottom, y =>
+            {
+                var imageDataSpan = imageData.AsSpan(y * managedImage.Width, managedImage.Width);
+                for (var x = roi.Left; x < roi.Right; x++)
+                {
+                    var c = imageDataSpan[x];
+                    var ca = c.W;
+                    c = Vector4.One - c;
+                    c.W = ca;
+                    c *= ca;
+
+                    var irate = c.HorizontalMaxBy3Element();
+                    if (irate <= 0.0F)
+                    {
+                        imageDataSpan[x] = new Vector4(1.0F, 1.0F, 1.0F, 0.0F);
+                        continue;
+                    }
+
+                    var t = c / irate;
+                    var ta = 0.0F;
+                    if (t.X > 0.0F)
+                    {
+                        ta = c.X / t.X;
+                    }
+                    else if (t.Y > 0.0F)
+                    {
+                        ta = c.Y / t.Y;
+                    }
+                    else if (t.Z > 0.0F)
+                    {
+                        ta = c.Z / t.Z;
+                    }
+
+                    if (ta > 0.0F)
+                    {
+                        t = Vector4.One - t;
+                        t.W = ta;
+                        imageDataSpan[x] = t;
+                    }
+                    else
+                    {
+                        imageDataSpan[x] = new Vector4(1.0F, 1.0F, 1.0F, 0.0F);
+                    }
+                }
+            });
+
+            return managedImage;
+        }
+
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, UnmultBackgroundType backgroundColor)
         {
             var gpuImage = image.ToGpu(device);
 
-            using var context = device.CreateComputeContext();
-            context.For(roi.Width, roi.Height, new UnmultProcess(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top));
+            if (backgroundColor == UnmultBackgroundType.White)
+            {
+                device.For(roi.Width, roi.Height, new UnmultProcessWhite(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top));
+            }
+            else
+            {
+                device.For(roi.Width, roi.Height, new UnmultProcessBlack(gpuImage.Data, gpuImage.Width, roi.Left, roi.Top));
+            }
 
             return gpuImage;
         }
@@ -120,7 +196,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct UnmultProcess(ReadWriteBuffer<Float4> image, int width, int startX, int startY) : IComputeShader
+    readonly partial struct UnmultProcessBlack(ReadWriteBuffer<Float4> image, int width, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -160,5 +236,57 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                 image[pos] = Const.EmptyPixelFloat4;
             }
         }
+    }
+
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct UnmultProcessWhite(ReadWriteBuffer<Float4> image, int width, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+            var c = image[pos];
+            c = new Float4(1.0F - c.XYZ, c.W);
+            c *= c.W;
+
+            var irate = Hlsl.Max(Hlsl.Max(c.X, c.Y), c.Z);
+            if (irate <= 0.0F)
+            {
+                image[pos] = Const.EmptyPixelFloat4;
+                return;
+            }
+
+            var t = c / irate;
+            var tav = c / t;
+            var ta = 0.0F;
+            if (t.X > 0.0F)
+            {
+                ta = tav.X;
+            }
+            else if (t.Y > 0.0F)
+            {
+                ta = tav.Y;
+            }
+            else if (t.Z > 0.0F)
+            {
+                ta = tav.Z;
+            }
+
+            if (ta > 0.0F)
+            {
+                image[pos] = new Float4(1.0F - t.XYZ, ta);
+            }
+            else
+            {
+                image[pos] = Const.EmptyPixelFloat4;
+            }
+        }
+    }
+
+    enum UnmultBackgroundType
+    {
+        Black,
+        White
     }
 }
