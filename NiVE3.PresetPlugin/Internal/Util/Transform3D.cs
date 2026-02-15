@@ -43,6 +43,33 @@ namespace NiVE3.PresetPlugin.Internal.Util
             return matrix;
         }
 
+        public static Matrix4x4d Calc3DParentModelMatrix(ParentTransform[] parentTransforms, double renderWidth, double renderHeight)
+        {
+            var size = Math.Max(renderWidth, renderHeight);
+            var matrix = Matrix4x4d.Identity;
+
+            foreach (var (type, parentTransform) in parentTransforms)
+            {
+                switch (type)
+                {
+                    case ParentType.Camera:
+                        matrix *= GetInvertedCameraMatrix(parentTransform, renderWidth, renderHeight);
+                        break;
+                    case ParentType.SpotOrParallelLight:
+                    case ParentType.PointLight:
+                        matrix *= GetLightMatrix(type == ParentType.SpotOrParallelLight ? LightType.Spot : LightType.Point, parentTransform, renderWidth, renderHeight);
+                        break;
+                    case ParentType.AmbientLight:
+                        break;
+                    default:
+                        matrix *= GetTransform3D(parentTransform, size);
+                        break;
+                }
+            }
+
+            return matrix;
+        }
+
         public static Matrix4x4d Calc3DViewMatrix(CameraSetting cameraSetting, double renderWidth, double renderHeight)
         {
             var size = Math.Max(renderWidth, renderHeight);

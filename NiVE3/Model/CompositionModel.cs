@@ -437,7 +437,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeTrackMatteModeHistoryCommand(layers, oldValues, mode));
         }
 
-        public void ChangeParentLayer(Guid[] layerIds, Guid? targetLayerId)
+        public void ChangeParentLayer(Guid[] layerIds, Guid? targetLayerId, Time time)
         {
             if (targetLayerId.HasValue)
             {
@@ -463,20 +463,38 @@ namespace NiVE3.Model
             {
                 layers.AddRange(Layers.Where(l => layerIds.Contains(l.LayerId)).OrderBy(Layers.IndexOf));
             }
+
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+
             var oldValues = layers.Select(l => l.ParentLayerId).ToArray();
+            var oldParentTransforms = layers.Select(l => GetParentTransforms(l.ParentLayerId, time));
 
             // NOTE: プレビュー中の無限ループ回避用
             foreach (var l in layers)
             {
                 l.ParentLayerId = null;
             }
+            var newParentTransform = GetParentTransforms(targetLayerId, time);
 
-            foreach (var l in layers)
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangeParentLayer));
+
+            foreach (var (l, oldParentTransform) in layers.Zip(oldParentTransforms))
             {
                 l.ParentLayerId = targetLayerId;
+                var newTransform = Transformer.CalcNewParentLocalTransform(l.IsEnable3D, l.GetTransform(time), oldParentTransform, newParentTransform);
+                if (newTransform != null)
+                {
+                    l.UpdateTransformByChangeParent(newTransform, time);
+                }
             }
 
             HistoryModel.Add(new ChangeParentLayerHistoryCommand([..layers], oldValues, targetLayerId));
+
+            HistoryModel.EndGroup();
         }
 
         public bool CheckCycledParentLayer(Guid layerId, Guid targetLayerId)
@@ -939,11 +957,11 @@ namespace NiVE3.Model
                     var (origin, width, height) = layer.GetSourceFootageRect(time, false);
                     if (layer.IsEnable3D)
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetBoundingBox3D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time), activeCameraSetting), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetBoundingBox3D(origin, width, height, layer.GetTransform(time), GetParentTransforms(layer.ParentLayerId, time), activeCameraSetting), layer.TagColor));
                     }
                     else
                     {
-                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetBoundingBox2D(origin, width, height, layer.GetTransform(time), layer.GetParentTransforms(time)), layer.TagColor));
+                        result.Add(new ColoredPreviewBoundingBox(Transformer.GetBoundingBox2D(origin, width, height, layer.GetTransform(time), GetParentTransforms(layer.ParentLayerId, time)), layer.TagColor));
                     }
                 }
             }
@@ -1800,6 +1818,51 @@ namespace NiVE3.Model
             return Layers.Any(l => l.LayerId == layerId);
         }
 
+        public ParentTransform[] GetParentTransforms(Guid? parentLayerId, Time time)
+        {
+            var parentTransforms = new List<ParentTransform>();
+            var parentId = parentLayerId;
+            while (parentId != null)
+            {
+                var parent = Layers.FirstOrDefault(l => l.LayerId == parentId.Value);
+                if (parent == null)
+                {
+                    break;
+                }
+
+                if (parent.IsCamera)
+                {
+                    parentTransforms.Add(new ParentTransform(ParentType.Camera, parent.GetTransform(time)));
+                }
+                else if (parent.IsLight)
+                {
+                    var options = parent.GetLayerOptions(time);
+                    if (options == null)
+                    {
+                        continue;
+                    }
+                    var parentType = ((LightType)(options[ILayerObject.LightLayerOptionLightTypeId] ?? LightType.Spot)) switch
+                    {
+                        LightType.Point => ParentType.PointLight,
+                        LightType.Ambient => ParentType.AmbientLight,
+                        _ => ParentType.SpotOrParallelLight
+                    };
+                    parentTransforms.Add(new ParentTransform(parentType, parent.GetTransform(time)));
+                }
+                else if (parent.IsNullObject)
+                {
+                    parentTransforms.Add(new ParentTransform(ParentType.NullObject, parent.GetTransform(time)));
+                }
+                else
+                {
+                    parentTransforms.Add(new ParentTransform(ParentType.Normal, parent.GetTransform(time)));
+                }
+                parentId = parent.ParentLayerId;
+            }
+
+            return [.. parentTransforms];
+        }
+
         public void UpdatePropertyForImport(Dictionary<Guid, Guid> layerIdMap, Dictionary<Guid, Dictionary<Guid, Guid>> effectIdMaps, Dictionary<Guid, Dictionary<Guid, Guid>> maskIdMaps)
         {
             foreach (var layer in Layers)
@@ -2092,7 +2155,7 @@ namespace NiVE3.Model
             var childLayers = removeLayers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
             if (childLayers.Length > 0)
             {
-                ChangeParentLayer(childLayers, null);
+                ChangeParentLayer(childLayers, null, CurrentTime);
             }
 
             var trackMatteChildLayers = removeLayers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();

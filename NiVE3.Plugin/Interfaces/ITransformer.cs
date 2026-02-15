@@ -23,6 +23,34 @@ namespace NiVE3.Plugin.Interfaces
         void SetSize(int width, int height);
 
         /// <summary>
+        /// 親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
+        /// </summary>
+        /// <param name="isEnable3D">対象のレイヤーが3Dレイヤーかどうか</param>
+        /// <param name="childTransform">親が変わる子のトランスフォーム</param>
+        /// <param name="oldParentTransform">古い親のトランスフォーム</param>
+        /// <param name="newParentTransform">新しい親のトランスフォーム</param>
+        /// <returns>新しい親の元でのローカル座標。計算できない場合はnull</returns>
+        DecomposedTransform? CalcNewParentLocalTransform(bool isEnable3D, PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
+
+        /// <summary>
+        /// カメラ親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
+        /// </summary>
+        /// <param name="childTransform">親が変わる子のトランスフォーム</param>
+        /// <param name="oldParentTransform">古い親のトランスフォーム</param>
+        /// <param name="newParentTransform">新しい親のトランスフォーム</param>
+        /// <returns>新しい親の元でのローカル座標。計算できない場合はnull</returns>
+        DecomposedTransform? CalcNewParentCameraLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
+
+        /// <summary>
+        /// ライト親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
+        /// </summary>
+        /// <param name="childTransform">親が変わる子のトランスフォーム</param>
+        /// <param name="oldParentTransform">古い親のトランスフォーム</param>
+        /// <param name="newParentTransform">新しい親のトランスフォーム</param>
+        /// <returns>新しい親の元でのローカル座標。計算できない場合はnull</returns>
+        DecomposedTransform? CalcNewParentLightLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
+
+        /// <summary>
         /// 2Dレイヤーのバウンディングボックスを取得します
         /// </summary>
         /// <param name="origin">フッテージ画像の位置</param>

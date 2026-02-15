@@ -320,5 +320,14 @@ namespace NiVE3.Numerics
             a.Z *= s;
             return a;
         }
+
+        public static (Vector2 position, Vector2 scale, float angle) Decompose(in Matrix3x3 matrix)
+        {
+            var scaleX = MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
+            var scaleY = MathF.Sqrt(matrix.M21 * matrix.M21 + matrix.M22 * matrix.M22);
+            var angle = MathF.Atan2(matrix.M12, matrix.M11) / MathF.PI * 180.0F;
+
+            return (new Vector2(matrix.M31, matrix.M32), new Vector2(scaleX, scaleY), angle);
+        }
     }
 }

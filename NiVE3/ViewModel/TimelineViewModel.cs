@@ -2090,7 +2090,7 @@ namespace NiVE3.ViewModel
                 targetLayers.AddRange(SelectedLayers);
             }
 
-            CompositionModel.ChangeParentLayer(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId);
+            CompositionModel.ChangeParentLayer(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId, CurrentTime);
         }
 
         private void ViewModel_CheckCycledParentLayerRequest(object? sender, CycledLayerEventArgs e)

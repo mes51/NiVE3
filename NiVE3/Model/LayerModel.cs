@@ -677,7 +677,7 @@ namespace NiVE3.Model
                 InterpolationQuality,
                 BlendMode,
                 transform,
-                GetParentTransforms(time),
+                CompositionModel.GetParentTransforms(ParentLayerId, time),
                 LayerOptionProperties?.GetValues(layerTime, time),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
@@ -719,7 +719,7 @@ namespace NiVE3.Model
                 InterpolationQuality,
                 BlendMode,
                 transform,
-                GetParentTransforms(time),
+                CompositionModel.GetParentTransforms(ParentLayerId, time),
                 LayerOptionProperties?.GetValues(layerTime, time),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
@@ -747,7 +747,7 @@ namespace NiVE3.Model
                 InterpolationQuality,
                 BlendMode,
                 GetTransform(time),
-                GetParentTransforms(time),
+                CompositionModel.GetParentTransforms(ParentLayerId, time),
                 LayerOptionProperties?.GetValues(layerTime, time),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
@@ -975,7 +975,7 @@ namespace NiVE3.Model
                 (double)(transform[ILayerObject.TransformYAngleId] ?? 0.0),
                 (double)(transform[ILayerObject.TransformZAngleId] ?? 0.0),
                 (double)(options?[ILayerObject.CameraLayerOptionZoomId] ?? 0.0),
-                GetParentTransforms(time)
+                CompositionModel.GetParentTransforms(ParentLayerId, time)
             );
         }
 
@@ -1011,7 +1011,7 @@ namespace NiVE3.Model
                 (bool)(options[ILayerObject.LightLayerOptionEnableShadowId] ?? false),
                 (double)(options[ILayerObject.LightLayerOptionShadowStrengthId] ?? 0.0),
                 (double)(options[ILayerObject.LightLayerOptionShadowScatterSizeId] ?? 0.0),
-                GetParentTransforms(time)
+                CompositionModel.GetParentTransforms(ParentLayerId, time)
             );
         }
 
@@ -1035,51 +1035,6 @@ namespace NiVE3.Model
         {
             var layerTime = time - SourceStartPoint;
             return TextProperties?.GetValues(layerTime, time, true);
-        }
-
-        public ParentTransform[] GetParentTransforms(Time time)
-        {
-            var parentTransforms = new List<ParentTransform>();
-            var parentId = ParentLayerId;
-            while (parentId != null)
-            {
-                var parent = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == parentId.Value);
-                if (parent == null)
-                {
-                    break;
-                }
-
-                if (parent.IsCamera)
-                {
-                    parentTransforms.Add(new ParentTransform(ParentType.Camera, parent.GetTransform(time)));
-                }
-                else if (parent.IsLight)
-                {
-                    var options = parent.GetLayerOptions(time);
-                    if (options == null)
-                    {
-                        continue;
-                    }
-                    var parentType = ((LightType)(options[ILayerObject.LightLayerOptionLightTypeId] ?? LightType.Spot)) switch
-                    {
-                        LightType.Point => ParentType.PointLight,
-                        LightType.Ambient => ParentType.AmbientLight,
-                        _ => ParentType.SpotOrParallelLight
-                    };
-                    parentTransforms.Add(new ParentTransform(parentType, parent.GetTransform(time)));
-                }
-                else if (parent.IsNullObject)
-                {
-                    parentTransforms.Add(new ParentTransform(ParentType.NullObject, parent.GetTransform(time)));
-                }
-                else
-                {
-                    parentTransforms.Add(new ParentTransform(ParentType.Normal, parent.GetTransform(time)));
-                }
-                parentId = parent.ParentLayerId;
-            }
-
-            return [..parentTransforms];
         }
 
         public SourceFootageRect GetSourceFootageRect(Time time, bool withInvisible)
@@ -1107,7 +1062,7 @@ namespace NiVE3.Model
             var sourceTime = CalcSourceTime(layerTime);
 
             var transform = GetTransform(time);
-            var parentTransforms = GetParentTransforms(time);
+            var parentTransforms = CompositionModel.GetParentTransforms(ParentLayerId, time);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
             var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, false, this, sourceOptionProperties);
 
@@ -1120,7 +1075,7 @@ namespace NiVE3.Model
             var sourceTime = CalcSourceTime(layerTime);
 
             var transform = GetTransform(time);
-            var parentTransforms = GetParentTransforms(time);
+            var parentTransforms = CompositionModel.GetParentTransforms(ParentLayerId, time);
             var sourceOptionProperties = (TextProperties ?? ShapeProperties ?? SourceOptionProperties)?.GetValues(sourceTime, time, true);
             var rect = FootageModel.CalcSize(sourceTime, CompositionModel.Width, CompositionModel.Height, false, this, sourceOptionProperties);
 
@@ -1172,7 +1127,7 @@ namespace NiVE3.Model
             }
 
             LayerOptionProperties?.GetValues(layerTime, time)?.CalcHash(hash);
-            foreach (var pt in GetParentTransforms(time))
+            foreach (var pt in CompositionModel.GetParentTransforms(ParentLayerId, time))
             {
                 hash.Append(pt.ParentType);
                 pt.Transform.CalcHash(hash);
@@ -2062,6 +2017,39 @@ namespace NiVE3.Model
             bothProperty.ReplaceAllKeyFrames(bothKeyFrames);
 
             HistoryModel.EndGroup();
+        }
+
+        public void UpdateTransformByChangeParent(DecomposedTransform decomposedTransform, Time time)
+        {
+            if (TransformProperties == null)
+            {
+                return;
+            }
+
+            switch (FootageModel.InputModel.Input)
+            {
+                case NullObjectInput:
+                    break;
+                case CameraInput:
+                    break;
+                case LightInput:
+                    break;
+                default:
+                    {
+                        var translate = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
+                        var direction = TransformProperties.FindProperty(ILayerObject.TransformDirectionId) as PropertyModel;
+                        var scale = TransformProperties.FindProperty(ILayerObject.TransformScaleId) as PropertyModel;
+
+                        HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+
+                        translate?.CommitProperty(decomposedTransform.Position, translate?.GetValue(time - SourceStartPoint, time));
+                        direction?.CommitProperty(decomposedTransform.Direction, direction?.GetValue(time - SourceStartPoint, time));
+                        scale?.CommitProperty(decomposedTransform.Scale, scale?.GetValue(time - SourceStartPoint, time));
+
+                        HistoryModel.EndGroup();
+                    }
+                    break;
+            }
         }
 
         void DeleteEffectInternal(Guid[] effectIds, bool isCut)

@@ -37,6 +37,71 @@ namespace NiVE3.PresetPlugin.Renderer
             Height = height;
         }
 
+        public DecomposedTransform? CalcNewParentLocalTransform(bool isEnable3D, PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
+        {
+            if (isEnable3D)
+            {
+                var size = Math.Max(Width, Height);
+
+                var oldMatrix = Transform3D.Calc3DModelMatrix(childTransform, oldParentTransform, Width, Height);
+                var newParentMatrix = Transform3D.Calc3DParentModelMatrix(newParentTransform, Width, Height);
+
+                if (!Matrix4x4d.Invert(newParentMatrix, out var inverted))
+                {
+                    return null;
+                }
+
+                var anchorPoint = (Vector3d)(childTransform[ILayerObject.TransformAnchorPointId] ?? new Vector3d()) / size;
+                var withoutAnchorPointLocal = Matrix4x4d.CreateTranslate(anchorPoint.X, anchorPoint.Y, anchorPoint.Z) * oldMatrix;
+                var local = withoutAnchorPointLocal * inverted;
+                var (position, scale, rotate) = Matrix4x4d.Decompose(local);
+
+                // NOTE: 回転を維持したままの新しい方向を算出
+                var childAngleX = (double)(childTransform[ILayerObject.TransformXAngleId] ?? 0.0);
+                var childAngleY = (double)(childTransform[ILayerObject.TransformYAngleId] ?? 0.0);
+                var childAngleZ = (double)(childTransform[ILayerObject.TransformZAngleId] ?? 0.0);
+                var childAngleMatrix = Matrix4x4d.CreateRotateZYX(childAngleX, childAngleY, childAngleZ);
+                var angle = Vector3d.Zero;
+                if (Matrix4x4d.Invert(childAngleMatrix, out var invertedChildAngleMatrix))
+                {
+                    angle = QuaternionD.FromRotationMatrix(Matrix4x4d.FromQuaternion(rotate) *  invertedChildAngleMatrix).ToEular();
+                }
+                else
+                {
+                    angle = rotate.ToEular();
+                }
+
+                return new DecomposedTransform(position * size, angle / Math.PI * 180.0, scale * 100.0);
+            }
+            else
+            {
+                var oldMatrix = Transform2D.CalcTransform2D(childTransform, oldParentTransform);
+                var newParentMatrix = newParentTransform.Length > 0 ? Transform2D.CalcTransform2D(newParentTransform[0].Transform, [.. newParentTransform.Skip(1)]) : Matrix3x3.Identity;
+
+                if (Matrix3x3.Invert(newParentMatrix, out var inverted))
+                {
+                    var local = oldMatrix * inverted;
+                    var (position, scale, angle) = Matrix3x3.Decompose(local);
+
+                    return new DecomposedTransform((Vector3d)position, (Vector3d)scale, new Vector3d(0.0, 0.0, angle));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public DecomposedTransform? CalcNewParentCameraLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
+        {
+            return null;
+        }
+
+        public DecomposedTransform? CalcNewParentLightLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
+        {
+            return null;
+        }
+
         public PreviewBoundingBox GetBoundingBox2D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
         {
             var matrix = Transform2D.CalcTransform2D(transform, parentTransforms);
