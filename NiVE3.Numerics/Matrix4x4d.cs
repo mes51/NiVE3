@@ -4,17 +4,18 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics.X86;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
-using System.Runtime.InteropServices;
 
 namespace NiVE3.Numerics
 {
     // copy from Matrix4x4
-    public struct Matrix4x4d
+    public struct Matrix4x4d : IEquatable<Matrix4x4d>
     {
         const double InvertEpsilon = 1E-308;
 
@@ -156,6 +157,8 @@ namespace NiVE3.Numerics
                     case (3, 3):
                         M44 = value;
                         break;
+                    default:
+                        throw new IndexOutOfRangeException();
                 }
             }
         }
@@ -212,6 +215,12 @@ namespace NiVE3.Numerics
             {
                 return false;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly bool Equals(Matrix4x4d other)
+        {
+            return this == other;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -651,7 +660,7 @@ namespace NiVE3.Numerics
             var scale = new Vector3d(sx, sy, sz);
             if (hasShear)
             {
-                rotateMatrix = NearestOrthogonal(rotateMatrix);
+                rotateMatrix = Matrix3x3d.NearestOrthogonal(Matrix3x3d.FromMatrix4x4d(rotateMatrix)).ToMatrix4x4d();
 
                 var sr = matrix * Transpose(rotateMatrix);
                 scale = new Vector3d(sr.M11, sr.M22, sr.M33);
@@ -769,11 +778,279 @@ namespace NiVE3.Numerics
 
             return result;
         }
+    }
+
+    public static class Matrix4x4dExtension
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector256<double> Transform(this in Matrix4x4d matrix, in Vector256<double> v)
+        {
+            var m1 = Vector256.LoadUnsafe(in matrix.M11);
+            var m2 = Vector256.LoadUnsafe(in matrix.M21);
+            var m3 = Vector256.LoadUnsafe(in matrix.M31);
+            var m4 = Vector256.LoadUnsafe(in matrix.M41);
+
+            return (Vector256.Create(v.GetElement(0)) * m1 + Vector256.Create(v.GetElement(1)) * m2) +
+                (Vector256.Create(v.GetElement(2)) * m3 + Vector256.Create(v.GetElement(3)) * m4);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Matrix4x4d NearestOrthogonal(in Matrix4x4d m)
+        public static Vector3d Transform(this in Matrix4x4d matrix, in Vector3d v)
         {
-            var (u, _, v) = SingularValueDecomposition3x3(m);
+            return (Vector3d)matrix.Transform(v.ToHomogeneousCoord());
+        }
+    }
+
+    file struct Matrix3x3d
+    {
+        static readonly Matrix3x3d _Identity = new Matrix3x3d(
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0
+        );
+        public static Matrix3x3d Identity => _Identity;
+
+        static readonly Matrix3x3d _Zero = new Matrix3x3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        public static Matrix3x3d Zero => _Zero;
+
+        public double M11;
+        public double M12;
+        public double M13;
+        public double Spacer1;
+        public double M21;
+        public double M22;
+        public double M23;
+        public double Spacer2;
+        public double M31;
+        public double M32;
+        public double M33;
+        public double Spacer3;
+
+        public double this[int row, int col]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            readonly get
+            {
+                return (row, col) switch
+                {
+                    (0, 0) => M11,
+                    (0, 1) => M12,
+                    (0, 2) => M13,
+                    (1, 0) => M21,
+                    (1, 1) => M22,
+                    (1, 2) => M23,
+                    (2, 0) => M31,
+                    (2, 1) => M32,
+                    (2, 2) => M33,
+                    _ => throw new IndexOutOfRangeException()
+                };
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                switch ((row, col))
+                {
+                    case (0, 0):
+                        M11 = value;
+                        break;
+                    case (0, 1):
+                        M12 = value;
+                        break;
+                    case (0, 2):
+                        M13 = value;
+                        break;
+                    case (1, 0):
+                        M21 = value;
+                        break;
+                    case (1, 1):
+                        M22 = value;
+                        break;
+                    case (1, 2):
+                        M23 = value;
+                        break;
+                    case (2, 0):
+                        M31 = value;
+                        break;
+                    case (2, 1):
+                        M32 = value;
+                        break;
+                    case (2, 2):
+                        M33 = value;
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
+            }
+        }
+
+        public Matrix3x3d(double m11, double m12, double m13, double m21, double m22, double m23, double m31, double m32, double m33)
+        {
+            M11 = m11;
+            M12 = m12;
+            M13 = m13;
+            M21 = m21;
+            M22 = m22;
+            M23 = m23;
+            M31 = m31;
+            M32 = m32;
+            M33 = m33;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly double Determinant()
+        {
+            return M11 * M22 * M33 + M12 * M23 * M31 + M13 * M21 * M32 - (M13 * M22 * M31 + M32 * M23 * M11 + M33 * M21 * M12);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public readonly Matrix4x4d ToMatrix4x4d()
+        {
+            var result = Matrix4x4d.Identity;
+            Vector256.LoadUnsafe(in M11).StoreUnsafe(ref result.M11);
+            Vector256.LoadUnsafe(in M21).StoreUnsafe(ref result.M21);
+            Vector256.LoadUnsafe(in M31).StoreUnsafe(ref result.M31);
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override readonly bool Equals([NotNullWhen(true)] object? obj)
+        {
+            if (obj is Matrix3x3d m)
+            {
+                return m == this;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override readonly int GetHashCode()
+        {
+            var hashCode = new HashCode();
+
+            hashCode.Add(M11);
+            hashCode.Add(M12);
+            hashCode.Add(M13);
+
+            hashCode.Add(M21);
+            hashCode.Add(M22);
+            hashCode.Add(M23);
+
+            hashCode.Add(M31);
+            hashCode.Add(M32);
+            hashCode.Add(M33);
+
+            return hashCode.ToHashCode();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override readonly string ToString()
+        {
+            return $@"{{
+    {{ M11: {M11}, M12: {M12}, M13: {M13} }}
+    {{ M21: {M21}, M22: {M22}, M23: {M23} }}
+    {{ M31: {M31}, M32: {M32}, M33: {M33} }}
+}}";
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Matrix3x3d a, in Matrix3x3d b)
+        {
+            return Vector256.LoadUnsafe(in a.M11) == Vector256.LoadUnsafe(in b.M11) &&
+                Vector256.LoadUnsafe(in a.M21) == Vector256.LoadUnsafe(in b.M21) &&
+                Vector256.LoadUnsafe(in a.M31) == Vector256.LoadUnsafe(in b.M31);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Matrix3x3d a, in Matrix3x3d b)
+        {
+            return Vector256.LoadUnsafe(in a.M11) != Vector256.LoadUnsafe(in b.M11) &&
+                Vector256.LoadUnsafe(in a.M21) != Vector256.LoadUnsafe(in b.M21) &&
+                Vector256.LoadUnsafe(in a.M31) != Vector256.LoadUnsafe(in b.M31);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d operator +(Matrix3x3d a, in Matrix3x3d b)
+        {
+            (Vector256.LoadUnsafe(in a.M11) + Vector256.LoadUnsafe(in b.M11)).StoreUnsafe(ref a.M11);
+            (Vector256.LoadUnsafe(in a.M21) + Vector256.LoadUnsafe(in b.M21)).StoreUnsafe(ref a.M21);
+            (Vector256.LoadUnsafe(in a.M31) + Vector256.LoadUnsafe(in b.M31)).StoreUnsafe(ref a.M31);
+
+            return a;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d operator -(Matrix3x3d a, in Matrix3x3d b)
+        {
+            (Vector256.LoadUnsafe(in a.M11) - Vector256.LoadUnsafe(in b.M11)).StoreUnsafe(ref a.M11);
+            (Vector256.LoadUnsafe(in a.M21) - Vector256.LoadUnsafe(in b.M21)).StoreUnsafe(ref a.M21);
+            (Vector256.LoadUnsafe(in a.M31) - Vector256.LoadUnsafe(in b.M31)).StoreUnsafe(ref a.M31);
+
+            return a;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d operator -(Matrix3x3d a)
+        {
+            (-Vector256.LoadUnsafe(in a.M11)).StoreUnsafe(ref a.M11);
+            (-Vector256.LoadUnsafe(in a.M21)).StoreUnsafe(ref a.M21);
+            (-Vector256.LoadUnsafe(in a.M31)).StoreUnsafe(ref a.M31);
+
+            return a;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d operator *(Matrix3x3d a, in Matrix3x3d b)
+        {
+            var mask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0UL).AsDouble();
+            var bX = Vector256.LoadUnsafe(in b.M11);
+            var bY = Vector256.LoadUnsafe(in b.M21);
+            var bZ = Vector256.LoadUnsafe(in b.M31);
+
+            ((Vector256.Create(a.M11) * bX + Vector256.Create(a.M12) * bY + (Vector256.Create(a.M13) * bZ)) & mask).StoreUnsafe(ref a.M11);
+            ((Vector256.Create(a.M21) * bX + Vector256.Create(a.M22) * bY + (Vector256.Create(a.M23) * bZ)) & mask).StoreUnsafe(ref a.M21);
+            ((Vector256.Create(a.M31) * bX + Vector256.Create(a.M32) * bY + (Vector256.Create(a.M33) * bZ)) & mask).StoreUnsafe(ref a.M31);
+
+            return a;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d operator *(Matrix3x3d a, double s)
+        {
+            (Vector256.LoadUnsafe(in a.M11) * s).StoreUnsafe(ref a.M11);
+            (Vector256.LoadUnsafe(in a.M21) * s).StoreUnsafe(ref a.M21);
+            (Vector256.LoadUnsafe(in a.M31) * s).StoreUnsafe(ref a.M31);
+
+            return a;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d FromMatrix4x4d(in Matrix4x4d m)
+        {
+            var mask = Vector256.Create(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL, 0UL).AsDouble();
+
+            Unsafe.SkipInit(out Matrix3x3d result);
+            (Vector256.LoadUnsafe(in m.M11) & mask).StoreUnsafe(ref result.M11);
+            (Vector256.LoadUnsafe(in m.M21) & mask).StoreUnsafe(ref result.M21);
+            (Vector256.LoadUnsafe(in m.M31) & mask).StoreUnsafe(ref result.M31);
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d Transpose(Matrix3x3d m)
+        {
+            (m.M12, m.M21) = (m.M21, m.M12);
+            (m.M13, m.M31) = (m.M31, m.M13);
+            (m.M23, m.M32) = (m.M32, m.M23);
+            return m;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix3x3d NearestOrthogonal(in Matrix3x3d m)
+        {
+            var (u, _, v) = SingularValueDecomposition(m);
             var r = u * Transpose(v);
             if (r.Determinant() < 0.0)
             {
@@ -786,12 +1063,12 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static (Matrix4x4d u, Vector3d s, Matrix4x4d v) SingularValueDecomposition3x3(in Matrix4x4d m)
+        static (Matrix3x3d u, Vector3d s, Matrix3x3d v) SingularValueDecomposition(in Matrix3x3d m)
         {
             const double EigenEpsilon = 1E-10;
 
             var mtm = Transpose(m) * m;
-            var (eigenValues, eigenVectors) = SymmetricEigen3x3(mtm);
+            var (eigenValues, eigenVectors) = SymmetricEigen(mtm);
 
             var valuesWithIndex = new (int index, double value)[] { (0, eigenValues.X), (1, eigenValues.Y), (2, eigenValues.Z) };
             valuesWithIndex.AsSpan().Sort((a, b) => b.value.CompareTo(a.value));
@@ -848,10 +1125,10 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static (Vector3d eigenValues, Matrix4x4d eigenVectors) SymmetricEigen3x3(Matrix4x4d m)
+        static (Vector3d eigenValues, Matrix3x3d eigenVectors) SymmetricEigen(Matrix3x3d m)
         {
             const double Epsilon = 1E-12;
-            const int MaxIteration = 100;
+            const int MaxIteration = 20;
 
             var v = Identity;
             for (var iteration = 0; iteration < MaxIteration; iteration++)
@@ -917,27 +1194,6 @@ namespace NiVE3.Numerics
             }
 
             return (new Vector3d(m.M11, m.M22, m.M33), v);
-        }
-    }
-
-    public static class Matrix4x4dExtension
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector256<double> Transform(this in Matrix4x4d matrix, in Vector256<double> v)
-        {
-            var m1 = Vector256.LoadUnsafe(in matrix.M11);
-            var m2 = Vector256.LoadUnsafe(in matrix.M21);
-            var m3 = Vector256.LoadUnsafe(in matrix.M31);
-            var m4 = Vector256.LoadUnsafe(in matrix.M41);
-
-            return (Vector256.Create(v.GetElement(0)) * m1 + Vector256.Create(v.GetElement(1)) * m2) +
-                (Vector256.Create(v.GetElement(2)) * m3 + Vector256.Create(v.GetElement(3)) * m4);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3d Transform(this in Matrix4x4d matrix, in Vector3d v)
-        {
-            return (Vector3d)matrix.Transform(v.ToHomogeneousCoord());
         }
     }
 }
