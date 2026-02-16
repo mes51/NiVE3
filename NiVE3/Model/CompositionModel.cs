@@ -471,7 +471,7 @@ namespace NiVE3.Model
             }
 
             var oldValues = layers.Select(l => l.ParentLayerId).ToArray();
-            var oldParentTransforms = layers.Select(l => GetParentTransforms(l.ParentLayerId, time));
+            var oldParentTransforms = layers.Select(l => GetParentTransforms(l.ParentLayerId, time)).ToArray();
 
             // NOTE: プレビュー中の無限ループ回避用
             foreach (var l in layers)
