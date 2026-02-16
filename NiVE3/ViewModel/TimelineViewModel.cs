@@ -2033,7 +2033,7 @@ namespace NiVE3.ViewModel
             CompositionModel.ChangeBlendModes(targetLayers.Select(l => l.LayerId).ToArray(), e.NewValue);
         }
 
-        private void LayerViewModel_TrackMatteLayerChangeRequest(object? sender, ReferenceLayerChangeEvent e)
+        private void LayerViewModel_TrackMatteLayerChangeRequest(object? sender, ReferenceLayerChangeEventArgs e)
         {
             if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
@@ -2073,7 +2073,7 @@ namespace NiVE3.ViewModel
             CompositionModel.ChangeTrackMatteModes(targetLayers.Select(l => l.LayerId).ToArray(), e.NewValue);
         }
 
-        private void ViewModel_ParentLayerChangeRequest(object? sender, ReferenceLayerChangeEvent e)
+        private void ViewModel_ParentLayerChangeRequest(object? sender, ParentLayerChangeEventArgs e)
         {
             if (sender is not LayerViewModel layerViewModel || CompositionModel == null || SelectedLayers == null || !(Layers?.Contains(layerViewModel) ?? false))
             {
@@ -2090,7 +2090,7 @@ namespace NiVE3.ViewModel
                 targetLayers.AddRange(SelectedLayers);
             }
 
-            CompositionModel.ChangeParentLayer(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId, CurrentTime);
+            CompositionModel.ChangeParentLayer(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId, CurrentTime, e.ResetTransform, e.SkipKeepTransform);
         }
 
         private void ViewModel_CheckCycledParentLayerRequest(object? sender, CycledLayerEventArgs e)

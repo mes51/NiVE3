@@ -437,7 +437,7 @@ namespace NiVE3.Model
             HistoryModel.Add(new ChangeTrackMatteModeHistoryCommand(layers, oldValues, mode));
         }
 
-        public void ChangeParentLayer(Guid[] layerIds, Guid? targetLayerId, Time time)
+        public void ChangeParentLayer(Guid[] layerIds, Guid? targetLayerId, Time time, bool resetTransform, bool skipKeepTransform)
         {
             if (targetLayerId.HasValue)
             {
@@ -485,10 +485,18 @@ namespace NiVE3.Model
             foreach (var (l, oldParentTransform) in layers.Zip(oldParentTransforms))
             {
                 l.ParentLayerId = targetLayerId;
-                var newTransform = Transformer.CalcNewParentLocalTransform(l.IsEnable3D, l.GetTransform(time), oldParentTransform, newParentTransform);
-                if (newTransform != null)
+                if (resetTransform)
                 {
-                    l.UpdateTransformByChangeParent(newTransform, time);
+                    l.ResetTransform();
+                    l.UpdateTransformByChangeParent(new DecomposedTransform(Vector3d.Zero, Vector3d.Zero, new Vector3d(100.0)), time);
+                }
+                else if (!skipKeepTransform)
+                {
+                    var newTransform = Transformer.CalcNewParentLocalTransform(l.IsEnable3D, l.GetTransform(time), oldParentTransform, newParentTransform);
+                    if (newTransform != null)
+                    {
+                        l.UpdateTransformByChangeParent(newTransform, time);
+                    }
                 }
             }
 
@@ -2155,7 +2163,7 @@ namespace NiVE3.Model
             var childLayers = removeLayers.SelectMany(p => Layers.Where(c => c.ParentLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();
             if (childLayers.Length > 0)
             {
-                ChangeParentLayer(childLayers, null, CurrentTime);
+                ChangeParentLayer(childLayers, null, CurrentTime, false, false);
             }
 
             var trackMatteChildLayers = removeLayers.SelectMany(p => Layers.Where(c => c.TrackMatteLayerId == p.LayerId)).Select(l => l.LayerId).ToArray();

@@ -29,13 +29,26 @@ namespace NiVE3.ViewModel
         }
     }
 
-    class ReferenceLayerChangeEvent : EventArgs
+    class ReferenceLayerChangeEventArgs : EventArgs
     {
         public Guid? LayerId { get; }
 
-        public ReferenceLayerChangeEvent(Guid? layerId)
+        public ReferenceLayerChangeEventArgs(Guid? layerId)
         {
             LayerId = layerId;
+        }
+    }
+
+    class ParentLayerChangeEventArgs : ReferenceLayerChangeEventArgs
+    {
+        public bool ResetTransform { get; }
+
+        public bool SkipKeepTransform { get; }
+
+        public ParentLayerChangeEventArgs(Guid? layerId, bool resetTransform, bool skipKeepTransform) : base(layerId)
+        {
+            ResetTransform = resetTransform;
+            SkipKeepTransform = skipKeepTransform;
         }
     }
 

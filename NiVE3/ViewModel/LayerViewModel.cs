@@ -452,8 +452,8 @@ namespace NiVE3.ViewModel
             remove { BlendModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<ReferenceLayerChangeEvent> TrackMatteLayerChangeRequestPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEvent>();
-        public event EventHandler<ReferenceLayerChangeEvent> TrackMatteLayerChangeRequest
+        WeakEventPublisher<ReferenceLayerChangeEventArgs> TrackMatteLayerChangeRequestPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEventArgs>();
+        public event EventHandler<ReferenceLayerChangeEventArgs> TrackMatteLayerChangeRequest
         {
             add { TrackMatteLayerChangeRequestPublisher.Subscribe(value); }
             remove { TrackMatteLayerChangeRequestPublisher.Unsubscribe(value); }
@@ -466,8 +466,8 @@ namespace NiVE3.ViewModel
             remove { TrackMatteModeChangeRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<ReferenceLayerChangeEvent> ParentLayerChangeRequestPublisher { get; } = new WeakEventPublisher<ReferenceLayerChangeEvent>();
-        public event EventHandler<ReferenceLayerChangeEvent> ParentLayerChangeRequest
+        WeakEventPublisher<ParentLayerChangeEventArgs> ParentLayerChangeRequestPublisher { get; } = new WeakEventPublisher<ParentLayerChangeEventArgs>();
+        public event EventHandler<ParentLayerChangeEventArgs> ParentLayerChangeRequest
         {
             add { ParentLayerChangeRequestPublisher.Subscribe(value); }
             remove { ParentLayerChangeRequestPublisher.Unsubscribe(value); }
@@ -631,7 +631,7 @@ namespace NiVE3.ViewModel
 
             ChangeTrackMatteCommand = new DelegateCommand<LayerModelProxy?>(trackMatteLayer =>
             {
-                TrackMatteLayerChangeRequestPublisher.Publish(this, new ReferenceLayerChangeEvent(trackMatteLayer?.LayerId));
+                TrackMatteLayerChangeRequestPublisher.Publish(this, new ReferenceLayerChangeEventArgs(trackMatteLayer?.LayerId));
             });
 
             ChangeTrackMatteModeCommand = new DelegateCommand<TrackMatteMode?>(trackMatteMode =>
@@ -645,7 +645,9 @@ namespace NiVE3.ViewModel
 
             ChangeParentLayerCommand = new DelegateCommand<LayerModelProxy?>(parentLayer =>
             {
-                ParentLayerChangeRequestPublisher.Publish(this, new ReferenceLayerChangeEvent(parentLayer?.LayerId));
+                var resetTransform = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
+                var skipKeepTransform = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+                ParentLayerChangeRequestPublisher.Publish(this, new ParentLayerChangeEventArgs(parentLayer?.LayerId, resetTransform, skipKeepTransform));
             });
 
             BeginEditNameCommand = new DelegateCommand(() =>

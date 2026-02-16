@@ -2052,6 +2052,15 @@ namespace NiVE3.Model
             }
         }
 
+        public void ResetTransform()
+        {
+            if (TransformProperties == null)
+            {
+                return;
+            }
+            TransformProperties.ResetAllChildren();
+        }
+
         void DeleteEffectInternal(Guid[] effectIds, bool isCut)
         {
             var effects = Effects.Where(l => effectIds.Contains(l.EffectId)).OrderBy(Effects.IndexOf).ToArray();
