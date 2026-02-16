@@ -371,6 +371,21 @@ namespace NiVE3.Numerics
             Z = z;
         }
 
+        public readonly double this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return index switch
+                {
+                    0 => X,
+                    1 => Y,
+                    2 => Z,
+                    _ => throw new IndexOutOfRangeException()
+                };
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2d AsVector2d()
         {

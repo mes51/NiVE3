@@ -9,6 +9,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Shared.Extension;
+using System.Runtime.InteropServices;
 
 namespace NiVE3.Numerics
 {
@@ -76,6 +77,89 @@ namespace NiVE3.Numerics
             M31 == 0.0 && M32 == 0.0 && M34 == 0.0 &&
             M41 == 0.0 && M42 == 0.0 && M43 == 0.0;
 
+        public double this[int row, int col]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            readonly get
+            {
+                return (row, col) switch
+                {
+                    (0, 0) => M11,
+                    (0, 1) => M12,
+                    (0, 2) => M13,
+                    (0, 3) => M14,
+                    (1, 0) => M21,
+                    (1, 1) => M22,
+                    (1, 2) => M23,
+                    (1, 3) => M24,
+                    (2, 0) => M31,
+                    (2, 1) => M32,
+                    (2, 2) => M33,
+                    (2, 3) => M34,
+                    (3, 0) => M41,
+                    (3, 1) => M42,
+                    (3, 2) => M43,
+                    (3, 3) => M44,
+                    _ => throw new IndexOutOfRangeException()
+                };
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                switch ((row, col))
+                {
+                    case (0, 0):
+                        M11 = value;
+                        break;
+                    case (0, 1):
+                        M12 = value;
+                        break;
+                    case (0, 2):
+                        M13 = value;
+                        break;
+                    case (0, 3):
+                        M14 = value;
+                        break;
+                    case (1, 0):
+                        M21 = value;
+                        break;
+                    case (1, 1):
+                        M22 = value;
+                        break;
+                    case (1, 2):
+                        M23 = value;
+                        break;
+                    case (1, 3):
+                        M24 = value;
+                        break;
+                    case (2, 0):
+                        M31 = value;
+                        break;
+                    case (2, 1):
+                        M32 = value;
+                        break;
+                    case (2, 2):
+                        M33 = value;
+                        break;
+                    case (2, 3):
+                        M34 = value;
+                        break;
+                    case (3, 0):
+                        M41 = value;
+                        break;
+                    case (3, 1):
+                        M42 = value;
+                        break;
+                    case (3, 2):
+                        M43 = value;
+                        break;
+                    case (3, 3):
+                        M44 = value;
+                        break;
+                }
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly Matrix4x4d Translate(double x, double y, double z)
         {
@@ -115,19 +199,6 @@ namespace NiVE3.Numerics
                    M14 * M22 * M31 * M43 - M12 * M24 * M31 * M43 - M14 * M21 * M32 * M43 + M11 * M24 * M32 * M43 +
                    M12 * M21 * M34 * M43 - M11 * M22 * M34 * M43 - M13 * M22 * M31 * M44 + M12 * M23 * M31 * M44 +
                    M13 * M21 * M32 * M44 - M11 * M23 * M32 * M44 - M12 * M21 * M33 * M44 + M11 * M22 * M33 * M44;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        readonly double FrobeniusNorm()
-        {
-            var m1 = Vector256.LoadUnsafe(in M11);
-            var m2 = Vector256.LoadUnsafe(in M21);
-            var m3 = Vector256.LoadUnsafe(in M31);
-            var m4 = Vector256.LoadUnsafe(in M41);
-
-            var sum = Vector256.Dot(m1, m1) + Vector256.Dot(m2, m2) + Vector256.Dot(m3, m3) + Vector256.Dot(m4, m4);
-
-            return sum > 0.0 ? Math.Sqrt(sum) : 0.0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -523,44 +594,11 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Matrix4x4d FromQuaternion(in QuaternionD q)
-        {
-            // SEE: https://github.com/dotnet/runtime/blob/35d27803b83bbd46d3cfe42aa58f46f585c0c6ae/src/libraries/System.Private.CoreLib/src/System/Numerics/Matrix4x4.Impl.cs#L295
-
-            var xx = q.X * q.X;
-            var yy = q.Y * q.Y;
-            var zz = q.Z * q.Z;
-
-            var xy = q.X * q.Y;
-            var xz = q.X * q.Z;
-            var yz = q.Y * q.Z;
-            var wx = q.W * q.X;
-            var wy = q.W * q.Y;
-            var wz = q.W * q.Z;
-
-            var result = Identity;
-
-            result.M11 = 1.0 - 2.0 * (yy + zz);
-            result.M12 = 2.0 * (xy + wz);
-            result.M13 = 2.0 * (xz - wy);
-
-            result.M21 = 2.0 * (xy - wz);
-            result.M22 = 1.0 - 2.0 * (zz + xx);
-            result.M23 = 2.0 * (yz + wx);
-
-            result.M31 = 2.0 * (xz + wy);
-            result.M32 = 2.0 * (yz - wx);
-            result.M33 = 1.0 - 2.0 * (yy + xx);
-
-            return result;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Matrix4x4d Compose(Vector3d position, Vector3d scale, QuaternionD rotation)
+        public static Matrix4x4d Compose(Vector3d position, Vector3d scale, Vector3d rotation)
         {
             // SEE: https://github.com/mrdoob/three.js/blob/a692ffc9d5519df3062fce89457a900cc9a5dde5/src/math/Matrix4.js#L696
 
-            var result = FromQuaternion(rotation);
+            var result = CreateRotateZYX(rotation.Z, rotation.Y, rotation.X);
 
             (Vector256.LoadUnsafe(in result.M11) * scale.X).StoreUnsafe(ref result.M11);
             (Vector256.LoadUnsafe(in result.M21) * scale.Y).StoreUnsafe(ref result.M21);
@@ -571,38 +609,65 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (Vector3d position, Vector3d scale, QuaternionD rotate) Decompose(Matrix4x4d matrix)
+        public static (Vector3d position, Vector3d scale, Vector3d rotate) Decompose(Matrix4x4d matrix)
         {
+            const double ScaleEpsilon = 1E-7;
+            const double ShearThreshold = 1E-4;
+            const double GimbalLockThreshold = 1E-6;
+
             var position = new Vector3d(matrix.M41, matrix.M42, matrix.M43);
 
             matrix.M41 = 0.0;
             matrix.M42 = 0.0;
             matrix.M43 = 0.0;
+            matrix.M14 = 0.0;
+            matrix.M24 = 0.0;
+            matrix.M34 = 0.0;
 
-            /*
-            var sx = new Vector3d(matrix.M11, matrix.M12, matrix.M13).Length();
-            var sy = new Vector3d(matrix.M21, matrix.M22, matrix.M23).Length();
-            var sz = new Vector3d(matrix.M31, matrix.M32, matrix.M33).Length();
+            var sx = Vector256.LoadUnsafe(ref matrix.M11).Length();
+            var sy = Vector256.LoadUnsafe(ref matrix.M21).Length();
+            var sz = Vector256.LoadUnsafe(ref matrix.M31).Length();
+            var det = matrix.Determinant();
+            if (det < 0.0)
+            {
+                sx = -sx;
+            }
+
+            if (Math.Abs(sx) < ScaleEpsilon || Math.Abs(sy) < ScaleEpsilon || Math.Abs(sz) < ScaleEpsilon)
+            {
+                return (position, Vector3d.Zero, Vector3d.Zero);
+            }
+
+            var rotateMatrix = matrix;
+            (Vector256.LoadUnsafe(ref rotateMatrix.M11) / sx).StoreUnsafe(ref rotateMatrix.M11);
+            (Vector256.LoadUnsafe(ref rotateMatrix.M21) / sy).StoreUnsafe(ref rotateMatrix.M21);
+            (Vector256.LoadUnsafe(ref rotateMatrix.M31) / sz).StoreUnsafe(ref rotateMatrix.M31);
+
+            var rtr = Transpose(rotateMatrix) * rotateMatrix;
+            var outDiagonal = Math.Abs(rtr.M12) + Math.Abs(rtr.M13) + Math.Abs(rtr.M21) + Math.Abs(rtr.M23) + Math.Abs(rtr.M31) + Math.Abs(rtr.M32);
+            var diagonalDiff = Math.Abs(rtr.M11 - 1.0) + Math.Abs(rtr.M22 - 1.0) + Math.Abs(rtr.M33 - 1.0);
+            var hasShear = (outDiagonal + diagonalDiff) > ShearThreshold;
+
             var scale = new Vector3d(sx, sy, sz);
+            if (hasShear)
+            {
+                rotateMatrix = NearestOrthogonal(rotateMatrix);
 
-            matrix.M11 /= sx;
-            matrix.M12 /= sx;
-            matrix.M13 /= sx;
-            matrix.M21 /= sy;
-            matrix.M22 /= sy;
-            matrix.M23 /= sy;
-            matrix.M31 /= sz;
-            matrix.M32 /= sz;
-            matrix.M33 /= sz;
+                var sr = matrix * Transpose(rotateMatrix);
+                scale = new Vector3d(sr.M11, sr.M22, sr.M33);
+            }
 
-            var rotate = QuaternionD.FromRotationMatrix(matrix);
-            //*/
+            var rotate = Vector3d.Zero;
+            var ry = Math.Asin(rotateMatrix.M31);
+            if (Math.Abs(Math.Cos(ry)) > GimbalLockThreshold)
+            {
+                rotate = new Vector3d(Math.Atan2(-rotateMatrix.M32, rotateMatrix.M33), ry, Math.Atan2(-rotateMatrix.M21, rotateMatrix.M11));
+            }
+            else
+            {
+                rotate = new Vector3d(rotateMatrix.M31 > 0.0 ? Math.Atan2(rotateMatrix.M12, -rotateMatrix.M13) : -Math.Atan2(rotateMatrix.M12, rotateMatrix.M13), ry, 0.0);
+            }
 
-            var (scaleMatrix, rotateMatrix) = PolarDecompose(matrix);
-
-            var scale = new Vector3d(scaleMatrix.M11, scaleMatrix.M22, scaleMatrix.M33);
-            var rotate = QuaternionD.FromRotationMatrix(rotateMatrix);
-            //*/
             return (position, scale, rotate);
         }
 
@@ -705,50 +770,153 @@ namespace NiVE3.Numerics
             return result;
         }
 
-        static (Matrix4x4d scale, Matrix4x4d rotate) PolarDecompose(Matrix4x4d m)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Matrix4x4d NearestOrthogonal(in Matrix4x4d m)
         {
-            const int IterationCount = 20;
-            const double Epsilon = 1E-7;
-
-            m.M41 = 0.0;
-            m.M42 = 0.0;
-            m.M43 = 0.0;
-            m.M14 = 0.0;
-            m.M24 = 0.0;
-            m.M34 = 0.0;
-            var det = m.Determinant();
-
-            var scaleSign = det < 0.0 ? -1.0 : 1.0;
-            if (det < 0.0)
+            var (u, _, v) = SingularValueDecomposition3x3(m);
+            var r = u * Transpose(v);
+            if (r.Determinant() < 0.0)
             {
-                m *= -1.0;
-                m.M44 = 1.0;
+                r.M13 = -r.M12;
+                r.M23 = -r.M22;
+                r.M33 = -r.M32;
             }
 
-            var rotate = m;
-            rotate.M44 = 1.0;
-            for (var i = 0; i < IterationCount; i++)
+            return r;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (Matrix4x4d u, Vector3d s, Matrix4x4d v) SingularValueDecomposition3x3(in Matrix4x4d m)
+        {
+            const double EigenEpsilon = 1E-10;
+
+            var mtm = Transpose(m) * m;
+            var (eigenValues, eigenVectors) = SymmetricEigen3x3(mtm);
+
+            var valuesWithIndex = new (int index, double value)[] { (0, eigenValues.X), (1, eigenValues.Y), (2, eigenValues.Z) };
+            valuesWithIndex.AsSpan().Sort((a, b) => b.value.CompareTo(a.value));
+            var s = (Vector3d)Vector256.Sqrt(Vector256.Max(Vector256.Create(valuesWithIndex[0].value, valuesWithIndex[1].value, valuesWithIndex[2].value, 0.0), Vector256<double>.Zero));
+
+            var v = Zero;
+            for (var row = 0; row < 3; row++)
             {
-                if (!Invert(rotate, out var invertedQ))
+                for (var col = 0; col < 3; col++)
                 {
-                    rotate = Identity;
-                    break;
-                }
-
-                var invertedQT = Transpose(invertedQ);
-                var next = (rotate + invertedQT) * 0.5;
-
-                rotate = next;
-                if ((rotate - next).FrobeniusNorm() < Epsilon)
-                {
-                    break;
+                    v[row, col] = eigenVectors[row, valuesWithIndex[col].index];
                 }
             }
 
-            var rotateT = Transpose(rotate);
-            var scale = (m * rotateT) * scaleSign;
+            var mv = m * v;
+            var u = Zero;
+            for (var col = 0; col < 3; col++)
+            {
+                var se = s[col];
+                if (se > EigenEpsilon)
+                {
+                    for (var row = 0; row < 3; row++)
+                    {
+                        u[row, col] = mv[row, col] / se;
+                    }
+                }
+                else if (col == 2)
+                {
+                    var u0 = Vector256.Create(u[0, 0], u[1, 0], u[2, 0], 0.0);
+                    var u1 = Vector256.Create(u[0, 1], u[1, 1], u[2, 1], 0.0);
+                    var cross = u0.CrossProduct3D(u1);
+                    u[0, 2] = cross.GetElement(0);
+                    u[1, 2] = cross.GetElement(1);
+                    u[2, 2] = cross.GetElement(2);
+                }
+            }
 
-            return (scale, rotate);
+            if (u.Determinant() < 0.0)
+            {
+                u.M13 = -u.M13;
+                u.M23 = -u.M23;
+                u.M33 = -u.M33;
+                s = new Vector3d(s.X, s.Y, -s.Z);
+            }
+            if (v.Determinant() < 0.0)
+            {
+                v.M13 = -v.M13;
+                v.M23 = -v.M23;
+                v.M33 = -v.M33;
+                s = new Vector3d(s.X, s.Y, -s.Z);
+            }
+
+            return (u, s, v);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (Vector3d eigenValues, Matrix4x4d eigenVectors) SymmetricEigen3x3(Matrix4x4d m)
+        {
+            const double Epsilon = 1E-12;
+            const int MaxIteration = 100;
+
+            var v = Identity;
+            for (var iteration = 0; iteration < MaxIteration; iteration++)
+            {
+                var maxValue = 0.0;
+                var p = 0;
+                var q = 1;
+                for (var r = 0; r < 3; r++)
+                {
+                    for (var c = r + 1; c < 3; c++)
+                    {
+                        var abs = Math.Abs(m[r, c]);
+                        if (abs > maxValue)
+                        {
+                            maxValue = abs;
+                            p = r;
+                            q = c;
+                        }
+                    }
+                }
+                if (maxValue < Epsilon)
+                {
+                    break;
+                }
+
+                var pp = m[p, p];
+                var qq = m[q, q];
+                var pq = m[p, q];
+                var theta = 0.5 * Math.Atan2(2.0 * pq, pp - qq);
+                var cos = Math.Cos(theta);
+                var sin = Math.Sin(theta);
+
+                var newMatrix = m;
+                newMatrix[p, p] = cos * cos * pp + 2.0 * sin * cos * pq + sin * sin * qq;
+                newMatrix[q, q] = sin * sin * pp - 2.0 * sin * cos * pq + cos * cos * qq;
+                newMatrix[p, q] = 0.0;
+                newMatrix[q, p] = 0.0;
+
+                for (var r = 0; r < 3; r++)
+                {
+                    if (r == p || r == q)
+                    {
+                        continue;
+                    }
+
+                    var rp = m[r, p];
+                    var rq = m[r, q];
+                    newMatrix[r, p] = cos * rp + sin * rq;
+                    newMatrix[p, r] = newMatrix[r, p];
+                    newMatrix[r, q] = -sin * rp + cos * rq;
+                    newMatrix[q, r] = newMatrix[r, q];
+                }
+
+                m = newMatrix;
+
+                for (var r = 0; r < 3; r++)
+                {
+                    var vp = v[r, p];
+                    var vq = v[r, q];
+                    v[r, p] = cos * vp + sin * vq;
+                    v[r, q] = -sin * vp + cos * vq;
+                }
+            }
+
+            return (new Vector3d(m.M11, m.M22, m.M33), v);
         }
     }
 

@@ -60,18 +60,17 @@ namespace NiVE3.PresetPlugin.Renderer
                 var childAngleX = (double)(childTransform[ILayerObject.TransformXAngleId] ?? 0.0);
                 var childAngleY = (double)(childTransform[ILayerObject.TransformYAngleId] ?? 0.0);
                 var childAngleZ = (double)(childTransform[ILayerObject.TransformZAngleId] ?? 0.0);
-                var childAngleMatrix = Matrix4x4d.CreateRotateZYX(childAngleX, childAngleY, childAngleZ);
-                var angle = Vector3d.Zero;
-                if (Matrix4x4d.Invert(childAngleMatrix, out var invertedChildAngleMatrix))
+                if (childAngleX != 0.0 || childAngleY != 0.0 || childAngleZ != 0.0)
                 {
-                    angle = QuaternionD.FromRotationMatrix(Matrix4x4d.FromQuaternion(rotate) *  invertedChildAngleMatrix).ToEular();
-                }
-                else
-                {
-                    angle = rotate.ToEular();
+                    var childAngleMatrix = Matrix4x4d.CreateRotateZYX(childAngleX, childAngleY, childAngleZ);
+                    if (Matrix4x4d.Invert(childAngleMatrix, out var invertedChildAngleMatrix))
+                    {
+                        rotate = rotate / Math.PI * 180.0;
+                        (_, _, rotate) = Matrix4x4d.Decompose(Matrix4x4d.CreateRotateZYX(rotate.X, rotate.Y, rotate.Z) * invertedChildAngleMatrix);
+                    }
                 }
 
-                return new DecomposedTransform(position * size, angle / Math.PI * 180.0, scale * 100.0);
+                return new DecomposedTransform(position * size, rotate / Math.PI * 180.0, scale * 100.0);
             }
             else
             {
