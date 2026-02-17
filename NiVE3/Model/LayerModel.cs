@@ -2028,8 +2028,6 @@ namespace NiVE3.Model
 
             switch (FootageModel.InputModel.Input)
             {
-                case NullObjectInput:
-                    break;
                 case CameraInput:
                     break;
                 case LightInput:
@@ -2037,14 +2035,22 @@ namespace NiVE3.Model
                 default:
                     {
                         var translate = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
-                        var direction = TransformProperties.FindProperty(ILayerObject.TransformDirectionId) as PropertyModel;
                         var scale = TransformProperties.FindProperty(ILayerObject.TransformScaleId) as PropertyModel;
 
                         HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
 
                         translate?.CommitProperty(decomposedTransform.Position, translate?.GetValue(time - SourceStartPoint, time));
-                        direction?.CommitProperty(decomposedTransform.Direction, direction?.GetValue(time - SourceStartPoint, time));
                         scale?.CommitProperty(decomposedTransform.Scale, scale?.GetValue(time - SourceStartPoint, time));
+                        if (IsEnable3D)
+                        {
+                            var direction = TransformProperties.FindProperty(ILayerObject.TransformDirectionId) as PropertyModel;
+                            direction?.CommitProperty(decomposedTransform.Direction, direction?.GetValue(time - SourceStartPoint, time));
+                        }
+                        else
+                        {
+                            var zAngle = TransformProperties.FindProperty(ILayerObject.TransformZAngleId) as PropertyModel;
+                            zAngle?.CommitProperty(decomposedTransform.Direction.Z, zAngle?.GetValue(time - SourceDuration, time));
+                        }
 
                         HistoryModel.EndGroup();
                     }

@@ -618,7 +618,7 @@ namespace NiVE3.Numerics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (Vector3d position, Vector3d scale, Vector3d rotate) Decompose(Matrix4x4d matrix)
+        public static (Vector3d position, Vector3d scale, Vector3d angle) Decompose(Matrix4x4d matrix)
         {
             const double ScaleEpsilon = 1E-7;
             const double ShearThreshold = 1E-4;
@@ -677,7 +677,7 @@ namespace NiVE3.Numerics
                 rotate = new Vector3d(rotateMatrix.M31 > 0.0 ? Math.Atan2(rotateMatrix.M12, -rotateMatrix.M13) : -Math.Atan2(rotateMatrix.M12, rotateMatrix.M13), ry, 0.0);
             }
 
-            return (position, scale, rotate);
+            return (position, scale, rotate / Math.PI * 180.0);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

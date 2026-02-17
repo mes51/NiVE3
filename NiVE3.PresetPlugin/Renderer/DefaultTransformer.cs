@@ -53,8 +53,8 @@ namespace NiVE3.PresetPlugin.Renderer
 
                 var anchorPoint = (Vector3d)(childTransform[ILayerObject.TransformAnchorPointId] ?? new Vector3d()) / size;
                 var withoutAnchorPointLocal = Matrix4x4d.CreateTranslate(anchorPoint.X, anchorPoint.Y, anchorPoint.Z) * oldMatrix;
-                var local = withoutAnchorPointLocal * inverted;
-                var (position, scale, rotate) = Matrix4x4d.Decompose(local);
+                var newLocal = withoutAnchorPointLocal * inverted;
+                var (position, scale, angle) = Matrix4x4d.Decompose(newLocal);
 
                 // NOTE: 回転を維持したままの新しい方向を算出
                 var childAngleX = (double)(childTransform[ILayerObject.TransformXAngleId] ?? 0.0);
@@ -65,29 +65,29 @@ namespace NiVE3.PresetPlugin.Renderer
                     var childAngleMatrix = Matrix4x4d.CreateRotateZYX(childAngleX, childAngleY, childAngleZ);
                     if (Matrix4x4d.Invert(childAngleMatrix, out var invertedChildAngleMatrix))
                     {
-                        rotate = rotate / Math.PI * 180.0;
-                        (_, _, rotate) = Matrix4x4d.Decompose(Matrix4x4d.CreateRotateZYX(rotate.X, rotate.Y, rotate.Z) * invertedChildAngleMatrix);
+                        (_, _, angle) = Matrix4x4d.Decompose(Matrix4x4d.CreateRotateZYX(angle.X, angle.Y, angle.Z) * invertedChildAngleMatrix);
                     }
                 }
 
-                return new DecomposedTransform(position * size, rotate / Math.PI * 180.0, scale * 100.0);
+                return new DecomposedTransform(position * size, angle, scale * 100.0);
             }
             else
             {
                 var oldMatrix = Transform2D.CalcTransform2D(childTransform, oldParentTransform);
                 var newParentMatrix = newParentTransform.Length > 0 ? Transform2D.CalcTransform2D(newParentTransform[0].Transform, [.. newParentTransform.Skip(1)]) : Matrix3x3.Identity;
 
-                if (Matrix3x3.Invert(newParentMatrix, out var inverted))
-                {
-                    var local = oldMatrix * inverted;
-                    var (position, scale, angle) = Matrix3x3.Decompose(local);
-
-                    return new DecomposedTransform((Vector3d)position, (Vector3d)scale, new Vector3d(0.0, 0.0, angle));
-                }
-                else
+                if (!Matrix3x3.Invert(newParentMatrix, out var inverted))
                 {
                     return null;
                 }
+
+                var anchorPoint = (Vector2)(Vector3d)(childTransform[ILayerObject.TransformAnchorPointId] ?? new Vector3d());
+                var withoutAnchorPointLocal = Matrix3x3.CreateTranslate(anchorPoint.X, anchorPoint.Y) * oldMatrix;
+                var newLocal = withoutAnchorPointLocal * inverted;
+
+                var (position, scale, angle) = Matrix3x3.Decompose(newLocal);
+
+                return new DecomposedTransform((Vector3d)position, new Vector3d(0.0, 0.0, angle), (Vector3d)scale * 100.0);
             }
         }
 

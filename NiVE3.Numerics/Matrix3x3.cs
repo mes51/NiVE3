@@ -321,13 +321,53 @@ namespace NiVE3.Numerics
             return a;
         }
 
-        public static (Vector2 position, Vector2 scale, float angle) Decompose(in Matrix3x3 matrix)
+        public static (Vector2 position, Vector2 scale, float angle) Decompose(Matrix3x3 matrix)
         {
-            var scaleX = MathF.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
-            var scaleY = MathF.Sqrt(matrix.M21 * matrix.M21 + matrix.M22 * matrix.M22);
-            var angle = MathF.Atan2(matrix.M12, matrix.M11) / MathF.PI * 180.0F;
+            const float ScaleEpsilon = 1E-7F;
+            const float ShearThreshold = 1E-4F;
 
-            return (new Vector2(matrix.M31, matrix.M32), new Vector2(scaleX, scaleY), angle);
+            var position = new Vector2(matrix.M31, matrix.M32);
+
+            matrix.X *= new Vector3(1.0F, 1.0F, 0.0F);
+            matrix.Y *= new Vector3(1.0F, 1.0F, 0.0F);
+            matrix.Z = new Vector3(0.0F, 0.0F, 1.0F);
+
+            var sx = matrix.X.Length();
+            var sy = matrix.Y.Length();
+
+            if (Math.Abs(sx) < ScaleEpsilon || Math.Abs(sy) < ScaleEpsilon)
+            {
+                return (position, Vector2.Zero, 0.0F);
+            }
+
+            var det = matrix.M11 * matrix.M22 - matrix.M12 * matrix.M21;
+            if (det < 0.0F)
+            {
+                sx = -sx;
+            }
+
+            var r0 = matrix.X / sx;
+            var r1 = matrix.Y / sy;
+            var outDiagonal = Math.Abs(Vector3.Dot(r0, r1));
+            var diagonalDiff = Math.Abs(r0.LengthSquared() - 1.0F) + Math.Abs(r1.LengthSquared() - 1.0F);
+            var hasShear = (outDiagonal + diagonalDiff) > ShearThreshold;
+
+            var scale = new Vector2(sx, sy);
+            var rotate = 0.0F;
+            if (hasShear)
+            {
+                rotate = MathF.Atan2(r0.Y - r1.X, r0.X + r1.Y);
+                var cos = MathF.Cos(rotate);
+                var sin = MathF.Sin(rotate);
+                scale = new Vector2(matrix.M11 * cos + matrix.M12 * sin, -matrix.M21 * sin + matrix.M22 * cos);
+            }
+            else
+            {
+                rotate = MathF.Atan2(r0.Y, r0.X);
+            }
+
+
+            return (position, scale, rotate / MathF.PI * 180.0F);
         }
     }
 }
