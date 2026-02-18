@@ -91,6 +91,37 @@ namespace NiVE3.PresetPlugin.Renderer
             }
         }
 
+        public DecomposedTransform? CalcNewParentBaseTransformDifference(bool isEnable3D, PropertyValueGroup childTransform, ParentTransform[] newParentTransform)
+        {
+            if (isEnable3D)
+            {
+                var position = (Vector3d)(childTransform[ILayerObject.TransformPositionId] ?? Vector3d.Zero);
+                var scale = (Vector3d)(childTransform[ILayerObject.TransformScaleId] ?? new Vector3d(100.0));
+                var xAngle = (double)(childTransform[ILayerObject.TransformXAngleId] ?? 0.0);
+                var yAngle = (double)(childTransform[ILayerObject.TransformYAngleId] ?? 0.0);
+                var zAngle = (double)(childTransform[ILayerObject.TransformZAngleId] ?? 0.0);
+                var direction = (Vector3d)(childTransform[ILayerObject.TransformDirectionId] ?? Vector3d.Zero);
+
+                var rotateMatrix = Matrix4x4d.CreateRotateZYX(xAngle, yAngle, zAngle);
+                if (!Matrix4x4d.Invert(rotateMatrix, out var inverted))
+                {
+                    return new DecomposedTransform(-position, Vector3d.Zero, 100.0 / scale);
+                }
+
+                var (_, _, angle) = Matrix4x4d.Decompose(inverted);
+
+                return new DecomposedTransform(-position, angle - direction, 100.0 / scale);
+            }
+            else
+            {
+                // NOTE: 2Dはそのまま逆を返すだけ
+                var position = (Vector3d)(childTransform[ILayerObject.TransformPositionId] ?? Vector3d.Zero);
+                var scale = (Vector3d)(childTransform[ILayerObject.TransformScaleId] ?? new Vector3d(100.0));
+                var zAngle = (double)(childTransform[ILayerObject.TransformZAngleId] ?? 0.0);
+                return new DecomposedTransform(-position, new Vector3d(0.0, 0.0, -zAngle), 100.0 / scale);
+            }
+        }
+
         public DecomposedTransform? CalcNewParentCameraLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
         {
             return null;

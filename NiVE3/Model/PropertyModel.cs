@@ -201,6 +201,21 @@ namespace NiVE3.Model
             }
         }
 
+        public void ReplaceKeyFrameValue(object? newValue, Time time)
+        {
+            for (var i = 0; i < KeyFrames.Count; i++)
+            {
+                if (KeyFrames[i].Time == time)
+                {
+                    var keyFrame = KeyFrames[i];
+                    var newKeyFrame = new KeyFrame(keyFrame.Time, newValue, keyFrame.EaseIn, keyFrame.EaseOut, keyFrame.InterpolationType);
+
+                    ReplaceKeyFrames([keyFrame], [newKeyFrame], LanguageResourceDictionary.History_ReplaceKeyFrames);
+                    break;
+                }
+            }
+        }
+
         public void CreateKeyFrame(object? value)
         {
             var time = CurrentTime - SourceStartPoint;
@@ -330,7 +345,7 @@ namespace NiVE3.Model
             RawValue = value;
         }
 
-        public object? GetRawValue(Time time)
+        public object? GetRawValue(Time layerTime)
         {
             if (UseEditingValue || KeyFrames.Count < 1)
             {
@@ -338,7 +353,7 @@ namespace NiVE3.Model
             }
             else
             {
-                return Property.PropertyType.Interpolate(KeyFrames, time);
+                return Property.PropertyType.Interpolate(KeyFrames, layerTime);
             }
         }
 

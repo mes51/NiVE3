@@ -485,19 +485,7 @@ namespace NiVE3.Model
             foreach (var (l, oldParentTransform) in layers.Zip(oldParentTransforms))
             {
                 l.ParentLayerId = targetLayerId;
-                if (resetTransform)
-                {
-                    l.ResetTransform();
-                    l.UpdateTransformByChangeParent(new DecomposedTransform(Vector3d.Zero, Vector3d.Zero, new Vector3d(100.0)), time);
-                }
-                else if (!skipKeepTransform)
-                {
-                    var newTransform = Transformer.CalcNewParentLocalTransform(l.IsEnable3D, l.GetTransform(time), oldParentTransform, newParentTransform);
-                    if (newTransform != null)
-                    {
-                        l.UpdateTransformByChangeParent(newTransform, time);
-                    }
-                }
+                l.UpdateTransformByChangeParent(Transformer, oldParentTransform, newParentTransform, time, resetTransform, skipKeepTransform);
             }
 
             HistoryModel.Add(new ChangeParentLayerHistoryCommand([..layers], oldValues, targetLayerId));

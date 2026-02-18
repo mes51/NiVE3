@@ -33,6 +33,15 @@ namespace NiVE3.Plugin.Interfaces
         DecomposedTransform? CalcNewParentLocalTransform(bool isEnable3D, PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
 
         /// <summary>
+        /// 親を零点とし、親に一致させるためのトランスフォームの差分を計算します
+        /// </summary>
+        /// <param name="isEnable3D">対象のレイヤーが3Dレイヤーかどうか</param>
+        /// <param name="childTransform">親が変わる子のトランスフォーム</param>
+        /// <param name="newParentTransform">新しい親のトランスフォーム</param>
+        /// <returns>新しい親に一致させるためのトランスフォームの差分。計算できない場合はnull</returns>
+        DecomposedTransform? CalcNewParentBaseTransformDifference(bool isEnable3D, PropertyValueGroup childTransform, ParentTransform[] newParentTransform);
+
+        /// <summary>
         /// カメラ親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
         /// </summary>
         /// <param name="childTransform">親が変わる子のトランスフォーム</param>
