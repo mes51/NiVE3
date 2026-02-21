@@ -2031,22 +2031,98 @@ namespace NiVE3.Model
             switch (FootageModel.InputModel.Input)
             {
                 case CameraInput:
-                    break;
                 case LightInput:
-                    break;
-                default:
                     {
-                        var translate = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
-                        var scale = TransformProperties.FindProperty(ILayerObject.TransformScaleId) as PropertyModel;
-                        var direction = TransformProperties.FindProperty(ILayerObject.TransformDirectionId) as PropertyModel;
-                        var zAngle = TransformProperties.FindProperty(ILayerObject.TransformZAngleId) as PropertyModel;
-
-                        if (translate == null || scale == null || direction == null || zAngle == null)
+                        var position = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
+                        var pointOfInterest = TransformProperties.FindProperty(ILayerObject.TransformPointOfInterestId) as PropertyModel;
+                        if (position == null || pointOfInterest == null)
                         {
                             return;
                         }
 
-                        var hasKeyFrame = translate.HasKeyFrame() || scale.HasKeyFrame() || (IsEnable3D ? direction.HasKeyFrame() : zAngle.HasKeyFrame());
+                        var hasKeyFrame = position.HasKeyFrame() || pointOfInterest.HasKeyFrame();
+
+                        HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+
+                        if (hasKeyFrame)
+                        {
+                            if (resetTransform)
+                            {
+                                var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
+                                var currentPointOfInterest = (Vector3d)(pointOfInterest.GetRawValue(layerTime) ?? Vector3d.Zero);
+                                var center = new Vector3d(CompositionModel.Width, CompositionModel.Height, 0.0) * 0.5;
+                                var diff = currentPosition - center;
+                                foreach (var keyFrame in position.KeyFrames.ToArray())
+                                {
+                                    position.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) - diff, keyFrame.Time);
+                                }
+                                foreach (var keyFrame in pointOfInterest.KeyFrames.ToArray())
+                                {
+                                    pointOfInterest.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) - diff, keyFrame.Time);
+                                }
+                            }
+                            else if (!skipKeepTransform)
+                            {
+                                foreach (var keyFrame in position.KeyFrames.ToArray())
+                                {
+                                    var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                    if (twoNodeValue == null)
+                                    {
+                                        return;
+                                    }
+                                    position.ReplaceKeyFrameValue(twoNodeValue.Position, keyFrame.Time);
+                                }
+                                foreach (var keyFrame in pointOfInterest.KeyFrames.ToArray())
+                                {
+                                    var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                    if (twoNodeValue == null)
+                                    {
+                                        return;
+                                    }
+                                    pointOfInterest.ReplaceKeyFrameValue(twoNodeValue.PointOfInterest, keyFrame.Time);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
+                            var currentPointOfInterest = (Vector3d)(pointOfInterest.GetRawValue(layerTime) ?? Vector3d.Zero);
+                            if (resetTransform)
+                            {
+                                var center = new Vector3d(CompositionModel.Width, CompositionModel.Height, 0.0) * 0.5;
+                                var diff = currentPosition - center;
+                                position.CommitProperty(center, currentPosition);
+                                pointOfInterest.CommitProperty(currentPointOfInterest - diff, currentPointOfInterest);
+                            }
+                            else if (!skipKeepTransform)
+                            {
+                                var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(globalTime), oldParentTransform, newParentTransform);
+                                if (twoNodeValue == null)
+                                {
+                                    return;
+                                }
+
+                                var (newPosition, newPointOfInterest) = twoNodeValue;
+                                position.CommitProperty(newPosition, currentPosition);
+                                pointOfInterest.CommitProperty(newPointOfInterest, currentPointOfInterest);
+                            }
+                        }
+
+                        HistoryModel.EndGroup();
+                    }
+                    break;
+                default:
+                    {
+                        var position = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
+                        var scale = TransformProperties.FindProperty(ILayerObject.TransformScaleId) as PropertyModel;
+                        var direction = TransformProperties.FindProperty(ILayerObject.TransformDirectionId) as PropertyModel;
+                        var zAngle = TransformProperties.FindProperty(ILayerObject.TransformZAngleId) as PropertyModel;
+                        if (position == null || scale == null || direction == null || zAngle == null)
+                        {
+                            return;
+                        }
+
+                        var hasKeyFrame = position.HasKeyFrame() || scale.HasKeyFrame() || (IsEnable3D ? direction.HasKeyFrame() : zAngle.HasKeyFrame());
 
                         HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
 
@@ -2059,9 +2135,9 @@ namespace NiVE3.Model
                                     var decomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
                                     if (decomposedTransform != null)
                                     {
-                                        foreach (var keyFrame in translate.KeyFrames.ToArray())
+                                        foreach (var keyFrame in position.KeyFrames.ToArray())
                                         {
-                                            translate.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Position, keyFrame.Time);
+                                            position.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Position, keyFrame.Time);
                                         }
                                         foreach (var keyFrame in scale.KeyFrames.ToArray())
                                         {
@@ -2075,12 +2151,12 @@ namespace NiVE3.Model
                                 }
                                 else if (!skipKeepTransform)
                                 {
-                                    foreach (var keyFrame in translate.KeyFrames.ToArray())
+                                    foreach (var keyFrame in position.KeyFrames.ToArray())
                                     {
                                         var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
                                         if (decomposedTransform != null)
                                         {
-                                            translate.ReplaceKeyFrameValue(decomposedTransform.Position, keyFrame.Time);
+                                            position.ReplaceKeyFrameValue(decomposedTransform.Position, keyFrame.Time);
                                         }
                                     }
                                     foreach (var keyFrame in scale.KeyFrames.ToArray())
@@ -2103,7 +2179,7 @@ namespace NiVE3.Model
                             }
                             else
                             {
-                                var currentPosition = (Vector3d)(translate.GetRawValue(layerTime) ?? Vector3d.Zero);
+                                var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
                                 var currentScale = (Vector3d)(scale.GetRawValue(layerTime) ?? new Vector3d(100.0));
                                 var currentDirection = (Vector3d)(direction.GetRawValue(layerTime) ?? Vector3d.Zero);
                                 if (resetTransform)
@@ -2111,13 +2187,13 @@ namespace NiVE3.Model
                                     var decomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
                                     if (decomposedTransform != null)
                                     {
-                                        translate.CommitProperty(currentPosition + decomposedTransform.Position, currentPosition);
+                                        position.CommitProperty(currentPosition + decomposedTransform.Position, currentPosition);
                                         scale.CommitProperty(currentScale * decomposedTransform.Scale, currentScale);
                                         direction.CommitProperty(currentDirection + decomposedTransform.Direction, currentDirection);
                                     }
                                     else
                                     {
-                                        translate.CommitProperty(Vector3d.Zero, currentPosition);
+                                        position.CommitProperty(Vector3d.Zero, currentPosition);
                                         scale.CommitProperty(new Vector3d(100.0), currentScale);
                                         direction.CommitProperty(Vector3d.Zero, currentDirection);
                                     }
@@ -2127,7 +2203,7 @@ namespace NiVE3.Model
                                     var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
                                     if (decomposedTransform != null)
                                     {
-                                        translate.CommitProperty(decomposedTransform.Position, currentPosition);
+                                        position.CommitProperty(decomposedTransform.Position, currentPosition);
                                         scale.CommitProperty(decomposedTransform.Scale, currentScale);
                                         direction.CommitProperty(decomposedTransform.Direction, currentDirection);
                                     }
@@ -2143,9 +2219,9 @@ namespace NiVE3.Model
                                     var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
                                     if (decomposedTransform != null)
                                     {
-                                        foreach (var keyFrame in translate.KeyFrames.ToArray())
+                                        foreach (var keyFrame in position.KeyFrames.ToArray())
                                         {
-                                            translate.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Position, keyFrame.Time);
+                                            position.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Position, keyFrame.Time);
                                         }
                                         foreach (var keyFrame in scale.KeyFrames.ToArray())
                                         {
@@ -2159,12 +2235,12 @@ namespace NiVE3.Model
                                 }
                                 else if (!skipKeepTransform)
                                 {
-                                    foreach (var keyFrame in translate.KeyFrames.ToArray())
+                                    foreach (var keyFrame in position.KeyFrames.ToArray())
                                     {
                                         var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
                                         if (decomposedTransform != null)
                                         {
-                                            translate.ReplaceKeyFrameValue(decomposedTransform.Position, keyFrame.Time);
+                                            position.ReplaceKeyFrameValue(decomposedTransform.Position, keyFrame.Time);
                                         }
                                     }
                                     foreach (var keyFrame in scale.KeyFrames.ToArray())
@@ -2187,7 +2263,7 @@ namespace NiVE3.Model
                             }
                             else
                             {
-                                var currentPosition = (Vector3d)(translate.GetRawValue(layerTime) ?? Vector3d.Zero);
+                                var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
                                 var currentScale = (Vector3d)(scale.GetRawValue(layerTime) ?? new Vector3d(100.0));
                                 var currentZAngle = (double)(zAngle.GetRawValue(layerTime) ?? 0.0);
                                 if (resetTransform)
@@ -2195,13 +2271,13 @@ namespace NiVE3.Model
                                     var decomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
                                     if (decomposedTransform != null)
                                     {
-                                        translate.CommitProperty(currentPosition + decomposedTransform.Position, currentPosition);
+                                        position.CommitProperty(currentPosition + decomposedTransform.Position, currentPosition);
                                         scale.CommitProperty(currentScale / decomposedTransform.Scale, currentScale);
                                         zAngle.CommitProperty(currentZAngle + decomposedTransform.Direction.Z, currentZAngle);
                                     }
                                     else
                                     {
-                                        translate.CommitProperty(Vector3d.Zero, currentPosition);
+                                        position.CommitProperty(Vector3d.Zero, currentPosition);
                                         scale.CommitProperty(new Vector3d(100.0), currentScale);
                                         zAngle.CommitProperty(0.0, currentZAngle);
                                     }
@@ -2211,7 +2287,7 @@ namespace NiVE3.Model
                                     var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
                                     if (decomposedTransform != null)
                                     {
-                                        translate.CommitProperty(decomposedTransform.Position, currentPosition);
+                                        position.CommitProperty(decomposedTransform.Position, currentPosition);
                                         scale.CommitProperty(decomposedTransform.Scale, currentScale);
                                         zAngle.CommitProperty(decomposedTransform.Direction.Z, currentZAngle);
                                     }

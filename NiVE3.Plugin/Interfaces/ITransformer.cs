@@ -42,22 +42,13 @@ namespace NiVE3.Plugin.Interfaces
         DecomposedTransform? CalcNewParentBaseTransformDifference(bool isEnable3D, PropertyValueGroup childTransform, ParentTransform[] newParentTransform);
 
         /// <summary>
-        /// カメラ親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
+        /// 位置と注視点を持つレイヤーの親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
         /// </summary>
         /// <param name="childTransform">親が変わる子のトランスフォーム</param>
         /// <param name="oldParentTransform">古い親のトランスフォーム</param>
         /// <param name="newParentTransform">新しい親のトランスフォーム</param>
         /// <returns>新しい親の元でのローカル座標。計算できない場合はnull</returns>
-        DecomposedTransform? CalcNewParentCameraLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
-
-        /// <summary>
-        /// ライト親が切り替わった際、ワールド座標を維持した新しいトランスフォームを計算します
-        /// </summary>
-        /// <param name="childTransform">親が変わる子のトランスフォーム</param>
-        /// <param name="oldParentTransform">古い親のトランスフォーム</param>
-        /// <param name="newParentTransform">新しい親のトランスフォーム</param>
-        /// <returns>新しい親の元でのローカル座標。計算できない場合はnull</returns>
-        DecomposedTransform? CalcNewParentLightLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
+        TwoNodeValue? CalcNewParentTwoNodeLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform);
 
         /// <summary>
         /// 2Dレイヤーのバウンディングボックスを取得します

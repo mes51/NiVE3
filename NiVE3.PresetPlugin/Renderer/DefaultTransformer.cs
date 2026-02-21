@@ -122,14 +122,23 @@ namespace NiVE3.PresetPlugin.Renderer
             }
         }
 
-        public DecomposedTransform? CalcNewParentCameraLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
+        public TwoNodeValue? CalcNewParentTwoNodeLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
         {
-            return null;
-        }
+            var size = Math.Max(Width, Height);
 
-        public DecomposedTransform? CalcNewParentLightLocalTransform(PropertyValueGroup childTransform, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform)
-        {
-            return null;
+            var newParentMatrix = Transform3D.Calc3DParentModelMatrix(newParentTransform, Width, Height);
+            if (!Matrix4x4d.Invert(newParentMatrix, out var inverted))
+            {
+                return null;
+            }
+
+            var pos = (Vector3d)(childTransform[ILayerObject.TransformPositionId] ?? Vector3d.Zero) / size;
+            var poi = (Vector3d)(childTransform[ILayerObject.TransformPointOfInterestId] ?? Vector3d.Zero) / size;
+
+            var newPos = inverted.Transform(pos);
+            var newPoi = inverted.Transform(poi);
+
+            return new TwoNodeValue(newPos * size, newPoi * size);
         }
 
         public PreviewBoundingBox GetBoundingBox2D(Vector2d origin, int width, int height, PropertyValueGroup transform, ParentTransform[] parentTransforms)
