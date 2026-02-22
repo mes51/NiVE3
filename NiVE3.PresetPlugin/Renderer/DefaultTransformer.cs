@@ -131,12 +131,15 @@ namespace NiVE3.PresetPlugin.Renderer
             {
                 return null;
             }
+            var oldParentMatrix = Transform3D.Calc3DParentModelMatrix(oldParentTransform, Width, Height);
+
+            var convertMatrix = oldParentMatrix * inverted;
 
             var pos = (Vector3d)(childTransform[ILayerObject.TransformPositionId] ?? Vector3d.Zero) / size;
             var poi = (Vector3d)(childTransform[ILayerObject.TransformPointOfInterestId] ?? Vector3d.Zero) / size;
 
-            var newPos = inverted.Transform(pos);
-            var newPoi = inverted.Transform(poi);
+            var newPos = convertMatrix.Transform(pos);
+            var newPoi = convertMatrix.Transform(poi);
 
             return new TwoNodeValue(newPos * size, newPoi * size);
         }
