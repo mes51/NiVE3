@@ -2021,7 +2021,7 @@ namespace NiVE3.Model
 
         public void UpdateTransformByChangeParent(ITransformer transformer, ParentTransform[] oldParentTransform, ParentTransform[] newParentTransform, Time globalTime, bool resetTransform, bool skipKeepTransform)
         {
-            if (TransformProperties == null)
+            if (TransformProperties == null || (!resetTransform && skipKeepTransform))
             {
                 return;
             }
@@ -2033,79 +2033,113 @@ namespace NiVE3.Model
                 case CameraInput:
                 case LightInput:
                     {
-                        var position = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
-                        var pointOfInterest = TransformProperties.FindProperty(ILayerObject.TransformPointOfInterestId) as PropertyModel;
-                        if (position == null || pointOfInterest == null)
+                        if (TransformProperties.FindProperty(ILayerObject.TransformPositionId) is not PropertyModel position || TransformProperties.FindProperty(ILayerObject.TransformPointOfInterestId) is not PropertyModel pointOfInterest)
                         {
                             return;
                         }
 
-                        var hasKeyFrame = position.HasKeyFrame() || pointOfInterest.HasKeyFrame();
-
-                        HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
-
-                        if (hasKeyFrame)
+                        var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
+                        var currentPointOfInterest = (Vector3d)(pointOfInterest.GetRawValue(layerTime) ?? Vector3d.Zero);
+                        var newPositionKeyFrames = new List<(Vector3d, Time)>();
+                        var newPointOfInterestKeyFrames = new List<(Vector3d, Time)>();
+                        var newPosition = Vector3d.Zero;
+                        var newPointOfInterest = Vector3d.Zero;
+                        if (resetTransform)
                         {
-                            if (resetTransform)
+                            var center = new Vector3d(CompositionModel.Width, CompositionModel.Height, 0.0) * 0.5;
+                            var diff = currentPosition - center;
+
+                            if (position.HasKeyFrame())
                             {
-                                var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
-                                var currentPointOfInterest = (Vector3d)(pointOfInterest.GetRawValue(layerTime) ?? Vector3d.Zero);
-                                var center = new Vector3d(CompositionModel.Width, CompositionModel.Height, 0.0) * 0.5;
-                                var diff = currentPosition - center;
-                                foreach (var keyFrame in position.KeyFrames.ToArray())
+                                foreach (var keyFrame in position.KeyFrames)
                                 {
-                                    position.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) - diff, keyFrame.Time);
-                                }
-                                foreach (var keyFrame in pointOfInterest.KeyFrames.ToArray())
-                                {
-                                    pointOfInterest.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) - diff, keyFrame.Time);
+                                    newPositionKeyFrames.Add(((Vector3d)(keyFrame.Value ?? Vector3d.Zero) - diff, keyFrame.Time));
                                 }
                             }
-                            else if (!skipKeepTransform)
+                            else
                             {
-                                foreach (var keyFrame in position.KeyFrames.ToArray())
-                                {
-                                    var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                    if (twoNodeValue == null)
-                                    {
-                                        return;
-                                    }
-                                    position.ReplaceKeyFrameValue(twoNodeValue.Position, keyFrame.Time);
-                                }
+                                newPosition = center;
+                            }
+
+
+                            if (pointOfInterest.HasKeyFrame())
+                            {
                                 foreach (var keyFrame in pointOfInterest.KeyFrames.ToArray())
                                 {
-                                    var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                    if (twoNodeValue == null)
-                                    {
-                                        return;
-                                    }
-                                    pointOfInterest.ReplaceKeyFrameValue(twoNodeValue.PointOfInterest, keyFrame.Time);
+                                    newPointOfInterestKeyFrames.Add(((Vector3d)(keyFrame.Value ?? Vector3d.Zero) - diff, keyFrame.Time));
                                 }
+                            }
+                            else
+                            {
+                                newPointOfInterest = currentPointOfInterest - diff;
                             }
                         }
                         else
                         {
-                            var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
-                            var currentPointOfInterest = (Vector3d)(pointOfInterest.GetRawValue(layerTime) ?? Vector3d.Zero);
-                            if (resetTransform)
+                            if (position.HasKeyFrame())
                             {
-                                var center = new Vector3d(CompositionModel.Width, CompositionModel.Height, 0.0) * 0.5;
-                                var diff = currentPosition - center;
-                                position.CommitProperty(center, currentPosition);
-                                pointOfInterest.CommitProperty(currentPointOfInterest - diff, currentPointOfInterest);
+                                foreach (var keyFrame in position.KeyFrames.ToArray())
+                                {
+                                    var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                    if (twoNodeValue != null)
+                                    {
+                                        newPositionKeyFrames.Add((twoNodeValue.Position, keyFrame.Time));
+                                    }
+                                }
                             }
-                            else if (!skipKeepTransform)
+                            else
                             {
                                 var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(globalTime), oldParentTransform, newParentTransform);
-                                if (twoNodeValue == null)
+                                if (twoNodeValue != null)
                                 {
-                                    return;
+                                    newPosition = twoNodeValue.Position;
                                 }
-
-                                var (newPosition, newPointOfInterest) = twoNodeValue;
-                                position.CommitProperty(newPosition, currentPosition);
-                                pointOfInterest.CommitProperty(newPointOfInterest, currentPointOfInterest);
                             }
+
+                            if (pointOfInterest.HasKeyFrame())
+                            {
+                                foreach (var keyFrame in pointOfInterest.KeyFrames.ToArray())
+                                {
+                                    var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                    if (twoNodeValue != null)
+                                    {
+                                        newPointOfInterestKeyFrames.Add((twoNodeValue.PointOfInterest, keyFrame.Time));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var twoNodeValue = transformer.CalcNewParentTwoNodeLocalTransform(GetTransform(globalTime), oldParentTransform, newParentTransform);
+                                if (twoNodeValue != null)
+                                {
+                                    newPointOfInterest = twoNodeValue.PointOfInterest;
+                                }
+                            }
+                        }
+
+                        HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+
+                        if (newPositionKeyFrames.Count > 0)
+                        {
+                            foreach (var (value, time) in newPositionKeyFrames)
+                            {
+                                position.ReplaceKeyFrameValue(value, time);
+                            }
+                        }
+                        else
+                        {
+                            position.CommitProperty(newPosition, currentPosition);
+                        }
+                        if (newPointOfInterestKeyFrames.Count > 0)
+                        {
+                            foreach (var (value, time) in newPointOfInterestKeyFrames)
+                            {
+                                pointOfInterest.ReplaceKeyFrameValue(value, time);
+                            }
+                        }
+                        else
+                        {
+                            pointOfInterest.CommitProperty(newPointOfInterest, currentPointOfInterest);
                         }
 
                         HistoryModel.EndGroup();
@@ -2113,185 +2147,300 @@ namespace NiVE3.Model
                     break;
                 default:
                     {
-                        var position = TransformProperties.FindProperty(ILayerObject.TransformPositionId) as PropertyModel;
-                        var scale = TransformProperties.FindProperty(ILayerObject.TransformScaleId) as PropertyModel;
-                        var direction = TransformProperties.FindProperty(ILayerObject.TransformDirectionId) as PropertyModel;
-                        var zAngle = TransformProperties.FindProperty(ILayerObject.TransformZAngleId) as PropertyModel;
-                        if (position == null || scale == null || direction == null || zAngle == null)
+                        if (TransformProperties.FindProperty(ILayerObject.TransformPositionId) is not PropertyModel position ||
+                            TransformProperties.FindProperty(ILayerObject.TransformScaleId) is not PropertyModel scale ||
+                            TransformProperties.FindProperty(ILayerObject.TransformDirectionId) is not PropertyModel direction ||
+                            TransformProperties.FindProperty(ILayerObject.TransformZAngleId) is not PropertyModel zAngle)
                         {
                             return;
                         }
-
-                        var hasKeyFrame = position.HasKeyFrame() || scale.HasKeyFrame() || (IsEnable3D ? direction.HasKeyFrame() : zAngle.HasKeyFrame());
 
                         HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
 
                         if (IsEnable3D)
                         {
-                            if (hasKeyFrame)
+                            var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
+                            var currentScale = (Vector3d)(scale.GetRawValue(layerTime) ?? new Vector3d(100.0));
+                            var currentDirection = (Vector3d)(direction.GetRawValue(layerTime) ?? Vector3d.Zero);
+                            var newPositionKeyFrames = new List<(Vector3d, Time)>();
+                            var newScaleKeyFrames = new List<(Vector3d, Time)>();
+                            var newDirectionKeyFrames = new List<(Vector3d, Time)>();
+                            var newPosition = Vector3d.Zero;
+                            var newScale = Vector3d.Zero;
+                            var newDirection = Vector3d.Zero;
+
+                            if (resetTransform)
                             {
-                                if (resetTransform)
+                                var currentTimeDecomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
+                                if (currentTimeDecomposedTransform == null)
                                 {
-                                    var decomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
-                                    if (decomposedTransform != null)
+                                    return;
+                                }
+
+                                if (position.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in position.KeyFrames)
                                     {
-                                        foreach (var keyFrame in position.KeyFrames.ToArray())
-                                        {
-                                            position.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Position, keyFrame.Time);
-                                        }
-                                        foreach (var keyFrame in scale.KeyFrames.ToArray())
-                                        {
-                                            scale.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? new Vector3d(100.0)) * decomposedTransform.Scale, keyFrame.Time);
-                                        }
-                                        foreach (var keyFrame in direction.KeyFrames.ToArray())
-                                        {
-                                            direction.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Direction, keyFrame.Time);
-                                        }
+                                        newPositionKeyFrames.Add(((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + currentTimeDecomposedTransform.Position, keyFrame.Time));
                                     }
                                 }
-                                else if (!skipKeepTransform)
+                                else
                                 {
-                                    foreach (var keyFrame in position.KeyFrames.ToArray())
+                                    newPosition = currentPosition + currentTimeDecomposedTransform.Position;
+                                }
+                                if (scale.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in scale.KeyFrames)
                                     {
-                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                        if (decomposedTransform != null)
-                                        {
-                                            position.ReplaceKeyFrameValue(decomposedTransform.Position, keyFrame.Time);
-                                        }
+                                        newScaleKeyFrames.Add(((Vector3d)(keyFrame.Value ?? new Vector3d(100.0)) * currentTimeDecomposedTransform.Scale, keyFrame.Time));
                                     }
-                                    foreach (var keyFrame in scale.KeyFrames.ToArray())
+                                }
+                                else
+                                {
+                                    newScale = currentScale * currentTimeDecomposedTransform.Scale;
+                                }
+                                if (direction.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in direction.KeyFrames)
                                     {
-                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                        if (decomposedTransform != null)
-                                        {
-                                            scale.ReplaceKeyFrameValue(decomposedTransform.Scale, keyFrame.Time);
-                                        }
+                                        newDirectionKeyFrames.Add(((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + currentTimeDecomposedTransform.Direction, keyFrame.Time));
                                     }
-                                    foreach (var keyFrame in direction.KeyFrames.ToArray())
-                                    {
-                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                        if (decomposedTransform != null)
-                                        {
-                                            direction.ReplaceKeyFrameValue(decomposedTransform.Direction, keyFrame.Time);
-                                        }
-                                    }
+                                }
+                                else
+                                {
+                                    newDirection = currentDirection + currentTimeDecomposedTransform.Direction;
                                 }
                             }
                             else
                             {
-                                var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
-                                var currentScale = (Vector3d)(scale.GetRawValue(layerTime) ?? new Vector3d(100.0));
-                                var currentDirection = (Vector3d)(direction.GetRawValue(layerTime) ?? Vector3d.Zero);
-                                if (resetTransform)
+                                var currentTimeDecomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
+                                if (currentTimeDecomposedTransform == null)
                                 {
-                                    var decomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
-                                    if (decomposedTransform != null)
+                                    return;
+                                }
+
+                                if (position.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in position.KeyFrames)
                                     {
-                                        position.CommitProperty(currentPosition + decomposedTransform.Position, currentPosition);
-                                        scale.CommitProperty(currentScale * decomposedTransform.Scale, currentScale);
-                                        direction.CommitProperty(currentDirection + decomposedTransform.Direction, currentDirection);
-                                    }
-                                    else
-                                    {
-                                        position.CommitProperty(Vector3d.Zero, currentPosition);
-                                        scale.CommitProperty(new Vector3d(100.0), currentScale);
-                                        direction.CommitProperty(Vector3d.Zero, currentDirection);
+                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                        if (decomposedTransform != null)
+                                        {
+                                            newPositionKeyFrames.Add((decomposedTransform.Position, keyFrame.Time));
+                                        }
                                     }
                                 }
-                                else if (!skipKeepTransform)
+                                else
                                 {
-                                    var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
-                                    if (decomposedTransform != null)
+                                    newPosition = currentTimeDecomposedTransform.Position;
+                                }
+                                if (scale.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in scale.KeyFrames)
                                     {
-                                        position.CommitProperty(decomposedTransform.Position, currentPosition);
-                                        scale.CommitProperty(decomposedTransform.Scale, currentScale);
-                                        direction.CommitProperty(decomposedTransform.Direction, currentDirection);
+                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                        if (decomposedTransform != null)
+                                        {
+                                            newScaleKeyFrames.Add((decomposedTransform.Scale, keyFrame.Time));
+                                        }
                                     }
                                 }
+                                else
+                                {
+                                    newScale = currentTimeDecomposedTransform.Scale;
+                                }
+                                if (direction.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in direction.KeyFrames)
+                                    {
+                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                        if (decomposedTransform != null)
+                                        {
+                                            newDirectionKeyFrames.Add((decomposedTransform.Direction, keyFrame.Time));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    newDirection = currentTimeDecomposedTransform.Direction;
+                                }
+                            }
+
+                            if (newPositionKeyFrames.Count > 0)
+                            {
+                                foreach (var (value, time) in newPositionKeyFrames)
+                                {
+                                    position.ReplaceKeyFrameValue(value, time);
+                                }
+                            }
+                            else
+                            {
+                                position.CommitProperty(newPosition, currentPosition);
+                            }
+                            if (newScaleKeyFrames.Count > 0)
+                            {
+                                foreach (var (value, time) in newScaleKeyFrames)
+                                {
+                                    scale.ReplaceKeyFrameValue(value, time);
+                                }
+                            }
+                            else
+                            {
+                                scale.CommitProperty(newScale, currentScale);
+                            }
+                            if (newDirectionKeyFrames.Count > 0)
+                            {
+                                foreach (var (value, time) in newDirectionKeyFrames)
+                                {
+                                    direction.ReplaceKeyFrameValue(value, time);
+                                }
+                            }
+                            else
+                            {
+                                direction.CommitProperty(newDirection, currentDirection);
                             }
                         }
                         else
                         {
-                            if (hasKeyFrame)
+                            var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
+                            var currentScale = (Vector3d)(scale.GetRawValue(layerTime) ?? new Vector3d(100.0));
+                            var currentZAngle = (double)(zAngle.GetRawValue(layerTime) ?? 0.0);
+                            var newPositionKeyFrames = new List<(Vector3d, Time)>();
+                            var newScaleKeyFrames = new List<(Vector3d, Time)>();
+                            var newZAngleKeyFrames = new List<(double, Time)>();
+                            var newPosition = Vector3d.Zero;
+                            var newScale = Vector3d.Zero;
+                            var newZAngle = 0.0;
+
+                            if (resetTransform)
                             {
-                                if (resetTransform)
+                                var currentTimeDecomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
+                                if (currentTimeDecomposedTransform == null)
                                 {
-                                    var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
-                                    if (decomposedTransform != null)
+                                    return;
+                                }
+
+                                if (position.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in position.KeyFrames)
                                     {
-                                        foreach (var keyFrame in position.KeyFrames.ToArray())
-                                        {
-                                            position.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + decomposedTransform.Position, keyFrame.Time);
-                                        }
-                                        foreach (var keyFrame in scale.KeyFrames.ToArray())
-                                        {
-                                            scale.ReplaceKeyFrameValue((Vector3d)(keyFrame.Value ?? new Vector3d(100.0)) * decomposedTransform.Scale, keyFrame.Time);
-                                        }
-                                        foreach (var keyFrame in direction.KeyFrames.ToArray())
-                                        {
-                                            zAngle.ReplaceKeyFrameValue((double)(keyFrame.Value ?? 0.0) + decomposedTransform.Direction.Z, keyFrame.Time);
-                                        }
+                                        newPositionKeyFrames.Add(((Vector3d)(keyFrame.Value ?? Vector3d.Zero) + currentTimeDecomposedTransform.Position, keyFrame.Time));
                                     }
                                 }
-                                else if (!skipKeepTransform)
+                                else
                                 {
-                                    foreach (var keyFrame in position.KeyFrames.ToArray())
+                                    newPosition = currentPosition + currentTimeDecomposedTransform.Position;
+                                }
+                                if (scale.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in scale.KeyFrames)
                                     {
-                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                        if (decomposedTransform != null)
-                                        {
-                                            position.ReplaceKeyFrameValue(decomposedTransform.Position, keyFrame.Time);
-                                        }
+                                        newScaleKeyFrames.Add(((Vector3d)(keyFrame.Value ?? new Vector3d(100.0)) * currentTimeDecomposedTransform.Scale, keyFrame.Time));
                                     }
-                                    foreach (var keyFrame in scale.KeyFrames.ToArray())
+                                }
+                                else
+                                {
+                                    newScale = currentScale / currentTimeDecomposedTransform.Scale;
+                                }
+                                if (zAngle.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in zAngle.KeyFrames)
                                     {
-                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                        if (decomposedTransform != null)
-                                        {
-                                            scale.ReplaceKeyFrameValue(decomposedTransform.Scale, keyFrame.Time);
-                                        }
+                                        newZAngleKeyFrames.Add(((double)(keyFrame.Value ?? 0.0) + currentTimeDecomposedTransform.Direction.Z, keyFrame.Time));
                                     }
-                                    foreach (var keyFrame in zAngle.KeyFrames.ToArray())
-                                    {
-                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
-                                        if (decomposedTransform != null)
-                                        {
-                                            zAngle.ReplaceKeyFrameValue(decomposedTransform.Direction.Z, keyFrame.Time);
-                                        }
-                                    }
+                                }
+                                else
+                                {
+                                    newZAngle = currentZAngle + currentTimeDecomposedTransform.Direction.Z;
                                 }
                             }
                             else
                             {
-                                var currentPosition = (Vector3d)(position.GetRawValue(layerTime) ?? Vector3d.Zero);
-                                var currentScale = (Vector3d)(scale.GetRawValue(layerTime) ?? new Vector3d(100.0));
-                                var currentZAngle = (double)(zAngle.GetRawValue(layerTime) ?? 0.0);
-                                if (resetTransform)
+                                var currentTimeDecomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
+                                if (currentTimeDecomposedTransform == null)
                                 {
-                                    var decomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
-                                    if (decomposedTransform != null)
+                                    return;
+                                }
+
+                                if (position.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in position.KeyFrames)
                                     {
-                                        position.CommitProperty(currentPosition + decomposedTransform.Position, currentPosition);
-                                        scale.CommitProperty(currentScale / decomposedTransform.Scale, currentScale);
-                                        zAngle.CommitProperty(currentZAngle + decomposedTransform.Direction.Z, currentZAngle);
-                                    }
-                                    else
-                                    {
-                                        position.CommitProperty(Vector3d.Zero, currentPosition);
-                                        scale.CommitProperty(new Vector3d(100.0), currentScale);
-                                        zAngle.CommitProperty(0.0, currentZAngle);
+                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                        if (decomposedTransform != null)
+                                        {
+                                            newPositionKeyFrames.Add((decomposedTransform.Position, keyFrame.Time));
+                                        }
                                     }
                                 }
-                                else if (!skipKeepTransform)
+                                else
                                 {
-                                    var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
-                                    if (decomposedTransform != null)
+                                    newPosition = currentTimeDecomposedTransform.Position;
+                                }
+                                if (scale.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in scale.KeyFrames)
                                     {
-                                        position.CommitProperty(decomposedTransform.Position, currentPosition);
-                                        scale.CommitProperty(decomposedTransform.Scale, currentScale);
-                                        zAngle.CommitProperty(decomposedTransform.Direction.Z, currentZAngle);
+                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                        if (decomposedTransform != null)
+                                        {
+                                            newScaleKeyFrames.Add((decomposedTransform.Scale, keyFrame.Time));
+                                        }
                                     }
                                 }
+                                else
+                                {
+                                    newScale = currentTimeDecomposedTransform.Scale;
+                                }
+                                if (zAngle.HasKeyFrame())
+                                {
+                                    foreach (var keyFrame in zAngle.KeyFrames)
+                                    {
+                                        var decomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(keyFrame.Time + SourceStartPoint), oldParentTransform, newParentTransform);
+                                        if (decomposedTransform != null)
+                                        {
+                                            newZAngleKeyFrames.Add((decomposedTransform.Direction.Z, keyFrame.Time));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    newZAngle = currentTimeDecomposedTransform.Direction.Z;
+                                }
+                            }
+
+                            if (newPositionKeyFrames.Count > 0)
+                            {
+                                foreach (var (value, time) in newPositionKeyFrames)
+                                {
+                                    position.ReplaceKeyFrameValue(value, time);
+                                }
+                            }
+                            else
+                            {
+                                position.CommitProperty(newPosition, currentPosition);
+                            }
+                            if (newScaleKeyFrames.Count > 0)
+                            {
+                                foreach (var (value, time) in newScaleKeyFrames)
+                                {
+                                    scale.ReplaceKeyFrameValue(value, time);
+                                }
+                            }
+                            else
+                            {
+                                scale.CommitProperty(newScale, currentScale);
+                            }
+                            if (newZAngleKeyFrames.Count > 0)
+                            {
+                                foreach (var (value, time) in newZAngleKeyFrames)
+                                {
+                                    zAngle.ReplaceKeyFrameValue(value, time);
+                                }
+                            }
+                            else
+                            {
+                                zAngle.CommitProperty(newZAngle, currentZAngle);
                             }
                         }
 
