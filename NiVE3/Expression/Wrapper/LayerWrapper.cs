@@ -78,7 +78,7 @@ namespace NiVE3.Expression.Wrapper
         [ExpressionPublicMember]
         public bool isEnableShy => LayerModel.IsEnableShy;
 
-        //public bool isEnableCollapse => LayerModel.IsEnableCollapse;
+        //public bool isEnableExplode => LayerModel.IsEnableExplode;
 
         [ExpressionPublicMember]
         public bool isEnableEffect => LayerModel.IsEnableEffect;

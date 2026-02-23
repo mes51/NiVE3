@@ -272,7 +272,7 @@
                 <Grid Style="{StaticResource IconContainer}" Margin="3,0,0,0" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableShy}">
                     <Path Data="{StaticResource ShyIcon}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
-                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableCollapse}">
+                <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_IsEnableExplode}">
                     <Path Data="{gm:FontawesomeResource ResourceKey=Sun}" Style="{StaticResource HeaderIconPath}"/>
                 </Grid>
                 <Grid Style="{StaticResource IconContainer}" ToolTip="{gm:LanguageResource ResourceKey=Timeline_ToolTip_LayerSwitch_InterpolationQuality}">

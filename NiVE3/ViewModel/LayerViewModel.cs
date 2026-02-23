@@ -114,7 +114,7 @@ namespace NiVE3.ViewModel
 
         [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
-        public partial bool IsEnableCollapse { get; set; }
+        public partial bool IsEnableExplode { get; set; }
 
         [ReactiveProperty]
         [NeedWire(nameof(LayerModel), IsOneWay = true)]
@@ -602,7 +602,7 @@ namespace NiVE3.ViewModel
                     nameof(IsEnableSolo) => IsEnableSolo,
                     nameof(IsLock) => IsLock,
                     nameof(IsEnableShy) => IsEnableShy,
-                    nameof(IsEnableCollapse) => IsEnableCollapse,
+                    nameof(IsEnableExplode) => IsEnableExplode,
                     nameof(IsEnableEffect) => IsEnableEffect,
                     nameof(IsEnableFrameBlend) => IsEnableFrameBlend,
                     nameof(IsEnableMotionBlur) => IsEnableMotionBlur,

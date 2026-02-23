@@ -525,7 +525,7 @@ namespace NiVE3.View.Resource
         public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableShy = nameof(Timeline_ToolTip_LayerSwitch_IsEnableShy);
 
         [ShowInMarkup, LanguageKey, DefaultValue("未実装")]
-        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableCollapse = nameof(Timeline_ToolTip_LayerSwitch_IsEnableCollapse);
+        public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableExplode = nameof(Timeline_ToolTip_LayerSwitch_IsEnableExplode);
 
         [ShowInMarkup, LanguageKey, DefaultValue("画像の補間品質")]
         public static readonly string Timeline_ToolTip_LayerSwitch_InterpolationQuality = nameof(Timeline_ToolTip_LayerSwitch_InterpolationQuality);

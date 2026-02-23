@@ -123,7 +123,7 @@ namespace NiVE3.Model
         public partial bool IsEnableShy { get; set; }
 
         [ReactiveProperty]
-        public partial bool IsEnableCollapse { get; set; }
+        public partial bool IsEnableExplode { get; set; }
 
         [ReactiveProperty]
         public partial bool IsEnableEffect { get; set; } = true;
@@ -1583,7 +1583,7 @@ namespace NiVE3.Model
                 IsEnableSolo = IsEnableSolo,
                 IsLock = IsLock,
                 IsEnableShy = IsEnableShy,
-                IsEnableExplodeLayers = IsEnableCollapse,
+                IsEnableExplodeLayers = IsEnableExplode,
                 IsEnableEffect = IsEnableEffect,
                 IsEnableFrameBlend = IsEnableFrameBlend,
                 IsEnableMotionBlur = IsEnableMotionBlur,
@@ -1621,7 +1621,7 @@ namespace NiVE3.Model
             IsEnableSolo = data.IsEnableSolo;
             IsLock = data.IsLock;
             IsEnableShy = data.IsEnableShy;
-            IsEnableCollapse = data.IsEnableExplodeLayers;
+            IsEnableExplode = data.IsEnableExplodeLayers;
             IsEnableEffect = data.IsEnableEffect;
             IsEnableFrameBlend = data.IsEnableFrameBlend;
             IsEnableMotionBlur = data.IsEnableMotionBlur;

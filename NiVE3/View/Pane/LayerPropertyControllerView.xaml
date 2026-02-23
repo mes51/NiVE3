@@ -265,10 +265,10 @@
 
                                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun, ReturnDynamicResource=True}"
                                           Style="{StaticResource LayerSwitch}"
-                                          IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
+                                          IsChecked="{Binding IsEnableExplode, Mode=OneWay}"
                                           Visibility="{Binding IsComposition, Converter={StaticResource BooleanToVisibilityHiddenConverter}}"
                                           Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
-                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableCollapse}"/>
+                                          CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableExplode}"/>
 
                                 <pt:MultipleStateLayerSwitch State="{Binding InterpolationQuality, Mode=OneWay}"
                                                              Width="15"

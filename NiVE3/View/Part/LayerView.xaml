@@ -168,7 +168,7 @@
             </Style.Triggers>
         </Style>
 
-        <Style x:Key="CollapseSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitch}">
+        <Style x:Key="ExplodeSwitch" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource LayerSwitch}">
             <Setter Property="Visibility" Value="Hidden"/>
 
             <Style.Triggers>
@@ -598,10 +598,10 @@
 
                         <CheckBox Content="{gm:FontawesomeResource ResourceKey=Sun}"
                                   IsEnabled="{Binding IsLock, Converter={StaticResource BooleanInvertConverter}}"
-                                  Style="{StaticResource CollapseSwitch}"
-                                  IsChecked="{Binding IsEnableCollapse, Mode=OneWay}"
+                                  Style="{StaticResource ExplodeSwitch}"
+                                  IsChecked="{Binding IsEnableExplode, Mode=OneWay}"
                                   Command="{Binding ChangeLayerSwitchCommand, Mode=OneWay}"
-                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableCollapse}"/>
+                                  CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableExplode}"/>
 
                         <pt:MultipleStateLayerSwitch State="{Binding InterpolationQuality, Mode=OneWay}"
                                                      Width="15"
