@@ -91,7 +91,7 @@ namespace NiVE3.Model
                         LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting,
                         [
                             new BezierPathProperty(PropertyMaskSettingBezierPathId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BezierPath),
-                            new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, maskCenter, digit: 2),
+                            new Vector3dProperty(PropertyMaskSettingPositionId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Position, Vector3d.Zero, digit: 2),
                             new Vector3dProperty(PropertyMaskSettingBlurId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Blur, Vector3d.Zero, digit: 2),
                             new DoubleProperty(PropertyMaskSettingOpacityId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                             new EnumProperty(PropertyMaskSettingBlendModeId, LanguageResourceDictionary.ResourceKeys.MaskProperty_Setting_BlendMode, typeof(MaskBlendMode), typeof(LanguageResourceDictionary), MaskBlendMode.Add, false, 90.0),
