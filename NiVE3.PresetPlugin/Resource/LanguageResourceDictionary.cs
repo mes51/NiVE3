@@ -307,6 +307,35 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_CombineBlur_EdgeRepeatMode = nameof(Blur_CombineBlur_EdgeRepeatMode);
 
+        // PathBlur
+
+        [DefaultValue("パスブラー")]
+        public const string Blur_PathBlur_Name = nameof(Blur_PathBlur_Name);
+
+        [DefaultValue("指定したマスクのパスの形状を元にブラーを適用します")]
+        public const string Blur_PathBlur_Description = nameof(Blur_PathBlur_Description);
+
+        [LanguageKey, DefaultValue("マスク")]
+        public const string Blur_PathBlur_Mask = nameof(Blur_PathBlur_Mask);
+
+        [LanguageKey, DefaultValue("パスの開始のオフセット")]
+        public const string Blur_PathBlur_BeginOffset = nameof(Blur_PathBlur_BeginOffset);
+
+        [LanguageKey, DefaultValue("パスの終了のオフセット")]
+        public const string Blur_PathBlur_EndOffset = nameof(Blur_PathBlur_EndOffset);
+
+        [LanguageKey, DefaultValue("パス上のブラー中心ピクセルの位置")]
+        public const string Blur_PathBlur_BlurCenter = nameof(Blur_PathBlur_BlurCenter);
+
+        [LanguageKey, DefaultValue("ブラーの影響度")]
+        public const string Blur_PathBlur_StrengthMap = nameof(Blur_PathBlur_StrengthMap);
+
+        [LanguageKey, DefaultValue("サンプル数")]
+        public const string Blur_PathBlur_SampleCount = nameof(Blur_PathBlur_SampleCount);
+
+        [LanguageKey, DefaultValue("エッジの繰り返しモード")]
+        public const string Blur_PathBlur_EdgeRepeatMode = nameof(Blur_PathBlur_EdgeRepeatMode);
+
         // PixelSort
 
         [DefaultValue("ピクセルソート")]
@@ -2644,6 +2673,18 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("エッジを拡張する")]
         public const string EdgeRepeatMode_AddAmount = nameof(EdgeRepeatMode_AddAmount);
+
+        [DefaultValue("なし")]
+        public const string BilinearEdgeMode_None = nameof(BilinearEdgeMode_None);
+
+        [DefaultValue("エッジのみ繰り返し")]
+        public const string BilinearEdgeMode_Wrap = nameof(BilinearEdgeMode_Wrap);
+
+        [DefaultValue("繰り返し")]
+        public const string BilinearEdgeMode_Repeat = nameof(BilinearEdgeMode_Repeat);
+
+        [DefaultValue("鏡面繰り返し")]
+        public const string BilinearEdgeMode_Mirror = nameof(BilinearEdgeMode_Mirror);
 
         [DefaultValue("明るさ")]
         public const string ThresholdMode_Brightness = nameof(ThresholdMode_Brightness);

@@ -146,7 +146,10 @@ namespace NiVE3.Plugin.ValueObject
             }
             else
             {
-                return new BezierPoint(matrix.Transform(PrevControlPoint), matrix.Transform(NextControlPoint), matrix.Transform(EndPoint), true, IsFreeControlPoint);
+                var newEndPoint = matrix.Transform(EndPoint);
+                var newPrevControlPoint = matrix.Transform(PrevControlPoint + EndPoint) - newEndPoint;
+                var newNextControlPoint = matrix.Transform(NextControlPoint + EndPoint) - newEndPoint;
+                return new BezierPoint(newPrevControlPoint, newNextControlPoint, newEndPoint, false, IsFreeControlPoint);
             }
         }
 

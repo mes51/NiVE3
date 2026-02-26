@@ -199,7 +199,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             }
 
             var layoutPathBuilder = new PathBuilder();
-            var mask = useMaskPath && maskPathId != UseMaskPathTarget.Empty ? layer.GetMask(maskPathId.MaskId)?.GetPath(layerTime + layer.SourceStartPoint, downSamplingRateX)?.BuildPath()?.Flatten()?.FirstOrDefault() : null;
+            var mask = useMaskPath ? maskPathId.GetMask(layer, layerTime, downSamplingRateX)?.BuildPath()?.Flatten()?.FirstOrDefault() : null;
             layoutPathBuilder.StartFigure();
             if (mask != null && mask.Points.Length > 1)
             {

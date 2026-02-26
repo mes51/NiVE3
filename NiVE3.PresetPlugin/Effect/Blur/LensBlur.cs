@@ -189,7 +189,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             var irisMaskParameters = new IrisMaskParameters(amount, irisType, irisCornerRound, irisAngle, depthMapImage != null, depthMapFocus);
 
             var irisMasks = LastIrisMasks;
-            var layerMaskPath = irisUseLayerMask ? layer.GetMask(irisTargetLayerMask.MaskId)?.GetPath(layerTime + layer.SourceStartPoint, downSamplingRateX) : null;
+            var layerMaskPath = irisUseLayerMask ? irisTargetLayerMask.GetMask(layer, layerTime, downSamplingRateX) : null;
             if (layerMaskPath != null || irisMasks.Length < 1 || irisMaskParameters != LastIrisParameters)
             {
                 foreach (var i in LastIrisMasks)
