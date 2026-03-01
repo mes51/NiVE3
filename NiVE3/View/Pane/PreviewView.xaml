@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:local="clr-namespace:NiVE3.View.Pane"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
              xmlns:r="clr-namespace:NiVE3.View.Resource"
@@ -33,6 +34,10 @@
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
         <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <cv:ConverterCollection x:Key="InvertedBooleanToVisibilityConverter">
+            <cv:ConverterItem TargetType="{x:Type sys:Boolean}" Converter="{StaticResource BooleanInvertConverter}"/>
+            <cv:ConverterItem TargetType="{x:Type Visibility}" Converter="{BoolToVisibilityConverter}"/>
+        </cv:ConverterCollection>
 
         <r:BindingProxy x:Key="ViewModelProxy" Data="{Binding}"/>
 
@@ -279,7 +284,7 @@
             <Grid ClipToBounds="True">
                 <Canvas x:Name="PreviewCanvas" Background="Transparent" ClipToBounds="True" MouseDown="PreviewCanvas_MouseDown" MouseMove="PreviewCanvas_MouseMove" MouseUp="PreviewCanvas_MouseUp" MouseWheel="PreviewCanvas_MouseWheel" dd:DragDrop.DropHandler="{Binding}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DragSourceIgnore="False">
                     <Canvas.ContextMenu>
-                        <ContextMenu>
+                        <ContextMenu IsEnabled="{Binding IsShowSnapShotImage, Converter={StaticResource BooleanInvertConverter}}">
                             <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer}">
                                 <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Shape}" Command="{Binding AddShapeCommand}"/>
                                 <MenuItem Header="{gm:LanguageResource ResourceKey=Timeline_ContextMenu_AddLayer_Camera}" Command="{Binding AddCameraCommand}"/>
@@ -325,9 +330,10 @@
                                     </DrawingBrush>
                                 </Rectangle.Fill>
                             </Rectangle>
-                            <Image Source="{Binding CurrentFrame}" Style="{StaticResource PreviewImageStyle}"/>
+                            <Image Source="{Binding CurrentFrame}" Visibility="{Binding IsShowSnapShotImage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewImageStyle}"/>
+                            <Image Source="{Binding SnapShotFrame}" Visibility="{Binding IsShowSnapShotImage, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource PreviewImageStyle}"/>
                         </Grid>
-                        <Grid IsHitTestVisible="False">
+                        <Grid IsHitTestVisible="False" Visibility="{Binding IsShowSnapShotImage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                             <ItemsControl ItemsSource="{Binding BoundingBoxes}" ItemTemplate="{Binding ElementName=Root, Path=BoundingBoxTemplate}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -338,7 +344,13 @@
                         </Grid>
                     </Grid>
                 </Canvas>
-                <pt:PropertyInteractionVisual x:Name="PropertyInteractionView" PreviewViewModel="{Binding}" PreviewImageLeft="{Binding ScreenX}" PreviewImageTop="{Binding ScreenY}" PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}" PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
+                <pt:PropertyInteractionVisual x:Name="PropertyInteractionView"
+                                              IsEnabled="{Binding IsShowSnapShotImage, Converter={StaticResource BooleanInvertConverter}}"
+                                              PreviewViewModel="{Binding}"
+                                              PreviewImageLeft="{Binding ScreenX}"
+                                              PreviewImageTop="{Binding ScreenY}"
+                                              PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}"
+                                              PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
             </Grid>
         </Border>
 
@@ -489,6 +501,9 @@
                             </Style>
                         </pr:MultiItemRadioButton.Style>
                     </pr:MultiItemRadioButton>
+                    <Button Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewCaptureSnapShotButton}" Command="{Binding CaptureSnapShotCommand}"/>
+                    <Button x:Name="ShowSnapShotButton" Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewShowSnapShotButton}"/>
+                    <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=ShowSnapShotButton, Path=IsPressed}" Sender="{Binding IsShowSnapShotImage}"/>
                     <Rectangle Margin="{StaticResource LeftToolBarMargin}" Width="16" Height="16" VerticalAlignment="Center" Fill="{Binding ElementName=Root, Path=PointedPixelColorBrush}"/>
                     <TextBlock Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Text="{Binding ElementName=Root, Path=PointedPixelInfoText}"/>
                 </StackPanel>

@@ -168,4 +168,6 @@
     <BitmapImage x:Key="ScaleImage" UriSource="pack://application:,,,/NiVE3;component/Resources/Scale.png"/>
 
     <BitmapImage x:Key="CameraOrbitImage" UriSource="pack://application:,,,/NiVE3;component/Resources/CameraOrbit.png"/>
+
+    <BitmapImage x:Key="ShowSnapShot" UriSource="pack://application:,,,/NiVE3;component/Resources/ShowSnapShot.png"/>
 </ResourceDictionary>

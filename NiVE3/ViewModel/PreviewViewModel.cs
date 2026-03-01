@@ -145,6 +145,10 @@ namespace NiVE3.ViewModel
         public partial bool HistoryIsChanging { get; set; }
 
         [ReactiveProperty]
+        [NeedWire(nameof(PreviewModel), IsOneWay = true)]
+        public partial NManagedImage? SnapShotImage { get; set; }
+
+        [ReactiveProperty]
         public partial double RealFrameRate { get; set; }
 
         [ReactiveProperty]
@@ -181,6 +185,9 @@ namespace NiVE3.ViewModel
         public partial WriteableBitmap CurrentFrame { get; set; } = EmptyImage;
 
         [ReactiveProperty]
+        public partial WriteableBitmap SnapShotFrame { get; set; } = EmptyImage;
+
+        [ReactiveProperty]
         public partial ObservableCollection<ColoredPreviewBoundingBox> BoundingBoxes { get; set; } = [];
 
         [ReactiveProperty]
@@ -194,6 +201,9 @@ namespace NiVE3.ViewModel
 
         [ReactiveProperty]
         public partial ProceduralInputItem[] ProceduralInputItems { get; set; } = [];
+
+        [ReactiveProperty]
+        public partial bool IsShowSnapShotImage { get; set; }
 
         public PreviewModelBase PreviewModel { get; }
 
@@ -234,6 +244,8 @@ namespace NiVE3.ViewModel
         public ICommand AddProceduralFootageCommand { get; }
 
         public ICommand CompositionSettingCommand { get; }
+
+        public ICommand CaptureSnapShotCommand { get; }
 
         // TODO: 描画をコマンドにするべき?
         public ICommand RenderPropertyInteractionCommand { get; }
@@ -582,6 +594,17 @@ namespace NiVE3.ViewModel
                         result.Parameters.ContainsKey(CompositionSettingViewModel.ToneMapperSettingViewData) ? result.Parameters.GetValue<object>(CompositionSettingViewModel.ToneMapperSettingViewData) : null
                     );
                 }
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            CaptureSnapShotCommand = new DelegateCommand(() =>
+            {
+                if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || compositionPreviewModel.Composition == null)
+                {
+                    return;
+                }
+
+                compositionPreviewModel.CaptureSnapShot(CurrentTime);
             }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
                 .ObservesProperty(() => PreviewModel);
 
@@ -1066,6 +1089,20 @@ namespace NiVE3.ViewModel
                     break;
                 case nameof(ToolType) when IsUsingTool:
                     AbortUseToolCommand.Execute(null);
+                    break;
+                case nameof(IsShowSnapShotImage):
+                    if (IsShowSnapShotImage && SnapShotImage != null)
+                    {
+                        var temp = ArrayPool<int>.Shared.Rent(SnapShotImage.DataLength);
+                        temp.AsSpan(0, SnapShotImage.DataLength).Clear();
+                        ConvertTo8bpcImage(AcceleratorModel, SnapShotImage, temp, PreviewColorChannel);
+                        if (SnapShotFrame.Width != SnapShotImage.Width || SnapShotFrame.Height != SnapShotImage.Height)
+                        {
+                            SnapShotFrame = new WriteableBitmap(SnapShotImage.Width, SnapShotImage.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                        }
+                        SnapShotFrame.WritePixels(new Int32Rect(0, 0, SnapShotImage.Width, SnapShotImage.Height), temp, SnapShotImage.Width * 4, 0);
+                        ArrayPool<int>.Shared.Return(temp);
+                    }
                     break;
             }
         }

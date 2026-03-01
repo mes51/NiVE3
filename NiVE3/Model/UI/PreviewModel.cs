@@ -15,7 +15,7 @@ using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 namespace NiVE3.Model.UI
 {
     [UseReactiveProperty]
-    abstract partial class PreviewModelBase : BindableBase
+    abstract partial class PreviewModelBase : BindableBase, IDisposable
     {
         public abstract bool IsFootage { get; }
 
@@ -54,6 +54,9 @@ namespace NiVE3.Model.UI
         [ReactiveProperty]
         public partial bool IsLock { get; set; }
 
+        [ReactiveProperty]
+        public partial NManagedImage? SnapShotImage { get; set; }
+
         protected ApplicationModel ApplicationModel { get; }
 
         protected PreviewModelBase(ApplicationModel applicationModel)
@@ -82,6 +85,12 @@ namespace NiVE3.Model.UI
         protected void OnSourceChanged()
         {
             SourceChangedPublisher.Publish(this, EventArgs.Empty);
+        }
+
+        public void Dispose()
+        {
+            SnapShotImage?.Dispose();
+            SnapShotImage = null;
         }
     }
 
@@ -175,6 +184,8 @@ namespace NiVE3.Model.UI
                         field.CompositionUpdated -= Composition_CompositionUpdated;
                         field.PropertyChanged -= Composition_PropertyChanged;
                     }
+                    SnapShotImage?.Dispose();
+                    SnapShotImage = null;
                     if (value != null)
                     {
                         value.CompositionUpdated += Composition_CompositionUpdated;
@@ -225,6 +236,27 @@ namespace NiVE3.Model.UI
         public override float[]? GetAudio(Time time, Time length)
         {
             return Composition?.RenderAudio(time, length);
+        }
+
+        public void CaptureSnapShot(Time time)
+        {
+            if (Composition == null)
+            {
+                return;
+            }
+
+            var image = GetImage(time);
+            if (image == null)
+            {
+                return;
+            }
+
+            SnapShotImage?.Dispose();
+            SnapShotImage = image.ToManaged();
+            if (image != SnapShotImage)
+            {
+                image.Dispose();
+            }
         }
 
         private void Composition_CompositionUpdated(object? sender, NeedHistoryChangeEventArgs e)

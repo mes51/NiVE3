@@ -173,6 +173,7 @@ namespace NiVE3.Model
 
         public void RemovePreview(PreviewModelBase previewModel)
         {
+            previewModel.Dispose();
             PreviewModels.Remove(previewModel);
         }
 

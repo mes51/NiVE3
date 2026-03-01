@@ -601,4 +601,34 @@
             </MultiTrigger>
         </Style.Triggers>
     </Style>
+
+    <Style x:Key="PreviewCaptureSnapShotButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Image Source="{StaticResource ShowSnapShot}" Style="{StaticResource IconImageBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PreviewShowSnapShotButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Image Source="{StaticResource ShowSnapShot}" Style="{StaticResource IconImageBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

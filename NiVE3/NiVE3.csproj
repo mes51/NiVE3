@@ -21,6 +21,7 @@
     <None Remove="Resources\Hand.png" />
     <None Remove="Resources\Rotate.png" />
     <None Remove="Resources\Scale.png" />
+    <None Remove="Resources\ShowSnapShot.png" />
     <None Remove="Resources\Sono-Regular.otf" />
   </ItemGroup>
 
@@ -84,6 +85,7 @@
     <Resource Include="Resources\Scale.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\ShowSnapShot.png" />
     <Resource Include="Resources\Sono-Regular.otf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
