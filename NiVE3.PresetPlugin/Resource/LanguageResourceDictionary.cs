@@ -818,6 +818,17 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("境界線のみ表示")]
         public const string Stylize_Outline_OutlineOnly = nameof(Stylize_Outline_OutlineOnly);
 
+        // ToNormalMap
+
+        [DefaultValue("法線マップ化")]
+        public const string Stylize_ToNormalMap_Name = nameof(Stylize_ToNormalMap_Name);
+
+        [DefaultValue("画像のを法線マップ化します")]
+        public const string Stylize_ToNormalMap_Description = nameof(Stylize_ToNormalMap_Description);
+
+        [LanguageKey, DefaultValue("強度")]
+        public const string Stylize_ToNormalMap_Strength = nameof(Stylize_ToNormalMap_Strength);
+
         // Level
 
         [DefaultValue("レベル")]
