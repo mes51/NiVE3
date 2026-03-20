@@ -829,6 +829,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("強度")]
         public const string Stylize_ToNormalMap_Strength = nameof(Stylize_ToNormalMap_Strength);
 
+        // Bevel
+
+        [DefaultValue("光彩")]
+        public const string Stylize_InnerOuterGlow_Name = nameof(Stylize_InnerOuterGlow_Name);
+
+        [DefaultValue("画像の内側、または外側に光彩を追加します")]
+        public const string Stylize_InnerOuterGlow_Description = nameof(Stylize_InnerOuterGlow_Description);
+
+        [LanguageKey, DefaultValue("方向")]
+        public const string Stylize_InnerOuterGlow_Direction = nameof(Stylize_InnerOuterGlow_Direction);
+
+        [LanguageKey, DefaultValue("幅")]
+        public const string Stylize_InnerOuterGlow_GlowWidth = nameof(Stylize_InnerOuterGlow_GlowWidth);
+
+        [LanguageKey, DefaultValue("色")]
+        public const string Stylize_InnerOuterGlow_Color = nameof(Stylize_InnerOuterGlow_Color);
+
+        [LanguageKey, DefaultValue("不透明度")]
+        public const string Stylize_InnerOuterGlow_Opacity = nameof(Stylize_InnerOuterGlow_Opacity);
+
+        [LanguageKey, DefaultValue("ブレンドモード")]
+        public const string Stylize_InnerOuterGlow_BlendMode = nameof(Stylize_InnerOuterGlow_BlendMode);
+
         // Level
 
         [DefaultValue("レベル")]
@@ -3182,6 +3205,12 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("白")]
         public const string UnmultBackgroundType_White = nameof(UnmultBackgroundType_White);
+
+        [DefaultValue("内側")]
+        public const string InnerOuterGlowDirection_Inner = nameof(InnerOuterGlowDirection_Inner);
+
+        [DefaultValue("外側")]
+        public const string InnerOuterGlowDirection_Outer = nameof(InnerOuterGlowDirection_Outer);
 
         // unit
 

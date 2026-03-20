@@ -49,7 +49,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 return image;
             }
 
-            var strength = (float)((1.0 - properties.GetValue(PropertyStrengthId, layerTime, 0.0) * 0.01) * 49.99 + 0.01);
+            var strength = (float)(1.0 - properties.GetValue(PropertyStrengthId, layerTime, 0.0) * 0.01);
             if (AcceleratorObject != null && useGpu)
             {
                 return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, strength);
@@ -89,7 +89,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             });
 
             var imageHeight = managedImage.Height;
-          Parallel.For(roi.Top, roi.Bottom, y =>
+            Parallel.For(roi.Top, roi.Bottom, y =>
             {
                 var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
                 var centerSourceLineSpan = sourceData.AsSpan(y * imageWidth, imageWidth);
