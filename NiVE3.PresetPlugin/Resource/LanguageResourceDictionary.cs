@@ -852,6 +852,14 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Stylize_InnerOuterGlow_BlendMode = nameof(Stylize_InnerOuterGlow_BlendMode);
 
+        // Fxaa
+
+        [DefaultValue("FXAA")]
+        public const string Stylize_Fxaa_Name = nameof(Stylize_Fxaa_Name);
+
+        [DefaultValue("画像にアンチエイリアスを適用します")]
+        public const string Stylize_Fxaa_Description = nameof(Stylize_Fxaa_Description);
+
         // Level
 
         [DefaultValue("レベル")]
