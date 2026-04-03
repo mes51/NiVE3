@@ -176,6 +176,8 @@ namespace NiVE3.Model
 
         Int128 ToneMapperSettingHash { get; set; }
 
+        bool HasLight => Layers.Any(l => l.IsLight && l.IsEnableVideo);
+
         public CompositionModel(
             Guid rendererPluginId,
             Guid toneMapperPluginId,
@@ -781,7 +783,7 @@ namespace NiVE3.Model
                     var hash = new XxHash3();
                     if (downSamplingRate == 1.0)
                     {
-                        CalcCacheHash(hash, time, Time.Zero, false);
+                        CalcCacheKeyHash(hash, time, Time.Zero, false);
                     }
 
                     var cacheKey = hash.ToInt128();
@@ -1906,21 +1908,23 @@ namespace NiVE3.Model
             return new CoordTransformerWrapper(Transformer, this, layer, CurrentTime);
         }
 
+        public void CalcCacheKeyHash(XxHash3 hash, Time time)
+        {
+            CalcCacheKeyHash(hash, time, time, false);
+        }
+
         NImage RenderFrameInternal(Time time, Time shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)
         {
-            var hasLightSolo = Layers.Any(l => l.IsLight && l.IsEnableVideo && l.IsEnableSolo);
-            var useLights = Layers.Where(l => l.IsEnableVideo && (!hasLightSolo || l.IsEnableSolo)).Select(l => l.GetLightSetting(time)).NonNull().ToArray();
-
-            var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
-            var useLayers = Layers.Where(l => l.HasImage && l.IsEnableVideo && (!hasImageSolo || l.IsEnableSolo)).Reverse().ToArray();
             var subFrameTime = Time.Max(time + shutterTime, Time.Zero);
 
+            var hasLightSolo = Layers.Any(l => l.IsLight && l.IsEnableVideo && l.IsEnableSolo);
+            var useLights = Layers.Where(l => l.IsEnableVideo && (!hasLightSolo || l.IsEnableSolo)).Select(l => l.GetLightSetting(subFrameTime)).NonNull().ToArray();
             var cameraSetting = Layers.FirstOrDefault(l => l.IsEnableVideo && l.IsCamera && l.IsContainsTime(subFrameTime))?.GetCameraSetting(subFrameTime);
 
             var hash = new XxHash3();
             if (downSamplingRate == 1.0)
             {
-                CalcCacheHash(hash, time, shutterTime, isSubFrame);
+                CalcCacheKeyHash(hash, time, shutterTime, isSubFrame);
             }
 
             NImage result;
@@ -1949,9 +1953,16 @@ namespace NiVE3.Model
 
                     var images = new List<RenderableImage>();
                     var rawImages = new List<(LayerModel, RenderableImage)>();
-                    foreach (var l in useLayers)
+                    var convertedExplodeParentTransforms = new Dictionary<List<ParentTransform>, ParentTransform[]>();
+                    foreach (var (offset, l, ept) in GetVisibleExplodedLayer(time, subFrameTime))
                     {
-                        var currentTime = IsEnableMotionBlur && l.IsEnableMotionBlur ? subFrameTime : time;
+                        if (!convertedExplodeParentTransforms.TryGetValue(ept, out var explodeParentTransforms))
+                        {
+                            explodeParentTransforms = [..ept];
+                            convertedExplodeParentTransforms.Add(ept, explodeParentTransforms);
+                        }
+
+                        var currentTime = (IsEnableMotionBlur && l.IsEnableMotionBlur ? subFrameTime : time) - offset;
                         if (!l.IsContainsTime(currentTime))
                         {
                             continue;
@@ -1965,7 +1976,7 @@ namespace NiVE3.Model
                             }
                             images.Clear();
 
-                            using var adjustmentMaskImage = l.GetRawImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend);
+                            using var adjustmentMaskImage = l.GetRawImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend, explodeParentTransforms);
                             if (adjustmentMaskImage == null)
                             {
                                 continue;
@@ -1991,7 +2002,7 @@ namespace NiVE3.Model
                             var isRawImage = l.IsImage && !l.IsCustomizableFootageSource && !l.HasNonDummyEffect;
 
                             var (prevLayer, rawImage) = isRawImage ? rawImages.FirstOrDefault(t => l.IsSameFootage(t.Item1)) : (null, null);
-                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend, rawImage) : null) ?? l.GetImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend);
+                            var image = (prevLayer != null && rawImage != null ? l.GetSameImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend, rawImage, explodeParentTransforms) : null) ?? l.GetImage(currentTime, FrameDuration, downSamplingRate, true, useGpu, IsEnableFrameBlend, explodeParentTransforms);
                             if (image != null)
                             {
                                 images.Add(image);
@@ -2276,8 +2287,9 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        void CalcCacheHash(XxHash3 hash, Time time, Time shutterTime, bool isSubFrame)
+        void CalcCacheKeyHash(XxHash3 hash, Time time, Time shutterTime, bool isSubFrame)
         {
+            var originalTime = time;
             if (IsEnableMotionBlur)
             {
                 time = Time.Max(time + shutterTime, Time.Zero);
@@ -2347,9 +2359,9 @@ namespace NiVE3.Model
                     pt.Transform.CalcHash(hash);
                 }
             }
-            foreach (var layer in useLayers)
+            foreach (var (offset, layer, _) in GetVisibleExplodedLayer(originalTime, time))
             {
-                layer.CalcCacheKeyHash(hash, time, true, IsEnableFrameBlend);
+                layer.CalcCacheKeyHash(hash, time - offset, true, IsEnableFrameBlend);
             }
         }
 
@@ -2449,6 +2461,34 @@ namespace NiVE3.Model
                 layer.AudioOptionProperties?.ClearAllChildren();
                 layer.DeleteMask([..layer.Masks.Select(m => m.MaskId)]);
                 layer.DeleteEffect([..layer.Effects.Select(e => e.EffectId)]);
+            }
+        }
+
+        IEnumerable<(Time offset, LayerModel layer, List<ParentTransform> explodeParentTransforms)> GetVisibleExplodedLayer(Time targetTime, Time subFrameTime)
+        {
+            var hasImageSolo = Layers.Any(l => l.HasImage && l.IsEnableVideo && l.IsEnableSolo);
+            foreach (var layer in Layers.Reverse())
+            {
+                if (layer.HasImage && layer.IsEnableVideo && (!hasImageSolo || layer.IsEnableSolo))
+                {
+                    if (layer.IsContainsTime(layer.IsEnableMotionBlur ? subFrameTime : targetTime))
+                    {
+                        if (layer.IsComposition && layer.IsEnableExplode && layer.GetNestedComposition() is CompositionModel nested)
+                        {
+                            foreach (var (offset, nestedLayer, explodeParentTransforms) in nested.GetVisibleExplodedLayer(targetTime - layer.SourceStartPoint, subFrameTime - layer.SourceStartPoint))
+                            {
+                                var currentExplodeParentTransform = GetParentTransforms(layer.LayerId, targetTime);
+                                currentExplodeParentTransform[0] = new ParentTransform(ParentType.ExplodedComposition, currentExplodeParentTransform[0].Transform);
+                                explodeParentTransforms.AddRange(currentExplodeParentTransform);
+                                yield return (offset + layer.SourceStartPoint, nestedLayer, explodeParentTransforms);
+                            }
+                        }
+                        else
+                        {
+                            yield return (Time.Zero, layer, []);
+                        }
+                    }
+                }
             }
         }
 

@@ -94,7 +94,11 @@ namespace NiVE3.Plugin.Interfaces
         /// <summary>
         /// アンビエントライトレイヤー
         /// </summary>
-        AmbientLight
+        AmbientLight,
+        /// <summary>
+        /// 展開元のコンポジション
+        /// </summary>
+        ExplodedComposition
     }
 
     /// <summary>

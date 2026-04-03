@@ -569,7 +569,7 @@ namespace NiVE3.Model
             return GetAudio(globalTime, length);
         }
 
-        public RenderableImage? GetImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
+        public RenderableImage? GetImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, ParentTransform[] explodeParentTransforms)
         {
             if (!HasImage)
             {
@@ -585,7 +585,7 @@ namespace NiVE3.Model
             using var entry = CycleChecker.TryEnter(LayerId);
             if (entry == null)
             {
-                return GetRawImage(time, frameTime, downSamplingRate, withTrackMatte, useGpu, frameBlend);
+                return GetRawImage(time, frameTime, downSamplingRate, withTrackMatte, useGpu, frameBlend, explodeParentTransforms);
             }
 
             var layerTime = time - SourceStartPoint;
@@ -664,7 +664,7 @@ namespace NiVE3.Model
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
                 var trackMatteLayer = CompositionModel.Layers.FirstOrDefault(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer?.GetImage(time, frameTime, downSamplingRate, false, useGpu, frameBlend);
+                trackMatteImage = trackMatteLayer?.GetImage(time, frameTime, downSamplingRate, false, useGpu, frameBlend, explodeParentTransforms);
             }
 
             return new RenderableImage(
@@ -677,14 +677,14 @@ namespace NiVE3.Model
                 InterpolationQuality,
                 BlendMode,
                 transform,
-                CompositionModel.GetParentTransforms(ParentLayerId, time),
+                [..CompositionModel.GetParentTransforms(ParentLayerId, time).Concat(explodeParentTransforms)],
                 LayerOptionProperties?.GetValues(layerTime, time),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
             );
         }
 
-        public RenderableImage? GetRawImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend)
+        public RenderableImage? GetRawImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, ParentTransform[] explodeParentTransforms)
         {
             if (!HasImage)
             {
@@ -706,7 +706,7 @@ namespace NiVE3.Model
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
                 var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer.GetImage(time, frameTime, downSamplingRate, false, useGpu, frameBlend);
+                trackMatteImage = trackMatteLayer.GetImage(time, frameTime, downSamplingRate, false, useGpu, frameBlend, explodeParentTransforms);
             }
 
             return new RenderableImage(
@@ -719,14 +719,14 @@ namespace NiVE3.Model
                 InterpolationQuality,
                 BlendMode,
                 transform,
-                CompositionModel.GetParentTransforms(ParentLayerId, time),
+                [..CompositionModel.GetParentTransforms(ParentLayerId, time).Concat(explodeParentTransforms)],
                 LayerOptionProperties?.GetValues(layerTime, time),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
             );
         }
 
-        public RenderableImage GetSameImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, RenderableImage baseImage)
+        public RenderableImage GetSameImage(Time time, Time frameTime, double downSamplingRate, bool withTrackMatte, bool useGpu, bool frameBlend, RenderableImage baseImage, ParentTransform[] explodeParentTransforms)
         {
             var layerTime = time - SourceStartPoint;
 
@@ -734,7 +734,7 @@ namespace NiVE3.Model
             if (withTrackMatte && TrackMatteLayerId.HasValue)
             {
                 var trackMatteLayer = CompositionModel.Layers.First(l => l.LayerId == TrackMatteLayerId);
-                trackMatteImage = trackMatteLayer.GetImage(time, frameTime, downSamplingRate, false, useGpu, frameBlend);
+                trackMatteImage = trackMatteLayer.GetImage(time, frameTime, downSamplingRate, false, useGpu, frameBlend, explodeParentTransforms);
             }
 
             return new RenderableImage(
@@ -747,7 +747,7 @@ namespace NiVE3.Model
                 InterpolationQuality,
                 BlendMode,
                 GetTransform(time),
-                CompositionModel.GetParentTransforms(ParentLayerId, time),
+                [..CompositionModel.GetParentTransforms(ParentLayerId, time).Concat(explodeParentTransforms)],
                 LayerOptionProperties?.GetValues(layerTime, time),
                 trackMatteImage,
                 TrackMatteLayerId.HasValue ? TrackMatteMode : null
