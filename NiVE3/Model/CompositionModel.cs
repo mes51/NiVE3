@@ -2473,7 +2473,7 @@ namespace NiVE3.Model
                 {
                     if (layer.IsContainsTime(layer.IsEnableMotionBlur ? subFrameTime : targetTime))
                     {
-                        if (layer.IsComposition && layer.IsEnableExplode && layer.GetNestedComposition() is CompositionModel nested)
+                        if (layer.IsComposition && layer.IsEnableExplode && !layer.HasNonDummyEffect && layer.GetNestedComposition() is CompositionModel nested)
                         {
                             foreach (var (offset, nestedLayer, explodeParentTransforms) in nested.GetVisibleExplodedLayer(targetTime - layer.SourceStartPoint, subFrameTime - layer.SourceStartPoint))
                             {
