@@ -902,6 +902,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("オートセーブ")]
         public static readonly string OptionView_Category_AutoSave = nameof(OptionView_Category_AutoSave);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("アピアランス")]
+        public static readonly string OptionView_Category_Appearance = nameof(OptionView_Category_Appearance);
+
         [ShowInMarkup, LanguageKey, DefaultValue("平面のフォルダ名")]
         public static readonly string OptionView_General_SolidFilderName = nameof(OptionView_General_SolidFilderName);
 
@@ -958,6 +961,36 @@ namespace NiVE3.View.Resource
 
         [ShowInMarkup, LanguageKey, DefaultValue("オートセーブの個数:")]
         public static readonly string OptionView_AutoSave_Count_Labell = nameof(OptionView_AutoSave_Count_Labell);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("デフォルトのタグの色")]
+        public static readonly string OptionView_Appearance_DefaultTag = nameof(OptionView_Appearance_DefaultTag);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("画像:")]
+        public static readonly string OptionView_Appearance_DefaultImageLayerTag_Label = nameof(OptionView_Appearance_DefaultImageLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("音声:")]
+        public static readonly string OptionView_Appearance_DefaultAudioLayerTag_Label = nameof(OptionView_Appearance_DefaultAudioLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("動画:")]
+        public static readonly string OptionView_Appearance_DefaultVideoLayerTag_Label = nameof(OptionView_Appearance_DefaultVideoLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("シェイプ:")]
+        public static readonly string OptionView_Appearance_DefaultShapeLayerTag_Label = nameof(OptionView_Appearance_DefaultShapeLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("テキスト:")]
+        public static readonly string OptionView_Appearance_DefaultTextLayerTag_Label = nameof(OptionView_Appearance_DefaultTextLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("コンポジション:")]
+        public static readonly string OptionView_Appearance_DefaultCompositionLayerTag_Label = nameof(OptionView_Appearance_DefaultCompositionLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("カメラ:")]
+        public static readonly string OptionView_Appearance_DefaultCameraLayerTag_Label = nameof(OptionView_Appearance_DefaultCameraLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ライト:")]
+        public static readonly string OptionView_Appearance_DefaultLightLayerTag_Label = nameof(OptionView_Appearance_DefaultLightLayerTag_Label);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("ヌルオブジェクト:")]
+        public static readonly string OptionView_Appearance_DefaultNullObjectLayerTag_Label = nameof(OptionView_Appearance_DefaultNullObjectLayerTag_Label);
 
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定")]
         public static readonly string ShortcutKeySettingView_Title = nameof(ShortcutKeySettingView_Title);

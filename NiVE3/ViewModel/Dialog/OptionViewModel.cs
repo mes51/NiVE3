@@ -15,6 +15,7 @@ using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Commands;
 using Prism.Dialogs;
 using Prism.Mvvm;
+using System.Windows.Media;
 
 namespace NiVE3.ViewModel.Dialog
 {
@@ -98,6 +99,42 @@ namespace NiVE3.ViewModel.Dialog
         public partial int DisplayFrameRangePropertyInPreview { get; set; }
 
         [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultImageLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultAudioLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultVideoLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultShapeLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultCameraLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultLightLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultNullObjectLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultTextLayerTag { get; set; }
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial Color DefaultCompositionLayerTag { get; set; }
+
+        [ReactiveProperty]
         public partial double MaxRamPreviewCacheLimit { get; set; }
 
         [ReactiveProperty]
@@ -173,6 +210,15 @@ namespace NiVE3.ViewModel.Dialog
             AutoSaveInterval = ApplicationSetting.Setting.AutoSaveInterval;
             AutoSaveCount = ApplicationSetting.Setting.AutoSaveCount;
             DisplayFrameRangePropertyInPreview = ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview;
+            DefaultImageLayerTag = ApplicationSetting.Setting.DefaultImageLayerTag;
+            DefaultAudioLayerTag = ApplicationSetting.Setting.DefaultAudioLayerTag;
+            DefaultVideoLayerTag = ApplicationSetting.Setting.DefaultVideoLayerTag;
+            DefaultShapeLayerTag = ApplicationSetting.Setting.DefaultShapeLayerTag;
+            DefaultCameraLayerTag = ApplicationSetting.Setting.DefaultCameraLayerTag;
+            DefaultLightLayerTag = ApplicationSetting.Setting.DefaultLightLayerTag;
+            DefaultNullObjectLayerTag = ApplicationSetting.Setting.DefaultNullObjectLayerTag;
+            DefaultTextLayerTag = ApplicationSetting.Setting.DefaultTextLayerTag;
+            DefaultCompositionLayerTag = ApplicationSetting.Setting.DefaultCompositionLayerTag;
 
             SelectedGpuDevice = AvailableGpuDevices.FirstOrDefault(d => d.Item1 == UseGpuLuid, AvailableGpuDevices[0]);
 
@@ -193,6 +239,15 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.AutoSaveInterval = AutoSaveInterval;
             ApplicationSetting.Setting.AutoSaveCount = AutoSaveCount;
             ApplicationSetting.Setting.DisplayFrameRangePropertyInPreview = DisplayFrameRangePropertyInPreview;
+            ApplicationSetting.Setting.DefaultImageLayerTag = DefaultImageLayerTag;
+            ApplicationSetting.Setting.DefaultAudioLayerTag = DefaultAudioLayerTag;
+            ApplicationSetting.Setting.DefaultVideoLayerTag = DefaultVideoLayerTag;
+            ApplicationSetting.Setting.DefaultShapeLayerTag = DefaultShapeLayerTag;
+            ApplicationSetting.Setting.DefaultCameraLayerTag = DefaultCameraLayerTag;
+            ApplicationSetting.Setting.DefaultLightLayerTag = DefaultLightLayerTag;
+            ApplicationSetting.Setting.DefaultNullObjectLayerTag = DefaultNullObjectLayerTag;
+            ApplicationSetting.Setting.DefaultTextLayerTag = DefaultTextLayerTag;
+            ApplicationSetting.Setting.DefaultCompositionLayerTag = DefaultCompositionLayerTag;
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
             ApplicationSetting.Setting.Save();

@@ -9,6 +9,7 @@
              xmlns:gm="clr-namespace:NiVE3.View.Resource.Wpf.GeneratedMarkup"
              xmlns:upr="clr-namespace:NiVE3.UI.Primitive;assembly=NiVE3.UI"
              xmlns:ucv="clr-namespace:NiVE3.UI.Converter;assembly=NiVE3.UI"
+             xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:mk="clr-namespace:NiVE3.Wpf.Markup"
              xmlns:vl="clr-namespace:NiVE3.View.Validation"
@@ -32,6 +33,7 @@
         <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:LocalizationConverter x:Key="CacheGroupWithCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheSetting}"/>
         <cv:LocalizationConverter x:Key="MaxCacheLimitSizeConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=OptionView_Performance_CacheLimit_MaxSizeLabel}"/>
+        <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 
         <Thickness x:Key="ItemMargin">0,10,0,0</Thickness>
         <Thickness x:Key="GroupMargin">0,10,0,0</Thickness>
@@ -56,6 +58,22 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="ColorChangeButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="21"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{ugm:AppearanceResource ResourceKey=BorderBrush, ReturnDynamicResource=True}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Rectangle Fill="{TemplateBinding Content}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <pr:Dialog.WindowStyle>
         <Style TargetType="{x:Type Window}">
@@ -78,10 +96,11 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0" d:SelectedIndex="0">
+        <ListBox Grid.Row="0" Grid.Column="0" x:Name="SettingType" Width="150" SelectedIndex="0">
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_General}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Performance}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_AutoSave}"/>
+            <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Appearance}"/>
         </ListBox>
 
         <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Visible">
@@ -185,7 +204,7 @@
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            
+
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_AutoSave_Interval_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
                             <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinAutoSaveInterval}" Maximum="{x:Static vm:OptionViewModel.MaxAutoSaveInterval}" Value="{Binding AutoSaveInterval}" Digit="0" UnitText="{gm:LanguageResource ResourceKey=Unit_Minute}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
@@ -199,6 +218,106 @@
                             <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_AutoSave_Count_Labell}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
                             <upr:SlidableNumberTextBox Grid.Column="1" Margin="0,0,5,0" Minimum="{x:Static vm:OptionViewModel.MinAutoSaveCount}" Maximum="{x:Static vm:OptionViewModel.MaxAutoSaveCount}" Value="{Binding AutoSaveCount}" Digit="0" UnitText="{gm:LanguageResource ResourceKey=Unit_Pieces}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=3}" d:Visibility="Collapsed">
+            <StackPanel>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultTag}">
+                    <StackPanel Margin="{StaticResource GroupBoxInnerMargin}" Grid.IsSharedSizeScope="True" IsEnabled="{Binding UseAutoSave}">
+                        <UniformGrid Columns="2">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultImageLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultImageLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultImageLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultAudioLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultAudioLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultAudioLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                        </UniformGrid>
+                        <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultVideoLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultVideoLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultVideoLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultShapeLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultShapeLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultShapeLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                        </UniformGrid>
+                        <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultTextLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultTextLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultTextLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultCompositionLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultCompositionLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultCompositionLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                        </UniformGrid>
+                        <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultCameraLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultCameraLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultCameraLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultLightLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultLightLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultLightLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                        </UniformGrid>
+                        <UniformGrid Columns="2" Margin="{StaticResource ItemMargin}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingName"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{gm:LanguageResource ResourceKey=OptionView_Appearance_DefaultNullObjectLayerTag_Label}" Style="{StaticResource SettingLabelTextBlockStyle}"/>
+                                <Button Grid.Column="1" Content="{Binding DefaultNullObjectLayerTag, Converter={StaticResource ColorToBrushConverter}}" Style="{StaticResource ColorChangeButtonStyle}" Tag="{mk:NameOf Type={x:Type vm:OptionViewModel}, Member=DefaultNullObjectLayerTag}" Click="DefaultTagChangeButton_Click"/>
+                            </Grid>
+                        </UniformGrid>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>
