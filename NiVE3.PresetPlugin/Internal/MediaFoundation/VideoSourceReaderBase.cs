@@ -70,7 +70,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return -1.0;
             }
 
-            var (numerator, denominator) = Util.GetDoubleInt32(mediaType, MediaTypeAttributeKeys.FrameRate);
+            var (numerator, denominator) = Util.GetDoubleUInt32(mediaType, MediaTypeAttributeKeys.FrameRate);
             return numerator / (double)denominator;
         }
 

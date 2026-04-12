@@ -25,7 +25,7 @@ using NiVE3.PresetPlugin.Internal.MediaFoundation;
 namespace NiVE3.PresetPlugin.Input
 {
     [Export(typeof(IInput))]
-    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4,*.m4a,*.wav,*.mp3,*.wma,*.aac", IsSupportLoadToGpu = true)]
+    [InputMetadata(typeof(MediaFoundationInput), "MediaFoundationInput", "", "mes51", ID, "*.avi,*.mp4,*.m4a,*.mkv,*.wav,*.mp3,*.wma,*.aac", IsSupportLoadToGpu = true)]
     public class MediaFoundationInput : IInput
     {
         const string ID = "3BB12986-32DF-4C41-8D36-46C5E402C6AC";

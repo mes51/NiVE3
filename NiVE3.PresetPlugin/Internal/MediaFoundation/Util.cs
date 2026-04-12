@@ -18,6 +18,13 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static (uint, uint) GetDoubleUInt32(IMFAttributes attributes, Guid guidKey)
+        {
+            var result = attributes.GetUInt64(guidKey);
+            return SplitDoubleUInt32(result);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetDoubleInt32(IMFAttributes attributes, Guid guidKey, int value1, int value2)
         {
             attributes.Set(guidKey, unchecked(((ulong)value1 << 32) | (uint)value2));
@@ -36,11 +43,20 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (int, int) SplitDoubleInt32(ulong value)
+        static (int, int) SplitDoubleInt32(ulong value)
         {
             return (
-                unchecked((int)((value >> 32) & 0xFFFFFFFF)),
-                unchecked((int)(value & 0xFFFFFFFF))
+                unchecked((int)((value >> 32) & 0xFFFFFFFFUL)),
+                unchecked((int)(value & 0xFFFFFFFFUL))
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static (uint, uint) SplitDoubleUInt32(ulong value)
+        {
+            return (
+                unchecked((uint)((value >> 32) & 0xFFFFFFFFUL)),
+                unchecked((uint)(value & 0xFFFFFFFFUL))
             );
         }
     }
