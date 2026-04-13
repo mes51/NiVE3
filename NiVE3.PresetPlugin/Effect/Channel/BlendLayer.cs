@@ -24,7 +24,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Channel
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Channel_BlendLayer_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Channel, LanguageResourceDictionary.Channel_BlendLayer_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Channel_BlendLayer_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Channel, LanguageResourceDictionary.Channel_BlendLayer_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class BlendLayer : IEffect
     {
         const string ID = "55651CBB-D66C-46F2-9556-D46B90647FF3";

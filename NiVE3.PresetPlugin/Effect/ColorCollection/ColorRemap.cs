@@ -29,7 +29,7 @@ using SharpGen.Runtime;
 namespace NiVE3.PresetPlugin.Effect.ColorCollection
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ColorCollection_ColorRemap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_ColorRemap_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.ColorCollection_ColorRemap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ColorCollection, LanguageResourceDictionary.ColorCollection_ColorRemap_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class ColorRemap : IEffect
     {
         const string ID = "167CC5EC-A8AB-4AAB-95A8-0623D08952E0";
