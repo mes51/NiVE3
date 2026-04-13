@@ -102,6 +102,42 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ポイント")]
         public const string ExpressionControl_Point3DControl_PropertyName = nameof(ExpressionControl_Point3DControl_PropertyName);
 
+        [DefaultValue("カラー制御")]
+        public const string ExpressionControl_ColorControl_Name = nameof(ExpressionControl_ColorControl_Name);
+
+        [DefaultValue("エクスプレッションで使用するカラー制御")]
+        public const string ExpressionControl_ColorControl_Description = nameof(ExpressionControl_ColorControl_Description);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string ExpressionControl_ColorControl_PropertyName = nameof(ExpressionControl_ColorControl_PropertyName);
+
+        [DefaultValue("チェックボックス制御")]
+        public const string ExpressionControl_CheckBoxControl_Name = nameof(ExpressionControl_CheckBoxControl_Name);
+
+        [DefaultValue("エクスプレッションで使用するチェックボックス制御")]
+        public const string ExpressionControl_CheckBoxControl_Description = nameof(ExpressionControl_CheckBoxControl_Description);
+
+        [LanguageKey, DefaultValue("チェックボックス")]
+        public const string ExpressionControl_CheckBoxControl_PropertyName = nameof(ExpressionControl_CheckBoxControl_PropertyName);
+
+        [DefaultValue("角度制御")]
+        public const string ExpressionControl_AngleControl_Name = nameof(ExpressionControl_AngleControl_Name);
+
+        [DefaultValue("エクスプレッションで使用する角度制御")]
+        public const string ExpressionControl_AngleControl_Description = nameof(ExpressionControl_AngleControl_Description);
+
+        [LanguageKey, DefaultValue("角度")]
+        public const string ExpressionControl_AngleControl_PropertyName = nameof(ExpressionControl_AngleControl_PropertyName);
+
+        [DefaultValue("レイヤー制御")]
+        public const string ExpressionControl_LayerControl_Name = nameof(ExpressionControl_LayerControl_Name);
+
+        [DefaultValue("エクスプレッションで使用するレイヤー制御")]
+        public const string ExpressionControl_LayerControl_Description = nameof(ExpressionControl_LayerControl_Description);
+
+        [LanguageKey, DefaultValue("レイヤー")]
+        public const string ExpressionControl_LayerControl_PropertyName = nameof(ExpressionControl_LayerControl_PropertyName);
+
         // BoxBlur
 
         [DefaultValue("ボックスブラー")]

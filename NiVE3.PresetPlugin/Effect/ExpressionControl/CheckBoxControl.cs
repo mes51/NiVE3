@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
+using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -16,18 +15,18 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_SliderControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_SliderControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class SliderControl : IEffect
+    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_CheckBoxControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_CheckBoxControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class CheckBoxControl : IEffect
     {
-        const string ID = "6FA4B24F-D759-4085-90D6-EA11E537FBC0";
+        const string ID = "5F1EF43B-FFAE-4CB9-A3C4-9F1374CF8202";
 
-        const string PropertySliderId = nameof(PropertySliderId);
+        const string PropertyCheckBoxId = nameof(PropertyCheckBoxId);
 
         public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return
             [
-                new DoubleProperty(PropertySliderId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_SliderControl_PropertyName), 0.0, double.MinValue, double.MaxValue, true, 2)
+                new CheckBoxProperty(PropertyCheckBoxId, LanguageResourceDictionary.ResourceKeys.ExpressionControl_CheckBoxControl_PropertyName, false)
             ];
         }
 

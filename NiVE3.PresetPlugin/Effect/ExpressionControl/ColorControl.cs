@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
+using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -16,18 +15,18 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_SliderControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_SliderControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class SliderControl : IEffect
+    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_ColorControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_ColorControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class ColorControl : IEffect
     {
-        const string ID = "6FA4B24F-D759-4085-90D6-EA11E537FBC0";
+        const string ID = "5A091395-8DF1-400B-8006-8B1FD3A8DB50";
 
-        const string PropertySliderId = nameof(PropertySliderId);
+        const string PropertyColorId = nameof(PropertyColorId);
 
         public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return
             [
-                new DoubleProperty(PropertySliderId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_SliderControl_PropertyName), 0.0, double.MinValue, double.MaxValue, true, 2)
+                new ColorProperty(PropertyColorId, LanguageResourceDictionary.ResourceKeys.ExpressionControl_ColorControl_PropertyName, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, Vector4.One)
             ];
         }
 

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using NiVE3.Image;
 using NiVE3.Plugin.Attributes;
 using NiVE3.Plugin.Interfaces;
@@ -16,18 +14,18 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.ExpressionControl
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_SliderControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_SliderControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
-    public sealed class SliderControl : IEffect
+    [EffectMetadata(LanguageResourceDictionary.ExpressionControl_AngleControl_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_ExpressionControl, LanguageResourceDictionary.ExpressionControl_AngleControl_Description, ID, IsDummyEffect = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    public sealed class AngleControl : IEffect
     {
-        const string ID = "6FA4B24F-D759-4085-90D6-EA11E537FBC0";
+        const string ID = "D9DB6583-542A-4DFA-ADC7-051651554204";
 
-        const string PropertySliderId = nameof(PropertySliderId);
+        const string PropertyAngleId = nameof(PropertyAngleId);
 
         public PropertyBase[] GetProperties(Int32Size sourceSize)
         {
             return
             [
-                new DoubleProperty(PropertySliderId, new LanguageResourceKey(typeof(LanguageResourceDictionary), LanguageResourceDictionary.ExpressionControl_SliderControl_PropertyName), 0.0, double.MinValue, double.MaxValue, true, 2)
+                new AngleProperty(PropertyAngleId, LanguageResourceDictionary.ResourceKeys.ExpressionControl_AngleControl_PropertyName, 0.0, digit: 2)
             ];
         }
 
