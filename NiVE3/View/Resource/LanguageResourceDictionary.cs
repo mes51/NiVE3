@@ -56,7 +56,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("新規フォルダ(_F)")]
         public static readonly string MainWindow_MenuItem_File_NewFolder = nameof(MainWindow_MenuItem_File_NewFolder);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション...(_C)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション(_C)...")]
         public static readonly string MainWindow_MenuItem_File_NewComposition = nameof(MainWindow_MenuItem_File_NewComposition);
 
         [ShowInMarkup, LanguageKey, DefaultValue("プロジェクトを開く(_O)")]
@@ -71,10 +71,10 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("読み込み(_L)")]
         public static readonly string MainWindow_MenuItem_File_Load = nameof(MainWindow_MenuItem_File_Load);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ファイル...(_F)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("ファイル(_F)...")]
         public static readonly string MainWindow_MenuItem_File_LoadFile = nameof(MainWindow_MenuItem_File_LoadFile);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("平面...(_S)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("平面(_S)...")]
         public static readonly string MainWindow_MenuItem_File_LoadSolid = nameof(MainWindow_MenuItem_File_LoadSolid);
 
         [ShowInMarkup, LanguageKey, DefaultValue("終了(_X)")]
@@ -107,13 +107,13 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("すべて選択(_A)")]
         public static readonly string MainWindow_MenuItem_Edit_SelectAll = nameof(MainWindow_MenuItem_Edit_SelectAll);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューに追加...(_R)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("レンダーキューに追加(_R)...")]
         public static readonly string MainWindow_MenuItem_Composition_AddRenderQueue = nameof(MainWindow_MenuItem_Composition_AddRenderQueue);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("現在の時間のフレームを保存...(_F)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("現在の時間のフレームを保存(_F)...")]
         public static readonly string MainWindow_MenuItem_Composition_SaveCurrentTimeFrame = nameof(MainWindow_MenuItem_Composition_SaveCurrentTimeFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("コンポジション設定...(_O)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("コンポジション設定(_O)...")]
         public static readonly string MainWindow_MenuItem_Composition_OpenCompositionSetting = nameof(MainWindow_MenuItem_Composition_OpenCompositionSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("環境設定(_O)...")]
@@ -161,7 +161,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("新規(_N)")]
         public static readonly string FootageListView_ContextMenu_New = nameof(FootageListView_ContextMenu_New);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション...(_C)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("新規コンポジション(_C)...")]
         public static readonly string FootageListView_ContextMenu_NewComposition = nameof(FootageListView_ContextMenu_NewComposition);
 
         [ShowInMarkup, LanguageKey, DefaultValue("新規フォルダ(_F)")]
@@ -170,10 +170,10 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("読み込み(_L)")]
         public static readonly string FootageListView_ContextMenu_Load = nameof(FootageListView_ContextMenu_Load);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("ファイル...(_F)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("ファイル(_F)...")]
         public static readonly string FootageListView_ContextMenu_LoadFile = nameof(FootageListView_ContextMenu_LoadFile);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("平面...(_S)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("平面(_S)...")]
         public static readonly string FootageListView_ContextMenu_LoadSolid = nameof(FootageListView_ContextMenu_LoadSolid);
 
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト")]
@@ -467,13 +467,13 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーを10フレーム前にシフト(_R)")]
         public static readonly string Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame = nameof(Timeline_ContextMenu_ShiftSourceStartPointToPrevious10Frame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("再生速度を変更...(_S)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("再生速度を変更(_S)...")]
         public static readonly string Timeline_ContextMenu_ChangePlayRate = nameof(Timeline_ContextMenu_ChangePlayRate);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの表示フレームを現在時刻で固定(_F)")]
         public static readonly string Timeline_ContextMenu_ChangeLayerFreezeFrame = nameof(Timeline_ContextMenu_ChangeLayerFreezeFrame);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("音声の音量を元にキーフレームを生成...(_K)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("音声の音量を元にキーフレームを生成(_K)...")]
         public static readonly string Timeline_ContextMenu_GenerateAudioLevelValueKeyFrame = nameof(Timeline_ContextMenu_GenerateAudioLevelValueKeyFrame);
 
         [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの順番を1つ上げる(_U)")]
@@ -488,10 +488,10 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("エフェクト/マスクプリセットの適用(_G)...")]
         public static readonly string Timeline_ContextMenu_LoadEffectOrMaskPreset = nameof(Timeline_ContextMenu_LoadEffectOrMaskPreset);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("プリコンポーズ...(_H)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("プリコンポーズ(_H)...")]
         public static readonly string Timeline_ContextMenu_Precompose = nameof(Timeline_ContextMenu_Precompose);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定...(_O)")]
+        [ShowInMarkup, LanguageKey, DefaultValue("コンポジションの設定(_O)...")]
         public static readonly string Timeline_ContextMenu_CompositionSetting = nameof(Timeline_ContextMenu_CompositionSetting);
 
         [ShowInMarkup, LanguageKey, DefaultValue("シャイが有効なレイヤーの表示/非表示")]
