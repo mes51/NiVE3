@@ -30,13 +30,6 @@ using NiVE3.View.Dialog.CustomWindow;
 
 namespace NiVE3.ViewModel
 {
-    [CommandHandling(nameof(NewProjectCommand), nameof(ShortcutKeySetting.NewProjectGesture))]
-    [CommandHandling(nameof(OpenProjectCommand), nameof(ShortcutKeySetting.OpenProjectGesture))]
-    [CommandHandling(nameof(SaveProjectCommand), nameof(ShortcutKeySetting.SaveProjectGesture))]
-    [CommandHandling(nameof(SaveProjectAsNewNameCommand), nameof(ShortcutKeySetting.SaveProjectAsNewNameGesture))]
-    [CommandHandling(nameof(ExitCommand), nameof(ShortcutKeySetting.ExitGesture))]
-    [CommandHandling(nameof(NewCompositionCommand), nameof(ShortcutKeySetting.NewCompositionGesture))]
-    [CommandHandling(nameof(OpenCommandPaletteCommand), nameof(ShortcutKeySetting.OpenCommandPaletteGesture))]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class MainWindowViewModel : BindableBase
@@ -78,14 +71,19 @@ namespace NiVE3.ViewModel
 
         public InteractionRequest CloseRequest { get; } = new InteractionRequest();
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.NewProjectGesture))]
         public ICommand NewProjectCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.OpenProjectGesture))]
         public ICommand OpenProjectCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SaveProjectGesture))]
         public ICommand SaveProjectCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SaveProjectAsNewNameGesture))]
         public ICommand SaveProjectAsNewNameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ExitGesture))]
         public ICommand ExitCommand { get; }
 
         public ICommand OpenSettingCommand { get; }
@@ -94,8 +92,10 @@ namespace NiVE3.ViewModel
 
         public ICommand OpenAboutCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.OpenCommandPaletteGesture))]
         public ICommand OpenCommandPaletteCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.NewCompositionGesture))]
         public ICommand NewCompositionCommand { get; }
 
         public ICommand RemoveViewModelCommand { get; }

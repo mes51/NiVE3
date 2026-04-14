@@ -5,24 +5,22 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using NiVE3.Shared.Extension;
 using NiVE3.Shared.Util;
 
 namespace NiVE3.View.Command
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    sealed class CommandHandlingAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    sealed class ShortcutGestureAttribute : Attribute
     {
-        static Dictionary<Type, ILookup<string, Tuple<CommandHandlingAttribute, PropertyInfo>>> Cache { get; } = [];
+        static Dictionary<Type, ILookup<string, Tuple<ShortcutGestureAttribute, PropertyInfo>>> Cache { get; } = [];
 
         public string TargetGesture { get; }
 
-        public string CommandName { get; }
-
         public bool IsGlobal { get; set; }
 
-        public CommandHandlingAttribute(string commandName, string targetGesture)
+        public ShortcutGestureAttribute(string targetGesture)
         {
-            CommandName = commandName;
             TargetGesture = targetGesture;
         }
 
@@ -47,17 +45,23 @@ namespace NiVE3.View.Command
             }
         }
 
-        static ILookup<string, Tuple<CommandHandlingAttribute, PropertyInfo>> CreateCache(Type type)
+        static ILookup<string, Tuple<ShortcutGestureAttribute, PropertyInfo>> CreateCache(Type type)
         {
-            return type.GetCustomAttributes<CommandHandlingAttribute>(false)
-                .Select(a =>
-                {
-                    var commandProperty = type.GetProperty(a.CommandName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                    // NOTE: ViewModel内に存在しないコマンドは指定してはいけない
-                    Assertion.IsNotNull(commandProperty, $"{a.CommandName} is not define in {type.Name}");
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-                    return Tuple.Create(a, commandProperty);
+            return properties.Select(p =>
+                {
+                    var attr = p.GetCustomAttribute<ShortcutGestureAttribute>();
+                    if (attr != null)
+                    {
+                        return Tuple.Create(attr, p);
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 })
+                .NonNull()
                 .ToLookup(t => t.Item1.TargetGesture);
         }
     }

@@ -45,11 +45,6 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Document)]
-    [CommandHandling(nameof(ChangeToHandToolCommand), nameof(ShortcutKeySetting.SelectHandToolGesture), IsGlobal = true)]
-    [CommandHandling(nameof(ChangeToSelectToolCommand), nameof(ShortcutKeySetting.SelectSelectToolGesture), IsGlobal = true)]
-    [CommandHandling(nameof(ChangeToRotateToolCommand), nameof(ShortcutKeySetting.SelectRotateToolGesture), IsGlobal = true)]
-    [CommandHandling(nameof(ChangeToScaleCommand), nameof(ShortcutKeySetting.SelectScaleGestureGesture), IsGlobal = true)]
-    [CommandHandling(nameof(ChangeToCameraToolCommand), nameof(ShortcutKeySetting.SelectCameraToolGesture), IsGlobal = true)]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     partial class PreviewViewModel : PaneViewModelBase, IDropTarget
@@ -221,14 +216,19 @@ namespace NiVE3.ViewModel
 
         public ICommand AbortUseToolCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectHandToolGesture), IsGlobal = true)]
         public ICommand ChangeToHandToolCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectSelectToolGesture), IsGlobal = true)]
         public ICommand ChangeToSelectToolCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectRotateToolGesture), IsGlobal = true)]
         public ICommand ChangeToRotateToolCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectScaleGestureGesture), IsGlobal = true)]
         public ICommand ChangeToScaleCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectCameraToolGesture), IsGlobal = true)]
         public ICommand ChangeToCameraToolCommand { get; }
 
         public ICommand AddShapeCommand { get; }

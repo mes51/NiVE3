@@ -18,8 +18,6 @@ using NiVE3.Model.UI;
 
 namespace NiVE3.ViewModel
 {
-    [CommandHandling(nameof(UndoCommand), nameof(ShortcutKeySetting.UndoGesture), IsGlobal = true)]
-    [CommandHandling(nameof(RedoCommand), nameof(ShortcutKeySetting.RedoGesture), IsGlobal = true)]
     [PaneLocation(PaneLocation.Right1Bottom, Size = 200)]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
@@ -66,8 +64,10 @@ namespace NiVE3.ViewModel
 
         public IHistoryCommand LatestUndoCommand => UndoCommands.Count > 0 ? UndoCommands.Peek() : FirstHistoryCommand.First();
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.UndoGesture), IsGlobal = true)]
         public ICommand UndoCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.RedoGesture), IsGlobal = true)]
         public ICommand RedoCommand { get; }
 
         public ICommand ReproduceToTargetHistoryCommand { get; }

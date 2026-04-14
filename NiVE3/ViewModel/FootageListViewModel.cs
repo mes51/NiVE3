@@ -30,11 +30,6 @@ namespace NiVE3.ViewModel
     }
 
     [PaneLocation(PaneLocation.Left1Center, Size = 578)]
-    [CommandHandling(nameof(AddFootageFolderCommand), nameof(ShortcutKeySetting.NewFootageFolderGesture), IsGlobal = true)]
-    [CommandHandling(nameof(DeleteFootageCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
-    [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
-    [CommandHandling(nameof(LoadSolidCommand), nameof(ShortcutKeySetting.LoadSolidGesture), IsGlobal = true)]
-    [CommandHandling(nameof(LoadFileCommand), nameof(ShortcutKeySetting.LoadFileGesture), IsGlobal = true)]
     [UseReactiveProperty]
     partial class FootageListViewModel : SingletonePaneViewModelBase, IFootageViewModelList, IDropTarget, IDragSource
     {
@@ -72,16 +67,21 @@ namespace NiVE3.ViewModel
 
         public ICommand MoveFootageListCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.LoadSolidGesture), IsGlobal = true)]
         public ICommand LoadSolidCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.LoadFileGesture), IsGlobal = true)]
         public ICommand LoadFileCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.DeleteItemGesture))]
         public ICommand DeleteFootageCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.NewFootageFolderGesture), IsGlobal = true)]
         public ICommand AddFootageFolderCommand { get; }
 
         public ICommand ShowPreviewCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.BeginEditNameGesture))]
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand EndEditNameCommand { get; }

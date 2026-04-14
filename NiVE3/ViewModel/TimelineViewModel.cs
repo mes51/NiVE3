@@ -47,57 +47,6 @@ using Prism.Dialogs;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Bottom)]
-    [CommandHandling(nameof(BeginEditNameCommand), nameof(ShortcutKeySetting.BeginEditNameGesture))]
-    [CommandHandling(nameof(AddSolidLayerCommand), nameof(ShortcutKeySetting.AddSolidLayerGesture))]
-    [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
-    [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
-    [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
-    [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
-    [CommandHandling(nameof(DuplicateCommand), nameof(ShortcutKeySetting.DuplicateItemGesture))]
-    [CommandHandling(nameof(SelectAllCommand), nameof(ShortcutKeySetting.SelectAllGesture))]
-    [CommandHandling(nameof(AddKeyFrameCommand), nameof(ShortcutKeySetting.AddKeyFrameGesture))]
-    [CommandHandling(nameof(ResetPropertyCommand), nameof(ShortcutKeySetting.ResetPropertyGesture))]
-    [CommandHandling(nameof(SplitLayerCommand), nameof(ShortcutKeySetting.SplitLayerGesture))]
-    [CommandHandling(nameof(OpenRenderSettingCommand), nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
-    [CommandHandling(nameof(AddShapeCommand), nameof(ShortcutKeySetting.AddShapeLayerGesture))]
-    [CommandHandling(nameof(AddCameraCommand), nameof(ShortcutKeySetting.AddCameraLayerGesture))]
-    [CommandHandling(nameof(AddLightCommand), nameof(ShortcutKeySetting.AddLightLayerGesture))]
-    [CommandHandling(nameof(AddNullObjectCommand), nameof(ShortcutKeySetting.AddNullObjectLayerGesture))]
-    [CommandHandling(nameof(AddTextCommand), nameof(ShortcutKeySetting.AddTextLayerGesture))]
-    [CommandHandling(nameof(AddRectangleMaskCommand), nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
-    [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
-    [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
-    [CommandHandling(nameof(CompositionSettingCommand), nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
-    [CommandHandling(nameof(MoveLayerOrderUpCommand), nameof(ShortcutKeySetting.MoveLayerOrderUpGesture))]
-    [CommandHandling(nameof(MoveLayerOrderDownCommand), nameof(ShortcutKeySetting.MoveLayerOrderDownGesture))]
-    [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
-    [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseInPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseInPointGesture))]
-    [CommandHandling(nameof(MoveSourceStartPointToIndicatorBaseOutPointCommand), nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseOutPointGesture))]
-    [CommandHandling(nameof(MoveInPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveInPointToIndicatorGesture))]
-    [CommandHandling(nameof(MoveOutPointToIndicatorCommand), nameof(ShortcutKeySetting.MoveOutPointToIndicatorGesture))]
-    [CommandHandling(nameof(ShiftSourceStartPointToNextFrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToNextFrameGesture))]
-    [CommandHandling(nameof(ShiftSourceStartPointToPreviousFrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToPreviousFrameGesture))]
-    [CommandHandling(nameof(ShiftSourceStartPointToNext10FrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToNext10FrameGesture))]
-    [CommandHandling(nameof(ShiftSourceStartPointToPrevious10FrameCommand), nameof(ShortcutKeySetting.ShiftSourceStartPointToPrevious10FrameGesture))]
-    [CommandHandling(nameof(MoveIndicatorToNextFrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToNextFrameGesture))]
-    [CommandHandling(nameof(MoveIndicatorToPreviousFrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToPreviousFrameGesture))]
-    [CommandHandling(nameof(MoveIndicatorToNext10FrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToNext10FrameGesture))]
-    [CommandHandling(nameof(MoveIndicatorToPrevious10FrameCommand), nameof(ShortcutKeySetting.MoveIndicatorToPrevious10FrameGesture))]
-    [CommandHandling(nameof(MoveIndicatorToCompositionBeginCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionBeginGesture))]
-    [CommandHandling(nameof(MoveIndicatorToCompositionEndCommand), nameof(ShortcutKeySetting.MoveIndicatorToCompositionEndGesture))]
-    [CommandHandling(nameof(MoveIndicatorToSelectLayerInPointCommand), nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerInPointGesture))]
-    [CommandHandling(nameof(MoveIndicatorToSelectLayerOutPointCommand), nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerOutPointGesture))]
-    [CommandHandling(nameof(PlayRateChangeCommand), nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
-    [CommandHandling(nameof(ChangeLayerFreezeFrameCommand), nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
-    [CommandHandling(nameof(GenerateAudioLevelValueKeyFrameCommand), nameof(ShortcutKeySetting.GenerateAudioLevelValueKeyFrameGesture))]
-    [CommandHandling(nameof(MoveWorkareaBeginToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
-    [CommandHandling(nameof(MoveWorkareaEndToIndicatorCommand), nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
-    [CommandHandling(nameof(AddMarkerToCurrentTimeCommand), nameof(ShortcutKeySetting.AddMarkerToCurrentTimeGesture))]
-    [CommandHandling(nameof(PlayOrStopCommand), nameof(ShortcutKeySetting.PlayOrStopGesture))]
-    [CommandHandling(nameof(SavePresetCommand), nameof(ShortcutKeySetting.SavePresetGesture))]
-    [CommandHandling(nameof(LoadPresetCommand), nameof(ShortcutKeySetting.LoadPresetGesture))]
-    [CommandHandling(nameof(PrecomposeCommand), nameof(ShortcutKeySetting.PrecomposeGesture))]
-    [CommandHandling(nameof(SaveCurrentTimeFrameCommand), nameof(ShortcutKeySetting.SaveCurrentFrameGesture))]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(CompositionModel), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
@@ -334,104 +283,150 @@ namespace NiVE3.ViewModel
 
         public ICommand ChangeEnableMotionBlurCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.BeginEditNameGesture))]
         public ICommand BeginEditNameCommand { get; }
 
         public ICommand ChangeWorkareaCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddSolidLayerGesture))]
         public ICommand AddSolidLayerCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.DeleteItemGesture))]
         public ICommand DeleteCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.CutItemGesture))]
         public ICommand CutCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.CopyItemGesture))]
         public ICommand CopyCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.PasteItemGesture))]
         public ICommand PasteCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.DuplicateItemGesture))]
         public ICommand DuplicateCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectAllGesture))]
         public ICommand SelectAllCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddKeyFrameGesture))]
         public ICommand AddKeyFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ResetPropertyGesture))]
         public ICommand ResetPropertyCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SplitLayerGesture))]
         public ICommand SplitLayerCommand { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddShapeLayerGesture))]
         public ICommand AddShapeCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddCameraLayerGesture))]
         public ICommand AddCameraCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddLightLayerGesture))]
         public ICommand AddLightCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddNullObjectLayerGesture))]
         public ICommand AddNullObjectCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddTextLayerGesture))]
         public ICommand AddTextCommand { get; }
 
         public ICommand AddProceduralFootageCommand { get; }
 
         public ICommand AddEffectCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
         public ICommand AddRectangleMaskCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
         public ICommand AddEllipseMaskCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddBezierMaskGesture))]
         public ICommand AddBezierMaskCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveLayerOrderUpGesture))]
         public ICommand MoveLayerOrderUpCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveLayerOrderDownGesture))]
         public ICommand MoveLayerOrderDownCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
         public ICommand ChangeLayerTagsRandomlyCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveInPointToIndicatorGesture))]
         public ICommand MoveInPointToIndicatorCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveOutPointToIndicatorGesture))]
         public ICommand MoveOutPointToIndicatorCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseInPointGesture))]
         public ICommand MoveSourceStartPointToIndicatorBaseInPointCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveSourceStartPointToIndicatorBaseOutPointGesture))]
         public ICommand MoveSourceStartPointToIndicatorBaseOutPointCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ShiftSourceStartPointToNextFrameGesture))]
         public ICommand ShiftSourceStartPointToNextFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ShiftSourceStartPointToPreviousFrameGesture))]
         public ICommand ShiftSourceStartPointToPreviousFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ShiftSourceStartPointToNext10FrameGesture))]
         public ICommand ShiftSourceStartPointToNext10FrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ShiftSourceStartPointToPrevious10FrameGesture))]
         public ICommand ShiftSourceStartPointToPrevious10FrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.OpenCompositionSettingGesture))]
         public ICommand CompositionSettingCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.OpenRenderSettingGesture))]
         public ICommand OpenRenderSettingCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToNextFrameGesture))]
         public ICommand MoveIndicatorToNextFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToPreviousFrameGesture))]
         public ICommand MoveIndicatorToPreviousFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToNext10FrameGesture))]
         public ICommand MoveIndicatorToNext10FrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToPrevious10FrameGesture))]
         public ICommand MoveIndicatorToPrevious10FrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToCompositionBeginGesture))]
         public ICommand MoveIndicatorToCompositionBeginCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToCompositionEndGesture))]
         public ICommand MoveIndicatorToCompositionEndCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerInPointGesture))]
         public ICommand MoveIndicatorToSelectLayerInPointCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveIndicatorToSelectLayerOutPointGesture))]
         public ICommand MoveIndicatorToSelectLayerOutPointCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.PlayOrStopGesture))]
         public ICommand PlayOrStopCommand { get; set; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ChangeLayerPlayRateGesture))]
         public ICommand PlayRateChangeCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ChangeLayerFreezeFrameGesture))]
         public ICommand ChangeLayerFreezeFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.GenerateAudioLevelValueKeyFrameGesture))]
         public ICommand GenerateAudioLevelValueKeyFrameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveWorkareaBeginToIndicatorGesture))]
         public ICommand MoveWorkareaBeginToIndicatorCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.MoveWorkareaEndToIndicatorGesture))]
         public ICommand MoveWorkareaEndToIndicatorCommand { get; }
 
         public ICommand MoveMarkerCommand { get; }
@@ -442,14 +437,19 @@ namespace NiVE3.ViewModel
 
         public ICommand EditMarkerNameCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddMarkerToCurrentTimeGesture))]
         public ICommand AddMarkerToCurrentTimeCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SavePresetGesture))]
         public ICommand SavePresetCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.LoadPresetGesture))]
         public ICommand LoadPresetCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.PrecomposeGesture))]
         public ICommand PrecomposeCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SaveCurrentFrameGesture))]
         public ICommand SaveCurrentTimeFrameCommand { get; }
 
         WeakEventPublisher<EventArgs> CurrentTimeChangeByUserPublisher { get; } = new WeakEventPublisher<EventArgs>();

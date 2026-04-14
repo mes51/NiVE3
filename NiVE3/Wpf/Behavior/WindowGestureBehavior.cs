@@ -68,7 +68,7 @@ namespace NiVE3.Wpf.Behavior
                 .FirstOrDefault(vm => vm.IsActive && vm.IsSelected);
             if (activeViewModel != null)
             {
-                var command = CommandHandlingAttribute.GetCommand(activeViewModel, gesture, false);
+                var command = ShortcutGestureAttribute.GetCommand(activeViewModel, gesture, false);
                 if (command != null)
                 {
                     return command;
@@ -79,14 +79,14 @@ namespace NiVE3.Wpf.Behavior
                 .OfType<PaneViewModelBase>()
                 .Cast<BindableBase>()
                 .Concat(mainWindowViewModel.CommandOnlyViewModels)
-                .Select(vm => CommandHandlingAttribute.GetCommand(vm, gesture, true))
+                .Select(vm => ShortcutGestureAttribute.GetCommand(vm, gesture, true))
                 .FirstOrDefault(c => c != null);
             if (globalCommand != null)
             {
                 return globalCommand;
             }
 
-            return CommandHandlingAttribute.GetCommand(mainWindowViewModel, gesture, false);
+            return ShortcutGestureAttribute.GetCommand(mainWindowViewModel, gesture, false);
         }
 
         private void GestureCommand_PreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)

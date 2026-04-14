@@ -20,15 +20,6 @@ using Prism.Commands;
 namespace NiVE3.ViewModel
 {
     [PaneLocation(PaneLocation.Left2Center)]
-    [CommandHandling(nameof(DeleteCommand), nameof(ShortcutKeySetting.DeleteItemGesture))]
-    [CommandHandling(nameof(CutCommand), nameof(ShortcutKeySetting.CutItemGesture))]
-    [CommandHandling(nameof(CopyCommand), nameof(ShortcutKeySetting.CopyItemGesture))]
-    [CommandHandling(nameof(PasteCommand), nameof(ShortcutKeySetting.PasteItemGesture))]
-    [CommandHandling(nameof(DuplicateCommand), nameof(ShortcutKeySetting.DuplicateItemGesture))]
-    [CommandHandling(nameof(AddRectangleMaskCommand), nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
-    [CommandHandling(nameof(AddEllipseMaskCommand), nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
-    [CommandHandling(nameof(AddBezierMaskCommand), nameof(ShortcutKeySetting.AddBezierMaskGesture))]
-    [CommandHandling(nameof(ChangeLayerTagsRandomlyCommand), nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
     [UseReactiveProperty]
     [ViewModelWireable(nameof(WiringModel), WithInitializeProperty = true)]
     [ManualViewModelWireable(nameof(Composition), nameof(BindComposition), nameof(UnbindComposition), WithInitializeProperty = true)]
@@ -65,26 +56,35 @@ namespace NiVE3.ViewModel
         [ReactiveProperty]
         public partial LayerViewModel? TargetLayer { get; set; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.DeleteItemGesture))]
         public ICommand DeleteCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.CutItemGesture))]
         public ICommand CutCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.CopyItemGesture))]
         public ICommand CopyCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.PasteItemGesture))]
         public ICommand PasteCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.DuplicateItemGesture))]
         public ICommand DuplicateCommand { get; }
 
         public ICommand SelectAllCommand { get; }
 
         public ICommand AddEffectCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddRectangleMaskGesture))]
         public ICommand AddRectangleMaskCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddEllipseMaskGesture))]
         public ICommand AddEllipseMaskCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.AddBezierMaskGesture))]
         public ICommand AddBezierMaskCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.ChangeLayerTagsRandomlyGesture))]
         public ICommand ChangeLayerTagsRandomlyCommand { get; }
 
         ProjectModel ProjectModel { get; }
