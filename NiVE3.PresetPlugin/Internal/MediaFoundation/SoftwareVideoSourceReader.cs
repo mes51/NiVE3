@@ -54,7 +54,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         public override bool GetFrame(double time, Span<byte> dst)
         {
-            using var sample = ReadSample(time);
+            var sample = ReadSample(time);
             if (sample == null)
             {
                 return false;

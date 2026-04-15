@@ -31,6 +31,10 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         protected FormatInfo Format { get; set; }
 
+        IMFSample? CurrentFrame { get; set; }
+
+        long LastFrameTime { get; set; }
+
         public abstract bool GetFrame(double time, Span<byte> dest);
 
         protected VideoSourceReaderBase(string filePath)
@@ -74,9 +78,15 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             return numerator / (double)denominator;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        /// <remarks>返値はDisposeしない</remarks>
         protected IMFSample? ReadSample(double time)
         {
-            const int MaxSkipFrame = 100;
+            const int MaxSkipFrame = 500;
 
             if (Reader == null)
             {
@@ -84,9 +94,26 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
             }
 
             var seekTolerance = (long)(5000000.0 / FrameRate);
+            var frameDuration = (long)(DurationRate / FrameRate);
 
             var longTime = (long)(time * DurationRate);
-            Reader.SetCurrentPosition(longTime);
+            if (CurrentFrame != null)
+            {
+                if (CurrentFrame.SampleTime >= longTime && (CurrentFrame.SampleTime + frameDuration) < longTime)
+                {
+                    return CurrentFrame;
+                }
+                else
+                {
+                    CurrentFrame.Dispose();
+                    CurrentFrame = null;
+                }
+            }
+
+            if (LastFrameTime > longTime)
+            {
+                Reader.SetCurrentPosition(longTime);
+            }
 
             IMFSample? sample = null;
             var skipCount = 0;
@@ -122,10 +149,14 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                     continue;
                 }
 
+                LastFrameTime = timestamp;
+
                 break;
             }
 
-            return sample;
+            CurrentFrame = sample;
+
+            return CurrentFrame;
         }
 
         protected unsafe void ConvertSample(IMFSample sample, Span<byte> dst)
@@ -145,6 +176,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
         public virtual void Dispose()
         {
+            CurrentFrame?.Dispose();
             Reader?.Dispose();
         }
     }

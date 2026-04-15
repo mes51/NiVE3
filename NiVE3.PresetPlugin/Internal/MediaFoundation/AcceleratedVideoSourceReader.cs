@@ -98,7 +98,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return false;
             }
 
-            using var sample = ReadSample(time);
+            var sample = ReadSample(time);
             if (sample == null)
             {
                 return false;
