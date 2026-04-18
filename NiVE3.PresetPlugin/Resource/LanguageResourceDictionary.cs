@@ -896,6 +896,53 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("画像にアンチエイリアスを適用します")]
         public const string Stylize_Fxaa_Description = nameof(Stylize_Fxaa_Description);
 
+        // RoughEdge
+
+        [DefaultValue("ラフエッジ")]
+        public const string Stylize_RoughEdge_Name = nameof(Stylize_RoughEdge_Name);
+
+        [DefaultValue("画像の端を荒くします")]
+        public const string Stylize_RoughEdge_Description = nameof(Stylize_RoughEdge_Description);
+
+        [LanguageKey, DefaultValue("エッジに色をつける")]
+        public const string Stylize_RoughEdge_IsColorizeEdge = nameof(Stylize_RoughEdge_IsColorizeEdge);
+
+        [LanguageKey, DefaultValue("エッジのカラー")]
+        public const string Stylize_RoughEdge_EdgeColor = nameof(Stylize_RoughEdge_EdgeColor);
+
+        [LanguageKey, DefaultValue("エッジの幅")]
+        public const string Stylize_RoughEdge_EdgeWidth = nameof(Stylize_RoughEdge_EdgeWidth);
+
+        [LanguageKey, DefaultValue("エッジのシャープネス")]
+        public const string Stylize_RoughEdge_EdgeSharpness = nameof(Stylize_RoughEdge_EdgeSharpness);
+
+        [LanguageKey, DefaultValue("フラクタルの影響")]
+        public const string Stylize_RoughEdge_FractalStrength = nameof(Stylize_RoughEdge_FractalStrength);
+
+        [LanguageKey, DefaultValue("フラクタルの設定")]
+        public const string Stylize_RoughEdge_FractalOption = nameof(Stylize_RoughEdge_FractalOption);
+
+        [LanguageKey, DefaultValue("コントラスト")]
+        public const string Stylize_RoughEdge_FractalOption_Contrast = nameof(Stylize_RoughEdge_FractalOption_Contrast);
+
+        [LanguageKey, DefaultValue("明るさ")]
+        public const string Stylize_RoughEdge_FractalOption_Luminance = nameof(Stylize_RoughEdge_FractalOption_Luminance);
+
+        [LanguageKey, DefaultValue("スケール")]
+        public const string Stylize_RoughEdge_FractalOption_Scale = nameof(Stylize_RoughEdge_FractalOption_Scale);
+
+        [LanguageKey, DefaultValue("オフセット")]
+        public const string Stylize_RoughEdge_FractalOption_Offset = nameof(Stylize_RoughEdge_FractalOption_Offset);
+
+        [LanguageKey, DefaultValue("複雑度")]
+        public const string Stylize_RoughEdge_FractalOption_Octarve = nameof(Stylize_RoughEdge_FractalOption_Octarve);
+
+        [LanguageKey, DefaultValue("展開")]
+        public const string Stylize_RoughEdge_FractalOption_Evolution = nameof(Stylize_RoughEdge_FractalOption_Evolution);
+
+        [LanguageKey, DefaultValue("ランダムシード")]
+        public const string Stylize_RoughEdge_FractalOption_RandomSeed = nameof(Stylize_RoughEdge_FractalOption_RandomSeed);
+
         // Level
 
         [DefaultValue("レベル")]
