@@ -943,6 +943,38 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ランダムシード")]
         public const string Stylize_RoughEdge_FractalOption_RandomSeed = nameof(Stylize_RoughEdge_FractalOption_RandomSeed);
 
+        // PageCurl
+
+        [DefaultValue("ページカール")]
+        public const string Distortion_PageCurl_Name = nameof(Distortion_PageCurl_Name);
+
+        [DefaultValue("画像を紙を捲ったように変形します")]
+        public const string Distortion_PageCurl_Description = nameof(Distortion_PageCurl_Description);
+
+        [LanguageKey, DefaultValue("変形")]
+        public const string Distortion_PageCurl_Progress = nameof(Distortion_PageCurl_Progress);
+
+        [LanguageKey, DefaultValue("角度")]
+        public const string Distortion_PageCurl_Angle = nameof(Distortion_PageCurl_Angle);
+
+        [LanguageKey, DefaultValue("丸め半径")]
+        public const string Distortion_PageCurl_Radius = nameof(Distortion_PageCurl_Radius);
+
+        [LanguageKey, DefaultValue("捲った画像を丸める")]
+        public const string Distortion_PageCurl_IsRoll = nameof(Distortion_PageCurl_IsRoll);
+
+        [LanguageKey, DefaultValue("裏のカラー")]
+        public const string Distortion_PageCurl_BackColor = nameof(Distortion_PageCurl_BackColor);
+
+        [LanguageKey, DefaultValue("裏の不透明度")]
+        public const string Distortion_PageCurl_BackOpacity = nameof(Distortion_PageCurl_BackOpacity);
+
+        [LanguageKey, DefaultValue("影の強さ")]
+        public const string Distortion_PageCurl_ShadowStrength = nameof(Distortion_PageCurl_ShadowStrength);
+
+        [LanguageKey, DefaultValue("アンチエイリアス")]
+        public const string Distortion_PageCurl_AntiAlias = nameof(Distortion_PageCurl_AntiAlias);
+
         // Level
 
         [DefaultValue("レベル")]
