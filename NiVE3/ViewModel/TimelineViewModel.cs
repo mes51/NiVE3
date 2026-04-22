@@ -2090,6 +2090,7 @@ namespace NiVE3.ViewModel
                 targetLayers.AddRange(SelectedLayers);
             }
 
+            using var checker = CycleChecker.StartCheck();
             CompositionModel.ChangeParentLayer(targetLayers.Select(l => l.LayerId).ToArray(), e.LayerId, CurrentTime, e.ResetTransform, e.SkipKeepTransform);
         }
 
