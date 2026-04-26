@@ -1756,12 +1756,22 @@ namespace NiVE3.ViewModel
             CameraSetting? cameraSetting;
             Guid? baseLayerId;
             LayerSkeleton? baseLayerSkeleton;
+            LayerSkeleton? parentLayerSkeleton;
             using (var checker = CycleChecker.StartCheck())
             {
                 activeCameraId = CompositionModel.GetActiveCamera(CurrentTime)?.LayerId;
                 cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
                 baseLayerId = CompositionModel.FindLayerByPreviewPosition(CurrentTime, e.StartScreenPosition);
-                baseLayerSkeleton = baseLayerId.HasValue ? CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime) : null;
+                if (baseLayerId.HasValue)
+                {
+                    baseLayerSkeleton = CompositionModel.GetLayerSkeleton(baseLayerId.Value, CurrentTime);
+                    parentLayerSkeleton = CompositionModel.GetParentLayerSkeleton(baseLayerId.Value, CurrentTime);
+                }
+                else
+                {
+                    baseLayerSkeleton = null;
+                    parentLayerSkeleton = null;
+                }
             }
             var baseLayerIs3D = baseLayerSkeleton?.IsEnable3D ?? false;
             var imageLayers = SelectedLayers?.Where(l => l.HasImage)?.ToArray() ?? [];
@@ -1769,7 +1779,7 @@ namespace NiVE3.ViewModel
             switch (e.Type)
             {
                 case BeginUseToolEventArgs.PropertyType.Transform when imageLayers.Length > 0 && baseLayerSkeleton != null:
-                    PreviewManipulation = new PositionPreviewManipulationState(imageLayers, baseLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
+                    PreviewManipulation = new PositionPreviewManipulationState(imageLayers, parentLayerSkeleton, CurrentTime, CompositionModel, cameraSetting, e.StartScreenPosition, HistoryModel);
                     break;
                 case BeginUseToolEventArgs.PropertyType.RotateAll when imageLayers.Length > 0 && !baseLayerIs3D && baseLayerSkeleton != null:
                 case BeginUseToolEventArgs.PropertyType.RotateX when imageLayers.Length > 0 &&!baseLayerIs3D && baseLayerSkeleton != null:

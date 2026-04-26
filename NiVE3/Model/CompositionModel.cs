@@ -1232,6 +1232,19 @@ namespace NiVE3.Model
             return Layers.FirstOrDefault(l => l.LayerId == layerId)?.GetLayerSkeleton(time);
         }
 
+        public LayerSkeleton? GetParentLayerSkeleton(Guid layerId, Time time)
+        {
+            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+            if (layer != null)
+            {
+                return Layers.FirstOrDefault(l => l.LayerId == layer.ParentLayerId)?.GetLayerSkeleton(time);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public Vector2d Projection(CameraSetting cameraSetting, LayerSkeleton? baseLayerSkeleton, Vector3d pos)
         {
             if (Transformer == null)

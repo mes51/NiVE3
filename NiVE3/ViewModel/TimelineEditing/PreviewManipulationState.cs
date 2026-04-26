@@ -91,11 +91,11 @@ namespace NiVE3.ViewModel.TimelineEditing
 
         Vector3d StartPosition { get; }
 
-        LayerSkeleton GrabbingLayerSkeleton { get; }
+        LayerSkeleton? GrabbingLayerParentSkeleton { get; }
 
         protected override PropertyViewModel[] Properties => PositionProperties.Select(t => t.property).ToArray();
 
-        public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton grabbingLayerSkeleton, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        public PositionPreviewManipulationState(LayerViewModel[] layers, LayerSkeleton? grabbingLayerParentSkeleton, Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
             : base(time, compositionModel, cameraSetting, startScreenPosition, historyModel)
         {
             var properties = new List<(bool, PropertyViewModel)>();
@@ -112,17 +112,17 @@ namespace NiVE3.ViewModel.TimelineEditing
                 }
             }
 
-            GrabbingLayerSkeleton = grabbingLayerSkeleton;
+            GrabbingLayerParentSkeleton = grabbingLayerParentSkeleton;
             PositionProperties = [..properties];
             PrevPositions = [..prevPositions];
-            StartPosition = compositionModel.Unprojection(cameraSetting, GrabbingLayerSkeleton, startScreenPosition);
+            StartPosition = compositionModel.Unprojection(cameraSetting, GrabbingLayerParentSkeleton, startScreenPosition);
         }
 
         public override void Update(Vector2d screenPos)
         {
             screenPos = AlignScreenPosition(screenPos);
 
-            var newPosition = CompositionModel.Unprojection(CameraSetting, GrabbingLayerSkeleton, screenPos);
+            var newPosition = CompositionModel.Unprojection(CameraSetting, GrabbingLayerParentSkeleton, screenPos);
             var diff3D = newPosition - StartPosition;
             var diff2D = screenPos - StartScreenPosition;
             if (double.IsNaN(diff3D.X) || double.IsNaN(diff3D.Y) || double.IsNaN(diff3D.Z))
