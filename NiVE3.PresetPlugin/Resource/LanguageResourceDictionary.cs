@@ -2148,6 +2148,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("フォースを掛け始める時間")]
         public const string Simulation_Shatter_Force_StartTime = nameof(Simulation_Shatter_Force_StartTime);
 
+        [LanguageKey, DefaultValue("フォースを掛け続ける時間")]
+        public const string Simulation_Shatter_Force_Duration = nameof(Simulation_Shatter_Force_Duration);
+
         [LanguageKey, DefaultValue("ワールド")]
         public const string Simulation_Shatter_World = nameof(Simulation_Shatter_World);
 

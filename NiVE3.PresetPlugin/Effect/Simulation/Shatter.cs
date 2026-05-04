@@ -76,6 +76,8 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
 
         const string PropertyForceStartTimeId = nameof(PropertyForceStartTimeId);
 
+        const string PropertyForceDurationId = nameof(PropertyForceDurationId);
+
         const string PropertyWorldGroupId = nameof(PropertyWorldGroupId);
 
         const string PropertyWorldGravityId = nameof(PropertyWorldGravityId);
@@ -173,8 +175,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                         [
                             new Vector3dProperty(PropertyForcePositionId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_Position, new Vector3d(sourceSize.Width, sourceSize.Height, 400.0) * 0.5, false, 2, true, useInteraction: true),
                             new DoubleProperty(PropertyForceRadiusId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_Radius, Math.Min(sourceSize.Width, sourceSize.Height) * 0.5, 0.0, double.MaxValue, false, digit: 2),
-                            new DoubleProperty(PropertyForcePowerId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_Power, 200.0, 0.0, double.MaxValue, false, digit: 2),
-                            new DoubleProperty(PropertyForceStartTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_StartTime, 0.01, double.MinValue, double.MaxValue, false, digit: 6, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second)
+                            new DoubleProperty(PropertyForcePowerId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_Power, 12.5, 0.0, double.MaxValue, false, digit: 2),
+                            new DoubleProperty(PropertyForceStartTimeId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_StartTime, 0.01, double.MinValue, double.MaxValue, false, digit: 6, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second),
+                            new DoubleProperty(PropertyForceDurationId, LanguageResourceDictionary.ResourceKeys.Simulation_Shatter_Force_Duration, 1.0 / 30.0, double.MinValue, double.MaxValue, false, digit: 6, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Second)
                         ])
                     )
                 ], 0, true),
@@ -386,8 +389,9 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var radius = forceProperties.GetValue(PropertyForceRadiusId, toTime, 0.0) / size;
                 var power = forceProperties.GetValue(PropertyForcePowerId, toTime, 0.0) / size;
                 var startTime = forceProperties.GetValue(PropertyForceStartTimeId, toTime, 0.0);
+                var duration = forceProperties.GetValue(PropertyForceDurationId, toTime, 0.0);
 
-                return (position, radius, power, startTime);
+                return (position, radius, power, startTime, duration);
             });
 
             var frameDuration = new Time(1, frameRate * simulationRate);
@@ -406,13 +410,13 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var airRegistance = airRegistanceProperty.GetValue(currentTime, 0.0) / size;
                 foreach (var shape in CurrentShapes)
                 {
-                    shape.Advance(doubleFrameDuration * 5.0, gravity, gravityDirection, airRegistance);
+                    shape.Advance(doubleFrameDuration, gravity, gravityDirection, airRegistance);
                 }
 
-                foreach (var (position, radius, power, startTime) in forceValues)
+                foreach (var (position, radius, power, startTime, duration) in forceValues)
                 {
                     var timeDiff = doubleCurrentTime - startTime;
-                    if (timeDiff < 0.0 || timeDiff >= doubleFrameDuration)
+                    if (timeDiff < 0.0 || timeDiff >= duration)
                     {
                         continue;
                     }
