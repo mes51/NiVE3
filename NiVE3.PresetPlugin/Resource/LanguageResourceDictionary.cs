@@ -859,13 +859,13 @@ namespace NiVE3.PresetPlugin.Resource
         [DefaultValue("法線マップ化")]
         public const string Stylize_ToNormalMap_Name = nameof(Stylize_ToNormalMap_Name);
 
-        [DefaultValue("画像のを法線マップ化します")]
+        [DefaultValue("画像を法線マップ化します")]
         public const string Stylize_ToNormalMap_Description = nameof(Stylize_ToNormalMap_Description);
 
         [LanguageKey, DefaultValue("強度")]
         public const string Stylize_ToNormalMap_Strength = nameof(Stylize_ToNormalMap_Strength);
 
-        // Bevel
+        // InnerOuterGlow
 
         [DefaultValue("光彩")]
         public const string Stylize_InnerOuterGlow_Name = nameof(Stylize_InnerOuterGlow_Name);
@@ -887,6 +887,62 @@ namespace NiVE3.PresetPlugin.Resource
 
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Stylize_InnerOuterGlow_BlendMode = nameof(Stylize_InnerOuterGlow_BlendMode);
+
+        // BumpMapping
+
+        [DefaultValue("バンプマッピング")]
+        public const string Stylize_BumpMappinglMap_Name = nameof(Stylize_BumpMappinglMap_Name);
+
+        [DefaultValue("他のレイヤーの画像を法線マップとして、凹凸があるような効果を適用します")]
+        public const string Stylize_BumpMapping_Description = nameof(Stylize_BumpMapping_Description);
+
+        [LanguageKey, DefaultValue("法線マップ")]
+        public const string Stylize_BumpMapping_NormalMapLayer = nameof(Stylize_BumpMapping_NormalMapLayer);
+
+        [LanguageKey, DefaultValue("法線マップの配置")]
+        public const string Stylize_BumpMapping_NormalMapLayerPosition = nameof(Stylize_BumpMapping_NormalMapLayerPosition);
+
+        [LanguageKey, DefaultValue("参照するレイヤー時間を指定する")]
+        public const string Stylize_BumpMapping_NormalMapLayerUseSpecificReferenceTime = nameof(Stylize_BumpMapping_NormalMapLayerUseSpecificReferenceTime);
+
+        [LanguageKey, DefaultValue("参照するレイヤー時間")]
+        public const string Stylize_BumpMapping_NormalMapLayerSpecificReferenceTime = nameof(Stylize_BumpMapping_NormalMapLayerSpecificReferenceTime);
+
+        [LanguageKey, DefaultValue("平行ライト")]
+        public const string Stylize_BumpMapping_ParallelLight = nameof(Stylize_BumpMapping_ParallelLight);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Stylize_BumpMapping_ParallelLight_Color = nameof(Stylize_BumpMapping_ParallelLight_Color);
+
+        [LanguageKey, DefaultValue("強度")]
+        public const string Stylize_BumpMapping_ParallelLight_Intensity = nameof(Stylize_BumpMapping_ParallelLight_Intensity);
+
+        [LanguageKey, DefaultValue("位置")]
+        public const string Stylize_BumpMapping_ParallelLight_Position = nameof(Stylize_BumpMapping_ParallelLight_Position);
+
+        [LanguageKey, DefaultValue("アンビエントライト")]
+        public const string Stylize_BumpMapping_AmbientLight = nameof(Stylize_BumpMapping_AmbientLight);
+
+        [LanguageKey, DefaultValue("カラー")]
+        public const string Stylize_BumpMapping_AmbientLight_Color = nameof(Stylize_BumpMapping_AmbientLight_Color);
+
+        [LanguageKey, DefaultValue("強度")]
+        public const string Stylize_BumpMapping_AmbientLight_Intensity = nameof(Stylize_BumpMapping_AmbientLight_Color);
+
+        [LanguageKey, DefaultValue("レイヤーのマテリアル")]
+        public const string Stylize_BumpMapping_Material = nameof(Stylize_BumpMapping_Material);
+
+        [LanguageKey, DefaultValue("拡散")]
+        public const string Stylize_BumpMapping_Material_Diffuse = nameof(Stylize_BumpMapping_Material_Diffuse);
+
+        [LanguageKey, DefaultValue("鏡面強度")]
+        public const string Stylize_BumpMapping_Material_SpecularIntensity = nameof(Stylize_BumpMapping_Material_SpecularIntensity);
+
+        [LanguageKey, DefaultValue("鏡面光沢")]
+        public const string Stylize_BumpMapping_Material_SpecularShininess = nameof(Stylize_BumpMapping_Material_SpecularShininess);
+
+        [LanguageKey, DefaultValue("金属")]
+        public const string Stylize_BumpMapping_Material_Metal = nameof(Stylize_BumpMapping_Material_Metal);
 
         // Fxaa
 

@@ -110,7 +110,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                     }
                     else
                     {
-                        var normal = Vector3.Normalize(new Vector3(strength, sobelY, sobelX)) + new Vector3(0.0F, 0.5F, 0.5F);
+                        var normal = Vector3.Normalize(new Vector3(strength, -sobelY, sobelX)) + new Vector3(0.0F, 0.5F, 0.5F);
                         imageDataSpan[x] = new Vector4(normal, 1.0F);
                     }
                 }
@@ -180,7 +180,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
             else
             {
-                var normal = Hlsl.Normalize(new Float3(strength, sobelY, sobelX)) + new Float3(0.0F, 0.5F, 0.5F);
+                var normal = Hlsl.Normalize(new Float3(strength, -sobelY, sobelX)) + new Float3(0.0F, 0.5F, 0.5F);
                 image[pos] = new Float4(normal, 1.0F);
             }
         }
