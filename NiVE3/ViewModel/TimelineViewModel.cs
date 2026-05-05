@@ -1319,6 +1319,9 @@ namespace NiVE3.ViewModel
                     var mode = result.Parameters.GetValue<PrecomposeMode>(nameof(PrecomposeSettingViewModel.Mode));
                     var alignDuration = result.Parameters.GetValue<bool>(nameof(PrecomposeSettingViewModel.AlignDurationToLayer));
                     var copyParent = result.Parameters.GetValue<bool>(nameof(PrecomposeSettingViewModel.CopyParent));
+
+                    using var checker = CycleChecker.StartCheck();
+
                     CompositionModel.Precompose([..SelectedLayers.Select(l => l.LayerId)], compositionName, mode == PrecomposeMode.MoveAll, alignDuration, copyParent, LastSelectedLayerId);
                 }
             }, () => CompositionModel != null && SelectedLayers != null && SelectedLayers.Count > 0 && SelectedLayers.Any(l => !l.IsNotRenderable))
