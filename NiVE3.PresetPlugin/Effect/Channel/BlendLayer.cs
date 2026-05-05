@@ -35,6 +35,8 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         const string PropertySourceOpacityId = nameof(PropertySourceOpacityId);
 
+        const string PropertyIsKeepAlphaId = nameof(PropertyIsKeepAlphaId);
+
         const string PropertySourceLayerPositionId = nameof(PropertySourceLayerPositionId);
 
         IAcceleratorObject? AcceleratorObject { get; set; }
@@ -51,6 +53,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                 new UseLayerImageProperty(PropertySourceLayerId, LanguageResourceDictionary.ResourceKeys.Channel_BlendLayer_SourceLayer, selectBoxWidth: 90.0),
                 new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Channel_BlendLayer_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 90.0),
                 new DoubleProperty(PropertySourceOpacityId, LanguageResourceDictionary.ResourceKeys.Channel_BlendLayer_SourceOpacity, 100.0, 0.0, 100.0, digit: 2),
+                new CheckBoxProperty(PropertyIsKeepAlphaId, LanguageResourceDictionary.ResourceKeys.Channel_BlendLayer_IsKeepAlpha, false),
                 new EnumProperty(PropertySourceLayerPositionId, LanguageResourceDictionary.ResourceKeys.Channel_BlendLayer_SourceLayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center, selectBoxWidth: 90.0)
             ];
         }
@@ -60,6 +63,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             var targetLayerId = properties.GetValue(PropertySourceLayerId, layerTime, UseLayerImageTarget.Empty);
             var blendMode = properties.GetValue(PropertyBlendModeId, layerTime, BlendMode.Normal);
             var sourceOpacity = (float)properties.GetValue(PropertySourceOpacityId, layerTime, 0.0) * 0.01F;
+            var isKeepAlpha = properties.GetValue(PropertyIsKeepAlphaId, layerTime, false);
             var sourceLayerPositionType = properties.GetValue(PropertySourceLayerPositionId, layerTime, SourceLayerPositionType.Center);
 
             var globalTime = layerTime + layer.SourceStartPoint;
@@ -71,11 +75,11 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, sourceImage, blendMode, sourceOpacity, sourceLayerPositionType);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, sourceImage, blendMode, sourceOpacity, isKeepAlpha, sourceLayerPositionType);
             }
             else
             {
-                return ProcessCpu(image, roi, sourceImage, blendMode, sourceOpacity, sourceLayerPositionType);
+                return ProcessCpu(image, roi, sourceImage, blendMode, sourceOpacity, isKeepAlpha, sourceLayerPositionType);
             }
         }
 
@@ -86,7 +90,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage imagge, ROI roi, NImage sourceImage, BlendMode blendMode, float sourceOpacity, SourceLayerPositionType sourceLayerPositionType)
+        static NManagedImage ProcessCpu(NImage imagge, ROI roi, NImage sourceImage, BlendMode blendMode, float sourceOpacity, bool isKeepAlpha, SourceLayerPositionType sourceLayerPositionType)
         {
             var managedImage = imagge.ToManaged();
             var managedSourceImage = sourceImage.ToManaged();
@@ -105,19 +109,41 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             var interpolateEdgeMode = sourceLayerPositionType == SourceLayerPositionType.Loop ? BilinearEdgeMode.Repeat : BilinearEdgeMode.None;
             var imageData = managedImage.Data;
             var imageWidth = managedImage.Width;
-            Parallel.For(roi.Top, roi.Bottom, y =>
+            if (isKeepAlpha)
             {
-                var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
-                var sourceDataSpan = managedSourceImage.GetDataSpan();
-                var sourceX = sourceStartX + sourceDiffX * roi.Left;
-                var sourceY = sourceStartY + sourceDiffY * y;
-                for (var x = roi.Left; x < roi.Right; x++, sourceX += sourceDiffX)
+                Parallel.For(roi.Top, roi.Bottom, y =>
                 {
-                    var sourceColor = ImageInterpolation.Bilinear(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY, Const.EmptyPixel, interpolateEdgeMode);
-                    sourceColor.W *= sourceOpacity;
-                    imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], sourceColor);
-                }
-            });
+                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                    var sourceDataSpan = managedSourceImage.GetDataSpan();
+                    var sourceX = sourceStartX + sourceDiffX * roi.Left;
+                    var sourceY = sourceStartY + sourceDiffY * y;
+                    for (var x = roi.Left; x < roi.Right; x++, sourceX += sourceDiffX)
+                    {
+                        var sourceColor = ImageInterpolation.Bilinear(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY, Const.EmptyPixel, interpolateEdgeMode);
+                        sourceColor.W *= sourceOpacity;
+                        var color = imageDataSpan[x];
+                        var newColor = Blend.Process(blendMode, color, sourceColor);
+                        newColor.W = color.W;
+                        imageDataSpan[x] = newColor;
+                    }
+                });
+            }
+            else
+            {
+                Parallel.For(roi.Top, roi.Bottom, y =>
+                {
+                    var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                    var sourceDataSpan = managedSourceImage.GetDataSpan();
+                    var sourceX = sourceStartX + sourceDiffX * roi.Left;
+                    var sourceY = sourceStartY + sourceDiffY * y;
+                    for (var x = roi.Left; x < roi.Right; x++, sourceX += sourceDiffX)
+                    {
+                        var sourceColor = ImageInterpolation.Bilinear(sourceDataSpan, managedSourceImage.Width, managedSourceImage.Height, sourceX, sourceY, Const.EmptyPixel, interpolateEdgeMode);
+                        sourceColor.W *= sourceOpacity;
+                        imageDataSpan[x] = Blend.Process(blendMode, imageDataSpan[x], sourceColor);
+                    }
+                });
+            }
 
             if (managedSourceImage != sourceImage)
             {
@@ -127,7 +153,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             return managedImage;
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, BlendMode blendMode, float sourceOpacity, SourceLayerPositionType sourceLayerPositionType)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, NImage sourceImage, BlendMode blendMode, float sourceOpacity, bool isKeepAlpha, SourceLayerPositionType sourceLayerPositionType)
         {
             var gpuImage = image.ToGpu(device);
             var gpuSourceImage = sourceImage.ToGpu(device);
@@ -158,6 +184,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                         (int)sourceLayerPositionType,
                         (int)blendMode,
                         sourceOpacity,
+                        isKeepAlpha,
                         roi.Left,
                         roi.Top
                     )
@@ -175,7 +202,7 @@ namespace NiVE3.PresetPlugin.Effect.Channel
 
     [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
     [GeneratedComputeShaderDescriptor]
-    readonly partial struct BlendLayerProcess(ReadWriteBuffer<Float4> image, int width, int height, ReadWriteBuffer<Float4> sourceImage, int sourceImageWidth, int sourceImageHeight, int position, int blendMode, float sourceOpacity, int startX, int startY) : IComputeShader
+    readonly partial struct BlendLayerProcess(ReadWriteBuffer<Float4> image, int width, int height, ReadWriteBuffer<Float4> sourceImage, int sourceImageWidth, int sourceImageHeight, int position, int blendMode, float sourceOpacity, bool isKeepAlpha, int startX, int startY) : IComputeShader
     {
         public void Execute()
         {
@@ -208,7 +235,17 @@ namespace NiVE3.PresetPlugin.Effect.Channel
             sourceColor.W *= sourceOpacity;
 
             var pos = y * width + x;
-            image[pos] = BlendMethods.Process(blendMode, image[pos], sourceColor);
+            if (isKeepAlpha)
+            {
+                var color = image[pos];
+                var newColor = BlendMethods.Process(blendMode, color, sourceColor);
+                newColor.W = color.W;
+                image[pos] = newColor;
+            }
+            else
+            {
+                image[pos] = BlendMethods.Process(blendMode, image[pos], sourceColor);
+            }
         }
 
         Float4 SourceImageBilinear(float x, float y)

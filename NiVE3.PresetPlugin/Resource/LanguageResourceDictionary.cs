@@ -1908,6 +1908,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ソースレイヤーの不透明度")]
         public const string Channel_BlendLayer_SourceOpacity = nameof(Channel_BlendLayer_SourceOpacity);
 
+        [LanguageKey, DefaultValue("元画像のアルファを維持する")]
+        public const string Channel_BlendLayer_IsKeepAlpha = nameof(Channel_BlendLayer_IsKeepAlpha);
+
         [LanguageKey, DefaultValue("ソースレイヤーの配置")]
         public const string Channel_BlendLayer_SourceLayerPosition = nameof(Channel_BlendLayer_SourceLayerPosition);
 
