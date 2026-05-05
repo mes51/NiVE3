@@ -604,6 +604,8 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
+                using var checker = CycleChecker.StartCheck();
+
                 compositionPreviewModel.CaptureSnapShot(CurrentTime);
             }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
                 .ObservesProperty(() => PreviewModel);
