@@ -112,8 +112,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
 
             var useReferenceTime = properties.GetValue(PropertyNormalMapLayerUseReferenceTimeId, layerTime, false);
-            var specificTime = useReferenceTime ? (Time)properties.GetValue(PropertyNormalMapLayerSpecificReferenceTimeId, layerTime, 0.0) : layerTime;
-            using var normalMap = normalMapLayerId.GetImage(composition, specificTime, downSamplingRateX, useGpu);
+            var specificTime = (Time)properties.GetValue(PropertyNormalMapLayerSpecificReferenceTimeId, layerTime, 0.0);
+            using var normalMap = useReferenceTime ? normalMapLayerId.GetImageReferenceTime(composition, specificTime, downSamplingRateX, useGpu) : normalMapLayerId.GetImage(composition, layerTime + layer.SourceStartPoint, downSamplingRateX, useGpu);
             if (normalMap == null)
             {
                 return image;

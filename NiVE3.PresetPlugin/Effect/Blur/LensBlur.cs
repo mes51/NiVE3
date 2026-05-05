@@ -185,7 +185,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 }
             }
 
-            using var depthMapImage = depthMapSourceLayerId.GetImage(composition, layerTime, downSamplingRateX, useGpu);
+            using var depthMapImage = depthMapSourceLayerId.GetImage(composition, layerTime + layer.SourceStartPoint, downSamplingRateX, useGpu);
             var irisMaskParameters = new IrisMaskParameters(amount, irisType, irisCornerRound, irisAngle, depthMapImage != null, depthMapFocus);
 
             var irisMasks = LastIrisMasks;

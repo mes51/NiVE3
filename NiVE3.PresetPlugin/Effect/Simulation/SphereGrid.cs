@@ -387,7 +387,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
 
             ApplyGraphMap(spheres, graphMap, layerTime);
-            ApplyLayerMap(spheres, layerMap, composition, gridSize, layerTime, downSamplingRateX, useGpu);
+            ApplyLayerMap(spheres, layerMap, composition, gridSize, layerTime, layer.SourceStartPoint, downSamplingRateX, useGpu);
 
             var transformMatrix = Matrix4x4d.AffineTransform(
                 transformGroup.GetValue(PropertyTransformAnchorPointId, layerTime, Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0) / renderSize,
@@ -699,7 +699,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
             }
         }
 
-        static void ApplyLayerMap(Sphere[] spheres, IReadOnlyCollection<IPropertyObject> layerMap, ICompositionObject composition, Vector3d gridSize, in Time layerTime, double downSamplingRate, bool useGpu)
+        static void ApplyLayerMap(Sphere[] spheres, IReadOnlyCollection<IPropertyObject> layerMap, ICompositionObject composition, Vector3d gridSize, in Time layerTime, in Time layerSourceStartPoint, double downSamplingRate, bool useGpu)
         {
             var imageCache = new Dictionary<LayerMapCacheKey, NManagedImage>();
 
@@ -722,7 +722,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 var cacheKey = new LayerMapCacheKey(layerKey.LayerId, referenceTime);
                 if (!imageCache.ContainsKey(cacheKey))
                 {
-                    var image = layerKey.GetImage(composition, referenceTime, downSamplingRate, useGpu);
+                    var image = useSpecificReferenceTime ? layerKey.GetImageReferenceTime(composition, referenceTime, downSamplingRate, useGpu) : layerKey.GetImage(composition, layerTime + layerSourceStartPoint, downSamplingRate, useGpu);
                     if (image == null)
                     {
                         continue;

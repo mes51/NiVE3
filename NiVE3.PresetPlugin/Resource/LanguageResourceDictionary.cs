@@ -1931,6 +1931,29 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("アルファ")]
         public const string Channel_ChannelShift_A = nameof(Channel_ChannelShift_A);
 
+        // SetMatte
+
+        [DefaultValue("マット設定")]
+        public const string Channel_SetMatte_Name = nameof(Channel_SetMatte_Name);
+
+        [DefaultValue("他のレイヤーの輝度等を使用し、アルファチャネルの値を設定します")]
+        public const string Channel_SetMatte_Description = nameof(Channel_SetMatte_Description);
+
+        [LanguageKey, DefaultValue("ソースレイヤー")]
+        public const string Channel_SetMatte_SourceLayer = nameof(Channel_SetMatte_SourceLayer);
+
+        [LanguageKey, DefaultValue("ソースレイヤーの配置")]
+        public const string Channel_SetMatte_SourceLayerPosition = nameof(Channel_SetMatte_SourceLayerPosition);
+
+        [LanguageKey, DefaultValue("ソースチャンネル")]
+        public const string Channel_SetMatte_SourceChannel = nameof(Channel_SetMatte_SourceChannel);
+
+        [LanguageKey, DefaultValue("反転")]
+        public const string Channel_SetMatte_IsInvert = nameof(Channel_SetMatte_IsInvert);
+
+        [LanguageKey, DefaultValue("モード")]
+        public const string Channel_SetMatte_Mode = nameof(Channel_SetMatte_Mode);
+
         // Particle
 
         [DefaultValue("パーティクル")]
@@ -3393,6 +3416,21 @@ namespace NiVE3.PresetPlugin.Resource
 
         [DefaultValue("外側")]
         public const string InnerOuterGlowDirection_Outer = nameof(InnerOuterGlowDirection_Outer);
+
+        [DefaultValue("なし")]
+        public const string SetMatteMode_None = nameof(SetMatteMode_None);
+
+        [DefaultValue("上書き")]
+        public const string SetMatteMode_Overwrite = nameof(SetMatteMode_Overwrite);
+
+        [DefaultValue("加算")]
+        public const string SetMatteMode_Add = nameof(SetMatteMode_Add);
+
+        [DefaultValue("乗算")]
+        public const string SetMatteMode_Multiply = nameof(SetMatteMode_Multiply);
+
+        [DefaultValue("減算")]
+        public const string SetMatteMode_Subtract = nameof(SetMatteMode_Subtract);
 
         // unit
 

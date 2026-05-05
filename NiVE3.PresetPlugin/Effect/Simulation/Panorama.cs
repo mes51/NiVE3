@@ -60,7 +60,7 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var targetLayerId = properties.GetValue(PropertySourceLayerId, layerTime, UseLayerImageTarget.Empty);
-            using var sourceImage = targetLayerId.GetImage(composition, layerTime, downSamplingRateX, useGpu);
+            using var sourceImage = targetLayerId.GetImage(composition, layerTime + layer.SourceStartPoint, downSamplingRateX, useGpu);
             if (sourceImage == null)
             {
                 return image;

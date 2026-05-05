@@ -132,7 +132,7 @@ namespace NiVE3.PresetPlugin.Effect.ColorCollection
             var useOkLabInterpolation = outputGroup.GetValue(PropertyOutputUseOkLabInterpolationId, layerTime, false);
             var cycleCount = (float)outputGroup.GetValue(PropertyOutputCycleCountId, layerTime, 1.0);
 
-            using var additionalSourceImage = additionalSourceLayerId.GetImage(composition, layerTime, downSamplingRateX, useGpu);
+            using var additionalSourceImage = additionalSourceLayerId.GetImage(composition, layerTime + layer.SourceStartPoint, downSamplingRateX, useGpu);
 
             if (useGpu && AcceleratorObject != null)
             {

@@ -31,5 +31,26 @@ namespace NiVE3.PresetPlugin.Extension
                 _ => layer.GetRawImage(time, downSamplingRate, useGpu)
             };
         }
+
+        public static NImage? GetImageReferenceTime(this UseLayerImageTarget target, ICompositionObject composition, Time time, double downSamplingRate, bool useGpu)
+        {
+            if (target == UseLayerImageTarget.Empty)
+            {
+                return null;
+            }
+
+            var layer = composition.GetLayer(target.LayerId);
+            if (layer == null)
+            {
+                return null;
+            }
+
+            return target.ImageProcessType switch
+            {
+                LayerImageProcessType.Masked => layer.GetMaskedImage(time + layer.SourceStartPoint, downSamplingRate, useGpu),
+                LayerImageProcessType.Effected => layer.GetEffectedImage(time + layer.SourceStartPoint, downSamplingRate, useGpu),
+                _ => layer.GetRawImage(time + layer.SourceStartPoint, downSamplingRate, useGpu)
+            };
+        }
     }
 }
