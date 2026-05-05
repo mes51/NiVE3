@@ -2698,20 +2698,53 @@ namespace NiVE3.Model
         {
             var targetTime = time ?? CurrentTime;
             var layerSkeleton = Layer.GetLayerSkeletonWithoutContainsTime(targetTime);
+            var cameraSetting = CompositionModel.GetActiveCameraSetting(targetTime);
 
             if (layerSkeleton != null)
             {
-                return Transformer.LocalCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(targetTime), layerSkeleton, localPosition);
+                return Transformer.LocalCoordToScreenCoord(cameraSetting, layerSkeleton, localPosition);
             }
             else
             {
-                return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(targetTime), localPosition);
+                return Transformer.WorldCoordToScreenCoord(cameraSetting, localPosition);
             }
         }
 
         public Vector2d WorldCoordToScreenCoord(Vector3d worldPosition, Time? time = null)
         {
             return Transformer.WorldCoordToScreenCoord(CompositionModel.GetActiveCameraSetting(time ?? CurrentTime), worldPosition);
+        }
+
+        public Vector3d LocalCoordToWorldCoord(Vector3d localPosition, Time? time = null)
+        {
+            var targetTime = time ?? CurrentTime;
+            var layerSkeleton = Layer.GetLayerSkeletonWithoutContainsTime(targetTime);
+            var cameraSetting = CompositionModel.GetActiveCameraSetting(targetTime);
+
+            if (layerSkeleton != null)
+            {
+                return Transformer.LocalCoordToWorldCoord(cameraSetting, layerSkeleton, localPosition);
+            }
+            else
+            {
+                return (Vector3d)Transformer.WorldCoordToScreenCoord(cameraSetting, localPosition);
+            }
+        }
+
+        public Vector3d WorldCoordToLocalCoord(Vector3d worldPosition, Time? time = null)
+        {
+            var targetTime = time ?? CurrentTime;
+            var layerSkeleton = Layer.GetLayerSkeletonWithoutContainsTime(targetTime);
+            var cameraSetting = CompositionModel.GetActiveCameraSetting(targetTime);
+
+            if (layerSkeleton != null)
+            {
+                return Transformer.WorldCoordToLocalCoord(cameraSetting, layerSkeleton, worldPosition);
+            }
+            else
+            {
+                return worldPosition;
+            }
         }
     }
 }

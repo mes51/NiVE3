@@ -352,5 +352,9 @@ namespace NiVE3.Plugin.Interfaces
         Vector2d LocalCoordToScreenCoord(Vector3d localPosition, Time? time = null);
 
         Vector2d WorldCoordToScreenCoord(Vector3d worldPosition, Time? time = null);
+
+        Vector3d LocalCoordToWorldCoord(Vector3d localPosition, Time? time = null);
+
+        Vector3d WorldCoordToLocalCoord(Vector3d worldPosition, Time? time = null);
     }
 }

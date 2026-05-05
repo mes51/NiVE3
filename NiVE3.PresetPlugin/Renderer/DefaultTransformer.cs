@@ -555,6 +555,51 @@ namespace NiVE3.PresetPlugin.Renderer
             return (Vector3d)(result / (w != 0.0 ? w : 1.0) * size);
         }
 
+        public Vector3d LocalCoordToWorldCoord(CameraSetting cameraSetting, LayerSkeleton baseLayer, Vector3d pos)
+        {
+            if (baseLayer.IsEnable3D)
+            {
+                var size = Math.Max(Width, Height);
+                var modelMatrix = Transform3D.Calc3DModelMatrix(baseLayer.Transform, baseLayer.ParentTransform, Width, Height);
+                var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
+                var mvt = modelMatrix * viewMatrix;
+
+                var pp = mvt.Transform((pos.AsVector256() + Vector256.Create(0.0, 0.0, 0.0, size)) / Vector256.Create((double)size));
+                return (Vector3d)(pp / pp.GetElement(3) * size);
+            }
+            else
+            {
+                var transform = Transform2D.CalcTransform2D(baseLayer.Transform, baseLayer.ParentTransform);
+                var (screenX, screenY) = transform.Transform((float)pos.X, (float)pos.Y);
+                return new Vector3d(screenX, screenY, 0.0);
+            }
+        }
+
+        public Vector3d WorldCoordToLocalCoord(CameraSetting cameraSetting, LayerSkeleton baseLayer, Vector3d pos)
+        {
+            if (baseLayer.IsEnable3D)
+            {
+                var size = Math.Max(Width, Height);
+                var offset = Vector256.Create(size - Width, size - Height, 0.0, 0.0) * 0.5 / size;
+                var modelMatrix = Transform3D.Calc3DModelMatrix(baseLayer.Transform, baseLayer.ParentTransform, Width, Height);
+                var viewMatrix = Transform3D.Calc3DViewMatrix(cameraSetting, Width, Height);
+
+                Matrix4x4d.Invert(modelMatrix * viewMatrix, out var invertedViewProjection);
+
+                var p = Vector256.Create(pos.X, pos.Y, pos.Z, size) / size;
+                var result = invertedViewProjection.Transform(p);
+                var w = result.GetElement(3);
+                return (Vector3d)(result / (w != 0.0 ? w : 1.0) * size);
+            }
+            else
+            {
+                var transform = Transform2D.CalcTransform2D(baseLayer.Transform, baseLayer.ParentTransform);
+                Matrix3x3.Invert(transform, out var inverted);
+                var (worldX, worldY) = inverted.Transform((float)pos.X, (float)pos.Y);
+                return new Vector3d(worldX, worldY, 0.0);
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static (BoundingBoxTriangle, BoundingBoxTriangle) CreateBoundingBoxTriangles(LayerSkeleton layerSkeleton, int compositionWidth, int compositionHeight, in Matrix4x4d viewMatrix, in Matrix4x4d offsetMatrix, int index = 0)
         {

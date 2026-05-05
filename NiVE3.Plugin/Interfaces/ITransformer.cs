@@ -130,5 +130,23 @@ namespace NiVE3.Plugin.Interfaces
         /// <param name="pos">コンポジションのワールドの座標</param>
         /// <returns>スクリーン座標</returns>
         Vector2d WorldCoordToScreenCoord(CameraSetting cameraSetting, Vector3d pos);
+
+        /// <summary>
+        /// レイヤーの座標からコンポジションのワールド座標に変換します
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <param name="baseLayer">基準となるレイヤー</param>
+        /// <param name="pos">レイヤーの座標</param>
+        /// <returns>コンポジションのワールド座標</returns>
+        Vector3d LocalCoordToWorldCoord(CameraSetting cameraSetting, LayerSkeleton baseLayer, Vector3d pos);
+
+        /// <summary>
+        /// コンポジションのワールド座標からレイヤーの座標に変換します。
+        /// </summary>
+        /// <param name="cameraSetting">カメラの設定</param>
+        /// <param name="baseLayer">基準となるレイヤー</param>
+        /// <param name="pos">コンポジションのワールドの座標</param>
+        /// <returns>レイヤーの座標</returns>
+        Vector3d WorldCoordToLocalCoord(CameraSetting cameraSetting, LayerSkeleton baseLayer, Vector3d pos);
     }
 }

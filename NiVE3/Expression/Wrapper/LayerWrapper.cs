@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Model;
+using NiVE3.Numerics;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 using NiVE3.Util;
@@ -202,6 +203,58 @@ namespace NiVE3.Expression.Wrapper
             var rect = LayerModel.GetSourceFootageRect((Time)time, withInvisible);
 
             return [rect.Origin.X, rect.Origin.Y, rect.Width, rect.Height];
+        }
+
+        [ExpressionPublicMember]
+        public object[] toWorldCoord(double[] localPosition)
+        {
+            var position = new Vector3d(
+                localPosition.Length > 0 ? localPosition[0] : 0.0,
+                localPosition.Length > 1 ? localPosition[1] : 0.0,
+                localPosition.Length > 2 ? localPosition[2] : 0.0
+            );
+            var worldPosition = CompositionModel.GetCoordTransformer(GlobalTime, LayerModel.LayerId).LocalCoordToWorldCoord(position);
+
+            return [worldPosition.X, worldPosition.Y, worldPosition.Z];
+        }
+
+        [ExpressionPublicMember]
+        public object[]toWorldCoord(double[] localPosition, double time)
+        {
+            var position = new Vector3d(
+                localPosition.Length > 0 ? localPosition[0] : 0.0,
+                localPosition.Length > 1 ? localPosition[1] : 0.0,
+                localPosition.Length > 2 ? localPosition[2] : 0.0
+            );
+            var worldPosition = CompositionModel.GetCoordTransformer(GlobalTime, LayerModel.LayerId).LocalCoordToWorldCoord(position, (Time)time);
+
+            return [worldPosition.X, worldPosition.Y, worldPosition.Z];
+        }
+
+        [ExpressionPublicMember]
+        public object[] toScreenCoord(double[] localPosition)
+        {
+            var position = new Vector3d(
+                localPosition.Length > 0 ? localPosition[0] : 0.0,
+                localPosition.Length > 1 ? localPosition[1] : 0.0,
+                localPosition.Length > 2 ? localPosition[2] : 0.0
+            );
+            var screenPosition = CompositionModel.GetCoordTransformer(GlobalTime, LayerModel.LayerId).LocalCoordToScreenCoord(position);
+
+            return [screenPosition.X, screenPosition.Y];
+        }
+
+        [ExpressionPublicMember]
+        public object[] toScreenCoord(double[] localPosition, double time)
+        {
+            var position = new Vector3d(
+                localPosition.Length > 0 ? localPosition[0] : 0.0,
+                localPosition.Length > 1 ? localPosition[1] : 0.0,
+                localPosition.Length > 2 ? localPosition[2] : 0.0
+            );
+            var screenPosition = CompositionModel.GetCoordTransformer(GlobalTime, LayerModel.LayerId).LocalCoordToScreenCoord(position, (Time)time);
+
+            return [screenPosition.X, screenPosition.Y];
         }
 
 #pragma warning restore IDE1006 // 命名スタイル
