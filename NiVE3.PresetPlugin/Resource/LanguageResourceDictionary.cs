@@ -1843,6 +1843,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("ブレンドモード")]
         public const string Channel_SolidComposite_BlendMode = nameof(Channel_SolidComposite_BlendMode);
 
+        [LanguageKey, DefaultValue("元画像のアルファを維持する")]
+        public const string Channel_SolidComposite_IsKeepAlpha = nameof(Channel_SolidComposite_IsKeepAlpha);
+
         // Clamp
 
         [DefaultValue("クランプ")]
