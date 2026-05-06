@@ -1456,6 +1456,26 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("スケール")]
         public const string Distortion_DotScaling_Scale = nameof(Distortion_DotScaling_Scale);
 
+        // FreeTransform
+
+        [DefaultValue("自由変形")]
+        public const string Distortion_FreeTransform_Name = nameof(Distortion_FreeTransform_Name);
+
+        [DefaultValue("4点の位置から、任意の凸四角形に変形します")]
+        public const string Distortion_FreeTransform_Description = nameof(Distortion_FreeTransform_Description);
+
+        [LanguageKey, DefaultValue("左上")]
+        public const string Distortion_FreeTransform_LeftTop = nameof(Distortion_FreeTransform_LeftTop);
+
+        [LanguageKey, DefaultValue("右上")]
+        public const string Distortion_FreeTransform_RightTop = nameof(Distortion_FreeTransform_RightTop);
+
+        [LanguageKey, DefaultValue("左下")]
+        public const string Distortion_FreeTransform_LeftBottom = nameof(Distortion_FreeTransform_LeftBottom);
+
+        [LanguageKey, DefaultValue("右下")]
+        public const string Distortion_FreeTransform_RightBottom = nameof(Distortion_FreeTransform_RightBottom);
+
         // Dynamics
 
         [DefaultValue("ダイナミクス")]
