@@ -588,6 +588,8 @@ namespace NiVE3.ViewModel
 
             DeleteCommand = new DelegateCommand(() =>
             {
+                using var checker = CycleChecker.StartCheck();
+
                 if (SelectedShortcutCommandTarget != null)
                 {
                     SelectedShortcutCommandTarget.DeleteCommand.Execute(SelectedItemType);
