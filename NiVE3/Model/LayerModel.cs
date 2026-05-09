@@ -783,7 +783,8 @@ namespace NiVE3.Model
 
         public float[] GetAudio(Time time, Time length)
         {
-            var layerTime = Time.Max(time - SourceStartPoint, InPoint);
+            var rawLayerTime = time - SourceStartPoint;
+            var layerTime = Time.Max(rawLayerTime, InPoint);
             var audio = GetRawAudio(time, length);
 
             foreach (var effect in Effects.Where(e => !e.IsDummyEffect && e.IsEnable && e.SupportedSource.IsSupportedSource(SourceType.Audio)))
@@ -815,7 +816,7 @@ namespace NiVE3.Model
                     var lastTime = level.KeyFrames.Last().Time;
                     for (int i = 0, si = 0; i < audioSpan.Length; i += 2, si++)
                     {
-                        var sampledLayerTime = layerTime + Const.AudioSampleTime * si;
+                        var sampledLayerTime = rawLayerTime + Const.AudioSampleTime * si;
                         if (sampledLayerTime < prevTime || sampledLayerTime > lastTime)
                         {
                             audioSpan[i] = audioSpan[i] * lLevel;
