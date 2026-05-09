@@ -1918,7 +1918,7 @@ namespace NiVE3.Model
                 Transformer.SetSize(Width, Height);
             }
 
-            return new CoordTransformerWrapper(Transformer, this, layer, CurrentTime);
+            return new CoordTransformerWrapper(Transformer, this, layer, time);
         }
 
         public void CalcCacheKeyHash(XxHash3 hash, Time time)
