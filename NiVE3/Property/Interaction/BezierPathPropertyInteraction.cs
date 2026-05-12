@@ -176,7 +176,7 @@ namespace NiVE3.Property.Interaction
                 return;
             }
 
-            if (!IsMoved && Vector2d.Distance(FirstMousePositionInPreview, mousePositionInPreview) < MoveStartThreshold)
+            if (!IsMoved && Vector2d.Distance(FirstMousePositionInPreview, mousePositionInPreview * previewImageScale) < MoveStartThreshold)
             {
                 return;
             }
