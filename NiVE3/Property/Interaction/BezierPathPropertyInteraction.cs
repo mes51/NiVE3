@@ -585,7 +585,7 @@ namespace NiVE3.Property.Interaction
                 }
                 else
                 {
-                    if (SelectedPointIndices.Contains(BeginPointIndex) && LastClickPointIndexForDoubleClick == BeginPointIndex && (DateTime.Now - LastClickTime).Milliseconds <= DoubleClickTime)
+                    if (SelectedPointIndices.Contains(BeginPointIndex) && LastClickPointIndexForDoubleClick == BeginPointIndex && (DateTime.Now - LastClickTime).TotalMilliseconds <= DoubleClickTime)
                     {
                         ViewModel.BeginEditCommand.Execute(null);
                         ViewModel.CurrentTimeRawValue = TogglePointIsLinear(path, LastClickPointIndexForDoubleClick);
@@ -659,7 +659,7 @@ namespace NiVE3.Property.Interaction
                     }
                     else
                     {
-                        if (SelectedPointIndices.Contains(i) && LastClickPointIndexForDoubleClick == i && (DateTime.Now - LastClickTime).Milliseconds <= DoubleClickTime)
+                        if (SelectedPointIndices.Contains(i) && LastClickPointIndexForDoubleClick == i && (DateTime.Now - LastClickTime).TotalMilliseconds <= DoubleClickTime)
                         {
                             ViewModel.BeginEditCommand.Execute(null);
                             ViewModel.CurrentTimeRawValue = TogglePointIsLinear(path, LastClickPointIndexForDoubleClick);
