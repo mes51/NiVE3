@@ -31,6 +31,7 @@
         Closing="Window_Closing"
         ContentRendered="Window_ContentRendered"
         StateChanged="Window_StateChanged"
+        DataContextChanged="Window_DataContextChanged"
         Height="1000" Width="1800"
         KeyboardNavigation.ControlTabNavigation="None"
         a:ShortcutKeyBindingProperty.InputBinding="True"
@@ -356,6 +357,8 @@
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Tool}">
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_OpenSetting}" Command="{Binding OpenSettingCommand}"/>
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_OpenShortcutKeySetting}" Command="{Binding OpenShortcutKeySettingCommand}"/>
+                    <Separator />
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_ResetWindowLayout}" Command="{Binding ResetWindowLayoutCommand}"/>
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Help}">
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Help_About}" Command="{Binding OpenAboutCommand}"/>

@@ -122,6 +122,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ショートカットキー設定(_S)...")]
         public static readonly string MainWindow_MenuItem_Tool_OpenShortcutKeySetting = nameof(MainWindow_MenuItem_Tool_OpenShortcutKeySetting);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("ウインドウレイアウトをリセット(_L)...")]
+        public static readonly string MainWindow_MenuItem_Tool_ResetWindowLayout = nameof(MainWindow_MenuItem_Tool_ResetWindowLayout);
+
         [ShowInMarkup, LanguageKey, DefaultValue("NicoVisualEffectsについて(_A)...")]
         public static readonly string MainWindow_MenuItem_Help_About = nameof(MainWindow_MenuItem_Help_About);
 

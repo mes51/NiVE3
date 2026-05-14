@@ -63,6 +63,8 @@ namespace NiVE3.ViewModel
 
         public bool IsForceClosing { get; set; }
 
+        public string InitialLayout { get; set; } = "";
+
         public object[] ViewModels => [..MainRegion.Views];
 
         public object[] SingletonViewModels => MainRegion.Views.OfType<SingletonePaneViewModelBase>().ToArray();
@@ -98,6 +100,8 @@ namespace NiVE3.ViewModel
         [ShortcutGesture(nameof(ShortcutKeySetting.NewCompositionGesture))]
         public ICommand NewCompositionCommand { get; }
 
+        public ICommand ResetWindowLayoutCommand { get; }
+
         public ICommand RemoveViewModelCommand { get; }
 
         public ICommand SaveProjectBeforeCloseCommand { get; }
@@ -105,6 +109,8 @@ namespace NiVE3.ViewModel
         public ICommand StopRenderingBeforeCloseCommand { get; }
 
         public ICommand AddEffectCommand { get; }
+
+        public event EventHandler? ResetWindowLayoutRequest;
 
         ProjectModel ProjectModel { get; }
 
@@ -297,6 +303,11 @@ namespace NiVE3.ViewModel
                         toneMapperSettingData
                     );
                 }
+            });
+
+            ResetWindowLayoutCommand = new DelegateCommand(() =>
+            {
+                ResetWindowLayoutRequest?.Invoke(this, EventArgs.Empty);
             });
 
             RemoveViewModelCommand = new DelegateCommand<BindableBase>(MainRegion.Remove);

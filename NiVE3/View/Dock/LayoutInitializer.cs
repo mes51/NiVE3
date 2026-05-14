@@ -91,7 +91,7 @@ namespace NiVE3.View.Dock
             return new LayoutInitializer();
         }
 
-        LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location, double size)
+        static LayoutAnchorablePane CreateAnchorablePane(LayoutRoot layout, PaneLocation location, double size)
         {
             var parent = (LayoutAnchorablePaneGroup)layout.Manager.FindName(GetPaneName(location)) ?? CreatePaneGroup(layout, location);
             var pane = new LayoutAnchorablePane

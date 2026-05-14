@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using AvalonDock;
 using AvalonDock.Layout;
 using AvalonDock.Layout.Serialization;
 using NiVE3.Config;
@@ -40,6 +41,72 @@ namespace NiVE3.Windows
         bool IsLoadingLayout {  get; set; }
 
         void SaveLayout()
+        {
+            var serializedLayoutXml = SerializeLayout();
+
+            if (WindowState == WindowState.Maximized)
+            {
+                WindowLayoutSetting.Setting.Location = OriginalLocation;
+                WindowLayoutSetting.Setting.Size = OriginalSize;
+            }
+            else
+            {
+                WindowLayoutSetting.Setting.Location = new Point(Left, Top);
+                WindowLayoutSetting.Setting.Size = new Size(Width, Height);
+            }
+            WindowLayoutSetting.Setting.WindowState = WindowState;
+            WindowLayoutSetting.Setting.DockingLayout = serializedLayoutXml;
+            WindowLayoutSetting.Setting.Save();
+        }
+
+        void LoadLayout()
+        {
+            IsLoadingLayout = true;
+
+            Left = WindowLayoutSetting.Setting.Location.X;
+            Top = WindowLayoutSetting.Setting.Location.Y;
+            Width = WindowLayoutSetting.Setting.Size.Width;
+            Height = WindowLayoutSetting.Setting.Size.Height;
+            if (WindowLayoutSetting.Setting.WindowState == WindowState.Maximized)
+            {
+                OriginalLocation = WindowLayoutSetting.Setting.Location;
+                OriginalSize = WindowLayoutSetting.Setting.Size;
+            }
+            WindowState = WindowLayoutSetting.Setting.WindowState;
+
+            if (!string.IsNullOrEmpty(WindowLayoutSetting.Setting.DockingLayout))
+            {
+                RestoreDockingWindowLayout(WindowLayoutSetting.Setting.DockingLayout);
+            }
+
+            IsLoadingLayout = false;
+        }
+
+        void RestoreDockingWindowLayout(string layout)
+        {
+            try
+            {
+                using var reader = new StringReader(layout);
+                var serializer = new XmlLayoutSerializer(Manager);
+                // NOTE: レイアウトのデシリアライズ時にAnchorableやDocumentを再生成され、LayoutInitializerで設定したイベントハンドラが消えるので再設定する
+                //       また、Documentは起動時には存在しないため、レイアウト復元時にはパネル自体表示しないようにする
+                serializer.LayoutSerializationCallback += (sender, e) =>
+                {
+                    if (e.Model is LayoutDocument)
+                    {
+                        e.Cancel = true;
+                    }
+                    else if (e.Content is not SingletonePaneViewModelBase)
+                    {
+                        LayoutInitializer.BindClosed(() => DataContext as MainWindowViewModel, e.Model);
+                    }
+                };
+                serializer.Deserialize(reader);
+            }
+            catch { }
+        }
+
+        string SerializeLayout()
         {
             var serializer = new XmlLayoutSerializer(Manager);
             using var writer = new StringWriter();
@@ -75,61 +142,7 @@ namespace NiVE3.Windows
                 serializedLayoutXml = editedWriter.ToString();
             }
 
-            if (WindowState == WindowState.Maximized)
-            {
-                WindowLayoutSetting.Setting.Location = OriginalLocation;
-                WindowLayoutSetting.Setting.Size = OriginalSize;
-            }
-            else
-            {
-                WindowLayoutSetting.Setting.Location = new Point(Left, Top);
-                WindowLayoutSetting.Setting.Size = new Size(Width, Height);
-            }
-            WindowLayoutSetting.Setting.WindowState = WindowState;
-            WindowLayoutSetting.Setting.DockingLayout = serializedLayoutXml;
-            WindowLayoutSetting.Setting.Save();
-        }
-
-        void LoadLayout()
-        {
-            IsLoadingLayout = true;
-
-            Left = WindowLayoutSetting.Setting.Location.X;
-            Top = WindowLayoutSetting.Setting.Location.Y;
-            Width = WindowLayoutSetting.Setting.Size.Width;
-            Height = WindowLayoutSetting.Setting.Size.Height;
-            if (WindowLayoutSetting.Setting.WindowState == WindowState.Maximized)
-            {
-                OriginalLocation = WindowLayoutSetting.Setting.Location;
-                OriginalSize = WindowLayoutSetting.Setting.Size;
-            }
-            WindowState = WindowLayoutSetting.Setting.WindowState;
-
-            if (!string.IsNullOrEmpty(WindowLayoutSetting.Setting.DockingLayout))
-            {
-                try
-                {
-                    using var reader = new StringReader(WindowLayoutSetting.Setting.DockingLayout);
-                    var serializer = new XmlLayoutSerializer(Manager);
-                    // NOTE: レイアウトのデシリアライズ時にAnchorableやDocumentを再生成され、LayoutInitializerで設定したイベントハンドラが消えるので再設定する
-                    //       また、Documentは起動時には存在しないため、レイアウト復元時にはパネル自体表示しないようにする
-                    serializer.LayoutSerializationCallback += (sender, e) =>
-                    {
-                        if (e.Model is LayoutDocument)
-                        {
-                            e.Cancel = true;
-                        }
-                        else if (e.Content is not SingletonePaneViewModelBase)
-                        {
-                            LayoutInitializer.BindClosed(() => DataContext as MainWindowViewModel, e.Model);
-                        }
-                    };
-                    serializer.Deserialize(reader);
-                }
-                catch { }
-            }
-
-            IsLoadingLayout = false;
+            return serializedLayoutXml;
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -172,7 +185,35 @@ namespace NiVE3.Windows
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                viewModel.InitialLayout = SerializeLayout();
+            }
             LoadLayout();
+        }
+
+        private void Window_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is MainWindowViewModel oldViewModel)
+            {
+                oldViewModel.ResetWindowLayoutRequest -= ViewModel_ResetWindowLayoutRequest;
+            }
+            if (e.NewValue is MainWindowViewModel newViewModel)
+            {
+                newViewModel.ResetWindowLayoutRequest += ViewModel_ResetWindowLayoutRequest;
+            }
+        }
+
+        private void ViewModel_ResetWindowLayoutRequest(object? sender, EventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel)
+            {
+                IsLoadingLayout = true;
+
+                RestoreDockingWindowLayout(viewModel.InitialLayout);
+
+                IsLoadingLayout = false;
+            }
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
