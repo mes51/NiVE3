@@ -83,6 +83,38 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="BorderedLargeIconButton" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" />
+        <Setter Property="BorderBrush" Value="{ugm:AppearanceResource ResourceKey=TextBrush, ReturnDynamicResource=True}" />
+
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{ugm:AppearanceResource ResourceKey=DisableTextBrush, ReturnDynamicResource=True}" />
+            </Trigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <Setter Property="BorderThickness" Value="1" />
+                <!--
+                <Setter Property="BorderBrush" Value="{DynamicResource ResourceKey=MouseOverBorderBrush}" />
+                -->
+            </MultiTrigger>
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsPressed" Value="True" />
+                    <Condition Property="IsEnabled" Value="True" />
+                </MultiTrigger.Conditions>
+                <!--
+                <Setter Property="Background" Value="{DynamicResource ResourceKey=IconButtonPressedBackgroundFill}" />
+                -->
+            </MultiTrigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="IconCheckBoxBase" TargetType="{x:Type CheckBox}">
         <Setter Property="Width" Value="24"/>
         <Setter Property="Height" Value="24"/>
@@ -602,7 +634,7 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="PreviewCaptureSnapShotButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+    <Style x:Key="PreviewCaptureSnapShotButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BorderedLargeIconButton}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
 
@@ -610,14 +642,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
-                        <Image Source="{StaticResource ShowSnapShot}" Style="{StaticResource IconImageBase}"/>
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=Camera, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="PreviewShowSnapShotButton" TargetType="{x:Type Button}" BasedOn="{StaticResource LargeIconButton}">
+    <Style x:Key="PreviewShowSnapShotButton" TargetType="{x:Type Button}" BasedOn="{StaticResource BorderedLargeIconButton}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         
