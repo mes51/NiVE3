@@ -93,6 +93,12 @@ namespace NiVE3.Audio
                 return 0;
             }
 
+            if (Position < 0 && -Position < count)
+            {
+                Position += count;
+                return count;
+            }
+
             buffer.AsSpan(offset, count).Clear();
 
             var requestFrameCount = count / sizeof(float) / Const.AudioChannelCount;
@@ -101,7 +107,8 @@ namespace NiVE3.Audio
             var positionStart = Position;
             if (resamplerNeeded > 0)
             {
-                var bufferFilledCount = 0;
+                var bufferFilledCount = -Math.Min(Position, 0);
+                Position = Math.Max(Position, 0);
                 while (bufferFilledCount < resamplerNeeded)
                 {
                     var copyCount = Math.Min(resamplerNeeded - bufferFilledCount, LoopEnd - Position);
@@ -127,7 +134,8 @@ namespace NiVE3.Audio
             else
             {
                 var floatBuffer = MemoryMarshal.Cast<byte, float>(buffer.AsSpan(offset, count));
-                var filledCount = 0;
+                var filledCount = -Math.Min(Position, 0);
+                Position = Math.Max(Position, 0);
                 while (filledCount < floatBuffer.Length)
                 {
                     var copyCount = Math.Min(floatBuffer.Length - filledCount, LoopEnd - Position);
