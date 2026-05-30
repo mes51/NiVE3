@@ -50,7 +50,7 @@
 	</Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\Plugins\&quot;&#xD;&#xA;copy &quot;$(TargetDir)\*.*&quot; &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\Plugins\&quot;" />
+    <Exec Command="mkdir &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\Plugins\&quot;&#xD;&#xA;for %25%25F in (&quot;$(TargetDir)*.*&quot;) do ^&#xD;&#xA;if not exist &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\%25%25~nxF&quot; (copy &quot;%25%25F&quot; &quot;$(ProjectDir)..\NiVE3\bin\$(ConfigurationName)\net10.0-windows7.0\Plugins\&quot;)" />
   </Target>
 
 </Project>
