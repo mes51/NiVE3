@@ -9,7 +9,7 @@
 		<IsRoslynComponent>true</IsRoslynComponent>
 		<AnalyzerLanguage>cs</AnalyzerLanguage>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-		<Copyright>Copyright © mes 2022 - 2025</Copyright>
+		<Copyright>Copyright © mes 2022 - 2026</Copyright>
 		<Authors>mes</Authors>
 		<AssemblyVersion>3.0.0.0</AssemblyVersion>
 	</PropertyGroup>

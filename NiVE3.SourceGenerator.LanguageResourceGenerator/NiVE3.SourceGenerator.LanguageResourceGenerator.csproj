@@ -10,7 +10,7 @@
     <AnalyzerLanguage>cs</AnalyzerLanguage>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <Authors>mes</Authors>
-    <Copyright>Copyright © mes 2022 - 2025</Copyright>
+    <Copyright>Copyright © mes 2022 - 2026</Copyright>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
   </PropertyGroup>
 

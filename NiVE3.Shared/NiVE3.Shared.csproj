@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 	<UseWPF>true</UseWPF>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
-    <Copyright>Copyright © mes 2022 - 2025</Copyright>
+    <Copyright>Copyright © mes 2022 - 2026</Copyright>
     <Authors>mes</Authors>
   </PropertyGroup>
 

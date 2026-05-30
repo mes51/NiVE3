@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <Copyright>Copyright © mes 2022 - 2026</Copyright>
+    <Authors>mes</Authors>
   </PropertyGroup>
 
   <ItemGroup>
