@@ -8,27 +8,36 @@
              xmlns:pr="http://prismlibrary.com/"
              mc:Ignorable="d" 
              pr:ViewModelLocator.AutoWireViewModel="True"
-             d:DesignWidth="350"
-             d:DesignHeight="150">
+             d:DesignWidth="500"
+             d:DesignHeight="357">
     <pr:Dialog.WindowStyle>
         <Style TargetType="{x:Type Window}">
             <Setter Property="pr:Dialog.WindowStartupLocation" Value="CenterOwner"/>
             <Setter Property="ResizeMode" Value="NoResize"/>
-            <Setter Property="Width" Value="350"/>
-            <Setter Property="Height" Value="150"/>
+            <Setter Property="Width" Value="500"/>
+            <Setter Property="Height" Value="395"/> <!-- DesignHeight + 38 -->
             <Setter Property="ShowInTaskbar" Value="False"/>
         </Style>
     </pr:Dialog.WindowStyle>
-    <Grid Margin="10">
-        <StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="NicoVisualEffects ver"/>
-                <TextBlock Text="{Binding VersionString}" Margin="5,0,0,0"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Image Grid.Row="0" Source="/Resources/Logo.png" Height="237"/>
+
+        <Grid Grid.Row="1" Margin="10">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="NicoVisualEffects ver"/>
+                    <TextBlock Text="{Binding VersionString}" Margin="5,0,0,0"/>
+                </StackPanel>
+
+                <TextBlock Text="ライセンスは LICENCE.txt、および License ディレクトリをご確認ください" Margin="0,20,0,0"/>
             </StackPanel>
 
-            <TextBlock Text="本バージョンの再配布を禁止します。" Margin="0,20,0,0"/>
-        </StackPanel>
-
-        <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{Binding CloseCommand}"/>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Command="{Binding CloseCommand}"/>
+        </Grid>
     </Grid>
 </UserControl>

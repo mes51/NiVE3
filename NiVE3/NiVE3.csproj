@@ -19,10 +19,12 @@
     <None Remove="Resources\ExpressionSyntax.xshd" />
     <None Remove="Resources\Font Awesome 6 Free-Solid-900.otf" />
     <None Remove="Resources\Hand.png" />
+    <None Remove="Resources\Logo.png" />
     <None Remove="Resources\Rotate.png" />
     <None Remove="Resources\Scale.png" />
     <None Remove="Resources\ShowSnapShot.png" />
     <None Remove="Resources\Sono-Regular.otf" />
+    <None Remove="Resources\Splash.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,6 +81,7 @@
     <Resource Include="Resources\Font Awesome 6 Free-Solid-900.otf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\Logo.png" />
     <Resource Include="Resources\Rotate.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -89,6 +92,10 @@
     <Resource Include="Resources\Sono-Regular.otf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <SplashScreen Include="Resources\Splash.png" />
   </ItemGroup>
 
 </Project>
