@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 質問
+    url: https://github.com/mes51/NiVE3/discussions/categories/q-a
+    about: 機能や使用方法の質問はこちら
+  - name: バグ報告
+    url: https://github.com/mes51/NiVE3/discussions/categories/bug-report
+    about: バグ報告はこちら
