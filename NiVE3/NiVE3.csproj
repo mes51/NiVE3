@@ -11,6 +11,7 @@
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
     <Product>NicoVisualEffects 3</Product>
     <Copyright>Copyright © mes 2022 - 2026</Copyright>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +26,10 @@
     <None Remove="Resources\ShowSnapShot.png" />
     <None Remove="Resources\Sono-Regular.otf" />
     <None Remove="Resources\Splash.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
