@@ -382,9 +382,9 @@
                     <ComboBox SelectedValue="{Binding PreviewColorChannel}" ItemsSource="{mk:EnumValues {x:Type vm:PreviewColorChannel}}" Style="{StaticResource PreviewColorChannelComboBox}"/>
                     <CheckBox x:Name="ShowCheckerboradCheckBox" Content="チェッカーボード" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center"/>
 
-                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource HandRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Hand}}"/>
-                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource CursorRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Select}}"/>
-                    <pr:MultiItemRadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" SelectedItem="{Binding ToolType}" ItemSelectMenuItemTemplate="{StaticResource ToolButtonItemSelectMenuItem}">
+                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource HandRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Hand}}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_HandTool}"/>
+                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource CursorRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Select}}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_SelectTool}"/>
+                    <pr:MultiItemRadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" SelectedItem="{Binding ToolType}" ItemSelectMenuItemTemplate="{StaticResource ToolButtonItemSelectMenuItem}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_RotateTool}">
                         <!-- 代入順序の関係(先にコレクションを代入する)のため子要素として書く -->
                         <pr:MultiItemRadioButton.ItemsSource>
                             <x:Array Type="vm:ToolType">
@@ -448,8 +448,8 @@
                             </Style>
                         </pr:MultiItemRadioButton.Style>
                     </pr:MultiItemRadioButton>
-                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource ArrowsUpDownLeftRightRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Scale}}"/>
-                    <pr:MultiItemRadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" SelectedItem="{Binding ToolType}" ItemSelectMenuItemTemplate="{StaticResource ToolButtonItemSelectMenuItem}">
+                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource ArrowsUpDownLeftRightRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Scale}}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_ScaleTool}"/>
+                    <pr:MultiItemRadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" SelectedItem="{Binding ToolType}" ItemSelectMenuItemTemplate="{StaticResource ToolButtonItemSelectMenuItem}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_CameraTool}">
                         <!-- 代入順序の関係(先にコレクションを代入する)のため子要素として書く -->
                         <pr:MultiItemRadioButton.ItemsSource>
                             <x:Array Type="vm:ToolType">
@@ -501,8 +501,8 @@
                             </Style>
                         </pr:MultiItemRadioButton.Style>
                     </pr:MultiItemRadioButton>
-                    <Button Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewCaptureSnapShotButton}" Command="{Binding CaptureSnapShotCommand}"/>
-                    <Button x:Name="ShowSnapShotButton" Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewShowSnapShotButton}"/>
+                    <Button Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewCaptureSnapShotButton}" Command="{Binding CaptureSnapShotCommand}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_CaptureSnapShot}"/>
+                    <Button x:Name="ShowSnapShotButton" Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewShowSnapShotButton}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_ShowSnapShot}"/>
                     <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=ShowSnapShotButton, Path=IsPressed}" Sender="{Binding IsShowSnapShotImage}"/>
                     <Rectangle Margin="{StaticResource LeftToolBarMargin}" Width="16" Height="16" VerticalAlignment="Center" Fill="{Binding ElementName=Root, Path=PointedPixelColorBrush}"/>
                     <TextBlock Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Text="{Binding ElementName=Root, Path=PointedPixelInfoText}"/>

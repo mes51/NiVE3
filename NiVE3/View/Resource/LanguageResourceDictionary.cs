@@ -203,6 +203,27 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("1/{0}画質")]
         public static readonly string PreviewView_DownScaleRateFormat = nameof(PreviewView_DownScaleRateFormat);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("手のひらツール")]
+        public static readonly string PreviewView_ToolTip_HandTool = nameof(PreviewView_ToolTip_HandTool);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("選択ツール")]
+        public static readonly string PreviewView_ToolTip_SelectTool = nameof(PreviewView_ToolTip_SelectTool);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("回転ツール (長押しで切り替えメニュー表示)")]
+        public static readonly string PreviewView_ToolTip_RotateTool = nameof(PreviewView_ToolTip_RotateTool);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("拡大縮小ツール")]
+        public static readonly string PreviewView_ToolTip_ScaleTool = nameof(PreviewView_ToolTip_ScaleTool);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("カメラツール (長押しで切り替えメニュー表示)")]
+        public static readonly string PreviewView_ToolTip_CameraTool = nameof(PreviewView_ToolTip_CameraTool);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("スナップショット")]
+        public static readonly string PreviewView_ToolTip_CaptureSnapShot = nameof(PreviewView_ToolTip_CaptureSnapShot);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("スナップショットを表示")]
+        public static readonly string PreviewView_ToolTip_ShowSnapShot = nameof(PreviewView_ToolTip_ShowSnapShot);
+
         [ShowInMarkup, LanguageKey, DefaultValue("タイムライン")]
         public static readonly string TimelineView_Title = nameof(TimelineView_Title);
 
@@ -527,7 +548,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("シャイの有効/無効")]
         public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableShy = nameof(Timeline_ToolTip_LayerSwitch_IsEnableShy);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("未実装")]
+        [ShowInMarkup, LanguageKey, DefaultValue("レイヤーの展開")]
         public static readonly string Timeline_ToolTip_LayerSwitch_IsEnableExplode = nameof(Timeline_ToolTip_LayerSwitch_IsEnableExplode);
 
         [ShowInMarkup, LanguageKey, DefaultValue("画像の補間品質")]
