@@ -277,7 +277,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Rectangle Width="16" Height="16" Margin="5,0" VerticalAlignment="Center" HorizontalAlignment="Center" Stroke="Black"/>
+            <Image Width="16" Height="16" Margin="5,0" VerticalAlignment="Center" HorizontalAlignment="Center" Source="/Resources/WindowIcon.png"/>
 
             <Menu Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left" Height="28" Padding="0,5" WindowChrome.IsHitTestVisibleInChrome="True">
                 <Menu.ItemsPanel>

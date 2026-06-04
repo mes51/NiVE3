@@ -26,6 +26,7 @@
     <None Remove="Resources\ShowSnapShot.png" />
     <None Remove="Resources\Sono-Regular.otf" />
     <None Remove="Resources\Splash.png" />
+    <None Remove="Resources\WindowIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -97,6 +98,7 @@
     <Resource Include="Resources\Sono-Regular.otf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\WindowIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
