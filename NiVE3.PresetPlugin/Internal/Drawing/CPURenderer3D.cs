@@ -402,7 +402,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                             continue;
                         }
 
-                        var tw = Vector128.Sum(w * e);
+                        var we = w * e;
+                        var tw = Vector128.Sum(we);
                         var tx = Vector128.Sum(u * e / tw) * textureWidth;
                         var ty = Vector128.Sum(v * e / tw) * textureHeight;
 
@@ -417,7 +418,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                         if (useLight)
                         {
                             var alpha = color.W;
-                            var position = CalcBarycentricCoord(vvX, vvY, vvZ, e);
+                            var position = CalcBarycentricCoord(vvX, vvY, vvZ, we / tw);
                             var n = isFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
                             var shadowProjectionPos = Vector4.Zero;
                             if (hasShadow)

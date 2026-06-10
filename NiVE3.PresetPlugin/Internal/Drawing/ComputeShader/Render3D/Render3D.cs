@@ -234,10 +234,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
 #pragma warning disable IDE0017 // NOTE: ComputeSharpのSourceGeneratorでは非対応
                 var result = new GPURasterizedPixel();
-#pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
                 result.Color = color * texturing.MultiplyColor;
-                result.E = e;
+                result.E = (e * texturing.W) / tw;
                 result.TriangleIndex = ti + 1;
+#pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
                 renderImage[p] = result;
 
                 break;
@@ -1267,11 +1267,11 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 
 #pragma warning disable IDE0017 // NOTE: ComputeSharpでは非対応
                 var sp = new GPUShadowPixel();
-#pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
                 sp.Color = shadowColor.XYZ;
                 sp.Depth = Hlsl.Clamp(ShaderUtil.DepthRound(d.Z), 0.0F, 1.0F);
                 sp.TriangleId = triangle.Id;
                 sp.NextIndex = oldBufferIndex;
+#pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
                 shadowBuffer[bufferIndex] = sp;
 
                 break;

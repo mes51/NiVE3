@@ -66,7 +66,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 return;
             }
 
-            var tw = FloatNUtil.Sum(triangle.W * e);
+            var we = triangle.W * e;
+            var tw = FloatNUtil.Sum(we);
             var tx = FloatNUtil.Sum((triangle.U * e) / tw) * textureWidth;
             var ty = FloatNUtil.Sum((triangle.V * e) / tw) * textureHeight;
 
@@ -80,7 +81,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             if (useLight)
             {
                 var alpha = color.W;
-                var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, e);
+                var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, we / tw);
                 var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
 
                 if (triangle.IsAcceptLight)
