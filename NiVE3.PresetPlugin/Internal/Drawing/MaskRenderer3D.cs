@@ -295,6 +295,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                 var diffuse = Vector4.Zero;
                                 var specular = Vector4.Zero;
                                 var ambient = Vector4.Zero;
+                                var v1 = new Vector3(vvX.GetElement(0), vvY.GetElement(0), vvZ.GetElement(0));
 
                                 for (var i = 0; i < pointLights.Length; i++)
                                 {
@@ -304,7 +305,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var light = Vector3.Normalize(lightDiff);
                                     var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
-                                    var diffuseFactor = Vector3.Dot(light, n);
+                                    var diffuseFactor = Vector3.Dot(v1 - l.Position.AsVector3(), n) / lightDiff.Length();
                                     var isBack = diffuseFactor < 0.0F;
                                     if (isBack)
                                     {
@@ -328,7 +329,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                     var lightColor = l.Color;
                                     var lightDiff = (position - l.Position).AsVector3();
                                     var light = Vector3.Normalize(lightDiff);
-                                    var spotCone = MathF.Acos(Vector3.Dot(l.Direction, light));
+                                    var spotCone = MathF.Acos(Math.Clamp(Vector3.Dot(l.Direction, light), -1.0F, 1.0F));
 
                                     if (spotCone <= l.OuterCone)
                                     {
@@ -339,7 +340,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing
                                         }
 
                                         var falloff = CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                                        var diffuseFactor = Vector3.Dot(light, n);
+                                        var diffuseFactor = Vector3.Dot(v1 - l.Position.AsVector3(), n) / lightDiff.Length();
                                         var isBack = diffuseFactor < 0.0F;
                                         if (isBack)
                                         {

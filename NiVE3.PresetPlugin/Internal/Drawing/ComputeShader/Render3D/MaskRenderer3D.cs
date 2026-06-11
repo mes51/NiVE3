@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
@@ -83,6 +84,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 var alpha = color.W;
                 var position = ShaderUtil.CalcBarycentricCoord(triangle.VVX, triangle.VVY, triangle.VVZ, we / tw);
                 var n = triangle.IsFrontFace ? -triangle.FloatNormal : triangle.FloatNormal;
+                var v1 = new Float3(triangle.VVX.X, triangle.VVY.X, triangle.VVZ.X);
 
                 if (triangle.IsAcceptLight)
                 {
@@ -98,7 +100,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         var light = Hlsl.Normalize(lightDiff);
                         var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
 
-                        var diffuseFactor = Hlsl.Dot(light, n);
+                        var diffuseFactor = Hlsl.Dot(v1 - l.Position.XYZ, n) / Hlsl.Length(lightDiff);
                         var isBack = diffuseFactor < 0.0F;
                         if (isBack)
                         {
@@ -122,7 +124,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                         var lightColor = l.Color;
                         var lightDiff = (position - l.Position).XYZ;
                         var light = Hlsl.Normalize(lightDiff);
-                        var spotCone = Hlsl.Acos(Hlsl.Dot(l.Direction, light));
+                        var spotCone = Hlsl.Acos(Hlsl.Clamp(Hlsl.Dot(l.Direction, light), -1.0F, 1.0F));
 
                         if (spotCone <= l.OuterCone)
                         {
@@ -133,7 +135,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                             }
 
                             var falloff = ShaderUtil.CalcFalloff(lightDiff, l.FalloffType, l.FalloffStart, l.FalloffLength);
-                            var diffuseFactor = Hlsl.Dot(light, n);
+                            var diffuseFactor = Hlsl.Dot(v1 - l.Position.XYZ, n) / Hlsl.Length(lightDiff);
                             var isBack = diffuseFactor < 0.0F;
                             if (isBack)
                             {
