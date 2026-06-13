@@ -40,7 +40,7 @@ namespace NiVE3.ViewModel.Dialog
 
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            VersionString = typeof(AboutViewModel).Assembly.GetName().Version?.ToString() + " α1";
+            VersionString = typeof(AboutViewModel).Assembly.GetName().Version?.ToString() + " α2";
         }
     }
 }
