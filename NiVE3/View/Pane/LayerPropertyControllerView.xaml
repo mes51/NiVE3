@@ -35,6 +35,7 @@
         <ucv:BooleanInvertConverter x:Key="BooleanInvertConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter" UseAndCompare="True"/>
         <cv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" UseAndCompare="True"/>
+        <cv:EnumToVisibilityConverter x:Key="HiddenEnumToVisibilityConverter" UseAndCompare="True" FalseIsHidden="True"/>
         <cv:OffsetGridLengthConverter x:Key="GridLengthConverter"/>
         <cv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 
@@ -274,7 +275,7 @@
                                                              Width="15"
                                                              Height="15"
                                                              Margin="1,0,0,0"
-                                                             Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                                             Visibility="{Binding SourceType, Converter={StaticResource HiddenEnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
                                                              Command="{Binding ChangeInterpolationQualityCommand}">
                                     <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level1}" Icon="{StaticResource ImageInterpolationLevel1Icon}"/>
                                     <pt:MultipleStateLayerSwitchItem State="{x:Static pi:ImageInterpolationQuality.Level2}" Icon="{StaticResource ImageInterpolationLevel2Icon}"/>
@@ -290,21 +291,21 @@
                                 <CheckBox Content="{StaticResource FrameBlendIcon}"
                                           Style="{StaticResource LayerSwitch}"
                                           IsChecked="{Binding IsEnableFrameBlend, Mode=OneWay}"
-                                          Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource HiddenEnumToVisibilityConverter}, ConverterParameter={x:Static pi:SourceType.Video}}"
                                           Command="{Binding ChangeLayerSwitchCommand}"
                                           CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableFrameBlend}"/>
 
                                 <CheckBox Content="{StaticResource MotionBlurIcon}"
                                           Style="{StaticResource LayerSwitch}"
                                           IsChecked="{Binding IsEnableMotionBlur, Mode=OneWay}"
-                                          Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource HiddenEnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
                                           Command="{Binding ChangeLayerSwitchCommand}"
                                           CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableMotionBlur}"/>
 
                                 <CheckBox Content="{gm:FontawesomeResource ResourceKey=CircleHalfStroke, ReturnDynamicResource=True}"
                                           Style="{StaticResource LayerSwitch}"
                                           IsChecked="{Binding IsEnableAdjustmentLayer, Mode=OneWay}"
-                                          Visibility="{Binding SourceType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
+                                          Visibility="{Binding SourceType, Converter={StaticResource HiddenEnumToVisibilityConverter}, ConverterParameter={x:Static local:LayerPropertyControllerView.CompositionDisplayableSourceType}}"
                                           Command="{Binding ChangeLayerSwitchCommand}"
                                           CommandParameter="{mk:NameOf Type={x:Type vm:LayerViewModel}, Member=IsEnableAdjustmentLayer}"/>
 
