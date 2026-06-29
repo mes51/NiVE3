@@ -560,21 +560,27 @@ namespace NiVE3.View.Part
 
         private void KeyFrameCollectionView_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            var pos = e.GetPosition(this);
+            var timeOffset = SourceStartPoint - RangeStart;
+            var x = pos.X - UIParameters.TimelineRangeThumbWidth;
+            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
+            var isValidPixelPerTime = pixelPerTime >= 0.0 && !double.IsNaN(pixelPerTime) && !double.IsInfinity(pixelPerTime);
+            var clickedKeyFrame = isValidPixelPerTime ? KeyFrames.LastOrDefault(k => Math.Abs((double)(k.Time + timeOffset) * pixelPerTime - x) < KeyFrameIconSize * 0.5) : null;
+
             if (e.LeftButton != MouseButtonState.Pressed)
             {
+                e.Handled |= clickedKeyFrame != null;
                 return;
             }
 
             e.Handled = true;
-            var pixelPerTime = (ActualWidth - UIParameters.TimelineRangeThumbTotalWidth) / (double)Range;
-            if (pixelPerTime < 0 || double.IsNaN(pixelPerTime) || double.IsInfinity(pixelPerTime) || KeyFrames.Count < 1)
+            if (!isValidPixelPerTime || KeyFrames.Count < 1)
             {
                 return;
             }
 
             var isSelectRange = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             var isSelectMultiple = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
-            var pos = e.GetPosition(this);
             var hitHeight = (ActualHeight - KeyFrameIconSize) * 0.5;
             if (pos.Y < hitHeight || (pos.Y - hitHeight) > KeyFrameIconSize)
             {
@@ -587,9 +593,6 @@ namespace NiVE3.View.Part
                 return;
             }
 
-            var timeOffset = SourceStartPoint - RangeStart;
-            var x = pos.X - UIParameters.TimelineRangeThumbWidth;
-            var clickedKeyFrame = KeyFrames.LastOrDefault(k => Math.Abs((double)(k.Time + timeOffset) * pixelPerTime - x) < KeyFrameIconSize * 0.5);
             if (clickedKeyFrame != null)
             {
                 if (e.ClickCount == 2)
