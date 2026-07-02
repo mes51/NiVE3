@@ -719,7 +719,7 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("サイズ")]
         public static readonly string TextPropertyView_Property_Size = nameof(TextPropertyView_Property_Size);
 
-        [ShowInMarkup, LanguageKey, DefaultValue("行送り")]
+        [ShowInMarkup, LanguageKey, DefaultValue("行送り(未実装)")]
         public static readonly string TextPropertyView_Property_LineHeight = nameof(TextPropertyView_Property_LineHeight);
 
         [ShowInMarkup, LanguageKey, DefaultValue("垂直比率")]
