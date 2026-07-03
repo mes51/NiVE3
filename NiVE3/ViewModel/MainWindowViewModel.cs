@@ -27,6 +27,7 @@ using NiVE3.Plugin.ValueObject;
 using NiVE3.Windows;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.View.Dialog.CustomWindow;
+using System.Diagnostics;
 
 namespace NiVE3.ViewModel
 {
@@ -93,6 +94,8 @@ namespace NiVE3.ViewModel
         public ICommand OpenShortcutKeySettingCommand { get; }
 
         public ICommand OpenAboutCommand { get; }
+
+        public ICommand OpenHelpCommand { get; }
 
         [ShortcutGesture(nameof(ShortcutKeySetting.OpenCommandPaletteGesture))]
         public ICommand OpenCommandPaletteCommand { get; }
@@ -255,6 +258,15 @@ namespace NiVE3.ViewModel
             OpenAboutCommand = new DelegateCommand(() =>
             {
                 DialogService.ShowDialog(nameof(AboutView));
+            });
+
+            OpenHelpCommand = new DelegateCommand(() =>
+            {
+                var startInfo = new ProcessStartInfo("https://help.nive.jp/")
+                {
+                    UseShellExecute = true
+                };
+                Process.Start(startInfo);
             });
 
             OpenCommandPaletteCommand = new DelegateCommand(() =>

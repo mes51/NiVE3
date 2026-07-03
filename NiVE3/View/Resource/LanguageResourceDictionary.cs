@@ -125,6 +125,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("ウインドウレイアウトをリセット(_L)...")]
         public static readonly string MainWindow_MenuItem_Tool_ResetWindowLayout = nameof(MainWindow_MenuItem_Tool_ResetWindowLayout);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("オンラインヘルプ(_H)...")]
+        public static readonly string MainWindow_MenuItem_Help_Help = nameof(MainWindow_MenuItem_Help_Help);
+
         [ShowInMarkup, LanguageKey, DefaultValue("NicoVisualEffectsについて(_A)...")]
         public static readonly string MainWindow_MenuItem_Help_About = nameof(MainWindow_MenuItem_Help_About);
 

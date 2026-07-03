@@ -361,6 +361,8 @@
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Tool_ResetWindowLayout}" Command="{Binding ResetWindowLayoutCommand}"/>
                 </MenuItem>
                 <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_Menu_Help}">
+                    <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Help_Help}" Command="{Binding OpenHelpCommand}"/>
+                    <Separator />
                     <MenuItem Header="{gm:LanguageResource ResourceKey=MainWindow_MenuItem_Help_About}" Command="{Binding OpenAboutCommand}"/>
                 </MenuItem>
             </Menu>
