@@ -1572,6 +1572,20 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("スケール")]
         public const string Utility_Histogram_Scale = nameof(Utility_Histogram_Scale);
 
+        // MedianLegacy
+
+        [DefaultValue("メディアン(レガシー)")]
+        public const string Noise_MedianLegacy_Name = nameof(Noise_MedianLegacy_Name);
+
+        [DefaultValue("画像に対し、メディアンフィルタを適用します。高速化のため、近似的な処理を行っています。")]
+        public const string Noise_MedianLegacy_Description = nameof(Noise_MedianLegacy_Description);
+
+        [LanguageKey, DefaultValue("範囲")]
+        public const string Noise_MedianLegacy_Radius = nameof(Noise_MedianLegacy_Radius);
+
+        [LanguageKey, DefaultValue("アルファにも適用する")]
+        public const string Noise_MedianLegacy_ApplyToAlpha = nameof(Noise_MedianLegacy_ApplyToAlpha);
+
         // Median
 
         [DefaultValue("メディアン")]
