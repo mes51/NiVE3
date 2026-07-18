@@ -121,19 +121,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 return;
             }
 
-            using var mediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstVideoStream);
-
-            //const int WidthAlign = 2;
-            //const int HeightAlign = 16;
-            //var height = Format.Height % HeightAlign != 0 ? (Format.Height / HeightAlign + 1) * HeightAlign : Format.Height;
-            //var alignedCorrectedWidth = Format.CorrectedWidth % WidthAlign != 0 ? (Format.CorrectedWidth / WidthAlign + 1) * WidthAlign : Format.CorrectedWidth;
-            //var alignedCorrectedHeight = Format.CorrectedHeight % HeightAlign != 0 ? (Format.CorrectedHeight / HeightAlign + 1) * HeightAlign : Format.CorrectedHeight;
-
-            using var inputMediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstVideoStream);
-
-            inputMediaType.Set(MediaTypeAttributeKeys.AllSamplesIndependent, true);
-            inputMediaType.Set(MediaTypeAttributeKeys.FixedSizeSamples, true);
-            Transform.SetInputType(0, inputMediaType, 0);
+            ConfigureTransformInput();
 
             using var outputMediaType = MediaFactory.MFCreateMediaType();
             outputMediaType.Set(MediaTypeAttributeKeys.MajorType, MediaTypeGuids.Video);
@@ -152,6 +140,25 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
             using var buffer = MediaFactory.MFCreateMemoryBuffer(streamInfo.Size);
             Sample.AddBuffer(buffer);
+        }
+
+        void ConfigureTransformInput()
+        {
+            if (Reader == null || Transform == null)
+            {
+                return;
+            }
+
+            using var inputMediaType = Reader.GetCurrentMediaType(SourceReaderIndex.FirstVideoStream);
+
+            inputMediaType.Set(MediaTypeAttributeKeys.AllSamplesIndependent, true);
+            inputMediaType.Set(MediaTypeAttributeKeys.FixedSizeSamples, true);
+            Transform.SetInputType(0, inputMediaType, 0);
+        }
+
+        protected override void OnCurrentMediaTypeChanged()
+        {
+            ConfigureTransformInput();
         }
 
         public override void Dispose()

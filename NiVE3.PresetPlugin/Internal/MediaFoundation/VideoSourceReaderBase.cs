@@ -126,13 +126,10 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                     break;
                 }
 
-                // TODO: 必要になるタイミングの調査。少なくともGPUアクセラレーションが有効の時はあると×
-                /*
-                if ((flags & (int)SourceReaderFlag.FCurrentmediatypechanged) != 0)
+                if ((flags & SourceReaderFlag.CurrentMediaTypeChanged) != 0)
                 {
-                    Format = FormatInfo.GetVideoFormat(Reader, VideoSourceReaderBase.FirstVideoStreamId);
+                    OnCurrentMediaTypeChanged();
                 }
-                */
 
                 if (sampleTemp == null)
                 {
@@ -173,6 +170,8 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
             buffer.Unlock();
         }
+
+        protected virtual void OnCurrentMediaTypeChanged() { }
 
         public virtual void Dispose()
         {
