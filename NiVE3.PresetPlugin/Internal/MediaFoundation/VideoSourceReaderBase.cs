@@ -117,6 +117,7 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
 
             IMFSample? sample = null;
             var skipCount = 0;
+            var rewindCount = 0;
             while (true)
             {
                 var sampleTemp = Reader.ReadSample(SourceReaderIndex.FirstVideoStream, SourceReaderControlFlag.None, out var _, out var flags, out var _);
@@ -142,7 +143,15 @@ namespace NiVE3.PresetPlugin.Internal.MediaFoundation
                 var timestamp = sampleTemp.SampleTime;
                 if (skipCount < MaxSkipFrame && Math.Abs(longTime - timestamp) > seekTolerance)
                 {
-                    skipCount++;
+                    if (timestamp > longTime)
+                    {
+                        Reader.SetCurrentPosition(Math.Max(longTime - frameDuration * rewindCount, 0L));
+                        rewindCount++;
+                    }
+                    else
+                    {
+                        skipCount++;
+                    }
                     continue;
                 }
 
