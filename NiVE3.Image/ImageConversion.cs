@@ -17,6 +17,10 @@ namespace NiVE3.Image
 
         static readonly Vector<float> MaxBase = new Vector<float>(Enumerable.Repeat(new float[] { 0.0F, 0.0F, 0.0F, 1.0F }, Vector<float>.Count / 4).SelectMany(_ => _).ToArray());
 
+        static readonly Vector<float> RoundPaddingVector = new Vector<float>(ByteToFloat * 0.5F);
+
+        static readonly Vector4 RoundPadding = new Vector4(ByteToFloat * 0.5F);
+
         /// <summary>
         /// 8bpcから32bpcに変換します
         /// </summary>
@@ -101,10 +105,10 @@ namespace NiVE3.Image
                 var stride = Vector<float>.Count; // Vector<float>.Count / 4channel * 4px
                 Parallel.For(0, pixelCount / stride, i =>
                 {
-                    var p1 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4], Vector<float>.Zero), Vector<float>.One) * 255.0F);
-                    var p2 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 1], Vector<float>.Zero), Vector<float>.One) * 255.0F);
-                    var p3 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 2], Vector<float>.Zero), Vector<float>.One) * 255.0F);
-                    var p4 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 3], Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p1 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4] + RoundPaddingVector, Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p2 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 1] + RoundPaddingVector, Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p3 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 2] + RoundPaddingVector, Vector<float>.Zero), Vector<float>.One) * 255.0F);
+                    var p4 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 3] + RoundPaddingVector, Vector<float>.Zero), Vector<float>.One) * 255.0F);
                     var ps1 = Vector.Narrow(p1, p2);
                     var ps2 = Vector.Narrow(p3, p4);
                     vResultData[i] = Vector.Narrow(ps1, ps2);
@@ -155,10 +159,10 @@ namespace NiVE3.Image
                 var stride = Vector<float>.Count; // Vector<float>.Count / 4channel * 4px
                 Parallel.For(0, pixelCount / stride, i =>
                 {
-                    var p1 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4], maxBase), Vector<float>.One) * 255.0F);
-                    var p2 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 1], maxBase), Vector<float>.One) * 255.0F);
-                    var p3 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 2], maxBase), Vector<float>.One) * 255.0F);
-                    var p4 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 3], maxBase), Vector<float>.One) * 255.0F);
+                    var p1 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4] + RoundPaddingVector, maxBase), Vector<float>.One) * 255.0F);
+                    var p2 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 1] + RoundPaddingVector, maxBase), Vector<float>.One) * 255.0F);
+                    var p3 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 2] + RoundPaddingVector, maxBase), Vector<float>.One) * 255.0F);
+                    var p4 = Vector.ConvertToUInt32(Vector.Min(Vector.Max(vPixelData[i * 4 + 3] + RoundPaddingVector, maxBase), Vector<float>.One) * 255.0F);
                     var ps1 = Vector.Narrow(p1, p2);
                     var ps2 = Vector.Narrow(p3, p4);
                     vResultData[i] = Vector.Narrow(ps1, ps2);
@@ -186,7 +190,7 @@ namespace NiVE3.Image
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ToBGRA32(in Vector4 color)
         {
-            var p = Sse41.RoundCurrentDirection(color.AsVector128() * 255.0F);
+            var p = Sse41.RoundCurrentDirection((color + RoundPadding).AsVector128() * 255.0F);
             var p32 = Sse41.Min(Sse41.Max(Sse2.ConvertToVector128Int32(p), Vector128<int>.Zero), Vector128.Create(255));
             var p16 = Sse2.PackSignedSaturate(p32, Vector128<int>.Zero);
             var p8 = Sse2.PackUnsignedSaturate(p16, Vector128<short>.Zero);
