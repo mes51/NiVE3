@@ -31,6 +31,8 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
         const string PropertyEdgeRepeatModeId = nameof(PropertyEdgeRepeatModeId);
 
+        const string PropertyUseFastModeId = nameof(PropertyUseFastModeId);
+
         IAcceleratorObject? AcceleratorObject { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
@@ -44,7 +46,8 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             [
                 new DoubleProperty(PropertyAmountId, LanguageResourceDictionary.ResourceKeys.Blur_GaussianBlur_Amount, 0.0, 0.0, 10000.0, digit: 2),
                 new EnumProperty(PropertyDirectionId, LanguageResourceDictionary.ResourceKeys.Blur_GaussianBlur_Direction, typeof(BlurDirection), typeof(LanguageResourceDictionary), BlurDirection.HorizontalAndVertical, selectBoxWidth: 90.0),
-                new EnumProperty(PropertyEdgeRepeatModeId, LanguageResourceDictionary.ResourceKeys.Blur_GaussianBlur_EdgeRepeatMode, typeof(EdgeRepeatMode), typeof(LanguageResourceDictionary), EdgeRepeatMode.None, selectBoxWidth: 90.0)
+                new EnumProperty(PropertyEdgeRepeatModeId, LanguageResourceDictionary.ResourceKeys.Blur_GaussianBlur_EdgeRepeatMode, typeof(EdgeRepeatMode), typeof(LanguageResourceDictionary), EdgeRepeatMode.None, selectBoxWidth: 90.0),
+                new CheckBoxProperty(PropertyUseFastModeId, LanguageResourceDictionary.ResourceKeys.Blur_GaussianBlur_UseFastMode, true)
             ];
         }
 
@@ -78,27 +81,42 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             var amount = properties.GetValue(PropertyAmountId, layerTime, 0.0);
-            var direction = properties.GetValue(PropertyDirectionId, layerTime, BlurDirection.HorizontalAndVertical);
-            var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
 
             if (amount <= 0.0F)
             {
                 return image;
             }
 
+            var direction = properties.GetValue(PropertyDirectionId, layerTime, BlurDirection.HorizontalAndVertical);
+            var edgeRepeatMode = properties.GetValue(PropertyEdgeRepeatModeId, layerTime, EdgeRepeatMode.None);
+            var useFastMode = properties.GetValue(PropertyUseFastModeId, layerTime, false);
             var horizontalAmount = direction != BlurDirection.Vertical ? (float)(amount / downSamplingRateX) : 0.0F;
             var verticalAmount = direction != BlurDirection.Horizontal ? (float)(amount / downSamplingRateY) : 0.0F;
             if (useGpu && AcceleratorObject != null)
             {
                 var device = AcceleratorObject.CurrentDevice;
                 var gpuImage = image.ToGpu(device);
-                GaussianBlurProcessor.ProcessGpu(AcceleratorObject.CurrentDevice, gpuImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                if (useFastMode)
+                {
+                    FastGaussianBlurProcessor.ProcessGpu(AcceleratorObject.CurrentDevice, gpuImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                }
+                else
+                {
+                    GaussianBlurProcessor.ProcessGpu(AcceleratorObject.CurrentDevice, gpuImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                }
                 return gpuImage;
             }
             else
             {
                 var managedImage = image.ToManaged();
-                GaussianBlurProcessor.ProcessCpu(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                if (useFastMode)
+                {
+                    FastGaussianBlurProcessor.ProcessCpu(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                }
+                else
+                {
+                    GaussianBlurProcessor.ProcessCpu(managedImage, roi, horizontalAmount, verticalAmount, edgeRepeatMode);
+                }
                 return managedImage;
             }
         }

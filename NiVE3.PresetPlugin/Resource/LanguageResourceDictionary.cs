@@ -175,6 +175,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("エッジの繰り返しモード")]
         public const string Blur_GaussianBlur_EdgeRepeatMode = nameof(Blur_GaussianBlur_EdgeRepeatMode);
 
+        [LanguageKey, DefaultValue("高速モード")]
+        public const string Blur_GaussianBlur_UseFastMode = nameof(Blur_GaussianBlur_UseFastMode);
+
         // DirectionalBlur
 
         [DefaultValue("方向ブラー")]
