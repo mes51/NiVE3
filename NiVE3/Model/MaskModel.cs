@@ -168,7 +168,7 @@ namespace NiVE3.Model
                 return shapeType switch
                 {
                     MaskShapeType.Ellipse => new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y).BezierPath,
-                    _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y).ToBezierPath()
+                    _ => new RectanglePolygon(position.X, position.Y, size.X, size.Y).ToBezierPath()
                 };
             }
         }
@@ -296,6 +296,7 @@ namespace NiVE3.Model
             {
                 var shapeType = (MaskShapeType)(setting[PropertyMaskSettingShapeTypeId] ?? MaskShapeType.Rectangle);
                 var size = (Vector2)((Vector3d)(setting[PropertyMaskSettingSizeId] ?? Vector3d.Zero) / new Vector3d(downSamplingRateX, downSamplingRateY, 1.0));
+                size = Vector2.Abs(size);
                 if (noOp || size.X <= 0.0 || size.Y <= 0.0)
                 {
                     if (useGpu)
@@ -312,7 +313,7 @@ namespace NiVE3.Model
                 polygons = [..(shapeType switch
                 {
                     MaskShapeType.Ellipse => (IPath)new BezierEllipsePolygon(position.X + size.X * 0.5F, position.Y + size.Y * 0.5F, size.X, size.Y),
-                    _ => new RectangularPolygon(position.X, position.Y, size.X, size.Y)
+                    _ => new RectanglePolygon(position.X, position.Y, size.X, size.Y)
                 }).Flatten().Select(p => new Polygon(p.Points.Span))];
             }
 
@@ -440,7 +441,7 @@ namespace NiVE3.Model
 
     file static class PathPolygonExtensions
     {
-        public static BezierPath ToBezierPath(this RectangularPolygon polygon)
+        public static BezierPath ToBezierPath(this RectanglePolygon polygon)
         {
             var points = polygon.Points.Span;
             var bezierPoints = new BezierPoint[points.Length - 1];

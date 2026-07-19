@@ -16,7 +16,6 @@ using NiVE3.Text;
 using NiVE3.SourceGenerator.ViewModelWireGenerator;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
-using SixLabors.ImageSharp.Drawing;
 using FontFamily = SixLabors.Fonts.FontFamily;
 using TextOptions = SixLabors.Fonts.TextOptions;
 using FontStyle = SixLabors.Fonts.FontStyle;
@@ -26,8 +25,8 @@ using NiVE3.Input;
 using NiVE3.Property.Types;
 using NiVE3.Data;
 using NiVE3.Model.UI;
-using NiVE3.Util;
 using NiVE3.Plugin.ValueObject;
+using SixLabors.ImageSharp.Drawing.Text;
 
 namespace NiVE3.ViewModel
 {
@@ -417,7 +416,7 @@ namespace NiVE3.ViewModel
                         var paths = TextBuilder.GenerateGlyphs("参麩靇 さんぷる サンプル Sample", new TextOptions(vm.SampleFontFamily.CreateFont(FontSize)));
                         foreach (var path in paths)
                         {
-                            foreach (var simplePath in path.Flatten())
+                            foreach (var simplePath in path.PathList.SelectMany(p => p.Flatten()))
                             {
                                 var geometry = new StreamGeometry
                                 {
@@ -490,6 +489,24 @@ namespace NiVE3.ViewModel
             IsSupportBold = fontInfo.FontFamily.GetAvailableStyles().Contains(FontStyle.Bold);
             IsSupportItalic = fontInfo.FontFamily.GetAvailableStyles().Contains(FontStyle.Italic);
             SubFamilyName = subFamilyName;
+        }
+    }
+
+    file static class ReadOnlyMemoryExtensions
+    {
+        public static bool Contains<T>(this ReadOnlyMemory<T?> memory, T? value)
+        {
+            var comparer = EqualityComparer<T>.Default;
+
+            var span = memory.Span;
+            for (var i = 0; i < span.Length; i++)
+            {
+                if (comparer.Equals(span[i], value))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

@@ -154,7 +154,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 {
                     for (var x = startX; x < image.Width; x += gridWidth)
                     {
-                        paths.Add(new RectangularPolygon(x, y, gridWidth - thickness, gridHeight - thickness));
+                        paths.Add(new RectanglePolygon(x, y, gridWidth - thickness, gridHeight - thickness));
                     }
                 }
             }
@@ -162,12 +162,12 @@ namespace NiVE3.PresetPlugin.Effect.Generate
             {
                 for (var x = startX; x <= image.Width; x += gridWidth)
                 {
-                    paths.Add(new RectangularPolygon(x, -lineCenter, thickness, image.Height + thickness));
+                    paths.Add(new RectanglePolygon(x, -lineCenter, thickness, image.Height + thickness));
                 }
 
                 for (var y = startY; y <= image.Height; y += gridHeight)
                 {
-                    paths.Add(new RectangularPolygon(-lineCenter, y, image.Width + thickness, thickness));
+                    paths.Add(new RectanglePolygon(-lineCenter, y, image.Width + thickness, thickness));
                 }
             }
             var polygons = paths.Select(p => new Polygon(p.Points.Span)).ToArray();

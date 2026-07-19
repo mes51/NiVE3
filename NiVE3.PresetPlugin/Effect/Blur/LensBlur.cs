@@ -554,15 +554,15 @@ namespace NiVE3.PresetPlugin.Effect.Blur
 
             var originalBounds = path.Bounds;
             var resizeRate = size / Math.Max(originalBounds.Width, originalBounds.Height);
-            var transform = Matrix3x2.CreateTranslation(-originalBounds.X - originalBounds.Width * 0.5F, -originalBounds.Y - originalBounds.Height * 0.5F)
-                * Matrix3x2.CreateScale(resizeRate, resizeRate)
-                * Matrix3x2.CreateRotation(MathF.PI);
+            var transform = Matrix4x4.CreateTranslation(-originalBounds.X - originalBounds.Width * 0.5F, -originalBounds.Y - originalBounds.Height * 0.5F, 0.0F)
+                * Matrix4x4.CreateScale(resizeRate, resizeRate, 1.0F)
+                * Matrix4x4.CreateRotationZ(MathF.PI);
             path = path.Transform(transform);
 
             var maskRadius = (int)MathF.Ceiling(Math.Max(path.Bounds.Width, path.Bounds.Height) * 0.5F);
             var maskSize = maskRadius * 2 + 1;
             var maskImage = new ManagedRasterizedMaskImage(maskSize, maskSize);
-            path = path.Transform(Matrix3x2.CreateTranslation(-path.Bounds.X + (maskSize - path.Bounds.Width) * 0.5F, -path.Bounds.Y + (maskSize - path.Bounds.Height) * 0.5F));
+            path = path.Transform(Matrix4x4.CreateTranslation(-path.Bounds.X + (maskSize - path.Bounds.Width) * 0.5F, -path.Bounds.Y + (maskSize - path.Bounds.Height) * 0.5F, 0.0F));
             var polygons = path.Flatten().Select(p => new Polygon(p.Points.Span)).ToArray();
             ShapeMaskRendererCPU.Fill(polygons, maskImage, 1.0F);
 
@@ -613,7 +613,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 }
                 pathBuilder.CloseFigure();
 
-                path = pathBuilder.Build().Transform(Matrix3x2.CreateRotation((angle / 180.0F + 1.0F) * MathF.PI) * Matrix3x2.CreateTranslation(maskImageCenter, maskImageCenter));
+                path = pathBuilder.Build().Transform(Matrix4x4.CreateRotationZ((angle / 180.0F + 1.0F) * MathF.PI) * Matrix4x4.CreateTranslation(maskImageCenter, maskImageCenter, 0.0F));
             }
             var maskImage = new ManagedRasterizedMaskImage(maskSize, maskSize);
             var polygons = path.Flatten().Select(p => new Polygon(p.Points.Span)).ToArray();

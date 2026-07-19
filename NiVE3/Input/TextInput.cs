@@ -24,8 +24,8 @@ using NiVE3.Shared.Util;
 using NiVE3.Text;
 using NiVE3.View.Resource;
 using SixLabors.Fonts;
+using SixLabors.Fonts.Rendering;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Drawing;
 using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.Input

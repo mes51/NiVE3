@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="ComputeSharp" Version="3.2.0" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,4 +20,8 @@
     <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
   </ItemGroup>
 
+
+  <PropertyGroup>
+    <SixLaborsLicenseFile>Resources\sixlabors.lic</SixLaborsLicenseFile>
+  </PropertyGroup>
 </Project>

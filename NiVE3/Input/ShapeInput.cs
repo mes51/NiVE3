@@ -27,7 +27,6 @@ using SolidBrush = NiVE3.Shape.SolidBrush;
 using LinearGradientBrush = NiVE3.Shape.LinearGradientBrush;
 using RadialGradientBrush = NiVE3.Shape.RadialGradientBrush;
 using NiVE3.Plugin.ValueObject;
-using System.Windows.Media;
 using ComputeSharp;
 using NiVE3.Property;
 using NiVE3.Extension;
@@ -358,8 +357,8 @@ namespace NiVE3.Input
                         ),
                         new DoubleProperty(SolidStrokeOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(SolidStrokeWidthId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_Width, 4.0, 0.0, double.MaxValue, digit: 2),
-                        new EnumProperty(SolidStrokeEndCapStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_EndCapStyleType, typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
-                        new EnumProperty(SolidStrokeJoinStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_JoinStyleType, typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidStrokeEndCapStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_LineCapType, typeof(LineCap), typeof(LanguageResourceDictionary), LineCap.Butt, selectBoxWidth: 100.0),
+                        new EnumProperty(SolidStrokeJoinStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_LineJoin, typeof(LineJoin), typeof(LanguageResourceDictionary), LineJoin.Miter, selectBoxWidth: 100.0),
                         new EnumProperty(SolidStrokeBlendModeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
                 new AppendablePropertyItem(GradientStrokeGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientStrokeGroup, () =>
@@ -379,8 +378,8 @@ namespace NiVE3.Input
                         new CheckBoxProperty(GradientStrokeUseOkLabInterpolationId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_GradientGroup_UseOkLabInterpolation, false),
                         new DoubleProperty(GradientStrokeOpacityId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                         new DoubleProperty(GradientStrokeWidthId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_Width, 4.0, 0.0, double.MaxValue, digit: 2),
-                        new EnumProperty(GradientStrokeEndCapStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_EndCapStyleType, typeof(EndCapStyle), typeof(LanguageResourceDictionary), EndCapStyle.Butt, selectBoxWidth: 100.0),
-                        new EnumProperty(GradientStrokeJoinStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_JoinStyleType, typeof(JointStyle), typeof(LanguageResourceDictionary), JointStyle.Square, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientStrokeEndCapStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_LineCapType, typeof(LineCap), typeof(LanguageResourceDictionary), LineCap.Butt, selectBoxWidth: 100.0),
+                        new EnumProperty(GradientStrokeJoinStyleTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_StrokeGroup_LineJoin, typeof(LineJoin), typeof(LanguageResourceDictionary), LineJoin.Miter, selectBoxWidth: 100.0),
                         new EnumProperty(GradientStrokeBlendModeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_Drawing_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal, selectBoxWidth: 100.0)
                     ])),
                 AppendablePropertyItemSeparator.Instance,
@@ -402,7 +401,7 @@ namespace NiVE3.Input
                 new AppendablePropertyItem(CombineGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup, () =>
                     new PropertyGroup(CombineGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup,
                     [
-                        new EnumProperty(CombineTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup_CombineType, typeof(ClippingOperation), typeof(LanguageResourceDictionary), ClippingOperation.Union, selectBoxWidth: 100)
+                        new EnumProperty(CombineTypeId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_CombineGroup_CombineType, typeof(BooleanOperation), typeof(LanguageResourceDictionary), BooleanOperation.Union, selectBoxWidth: 100)
                     ])),
                 new AppendablePropertyItem(TrimmingGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup, () =>
                     new PropertyGroup(TrimmingGroupId, LanguageResourceDictionary.ResourceKeys.ShapeProperty_TrimmingGroup,
@@ -589,7 +588,7 @@ namespace NiVE3.Input
                     var cornerRounded = Math.Min((float)(double)(property[RectangleCornerRoundedId] ?? 0.0), Math.Min(size.X, size.Y) * 0.5F);
                     if (cornerRounded <= 0.0F)
                     {
-                        tree.AddNode(new ShapePath(new RectangularPolygon(position.X, position.Y, size.X, size.Y)));
+                        tree.AddNode(new ShapePath(new RectanglePolygon(position.X, position.Y, size.X, size.Y)));
                     }
                     else
                     {
@@ -663,7 +662,7 @@ namespace NiVE3.Input
                     }
                     pathBuilder.CloseFigure();
 
-                    var transform = Matrix3x2.CreateRotation(angle / 180.0F * MathF.PI) * Matrix3x2.CreateTranslation(position.X, position.Y);
+                    var transform = Matrix4x4.CreateRotationZ(angle / 180.0F * MathF.PI) * Matrix4x4.CreateTranslation(position.X, position.Y, 0.0F);
                     tree.AddNode(new ShapePath(pathBuilder.Build().Transform(transform)));
                 }
                 else if (property.TryGetValue(StarPointCountId, out var starPointCount))
@@ -726,7 +725,7 @@ namespace NiVE3.Input
                     }
                     pathBuilder.CloseFigure();
 
-                    var transform = Matrix3x2.CreateRotation(angle / 180.0F * MathF.PI) * Matrix3x2.CreateTranslation(position.X, position.Y);
+                    var transform = Matrix4x4.CreateRotationZ(angle / 180.0F * MathF.PI) * Matrix4x4.CreateTranslation(position.X, position.Y, 0.0F);
                     tree.AddNode(new ShapePath(pathBuilder.Build().Transform(transform)));
                 }
                 else if (property.TryGetValue(PathBezierPathId, out var bezierPath))
@@ -736,7 +735,7 @@ namespace NiVE3.Input
                     {
                         var position = (Vector3)(Vector3d)(property[PathPositionId] ?? Vector3d.Zero);
 
-                        var transform = Matrix3x2.CreateTranslation(position.X, position.Y);
+                        var transform = Matrix4x4.CreateTranslation(position.X, position.Y, 0.0F);
                         tree.AddNode(new ShapePath(path.Transform(transform)));
                     }
                 }
@@ -767,11 +766,11 @@ namespace NiVE3.Input
                     var color = (Vector4)(solifStrokeColor ?? Vector4.Zero);
                     var opacity = (float)(double)(property[SolidStrokeOpacityId] ?? 0.0) * 0.01F;
                     var width = (float)(double)(property[SolidStrokeWidthId] ?? ShapeFillRule.NonZero);
-                    var endCapStyle = (EndCapStyle)(property[SolidStrokeEndCapStyleTypeId] ?? EndCapStyle.Butt);
-                    var joinStyle = (JointStyle)(property[SolidStrokeJoinStyleTypeId] ?? JointStyle.Square);
+                    var lineCap = (LineCap)(property[SolidStrokeEndCapStyleTypeId] ?? LineCap.Butt);
+                    var joinStyle = (LineJoin)(property[SolidStrokeJoinStyleTypeId] ?? LineJoin.Miter);
                     var blendModel = (BlendMode)(property[SolidStrokeBlendModeId] ?? BlendMode.Normal);
 
-                    tree.AddNode(new ShapeSolidStroke(color, width, endCapStyle, joinStyle, blendModel) { Opacity = opacity });
+                    tree.AddNode(new ShapeSolidStroke(color, width, lineCap, joinStyle, blendModel) { Opacity = opacity });
                 }
                 else if (property.TryGetValue(GradientStrokeColorId, out var gradientStrokeColor))
                 {
@@ -782,11 +781,11 @@ namespace NiVE3.Input
                     var end = (Vector3)(Vector3d)(property[GradientStrokeEndPositionId] ?? Vector3d.Zero);
                     var opacity = (float)(double)(property[GradientStrokeOpacityId] ?? 0.0) * 0.01F;
                     var width = (float)(double)(property[GradientStrokeWidthId] ?? ShapeFillRule.NonZero);
-                    var endCapStyle = (EndCapStyle)(property[GradientStrokeEndCapStyleTypeId] ?? EndCapStyle.Butt);
-                    var joinStyle = (JointStyle)(property[GradientStrokeJoinStyleTypeId] ?? JointStyle.Square);
+                    var lineCap = (LineCap)(property[GradientStrokeEndCapStyleTypeId] ?? LineCap.Butt);
+                    var joinStyle = (LineJoin)(property[GradientStrokeJoinStyleTypeId] ?? LineJoin.Miter);
                     var blendModel = (BlendMode)(property[GradientStrokeBlendModeId] ?? BlendMode.Normal);
 
-                    tree.AddNode(new ShapeGradientStroke(color, useOkLabInterpolation, type, begin.AsVector2(), end.AsVector2(), width, endCapStyle, joinStyle, blendModel) { Opacity = opacity });
+                    tree.AddNode(new ShapeGradientStroke(color, useOkLabInterpolation, type, begin.AsVector2(), end.AsVector2(), width, lineCap, joinStyle, blendModel) { Opacity = opacity });
                 }
                 else if (property.TryGetValue(RepeaterCountId, out var repeaterCount))
                 {
@@ -804,16 +803,16 @@ namespace NiVE3.Input
                 }
                 else if (property.TryGetValue(CombineTypeId, out var combineType))
                 {
-                    var operation = (ClippingOperation)(combineType ?? ClippingOperation.None);
+                    var operation = (BooleanOperation)(combineType ?? BooleanOperation.Intersection);
                     var paths = tree.GetAllPaths();
                     ShapePath newShape;
-                    if (operation != ClippingOperation.None)
+                    if (operation != BooleanOperation.Intersection)
                     {
                         var path = paths.First().AsClosedPath();
                         var option = new ShapeOptions
                         {
                             IntersectionRule = IntersectionRule.NonZero,
-                            ClippingOperation = operation
+                            BooleanOperation = operation
                         };
 
                         newShape = new ShapePath(path.Clip(option, paths.Skip(1).Select(p => p.AsClosedPath())));
@@ -911,7 +910,7 @@ namespace NiVE3.Input
     {
         public abstract ShapeTreeBase Copy();
 
-        protected internal abstract void Transform(Matrix3x2 matrix, float opacity);
+        protected internal abstract void Transform(Matrix4x4 matrix, float opacity);
     }
 
     class ShapeGroupTree : ShapeTreeBase
@@ -943,7 +942,7 @@ namespace NiVE3.Input
                             var brush = fill.GetBrush();
                             brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
                             var path = (IPathCollection)new PathCollection(TraversePath(fill).Select(p => p.AsClosedPath()));
-                            path = path.Transform(Matrix3x2.CreateScale(downSampling));
+                            path = path.Transform(Matrix4x4.CreateScale(downSampling));
                             yield return new Drawable(brush, fill.FillRule, fill.BlendMode, path);
                         }
                         break;
@@ -951,8 +950,8 @@ namespace NiVE3.Input
                         {
                             var brush = stroke.GetBrush();
                             brush.Transform(Matrix3x3.CreateScale(downSampling, downSampling));
-                            var path = (IPathCollection)new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width, stroke.JoinStyle, stroke.EndCapStyle)));
-                            path = path.Transform(Matrix3x2.CreateScale(downSampling));
+                            var path = (IPathCollection)new PathCollection(TraversePath(stroke).Select(p => p.GenerateOutline(stroke.Width, stroke.GetStrokeOptions())));
+                            path = path.Transform(Matrix4x4.CreateScale(downSampling));
                             yield return new Drawable(brush, ShapeFillRule.NonZero, stroke.BlendMode, path);
                         }
                         break;
@@ -995,10 +994,10 @@ namespace NiVE3.Input
             for (var i = 0; i < count; i++)
             {
                 var move = offset + i;
-                var transform = Matrix3x2.CreateTranslation((float)-anchorPoint.X, (float)-anchorPoint.Y) *
-                    Matrix3x2.CreateScale((float)Math.Pow(scale.X, move), (float)Math.Pow(scale.Y, move)) *
-                    Matrix3x2.CreateRotation((float)(angle * move / 180.0 * Math.PI)) *
-                    Matrix3x2.CreateTranslation((float)(anchorPoint.X + position.X * move), (float)(anchorPoint.Y + position.Y * move));
+                var transform = Matrix4x4.CreateTranslation((float)-anchorPoint.X, (float)-anchorPoint.Y, 0.0F) *
+                    Matrix4x4.CreateScale((float)Math.Pow(scale.X, move), (float)Math.Pow(scale.Y, move), 1.0F) *
+                    Matrix4x4.CreateRotationZ((float)(angle * move / 180.0 * Math.PI)) *
+                    Matrix4x4.CreateTranslation((float)(anchorPoint.X + position.X * move), (float)(anchorPoint.Y + position.Y * move), 0.0F);
 
                 var newChild = repeatTarget.Copy();
                 newChild.Transform(transform, (float)double.Lerp(beginPointOpacity, endPointOpacity, i / (double)count));
@@ -1046,7 +1045,13 @@ namespace NiVE3.Input
                 Matrix3x2.CreateSkew((float)(Math.Cos(skewRad) * skew), (float)(Math.Sin(skewRad) * skew)) *
                 Matrix3x2.CreateRotation((float)(angle / 180.0 * Math.PI)) *
                 Matrix3x2.CreateTranslation((float)position.X, (float)position.Y);
-            Transform(matrix, (float)opacity);
+            var matrix4x4 = new Matrix4x4(
+                matrix.M11, matrix.M12, 0.0F, 0.0F,
+                matrix.M21, matrix.M22, 0.0F, 0.0F,
+                0.0F, 0.0F, 1.0F, 0.0F,
+                matrix.M31, matrix.M32, 0.0F, 1.0F
+            );
+            Transform(matrix4x4, (float)opacity);
         }
 
         public override ShapeTreeBase Copy()
@@ -1057,7 +1062,7 @@ namespace NiVE3.Input
             return result;
         }
 
-        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        protected internal override void Transform(Matrix4x4 matrix, float opacity)
         {
             foreach (var node in Nodes)
             {
@@ -1336,7 +1341,7 @@ namespace NiVE3.Input
             return new ShapePath(new PathCollection([..Paths]));
         }
 
-        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        protected internal override void Transform(Matrix4x4 matrix, float opacity)
         {
             Paths = Paths.Transform(matrix);
             Opacity *= opacity;
@@ -1359,7 +1364,7 @@ namespace NiVE3.Input
 
         public abstract Brush GetBrush();
 
-        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        protected internal override void Transform(Matrix4x4 matrix, float opacity)
         {
             Opacity *= opacity;
         }
@@ -1369,25 +1374,34 @@ namespace NiVE3.Input
     {
         public float Width { get; }
 
-        public EndCapStyle EndCapStyle { get; }
+        public LineCap LineCap { get; }
 
-        public JointStyle JoinStyle { get; }
+        public LineJoin LineJoin { get; }
 
         public BlendMode BlendMode { get; }
 
         public float Opacity { get; set; } = 1.0F;
 
-        protected ShapeStrokeBase(float width, EndCapStyle endCapStyle, JointStyle joinStyle, BlendMode blendMode)
+        protected ShapeStrokeBase(float width, LineCap lineCap, LineJoin lineJoin, BlendMode blendMode)
         {
             Width = width;
-            EndCapStyle = endCapStyle;
-            JoinStyle = joinStyle;
+            LineCap = lineCap;
+            LineJoin = lineJoin;
             BlendMode = blendMode;
         }
 
         public abstract Brush GetBrush();
 
-        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        public StrokeOptions GetStrokeOptions()
+        {
+            return new StrokeOptions
+            {
+                LineCap = LineCap,
+                LineJoin = LineJoin
+            };
+        }
+
+        protected internal override void Transform(Matrix4x4 matrix, float opacity)
         {
             Opacity *= opacity;
         }
@@ -1441,7 +1455,7 @@ namespace NiVE3.Input
             return new ShapeGradientFill(Color, UseOkLabInterpolation, Type, BeginPosition, EndPosition, FillRule, BlendMode) { Opacity = Opacity };
         }
 
-        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        protected internal override void Transform(Matrix4x4 matrix, float opacity)
         {
             base.Transform(matrix, opacity);
             BeginPosition = Vector2.Transform(BeginPosition, matrix);
@@ -1465,14 +1479,14 @@ namespace NiVE3.Input
     {
         public Vector4 Color { get; }
 
-        public ShapeSolidStroke(Vector4 color, float width, EndCapStyle endCapStyle, JointStyle joinStyle, BlendMode blendMode) : base(width, endCapStyle, joinStyle, blendMode)
+        public ShapeSolidStroke(Vector4 color, float width, LineCap lineCap, LineJoin lineJoin, BlendMode blendMode) : base(width, lineCap, lineJoin, blendMode)
         {
             Color = color;
         }
 
         public override ShapeTreeBase Copy()
         {
-            return new ShapeSolidStroke(Color, Width, EndCapStyle, JoinStyle, BlendMode) { Opacity = Opacity };
+            return new ShapeSolidStroke(Color, Width, LineCap, LineJoin, BlendMode) { Opacity = Opacity };
         }
 
         public override Brush GetBrush()
@@ -1495,7 +1509,7 @@ namespace NiVE3.Input
 
         public Vector2 EndPosition { get; set; }
 
-        public ShapeGradientStroke(ColorGradient color, bool useOkLabInterpolation, GradientType type, Vector2 beginPosition, Vector2 endPosition, float width, EndCapStyle endCapStyle, JointStyle joinStyle, BlendMode blendMode) : base(width, endCapStyle, joinStyle, blendMode)
+        public ShapeGradientStroke(ColorGradient color, bool useOkLabInterpolation, GradientType type, Vector2 beginPosition, Vector2 endPosition, float width, LineCap lineCap, LineJoin lineJoin, BlendMode blendMode) : base(width, lineCap, lineJoin, blendMode)
         {
             Color = color;
             UseOkLabInterpolation = useOkLabInterpolation;
@@ -1506,10 +1520,10 @@ namespace NiVE3.Input
 
         public override ShapeTreeBase Copy()
         {
-            return new ShapeGradientStroke(Color, UseOkLabInterpolation, Type, BeginPosition, EndPosition, Width, EndCapStyle, JoinStyle, BlendMode) { Opacity = Opacity };
+            return new ShapeGradientStroke(Color, UseOkLabInterpolation, Type, BeginPosition, EndPosition, Width, LineCap, LineJoin, BlendMode) { Opacity = Opacity };
         }
 
-        protected internal override void Transform(Matrix3x2 matrix, float opacity)
+        protected internal override void Transform(Matrix4x4 matrix, float opacity)
         {
             base.Transform(matrix, opacity);
             BeginPosition = Vector2.Transform(BeginPosition, matrix);

@@ -23,13 +23,7 @@ namespace NiVE3.Shape
         {
             get
             {
-                if (FlattenedPoints == null)
-                {
-                    var flattenedPointMemory = NativeSegment.Flatten();
-                    FlattenedPoints = new PointF[flattenedPointMemory.Length];
-                    flattenedPointMemory.CopyTo(FlattenedPoints);
-                }
-
+                FlattenedPoints ??= FlattenInternal(Vector2.One);
                 return FlattenedPoints;
             }
         }
@@ -87,7 +81,7 @@ namespace NiVE3.Shape
             ]);
         }
 
-        private BezierEllipsePolygon(BezierEllipsePolygon basePolygon, Matrix3x2 transform)
+        private BezierEllipsePolygon(BezierEllipsePolygon basePolygon, Matrix4x4 transform)
         {
             NativeSegment = basePolygon.NativeSegment.Transform(transform);
 
@@ -122,9 +116,51 @@ namespace NiVE3.Shape
             return [this];
         }
 
-        public IPath Transform(Matrix3x2 matrix)
+        public LinearGeometry ToLinearGeometry(Vector2 scale)
+        {
+            var pointMemory = Points;
+            if (scale != Vector2.One)
+            {
+                pointMemory = FlattenInternal(scale);
+            }
+
+            var points = new PointF[pointMemory.Length];
+            pointMemory.CopyTo(points);
+
+            var contour = new LinearContour
+            {
+                PointCount = points.Length,
+                PointStart = 0,
+                SegmentCount = 1,
+                SegmentStart = 0,
+                IsClosed = false
+            };
+
+            var info = new LinearGeometryInfo
+            {
+                Bounds = Bounds,
+                ContourCount = 1,
+                NonHorizontalSegmentCountPixelBoundary = 0,
+                NonHorizontalSegmentCountPixelCenter = 0,
+                PointCount = points.Length,
+                SegmentCount = 1
+            };
+
+            return new LinearGeometry(info, [contour], points);
+        }
+
+        public IPath Transform(Matrix4x4 matrix)
         {
             return new BezierEllipsePolygon(this, matrix);
+        }
+
+        PointF[] FlattenInternal(Vector2 scale)
+        {
+            var points = NativeSegment.LinearVertexCount(scale);
+            var result = new PointF[points];
+            NativeSegment.CopyTo(result, false, scale);
+
+            return result;
         }
     }
 }

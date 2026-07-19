@@ -119,8 +119,10 @@ namespace NiVE3.Text
                 var loadedFontFamilies = FontCollection.AddCollection(path, out var descriptions).ToArray();
 
                 var result = new List<FontInfo>();
-                foreach (var d in descriptions)
+                var span = descriptions.Span;
+                for (var i = 0; i < span.Length; i++)
                 {
+                    var d = span[i];
                     try
                     {
                         var fontFamily = loadedFontFamilies.First(f => d.FontFamilyInvariantCulture == f.Name);

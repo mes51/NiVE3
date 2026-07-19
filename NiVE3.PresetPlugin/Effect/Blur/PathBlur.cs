@@ -76,7 +76,7 @@ namespace NiVE3.PresetPlugin.Effect.Blur
             }
 
             var maskId = properties.GetValue(PropertyMaskId, layerTime, UseMaskPathTarget.Empty);
-            var path = maskId.GetMask(layer, layerTime, downSamplingRateX)?.BuildPath()?.Transform(Matrix3x2.CreateRotation(MathF.PI))?.Flatten()?.FirstOrDefault();
+            var path = maskId.GetMask(layer, layerTime, downSamplingRateX)?.BuildPath()?.Transform(Matrix4x4.CreateRotationZ(MathF.PI))?.Flatten()?.FirstOrDefault();
             if (path == null)
             {
                 return image;

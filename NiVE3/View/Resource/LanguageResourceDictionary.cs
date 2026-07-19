@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using NiVE3.Plugin.Resource;
 using NiVE3.SourceGenerator.ResourceMarkupGenerator;
 using NiVE3.SourceGenerator.LanguageResourceGenerator;
@@ -1879,10 +1878,10 @@ namespace NiVE3.View.Resource
         public static readonly string ShapeProperty_StrokeGroup_Width = nameof(ShapeProperty_StrokeGroup_Width);
 
         [LanguageKey, DefaultValue("線端")]
-        public static readonly string ShapeProperty_StrokeGroup_EndCapStyleType = nameof(ShapeProperty_StrokeGroup_EndCapStyleType);
+        public static readonly string ShapeProperty_StrokeGroup_LineCapType = nameof(ShapeProperty_StrokeGroup_LineCapType);
 
         [LanguageKey, DefaultValue("線の結合")]
-        public static readonly string ShapeProperty_StrokeGroup_JoinStyleType = nameof(ShapeProperty_StrokeGroup_JoinStyleType);
+        public static readonly string ShapeProperty_StrokeGroup_LineJoin = nameof(ShapeProperty_StrokeGroup_LineJoin);
 
         [LanguageKey, DefaultValue("グラデーションの種類")]
         public static readonly string ShapeProperty_GradientGroup_Type = nameof(ShapeProperty_GradientGroup_Type);
@@ -2420,43 +2419,40 @@ namespace NiVE3.View.Resource
         public static readonly string GradientType_Radial = nameof(GradientType_Radial);
 
         [DefaultValue("バット")]
-        public static readonly string EndCapStyle_Butt = nameof(EndCapStyle_Butt);
+        public static readonly string LineCap_Butt = nameof(LineCap_Butt);
 
         [DefaultValue("丸型")]
-        public static readonly string EndCapStyle_Round = nameof(EndCapStyle_Round);
+        public static readonly string LineCap_Round = nameof(LineCap_Round);
 
         [DefaultValue("四角")]
-        public static readonly string EndCapStyle_Square = nameof(EndCapStyle_Square);
-
-        [DefaultValue("ポリゴン")]
-        public static readonly string EndCapStyle_Polygon = nameof(EndCapStyle_Polygon);
-
-        [DefaultValue("結合")]
-        public static readonly string EndCapStyle_Joined = nameof(EndCapStyle_Joined);
-
-        [DefaultValue("四角")]
-        public static readonly string JointStyle_Square = nameof(JointStyle_Square);
-
-        [DefaultValue("丸型")]
-        public static readonly string JointStyle_Round = nameof(JointStyle_Round);
+        public static readonly string LineCap_Square = nameof(LineCap_Square);
 
         [DefaultValue("マイター")]
-        public static readonly string JointStyle_Miter = nameof(JointStyle_Miter);
+        public static readonly string LineJoin_Miter = nameof(LineJoin_Miter);
 
-        [DefaultValue("結合")]
-        public static readonly string ClippingOperation_None = nameof(ClippingOperation_None);
+        [DefaultValue("逆マイター")]
+        public static readonly string LineJoin_MiterRevert = nameof(LineJoin_MiterRevert);
+
+        [DefaultValue("丸型")]
+        public static readonly string LineJoin_Round = nameof(LineJoin_Round);
+
+        [DefaultValue("ベベル")]
+        public static readonly string LineJoin_Bevel = nameof(LineJoin_Bevel);
+
+        [DefaultValue("マイター丸型")]
+        public static readonly string LineJoin_MiterRound = nameof(LineJoin_MiterRound);
 
         [DefaultValue("交差")]
-        public static readonly string ClippingOperation_Intersection = nameof(ClippingOperation_Intersection);
+        public static readonly string BooleanOperation_Intersection = nameof(BooleanOperation_Intersection);
 
         [DefaultValue("追加")]
-        public static readonly string ClippingOperation_Union = nameof(ClippingOperation_Union);
+        public static readonly string BooleanOperation_Union = nameof(BooleanOperation_Union);
 
         [DefaultValue("差")]
-        public static readonly string ClippingOperation_Difference = nameof(ClippingOperation_Difference);
+        public static readonly string BooleanOperation_Difference = nameof(BooleanOperation_Difference);
 
         [DefaultValue("中マド")]
-        public static readonly string ClippingOperation_Xor = nameof(ClippingOperation_Xor);
+        public static readonly string BooleanOperation_Xor = nameof(BooleanOperation_Xor);
 
         [DefaultValue("長方形")]
         public static readonly string MaskShapeType_Rectangle = nameof(MaskShapeType_Rectangle);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using NiVE3.Numerics;
 using NiVE3.Shared.Extension;
 using SixLabors.Fonts;
-using SixLabors.ImageSharp;
+using SixLabors.Fonts.Rendering;
 using SixLabors.ImageSharp.Drawing;
 
 namespace NiVE3.Text
@@ -100,13 +100,22 @@ namespace NiVE3.Text
                 transform *= Matrix3x2.CreateTranslation(ShiftedLetterSpacing, 0.0F);
             }
 
-            Builder.SetTransform(transform);
+            var matrix4x4 = new Matrix4x4(
+                transform.M11, transform.M12, 0.0F, 0.0F,
+                transform.M21, transform.M22, 0.0F, 0.0F,
+                0.0F, 0.0F, 1.0F, 0.0F,
+                transform.M31, transform.M32, 0.0F, 1.0F
+            );
+
+            Builder.SetTransform(matrix4x4);
 
             // NOTE: 現状行頭かどうかを完全に判定する手段が無いため、LetterSpacingはしばらく無効化
             //ShiftedLetterSpacing += (parameters.TextRun as ExtendedTextRun)?.LetterSpacing ?? 0.0F;
 
             return true;
         }
+
+        public void BeginLayer(Paint? paint, FillRule fillRule, ClipQuad? clipBounds) { }
 
         public void BeginText(in FontRectangle bounds)
         {
@@ -121,6 +130,17 @@ namespace NiVE3.Text
             }
 
             Builder.AddCubicBezier(CurrentPoint, secondControlPoint, thirdControlPoint, point);
+            CurrentPoint = point;
+        }
+
+        public void ArcTo(float radiusX, float radiusY, float rotation, bool largeArc, bool sweep, Vector2 point)
+        {
+            if (CurrentIsDiscardGlyph)
+            {
+                return;
+            }
+
+            Builder.AddArc(CurrentPoint, radiusX, radiusY, rotation, largeArc, sweep, point);
             CurrentPoint = point;
         }
 
@@ -161,6 +181,8 @@ namespace NiVE3.Text
             };
             Glyphs.Add(new GlyphPath(Builder.Build(), textRun));
         }
+
+        public void EndLayer() { }
 
         public void EndText() { }
 
