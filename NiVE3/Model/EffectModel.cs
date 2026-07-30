@@ -52,7 +52,7 @@ namespace NiVE3.Model
 
         public event EventHandler<EventArgs>? EffectUpdated;
 
-        ExportLifetimeContext<IEffect> Effect { get; }
+        IEffectHandle Effect { get; }
 
         IEffectMetadata Metadata { get; }
 
@@ -66,9 +66,9 @@ namespace NiVE3.Model
 
         bool IsSupportGpu { get; }
 
-        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, projectModel, compositionModel, layerModel, historyModel, null) { }
+        public EffectModel(IEffectHandle effect, IEffectMetadata metadata, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel) : this(effect, metadata, projectModel, compositionModel, layerModel, historyModel, null) { }
 
-        public EffectModel(ExportLifetimeContext<IEffect> effect, IEffectMetadata metadata, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
+        public EffectModel(IEffectHandle effect, IEffectMetadata metadata, ProjectModel projectModel, CompositionModel compositionModel, LayerModel layerModel, HistoryModel historyModel, Guid? effectId)
         {
             Effect = effect;
             Metadata = metadata;
@@ -84,6 +84,120 @@ namespace NiVE3.Model
             Properties.ValueUpdated += Property_ValueUpdated;
             Properties.ValueCommited += Properties_ValueCommited;
             PropertyChanged += EffectModel_PropertyChanged;
+
+            if (effect.Value is IPropertyEditAwareEffect editAwareEffect)
+            {
+                editAwareEffect.PropertyValuesWriteback += Effect_PropertyValuesWriteback;
+                SetEditSessionSubscription(Properties.Children, true);
+            }
+        }
+
+        // 編集セッション (ドラッグ操作等) の進行数。セッション中の書き戻しは確定まで保留する
+        int ActiveEditSessions { get; set; }
+
+        // 編集中止時の値復元中など、エフェクトへの編集通知を一時的に抑止するためのフラグ
+        bool SuppressEditNotify { get; set; }
+
+        // セッション中に書き戻された値 (プロパティID → モデル・セッション開始時の値・最新値)
+        Dictionary<string, (PropertyModel Model, object? FirstValue, object? LatestValue)> PendingSessionWritebacks { get; } = [];
+
+        void SetEditSessionSubscription(IEnumerable<IPropertyModel> models, bool subscribe)
+        {
+            foreach (var model in models)
+            {
+                if (model is PropertyModel propertyModel)
+                {
+                    if (subscribe)
+                    {
+                        propertyModel.EditSessionBegan += PropertyModel_EditSessionBegan;
+                        propertyModel.EditSessionEnded += PropertyModel_EditSessionEnded;
+                        propertyModel.EditSessionAborted += PropertyModel_EditSessionAborted;
+                    }
+                    else
+                    {
+                        propertyModel.EditSessionBegan -= PropertyModel_EditSessionBegan;
+                        propertyModel.EditSessionEnded -= PropertyModel_EditSessionEnded;
+                        propertyModel.EditSessionAborted -= PropertyModel_EditSessionAborted;
+                    }
+                }
+                if (model.Children != null)
+                {
+                    SetEditSessionSubscription(model.Children, subscribe);
+                }
+            }
+        }
+
+        private void PropertyModel_EditSessionBegan(object? sender, EventArgs e)
+        {
+            ActiveEditSessions++;
+        }
+
+        private void PropertyModel_EditSessionEnded(object? sender, EventArgs e)
+        {
+            if (ActiveEditSessions > 0 && --ActiveEditSessions == 0)
+            {
+                FlushSessionWritebacks(true);
+            }
+        }
+
+        private void PropertyModel_EditSessionAborted(object? sender, EventArgs e)
+        {
+            if (ActiveEditSessions > 0 && --ActiveEditSessions == 0)
+            {
+                FlushSessionWritebacks(false);
+            }
+        }
+
+        void FlushSessionWritebacks(bool commit)
+        {
+            if (PendingSessionWritebacks.Count < 1)
+            {
+                return;
+            }
+            var pending = PendingSessionWritebacks.Values.ToArray();
+            PendingSessionWritebacks.Clear();
+
+            if (commit)
+            {
+                // セッション全体の変更を 1 つの履歴 (グループ) として確定する
+                var targets = pending.Where(p => !Equals(p.FirstValue, p.LatestValue)).ToArray();
+                if (targets.Length == 1)
+                {
+                    targets[0].Model.CommitProperty(targets[0].LatestValue, targets[0].FirstValue);
+                }
+                else if (targets.Length > 1)
+                {
+                    HistoryModel.BeginGroup(EffectName);
+                    try
+                    {
+                        foreach (var (model, firstValue, latestValue) in targets)
+                        {
+                            model.CommitProperty(latestValue, firstValue);
+                        }
+                    }
+                    finally
+                    {
+                        HistoryModel.EndGroup();
+                    }
+                }
+            }
+            else
+            {
+                // 中止: セッション開始時の値へ黙って戻す (復元中の編集通知は抑止し、復元後にまとめて通知する)
+                SuppressEditNotify = true;
+                try
+                {
+                    foreach (var (model, firstValue, _) in pending)
+                    {
+                        model.UpdateUncommitedRawValue(firstValue);
+                    }
+                }
+                finally
+                {
+                    SuppressEditNotify = false;
+                }
+                (Effect.Value as IPropertyEditAwareEffect)?.OnPropertyValuesRestored(Properties.Children.ToArray());
+            }
         }
 
         public void ChangeName(string name)
@@ -249,9 +363,171 @@ namespace NiVE3.Model
             }
         }
 
+        // Undo/Redo 完了後の復元通知を予約済みかどうか (複数プロパティの復元を 1 回の通知にまとめる)
+        bool RestoreNotifyScheduled { get; set; }
+
         private void Property_ValueUpdated(object? sender, EventArgs e)
         {
+            // 値の編集を通知するエフェクト (OpenFX アダプタなど) へ変更を伝える
+            // Undo/Redo や書き戻しの反映中は通知しない (プラグインが再度値を変更して履歴が壊れるのを防ぐ)
+            if (!HistoryModel.IsChanging && !SuppressEditNotify)
+            {
+                (Effect.Value as IPropertyEditAwareEffect)?.OnPropertyValuesEdited(Properties.Children.ToArray());
+            }
+            else if (Effect.Value is IPropertyEditAwareEffect editAwareEffect && !RestoreNotifyScheduled)
+            {
+                // Undo/Redo による値の復元後にプラグインへ通知し、表示/有効状態などの内部状態を復元させる
+                // (復元処理の完了後に実行されるようキューへ積む)
+                var application = System.Windows.Application.Current;
+                if (application != null)
+                {
+                    RestoreNotifyScheduled = true;
+                    application.Dispatcher.BeginInvoke(() =>
+                    {
+                        RestoreNotifyScheduled = false;
+                        if (IsAlive())
+                        {
+                            editAwareEffect.OnPropertyValuesRestored(Properties.Children.ToArray());
+                        }
+                    });
+                }
+            }
+
             EffectUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Effect_PropertyValuesWriteback(object? sender, PropertyValuesWritebackEventArgs e)
+        {
+            if (e.IsUserAction)
+            {
+                // ユーザー操作起因 (編集やボタンの InstanceChanged 完了後)。
+                // プラグインのアクションは完了しているため同期的に反映し、Undo できるように履歴へ積む
+                var application = System.Windows.Application.Current;
+                if (application != null && !application.Dispatcher.CheckAccess())
+                {
+                    application.Dispatcher.BeginInvoke(() => ApplyWritebacksWithHistory(e.Values));
+                }
+                else
+                {
+                    ApplyWritebacksWithHistory(e.Values);
+                }
+            }
+            else
+            {
+                // レンダリング中のステータス表示更新など: 履歴には積まず、キュー経由で非同期に反映する
+                var application = System.Windows.Application.Current;
+                if (application != null)
+                {
+                    application.Dispatcher.BeginInvoke(() => ApplyWritebacksSilently(e.Values));
+                }
+                else
+                {
+                    ApplyWritebacksSilently(e.Values);
+                }
+            }
+        }
+
+        void ApplyWritebacksWithHistory(IReadOnlyList<KeyValuePair<string, object?>> values)
+        {
+            var targets = new List<(PropertyModel Model, object? NewValue, object? PrevValue)>();
+            foreach (var (propertyId, value) in values)
+            {
+                if (FindPropertyModel(Properties.Children, propertyId) is PropertyModel propertyModel)
+                {
+                    var newValue = propertyModel.Property.CoerceValue(value);
+
+                    // 非永続 (表示専用) のプロパティは履歴に積まず表示のみ更新する (ライセンス状態など)
+                    if (!propertyModel.Property.IsPersistent)
+                    {
+                        propertyModel.UpdateUncommitedRawValue(newValue);
+                        continue;
+                    }
+
+                    // キーフレームがない場合、GetValue は時間によらず現在の値を返す
+                    // (キーフレームがある場合、CommitProperty は prevValue を使用せずキーフレームを作成する)
+                    var prevValue = propertyModel.GetValue(Time.Zero, Time.Zero);
+                    if (!Equals(newValue, prevValue))
+                    {
+                        targets.Add((propertyModel, newValue, prevValue));
+                    }
+                }
+            }
+
+            if (targets.Count < 1)
+            {
+                return;
+            }
+
+            // 編集セッション (ドラッグ操作等) 中は履歴を確定せず保留し、ライブ表示のみ更新する
+            // (ドラッグの 1 ティックごとに履歴が積まれるのを防ぎ、EndEdit で 1 つの履歴にまとめる)
+            if (ActiveEditSessions > 0)
+            {
+                foreach (var (model, newValue, prevValue) in targets)
+                {
+                    if (PendingSessionWritebacks.TryGetValue(model.Property.Id, out var pending))
+                    {
+                        PendingSessionWritebacks[model.Property.Id] = (model, pending.FirstValue, newValue);
+                    }
+                    else
+                    {
+                        PendingSessionWritebacks[model.Property.Id] = (model, prevValue, newValue);
+                    }
+                    model.UpdateUncommitedRawValue(newValue);
+                }
+                return;
+            }
+
+            if (targets.Count == 1)
+            {
+                targets[0].Model.CommitProperty(targets[0].NewValue, targets[0].PrevValue);
+            }
+            else
+            {
+                HistoryModel.BeginGroup(EffectName);
+                try
+                {
+                    foreach (var (model, newValue, prevValue) in targets)
+                    {
+                        model.CommitProperty(newValue, prevValue);
+                    }
+                }
+                finally
+                {
+                    HistoryModel.EndGroup();
+                }
+            }
+        }
+
+        void ApplyWritebacksSilently(IReadOnlyList<KeyValuePair<string, object?>> values)
+        {
+            foreach (var (propertyId, value) in values)
+            {
+                if (FindPropertyModel(Properties.Children, propertyId) is PropertyModel propertyModel)
+                {
+                    // 値が同じ場合は ReactiveProperty 側で無視されるため、再レンダリングのループにはならない
+                    propertyModel.UpdateUncommitedRawValue(propertyModel.Property.CoerceValue(value));
+                }
+            }
+        }
+
+        static IPropertyModel? FindPropertyModel(IEnumerable<IPropertyModel> models, string propertyId)
+        {
+            foreach (var model in models)
+            {
+                if (model.Property.Id == propertyId)
+                {
+                    return model;
+                }
+                if (model.Children != null)
+                {
+                    var found = FindPropertyModel(model.Children, propertyId);
+                    if (found != null)
+                    {
+                        return found;
+                    }
+                }
+            }
+            return null;
         }
 
         private void Properties_ValueCommited(object? sender, EventArgs e)
@@ -266,6 +542,11 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
+            if (Effect.Value is IPropertyEditAwareEffect editAwareEffect)
+            {
+                editAwareEffect.PropertyValuesWriteback -= Effect_PropertyValuesWriteback;
+                SetEditSessionSubscription(Properties.Children, false);
+            }
             Effect.Dispose();
         }
     }

@@ -97,6 +97,20 @@ namespace NiVE3.Config
         [SerializableSetting]
         public double GpuCacheLimitRate { get; set; } = 30.0;
 
+        /// <summary>
+        /// OpenFX プラグインを追加で検索するディレクトリ
+        /// (標準の Common Files\OFX\Plugins と実行ファイル横の Plugins\OFX に加えて検索されます)
+        /// </summary>
+        [SerializableSetting]
+        public List<string> OfxPluginDirectories { get; set; } = [];
+
+        /// <summary>
+        /// OpenFX プラグインの依存 DLL を検索するディレクトリ (PATH に追加されます)
+        /// Natron 付属プラグインなど、プラグイン本体と別の場所に依存 DLL を持つプラグイン用
+        /// </summary>
+        [SerializableSetting]
+        public List<string> OfxDllDirectories { get; set; } = [];
+
         [SerializableSetting]
         public bool UseAutoSave { get; set; } = true;
 

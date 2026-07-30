@@ -253,6 +253,7 @@ namespace NiVE3.ViewModel
                 PrevValue = CurrentTimeRawValue;
                 IsEditing = true;
                 UseEditingValue = true;
+                PropertyModel.BeginEditSession();
             }, () => !IsEditing).ObservesProperty(() => IsEditing);
 
             EndEditCommand = new DelegateCommand(() =>
@@ -260,6 +261,7 @@ namespace NiVE3.ViewModel
                 PropertyModel.CommitProperty(CurrentTimeRawValue, PrevValue);
                 UseEditingValue = false;
                 IsEditing = false;
+                PropertyModel.EndEditSession();
             }, () => IsEditing && !IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             AbortEditCommand = new DelegateCommand(() =>
@@ -267,6 +269,7 @@ namespace NiVE3.ViewModel
                 CurrentTimeRawValue = PrevValue;
                 UseEditingValue = false;
                 IsEditing = false;
+                PropertyModel.AbortEditSession();
             }, () => IsEditing && !IsEditingExpression).ObservesProperty(() => IsEditing).ObservesProperty(() => IsEditingExpression);
 
             BeginEditExpressionCommand = new DelegateCommand(() =>

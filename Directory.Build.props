@@ -1,0 +1,17 @@
+<Project>
+  <!-- 全プロジェクト共通のビルド設定 -->
+  <PropertyGroup>
+    <Configurations>Debug;Release;DebugDiagnostics</Configurations>
+  </PropertyGroup>
+
+  <!--
+    DebugDiagnostics 構成: Debug 相当 + OFX のログ出力/診断コードを含める構成。
+    NIVE3_OFX_DIAGNOSTICS シンボルで有効になるコード (OfxLog、トレース、BMP ダンプ等) は
+    Debug / Release ではコンパイル時に完全に除去される。
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'DebugDiagnostics'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE;NIVE3_OFX_DIAGNOSTICS</DefineConstants>
+  </PropertyGroup>
+</Project>

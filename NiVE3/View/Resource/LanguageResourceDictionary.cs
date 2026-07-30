@@ -931,6 +931,18 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, LanguageKey, DefaultValue("アピアランス")]
         public static readonly string OptionView_Category_Appearance = nameof(OptionView_Category_Appearance);
 
+        [ShowInMarkup, LanguageKey, DefaultValue("OpenFX")]
+        public static readonly string OptionView_Category_OpenFX = nameof(OptionView_Category_OpenFX);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("追加のプラグイン検索フォルダ (1行に1フォルダ)")]
+        public static readonly string OptionView_OpenFX_PluginDirectories = nameof(OptionView_OpenFX_PluginDirectories);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("依存DLLの検索フォルダ (1行に1フォルダ)")]
+        public static readonly string OptionView_OpenFX_DllDirectories = nameof(OptionView_OpenFX_DllDirectories);
+
+        [ShowInMarkup, LanguageKey, DefaultValue("変更はアプリケーションの再起動後に反映されます")]
+        public static readonly string OptionView_OpenFX_RestartNote = nameof(OptionView_OpenFX_RestartNote);
+
         [ShowInMarkup, LanguageKey, DefaultValue("平面のフォルダ名")]
         public static readonly string OptionView_General_SolidFilderName = nameof(OptionView_General_SolidFilderName);
 

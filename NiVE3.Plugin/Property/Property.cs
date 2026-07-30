@@ -42,6 +42,19 @@ namespace NiVE3.Plugin.Property
         /// </summary>
         public string DisplayName => DisplayNameKey?.GetText() ?? RawDisplayName ?? "";
 
+        /// <summary>
+        /// プロパティの値をプロジェクトファイルへ保存するかどうか
+        /// false の場合、値は保存・復元されません (ライセンスキーなど保存すべきでない値に使用します)
+        /// </summary>
+        public bool IsPersistent { get; init; } = true;
+
+        /// <summary>
+        /// 表示管理用のステートの生成をカスタマイズするためのファクトリ
+        /// 設定されている場合、CreateState の既定の実装はこのファクトリを使用します
+        /// (実行時にプロパティの表示/有効状態を切り替えるエフェクト向け)
+        /// </summary>
+        public Func<PropertyViewState>? ViewStateFactory { get; init; }
+
         string? RawDisplayName { get; }
 
         LanguageResourceKey? DisplayNameKey { get; }
@@ -107,7 +120,7 @@ namespace NiVE3.Plugin.Property
         /// <returns>ステートを管理するPropertyViewState</returns>
         public virtual PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
-            return new PropertyViewState(DisplayName);
+            return ViewStateFactory?.Invoke() ?? new PropertyViewState(DisplayName);
         }
 
         /// <summary>

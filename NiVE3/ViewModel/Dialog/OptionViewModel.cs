@@ -84,6 +84,14 @@ namespace NiVE3.ViewModel.Dialog
 
         [ReactiveProperty]
         [SettingProperty]
+        public partial string OfxPluginDirectories { get; set; } = "";
+
+        [ReactiveProperty]
+        [SettingProperty]
+        public partial string OfxDllDirectories { get; set; } = "";
+
+        [ReactiveProperty]
+        [SettingProperty]
         public partial bool UseAutoSave { get; set; }
 
         [ReactiveProperty]
@@ -219,6 +227,8 @@ namespace NiVE3.ViewModel.Dialog
             DefaultNullObjectLayerTag = ApplicationSetting.Setting.DefaultNullObjectLayerTag;
             DefaultTextLayerTag = ApplicationSetting.Setting.DefaultTextLayerTag;
             DefaultCompositionLayerTag = ApplicationSetting.Setting.DefaultCompositionLayerTag;
+            OfxPluginDirectories = string.Join(Environment.NewLine, ApplicationSetting.Setting.OfxPluginDirectories);
+            OfxDllDirectories = string.Join(Environment.NewLine, ApplicationSetting.Setting.OfxDllDirectories);
 
             SelectedGpuDevice = AvailableGpuDevices.FirstOrDefault(d => d.Item1 == UseGpuLuid, AvailableGpuDevices[0]);
 
@@ -248,6 +258,8 @@ namespace NiVE3.ViewModel.Dialog
             ApplicationSetting.Setting.DefaultNullObjectLayerTag = DefaultNullObjectLayerTag;
             ApplicationSetting.Setting.DefaultTextLayerTag = DefaultTextLayerTag;
             ApplicationSetting.Setting.DefaultCompositionLayerTag = DefaultCompositionLayerTag;
+            ApplicationSetting.Setting.OfxPluginDirectories = [.. OfxPluginDirectories.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+            ApplicationSetting.Setting.OfxDllDirectories = [.. OfxDllDirectories.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
 
             ApplicationSetting.Setting.RaiseUpdateSetting();
             ApplicationSetting.Setting.Save();

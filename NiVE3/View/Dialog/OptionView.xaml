@@ -101,6 +101,7 @@
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Performance}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_AutoSave}"/>
             <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_Appearance}"/>
+            <ListBoxItem Content="{gm:LanguageResource ResourceKey=OptionView_Category_OpenFX}"/>
         </ListBox>
 
         <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=0}" d:Visibility="Visible">
@@ -320,6 +321,22 @@
                         </UniformGrid>
                     </StackPanel>
                 </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Style="{StaticResource SettingPanelStyle}" Visibility="{Binding ElementName=SettingType, Path=SelectedIndex, Converter={StaticResource SelectTypeConverter}, ConverterParameter=4}" d:Visibility="Collapsed">
+            <StackPanel>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_OpenFX_PluginDirectories}">
+                    <TextBox Margin="{StaticResource GroupBoxInnerMargin}" Height="80" AcceptsReturn="True" TextWrapping="NoWrap"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                             Text="{Binding OfxPluginDirectories, UpdateSourceTrigger=PropertyChanged}"/>
+                </GroupBox>
+                <GroupBox Header="{gm:LanguageResource ResourceKey=OptionView_OpenFX_DllDirectories}" Margin="{StaticResource GroupMargin}">
+                    <TextBox Margin="{StaticResource GroupBoxInnerMargin}" Height="80" AcceptsReturn="True" TextWrapping="NoWrap"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                             Text="{Binding OfxDllDirectories, UpdateSourceTrigger=PropertyChanged}"/>
+                </GroupBox>
+                <TextBlock Text="{gm:LanguageResource ResourceKey=OptionView_OpenFX_RestartNote}" Margin="0,10,0,0" Opacity="0.7"/>
             </StackPanel>
         </ScrollViewer>
 

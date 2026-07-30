@@ -431,7 +431,7 @@ namespace NiVE3.Model
                 IsEnabled = IsEnable,
                 PropertyTypeName = Property.PropertyType.GetType().FullName ?? "",
                 Name = Name,
-                Children = [..Children.Select(p => p.SaveData())]
+                Children = [..Children.Where(p => p.Property.IsPersistent).Select(p => p.SaveData())]
             };
         }
 

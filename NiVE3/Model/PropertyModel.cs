@@ -345,6 +345,45 @@ namespace NiVE3.Model
             RawValue = value;
         }
 
+        /// <summary>
+        /// 編集セッション (BeginEditCommand) の開始時に発生します
+        /// </summary>
+        public event EventHandler<EventArgs>? EditSessionBegan;
+
+        /// <summary>
+        /// 編集セッション (EndEditCommand) の終了時に発生します
+        /// </summary>
+        public event EventHandler<EventArgs>? EditSessionEnded;
+
+        /// <summary>
+        /// 編集セッション (AbortEditCommand) の中止時に発生します
+        /// </summary>
+        public event EventHandler<EventArgs>? EditSessionAborted;
+
+        /// <summary>
+        /// 編集セッションの開始を通知します
+        /// </summary>
+        public void BeginEditSession()
+        {
+            EditSessionBegan?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// 編集セッションの終了を通知します
+        /// </summary>
+        public void EndEditSession()
+        {
+            EditSessionEnded?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// 編集セッションの中止を通知します
+        /// </summary>
+        public void AbortEditSession()
+        {
+            EditSessionAborted?.Invoke(this, EventArgs.Empty);
+        }
+
         public object? GetRawValue(Time layerTime)
         {
             if (UseEditingValue || KeyFrames.Count < 1)

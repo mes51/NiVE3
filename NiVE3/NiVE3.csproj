@@ -3,6 +3,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <!-- OpenFX プラグイン (Sapphire 等) が CET シャドウスタック非対応のスタック操作を行うため無効化する -->
+    <CETCompat>false</CETCompat>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -67,6 +69,7 @@
     <ProjectReference Include="..\NiVE3.Image\NiVE3.Image.csproj" />
     <ProjectReference Include="..\NiVE3.InternalShader\NiVE3.InternalShader.csproj" />
     <ProjectReference Include="..\NiVE3.Numerics\NiVE3.Numerics.csproj" />
+    <ProjectReference Include="..\NiVE3.OpenFX\NiVE3.OpenFX.csproj" />
     <ProjectReference Include="..\NiVE3.Plugin\NiVE3.Plugin.csproj" />
     <ProjectReference Include="..\NiVE3.Shape\NiVE3.Shape.csproj" />
     <ProjectReference Include="..\NiVE3.Shared\NiVE3.Shared.csproj" />
