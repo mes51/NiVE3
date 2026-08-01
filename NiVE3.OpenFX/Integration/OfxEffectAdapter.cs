@@ -470,7 +470,7 @@ namespace NiVE3.OpenFX.Integration
         static double ToOfxTime(Time time, double frameRate)
         {
             // OFX の時間はフレーム番号 (double)
-            return (double)time * frameRate;
+            return Time.FromTime((double)time, frameRate).Frame;
         }
 
         (Vector4[]? Output, OfxStatus Status) RenderOnce(EffectInstance instance, double ofxTime, int width, int height, IOfxFrameProvider provider, bool useGpu, double renderScaleX, double renderScaleY)
