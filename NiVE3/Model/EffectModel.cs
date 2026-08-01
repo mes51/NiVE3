@@ -274,7 +274,19 @@ namespace NiVE3.Model
             IsEnable = data.IsEnable;
             if (data.Properties != null)
             {
-                Properties.LoadData(data.Properties);
+                // 値の復元を 1 件ずつプラグインへ通知すると、paramSetValue で連動するパラメータを持つ
+                // プラグイン (FilmConvert の Black/Mid/White Point 等) が復元途中の値から連動先を
+                // 再計算してしまい、保存した値が壊れる。復元中は編集通知を抑止し、
+                // 完了後に 1 回だけ OnPropertyValuesRestored (書き戻し破棄付き) で同期する
+                SuppressEditNotify = true;
+                try
+                {
+                    Properties.LoadData(data.Properties);
+                }
+                finally
+                {
+                    SuppressEditNotify = false;
+                }
             }
         }
 
