@@ -80,8 +80,8 @@ namespace NiVE3.ViewModel
                 return true;
             }
 
-            var keys = GenerateFilterSeparatorRegex().Split(filterKey);
-            return keys.All(effect.Name.Contains) || keys.All(effect.Category.Contains);
+            var keys = GenerateFilterSeparatorRegex().Split(filterKey).Select(s => s.ToLowerInvariant()).ToArray();
+            return keys.All(effect.Name.ToLowerInvariant().Contains) || keys.All(effect.Category.ToLowerInvariant().Contains);
         }
 
         private void EffectListViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
