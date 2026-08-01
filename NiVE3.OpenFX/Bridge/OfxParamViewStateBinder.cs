@@ -32,7 +32,7 @@ namespace NiVE3.OpenFX.Bridge
             {
                 if (!States.TryGetValue(param, out var list))
                 {
-                    list = new List<WeakReference<PropertyViewState>>();
+                    list = [];
                     States[param] = list;
                     param.UiStateChanged += Param_UiStateChanged;
                 }

@@ -102,7 +102,7 @@ namespace NiVE3.OpenFX.Bridge
             var label = GetString(param, OfxNames.PropLabel, param.Name);
             var animates = GetInt(param, OfxNames.ParamPropAnimates, 0) != 0;
             var isPersistent = GetInt(param, OfxNames.ParamPropPersistant, 1) != 0;
-            Func<PropertyViewState> viewStateFactory = () => binder.CreateState(param, label);
+            PropertyViewState viewStateFactory(PropertyViewState originalViewState) => binder.CreateState(param, label);
 
             switch (param.ParamType)
             {
@@ -112,7 +112,7 @@ namespace NiVE3.OpenFX.Bridge
                     // 中身が空になったグループ/ページは表示しない
                     var children = BuildChildren(param.Name, childrenByParent, instance, buttonClicked, binder);
                     return children.Length > 0
-                        ? new PropertyGroup(param.Name, label, children) { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent }
+                        ? new PropertyGroup(param.Name, label, children) { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent }
                         : null;
                 }
 
@@ -122,14 +122,14 @@ namespace NiVE3.OpenFX.Bridge
                     return new DoubleProperty(param.Name, label, GetDouble(param, OfxNames.ParamPropDefault, 0, 0.0), min, max, animates,
                         slideChangeValue: GetDouble(param, OfxNames.ParamPropIncrement, 0, 1.0),
                         digit: Math.Max(GetInt(param, OfxNames.ParamPropDigits, 2), 0))
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypeInteger:
                 {
                     var (min, max) = GetRange(param, isInteger: true);
                     return new DoubleProperty(param.Name, label, GetInt(param, OfxNames.ParamPropDefault, 0), min, max, animates, slideChangeValue: 1.0, digit: 0)
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypeDouble2D:
@@ -146,7 +146,7 @@ namespace NiVE3.OpenFX.Bridge
                     var (min, max) = GetRange(param, isInteger);
                     return new Vector3dProperty(param.Name, label, defaultValue, new Vector3d(min), new Vector3d(max), animates,
                         digit: isInteger ? 0 : Math.Max(GetInt(param, OfxNames.ParamPropDigits, 2), 0), is3D: is3D)
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypeRGB:
@@ -159,12 +159,12 @@ namespace NiVE3.OpenFX.Bridge
                         (float)GetDouble(param, OfxNames.ParamPropDefault, 0, 0.0),
                         param.ParamType == OfxNames.ParamTypeRGBA ? (float)GetDouble(param, OfxNames.ParamPropDefault, 3, 1.0) : 1.0F);
                     return new ColorProperty(param.Name, label, label, "OK", "Cancel", defaultValue, animates)
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypeBoolean:
                     return new CheckBoxProperty(param.Name, label, GetInt(param, OfxNames.ParamPropDefault, 0) != 0, animates)
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
 
                 case OfxNames.ParamTypeChoice:
                 {
@@ -177,7 +177,7 @@ namespace NiVE3.OpenFX.Bridge
                         .Select(i => param.Properties.TryGet(OfxNames.ParamPropChoiceOption, i, out var v) ? v as string ?? $"({i})" : $"({i})")
                         .ToArray();
                     return new SelectBoxProperty(param.Name, label, options, GetInt(param, OfxNames.ParamPropDefault, 0), animates)
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypeString:
@@ -187,12 +187,12 @@ namespace NiVE3.OpenFX.Bridge
                         isReadOnly: GetInt(param, OfxNames.ParamPropEnabled, 1) == 0,
                         textBoxWidth: isMultiLine ? 300.0 : 200.0,
                         isMultiLine: isMultiLine)
-                    { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypePushButton:
                 {
-                    var button = new ButtonProperty(param.Name, label) { ViewStateFactory = viewStateFactory, IsPersistent = isPersistent };
+                    var button = new ButtonProperty(param.Name, label) { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                     if (buttonClicked != null)
                     {
                         var paramName = param.Name;

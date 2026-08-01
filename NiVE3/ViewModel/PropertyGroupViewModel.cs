@@ -181,7 +181,7 @@ namespace NiVE3.ViewModel
                 vm.PropertyValueCommited += Property_PropertyValueCommited;
                 return vm;
             });
-            ViewState = propertyGroupModel.CreateState(this);
+            ViewState = propertyGroupModel.CreateViewState(this);
             IsRenameable = isRenameable;
 
             AddKeyFrameToSelectedChildrenCommand = new DelegateCommand(() =>

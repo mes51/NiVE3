@@ -237,7 +237,7 @@ namespace NiVE3.ViewModel
             PropertyModel = propertyModel;
             ApplicationViewState = viewState;
             Property = propertyModel.Property;
-            ViewState = propertyModel.CreateState(this);
+            ViewState = propertyModel.CreateViewState(this);
             IsEnableExpression = propertyModel.IsEnableExpression;
             SelectedKeyFrameIds = [];
             ExpressionCodeDocument.Text = propertyModel.ExpressionCode;

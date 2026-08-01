@@ -165,9 +165,9 @@ namespace NiVE3.Model
             return Property.CreateControl(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
-        public PropertyViewState CreateState(IPropertyViewModel viewModel)
+        public PropertyViewState CreateViewState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
+            return Property.CreateViewState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
         public bool ClearExpressionError()

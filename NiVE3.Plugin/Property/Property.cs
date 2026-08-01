@@ -49,11 +49,10 @@ namespace NiVE3.Plugin.Property
         public bool IsPersistent { get; init; } = true;
 
         /// <summary>
-        /// 表示管理用のステートの生成をカスタマイズするためのファクトリ
-        /// 設定されている場合、CreateState の既定の実装はこのファクトリを使用します
-        /// (実行時にプロパティの表示/有効状態を切り替えるエフェクト向け)
+        /// 表示管理用のステートをカスタマイズするためのデリゲート
+        /// 実行時にプロパティの表示/有効状態を切り替えるエフェクト等で使用します。
         /// </summary>
-        public Func<PropertyViewState>? ViewStateFactory { get; init; }
+        public Func<PropertyViewState, PropertyViewState>? ViewStateCustomizer { get; init; }
 
         string? RawDisplayName { get; }
 
@@ -111,19 +110,6 @@ namespace NiVE3.Plugin.Property
         public abstract object? CoerceValue(object? value);
 
         /// <summary>
-        /// プロパティの表示管理用のステートを生成します
-        /// </summary>
-        /// <param name="composition">このプロパティが含まれるコンポジション</param>
-        /// <param name="layer">このプロパティが含まれるレイヤー。コンポジションのプロパティの場合はnull</param>
-        /// <param name="effect">このプロパティが含まれるエフェクト。レイヤーのプロパティやコンポジションのプロパティの場合はnull</param>
-        /// <param name="viewModel">このプロパティのViewModel</param>
-        /// <returns>ステートを管理するPropertyViewState</returns>
-        public virtual PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
-        {
-            return ViewStateFactory?.Invoke() ?? new PropertyViewState(DisplayName);
-        }
-
-        /// <summary>
         /// プレビューパネルからプロパティを操作するためのPropertyInteractionを生成します
         /// </summary>
         /// <param name="viewModel">このプロパティのPropertyInteraction用のViewModel</param>
@@ -131,6 +117,25 @@ namespace NiVE3.Plugin.Property
         public virtual PropertyInteractionBase? CreatePropertyInteraction(IPropertyInteractionViewModel viewModel)
         {
             return null;
+        }
+
+        /// <summary>
+        /// プロパティの表示管理用のステートを生成します
+        /// </summary>
+        /// <param name="composition">このプロパティが含まれるコンポジション</param>
+        /// <param name="layer">このプロパティが含まれるレイヤー。コンポジションのプロパティの場合はnull</param>
+        /// <param name="effect">このプロパティが含まれるエフェクト。レイヤーのプロパティやコンポジションのプロパティの場合はnull</param>
+        /// <param name="viewModel">このプロパティのViewModel</param>
+        /// <returns>ステートを管理するPropertyViewState</returns>
+        protected virtual PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
+        {
+            return new PropertyViewState(DisplayName);
+        }
+
+        internal PropertyViewState CreateViewState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
+        {
+            var state = CreateState(composition, layer, effect, viewModel);
+            return ViewStateCustomizer?.Invoke(state) ?? state;
         }
     }
 

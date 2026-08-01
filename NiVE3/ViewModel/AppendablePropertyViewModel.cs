@@ -153,7 +153,7 @@ namespace NiVE3.ViewModel
                 return (IInternalPropertyViewModel)vm;
             });
             Name = appendablePropertyModel.Name;
-            ViewState = appendablePropertyModel.CreateState(this);
+            ViewState = appendablePropertyModel.CreateViewState(this);
 
             SelectItemCommand = new DelegateCommand(() =>
             {

@@ -25,7 +25,7 @@ namespace NiVE3.Property
             DisplayName3D = displayNameKey3D;
         }
 
-        public override PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
+        protected override PropertyViewState CreateState(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
             if (layer != null)
             {

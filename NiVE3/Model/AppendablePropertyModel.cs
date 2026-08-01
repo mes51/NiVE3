@@ -126,9 +126,9 @@ namespace NiVE3.Model
             throw new NotImplementedException();
         }
 
-        public PropertyViewState CreateState(IPropertyViewModel viewModel)
+        public PropertyViewState CreateViewState(IPropertyViewModel viewModel)
         {
-            return Property.CreateState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
+            return Property.CreateViewState(CompositionProxy, LayerProxy, EffectProxy, viewModel);
         }
 
         public bool ClearExpressionError()

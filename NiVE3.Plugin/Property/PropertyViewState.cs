@@ -13,34 +13,31 @@ namespace NiVE3.Plugin.Property
     /// </summary>
     public class PropertyViewState : INotifyPropertyChanged
     {
-        private string sourceDisplayName = "";
         /// <summary>
         /// プロパティの元の表示名
         /// </summary>
         public string SourceDisplayName
         {
-            get { return sourceDisplayName; }
-            set { SetProperty(ref sourceDisplayName, value); }
+            get;
+            set { SetProperty(ref field, value); }
         }
 
-        private bool isEnabled;
         /// <summary>
         /// プロパティが操作可能かどうか
         /// </summary>
         public bool IsEnabled
         {
-            get { return isEnabled; }
-            set { SetProperty(ref isEnabled, value); }
+            get;
+            set { SetProperty(ref field, value); }
         }
 
-        private bool isVisible;
         /// <summary>
         /// プロパティを表示するかどうか
         /// </summary>
         public bool IsVisible
         {
-            get { return isVisible; }
-            set { SetProperty(ref isVisible, value); }
+            get;
+            set { SetProperty(ref field, value); }
         }
 
         /// <summary>

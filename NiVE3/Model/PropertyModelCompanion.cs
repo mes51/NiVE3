@@ -40,7 +40,7 @@ namespace NiVE3.Model
 
         PropertyControlBase CreateControl(IPropertyViewModel viewModel);
 
-        PropertyViewState CreateState(IPropertyViewModel propertyViewModel);
+        PropertyViewState CreateViewState(IPropertyViewModel propertyViewModel);
 
         bool ClearExpressionError();
 
