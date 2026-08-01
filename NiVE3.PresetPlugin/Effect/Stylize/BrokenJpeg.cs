@@ -24,7 +24,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Stylize
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Stylize_BrokenJpeg_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Stylize, LanguageResourceDictionary.Stylize_BrokenJpeg_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary), IsRenderEveryFrame = true)]
+    [EffectMetadata(LanguageResourceDictionary.Stylize_BrokenJpeg_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Stylize, LanguageResourceDictionary.Stylize_BrokenJpeg_Description, ID, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class BrokenJpeg : IEffect
     {
         const string ID = "F70C3855-E1D7-4727-B7AF-2ADEB607FBE5";
@@ -115,6 +115,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                     new DoubleProperty(PropertyBrokenChrominanceQuantizeTableRandomSeedId, LanguageResourceDictionary.ResourceKeys.Stylize_BrokenJpeg_BrokenQuantizeTable_RandomSeed, 0.0, 0.0, int.MaxValue, digit: 0)
                 ])
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

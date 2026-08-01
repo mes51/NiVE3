@@ -22,7 +22,7 @@ using NiVE3.PresetPlugin.Effect.Util.Noise;
 namespace NiVE3.PresetPlugin.Effect.Noise
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Noise_RandomNoise_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Noise, LanguageResourceDictionary.Noise_RandomNoise_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Noise_RandomNoise_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Noise, LanguageResourceDictionary.Noise_RandomNoise_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class RandomNoise : IEffect
     {
         const string ID = "6D2B8747-EC1B-455B-8670-FAD8B9F79BE2";
@@ -48,6 +48,11 @@ namespace NiVE3.PresetPlugin.Effect.Noise
                 new CheckBoxProperty(PropertyIsColorNoiseId, LanguageResourceDictionary.ResourceKeys.Noise_RandomNoise_IsColorNoise, false),
                 new DoubleProperty(PropertySeedId, LanguageResourceDictionary.ResourceKeys.Noise_RandomNoise_Seed, 0, 0, uint.MaxValue, digit: 0)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

@@ -35,7 +35,7 @@ using Polygon = NiVE3.Shape.Polygon;
 namespace NiVE3.PresetPlugin.Effect.Blur
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Blur_LensBlur_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Blur, LanguageResourceDictionary.Blur_LensBlur_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Blur_LensBlur_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Blur, LanguageResourceDictionary.Blur_LensBlur_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class LensBlur : IEffect
     {
         internal const float GainMultiplyer = 3.0F;
@@ -97,6 +97,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
         public void SetupAccelerator(IAcceleratorObject accelerator)
         {
             AcceleratorObject = accelerator;
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)

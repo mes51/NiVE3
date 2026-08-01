@@ -25,7 +25,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Stylize
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Stylize_BumpMappinglMap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Stylize, LanguageResourceDictionary.Stylize_BumpMapping_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Stylize_BumpMappinglMap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Stylize, LanguageResourceDictionary.Stylize_BumpMapping_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class BumpMapping : IEffect
     {
         const float ShininessStrength = 120.0F;
@@ -101,6 +101,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                     new DoubleProperty(PropertyMaterialMetalId, LanguageResourceDictionary.ResourceKeys.Stylize_BumpMapping_Material_Metal, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
                 ])
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

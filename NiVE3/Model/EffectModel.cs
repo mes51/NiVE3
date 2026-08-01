@@ -38,8 +38,6 @@ namespace NiVE3.Model
 
         public string EffectName => Metadata.Name;
 
-        public bool IsRenderEveryFrame => Metadata.IsRenderEveryFrame || UseCompositionCamera; // TODO: アクティブカメラが変わったときのみ再レンダリングするようにする
-
         public bool IsDummyEffect => Metadata.IsDummyEffect;
 
         public bool UseCompositionCamera => Metadata.UseCompositionCamera;
@@ -222,6 +220,11 @@ namespace NiVE3.Model
             }
         }
 
+        public bool IsNeedRenderFrame(Time layerTime)
+        {
+            return UseCompositionCamera || Effect.Value.IsNeedRenderFrame([..Properties.Children], layerTime);
+        }
+
         public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime)
         {
             return Effect.Value.CalcRoi(baseRoi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel, LayerModel);
@@ -231,7 +234,7 @@ namespace NiVE3.Model
         {
             try
             {
-                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, Properties.Children.ToArray(), CompositionModel, LayerModel, useGpu && IsSupportGpu);
+                return Effect.Value.Process(image, roi, downSamplingRateX, downSamplingRateY, layerTime, [..Properties.Children], CompositionModel, LayerModel, useGpu && IsSupportGpu);
             }
             catch (Exception ex)
             {
@@ -248,7 +251,7 @@ namespace NiVE3.Model
 
         public float[] ProcessAudio(float[] audio, Time startTime)
         {
-            return Effect.Value.Process(audio, startTime, Properties.Children.ToArray(), CompositionModel, LayerModel);
+            return Effect.Value.Process(audio, startTime, [..Properties.Children], CompositionModel, LayerModel);
         }
 
         public EffectData SaveData()

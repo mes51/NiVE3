@@ -27,7 +27,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Simulation_CardDance_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_CardDance_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, UseCompositionCamera = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Simulation_CardDance_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_CardDance_Description, ID, IsSupportGpu = true, UseCompositionCamera = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class CardDance : IEffect
     {
         const string ID = "05A641A8-F97D-4E33-9F2B-B6575242385F";
@@ -268,6 +268,11 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                 ),
                 new CheckBoxProperty(PropertyRenderingAntiAliasId, LanguageResourceDictionary.ResourceKeys.Simulation_CardDance_RenderingAntiAlias, true)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

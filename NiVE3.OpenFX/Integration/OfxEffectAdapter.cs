@@ -49,10 +49,15 @@ namespace NiVE3.OpenFX.Integration
 
         Vector4[]? LastRenderOutput { get; set; }
 
+        bool IsRenderEveryFrame { get; set; }
+
         /// <summary>
         /// プラグインがパラメータ連動で値を書き換えた際に発生します (EffectModel がプロパティモデルへ反映する)
         /// </summary>
         public event EventHandler<PropertyValuesWritebackEventArgs>? PropertyValuesWriteback;
+
+        // 直近に GetClipPreferences を実行した時点のパラメータ値のハッシュ (再実行の要否判定用)
+        ulong LastPrefsParamsHash { get; set; }
 
         // OnPropertyValuesEdited で通知中のパラメータ名 (編集中のパラメータへの書き戻しを抑止する)
         string? NotifyingParamName { get; set; }
@@ -94,6 +99,11 @@ namespace NiVE3.OpenFX.Integration
             }
         }
 
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return IsRenderEveryFrame;
+        }
+
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)
         {
             lock (Lock)
@@ -110,6 +120,13 @@ namespace NiVE3.OpenFX.Integration
 
                 UpdateProjectProperties(instance, composition);
                 OfxParamBridge.ApplyValues(instance, properties, layerTime);
+
+                // 編集通知を経ないパラメータ値の変化 (プロジェクト読込直後の初回レンダリング等) も
+                // GetClipPreferences (FrameVarying 等) へ反映する
+                if (CalcParamsHash(instance) != LastPrefsParamsHash)
+                {
+                    UpdateClipPreferences(instance);
+                }
 
                 var ofxTime = ToOfxTime(layerTime, composition.FrameRate);
                 // NiVE3 の downSamplingRate は除数 (2 で半分の解像度)、OFX の renderScale は係数 (0.5 で半分)
@@ -256,14 +273,7 @@ namespace NiVE3.OpenFX.Integration
             }
 
             // クリップの希望設定を取得し、毎フレーム変化するエフェクトかどうかを反映する
-            var (outArgs, prefStatus) = Runtime.GetClipPreferences(Definition.Plugin, instance);
-            using (outArgs)
-            {
-                if (prefStatus == OfxStatus.OK && outArgs.GetOrDefault(OfxNames.ImageEffectPropFrameVarying, 0) is int frameVarying && frameVarying != 0)
-                {
-                    Definition.Metadata.IsRenderEveryFrame = true;
-                }
-            }
+            UpdateClipPreferences(instance);
             return true;
         }
 
@@ -293,10 +303,12 @@ namespace NiVE3.OpenFX.Integration
                 PendingWritebacks = new List<KeyValuePair<string, object?>>();
                 try
                 {
+                    var paramsChanged = false;
                     foreach (var (param, oldValues) in before)
                     {
                         if (!oldValues.SequenceEqual(param.Values))
                         {
+                            paramsChanged = true;
                             // 編集されたパラメータ自身への書き戻しは抑止する (編集操作と競合するため)
                             NotifyingParamName = param.Name;
                             try
@@ -311,7 +323,12 @@ namespace NiVE3.OpenFX.Integration
                         }
                     }
 
-                    NotifyClipTargetChanges(properties);
+                    var clipsChanged = NotifyClipTargetChanges(properties);
+
+                    if (paramsChanged || clipsChanged)
+                    {
+                        UpdateClipPreferences(Instance);
+                    }
                 }
                 finally
                 {
@@ -366,6 +383,7 @@ namespace NiVE3.OpenFX.Integration
 
                 // 通知中にプラグインが値を書き換えた場合に備え、復元された値を再適用する
                 OfxParamBridge.ApplyValues(Instance, properties, LastTime);
+                UpdateClipPreferences(Instance);
             }
         }
 
@@ -426,6 +444,7 @@ namespace NiVE3.OpenFX.Integration
                 {
                     var status = Runtime.NotifyParamChanged(Definition.Plugin, Instance, paramName, ToOfxTime(LastTime, LastFrameRate));
                     OfxLog.Info($"InstanceChanged({Definition.Plugin.Identifier}/{paramName}): {status}");
+                    UpdateClipPreferences(Instance);
                 }
                 finally
                 {
@@ -484,6 +503,19 @@ namespace NiVE3.OpenFX.Integration
             hash.Append(BitConverter.GetBytes(useGpu));
             hash.Append(BitConverter.GetBytes(renderScaleX));
             hash.Append(BitConverter.GetBytes(renderScaleY));
+            AppendParamValues(hash, instance);
+            return hash.GetCurrentHashAsUInt64();
+        }
+
+        static ulong CalcParamsHash(EffectInstance instance)
+        {
+            var hash = new XxHash3();
+            AppendParamValues(hash, instance);
+            return hash.GetCurrentHashAsUInt64();
+        }
+
+        static void AppendParamValues(XxHash3 hash, EffectInstance instance)
+        {
             foreach (var param in instance.Params.Params)
             {
                 foreach (var value in param.Values)
@@ -502,7 +534,6 @@ namespace NiVE3.OpenFX.Integration
                     }
                 }
             }
-            return hash.GetCurrentHashAsUInt64();
         }
 
         /// <summary>
@@ -547,13 +578,15 @@ namespace NiVE3.OpenFX.Integration
         /// (OnPropertyValuesEdited / OnPropertyValuesRestored の通知ブロック内から呼び出します)
         /// </summary>
         /// <param name="properties">エフェクトのプロパティ一覧</param>
-        void NotifyClipTargetChanges(IPropertyObject[] properties)
+        /// <returns>1 つ以上のクリップの割り当てが変化したかどうか</returns>
+        bool NotifyClipTargetChanges(IPropertyObject[] properties)
         {
             var instance = Instance;
             if (instance == null)
             {
-                return;
+                return false;
             }
+            var changed = false;
             foreach (var clip in instance.ExtraInputClips)
             {
                 var target = GetClipTarget(properties, clip.Name, LastTime);
@@ -562,10 +595,37 @@ namespace NiVE3.OpenFX.Integration
                 {
                     continue;
                 }
+                changed = true;
                 LastClipTargets[clip.Name] = target;
                 clip.SetConnected(target != UseLayerImageTarget.Empty);
                 var status = Runtime.NotifyClipChanged(Definition.Plugin, instance, clip.Name, ToOfxTime(LastTime, LastFrameRate));
                 OfxLog.Info($"InstanceChanged(クリップ {Definition.Plugin.Identifier}/{clip.Name}): {status}");
+            }
+            return changed;
+        }
+
+        /// <summary>
+        /// GetClipPreferences を実行し、FrameVarying (毎フレーム再レンダリングの要否) を反映します
+        /// GMIC の Animate Random Seed のように、パラメータ値によって FrameVarying が変わるプラグインに
+        /// 追従するため、パラメータ変更後にも呼び出します
+        /// </summary>
+        /// <param name="instance">対象のインスタンス</param>
+        void UpdateClipPreferences(EffectInstance instance)
+        {
+            LastPrefsParamsHash = CalcParamsHash(instance);
+            var (outArgs, prefStatus) = Runtime.GetClipPreferences(Definition.Plugin, instance);
+            using (outArgs)
+            {
+                if (prefStatus != OfxStatus.OK)
+                {
+                    return;
+                }
+                var frameVarying = outArgs.GetOrDefault(OfxNames.ImageEffectPropFrameVarying, 0) is int value && value != 0;
+                if (frameVarying != IsRenderEveryFrame)
+                {
+                    IsRenderEveryFrame = frameVarying;
+                    OfxLog.Info($"FrameVarying が変化しました: {Definition.Plugin.Identifier} -> {frameVarying}");
+                }
             }
         }
 

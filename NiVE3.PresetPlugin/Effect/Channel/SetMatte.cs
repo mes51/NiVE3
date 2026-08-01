@@ -23,7 +23,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.Channel
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Channel_SetMatte_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Channel, LanguageResourceDictionary.Channel_SetMatte_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Channel_SetMatte_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Channel, LanguageResourceDictionary.Channel_SetMatte_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class SetMatte : IEffect
     {
         const string ID = "8123B2CE-919F-4574-AF94-899D296AAC0E";
@@ -55,6 +55,11 @@ namespace NiVE3.PresetPlugin.Effect.Channel
                 new CheckBoxProperty(PropertyIsInvertId, LanguageResourceDictionary.ResourceKeys.Channel_SetMatte_IsInvert, false),
                 new EnumProperty(PropertyModeId, LanguageResourceDictionary.ResourceKeys.Channel_MinMax_Mode, typeof(SetMatteMode), typeof(LanguageResourceDictionary), SetMatteMode.Overwrite, selectBoxWidth: 90.0)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

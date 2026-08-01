@@ -39,7 +39,7 @@ using Polygon = NiVE3.Shape.Polygon;
 namespace NiVE3.PresetPlugin.Effect.Simulation
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Simulation_Shatter_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Shatter_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, UseCompositionCamera = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Simulation_Shatter_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Simulation, LanguageResourceDictionary.Simulation_Shatter_Description, ID, IsSupportGpu = true, UseCompositionCamera = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class Shatter : IEffect
     {
         const float ShapeWireframeThickness = 1.0F;
@@ -221,6 +221,11 @@ namespace NiVE3.PresetPlugin.Effect.Simulation
                     ]
                 )
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

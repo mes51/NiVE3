@@ -25,7 +25,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Distortion
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Distortion_GlassDistortion_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_GlassDistortion_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Distortion_GlassDistortion_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_GlassDistortion_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class GlassDistortion : IEffect
     {
         const string ID = "766B9EEE-982B-4372-8F87-E7DD71597C6C";
@@ -57,6 +57,11 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 new DoubleProperty(PropertyRateId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_Rate, 50.0, -100.0, 100.0, digit: 2),
                 new DoubleProperty(PropertyDisplacementAmountId, LanguageResourceDictionary.ResourceKeys.Distortion_GlassDistortion_DisplacementAmount, 100.0, -1000.0, 1000.0, digit: 2)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

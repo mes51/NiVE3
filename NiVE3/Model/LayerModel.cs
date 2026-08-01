@@ -271,8 +271,6 @@ namespace NiVE3.Model
 
         AcceleratorModel AcceleratorModel { get; }
 
-        bool HasRenderEveryFrameEffect { get; set; }
-
         public LayerModel(ProjectModel projectModel, CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel) : this(projectModel, compositionModel, footageModel, effectListModel, historyModel, acceleratorModel, null) { }
 
         public LayerModel(ProjectModel projectModel, CompositionModel compositionModel, FootageModel footageModel, EffectListModel effectListModel, HistoryModel historyModel, AcceleratorModel acceleratorModel, Guid? layerId)
@@ -499,7 +497,7 @@ namespace NiVE3.Model
             {
                 CalcCacheKeyHash(hash, globalTime, false, false);
 
-                if ((IsVideo && !IsFreezeFrame) || HasRenderEveryFrameEffect)
+                if ((IsVideo && !IsFreezeFrame) || Effects.Any(e => e.IsNeedRenderFrame(layerTime)))
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, device, out var cachedImage))
                     {
@@ -602,7 +600,7 @@ namespace NiVE3.Model
                 CalcCacheKeyHash(hash, time, withTrackMatte, frameBlend);
 
                 var device = useGpu ? AcceleratorModel.CurrentDevice : null;
-                if ((IsVideo && !IsFreezeFrame) || HasRenderEveryFrameEffect)
+                if ((IsVideo && !IsFreezeFrame) || Effects.Any(e => e.IsNeedRenderFrame(layerTime)))
                 {
                     if (ImageCache.TryGet(LayerId, hash.ToInt128(), layerTime, device, out var cachedImage))
                     {
@@ -1816,15 +1814,17 @@ namespace NiVE3.Model
             }
         }
 
-        public bool IsMotionBlurTarget()
+        public bool IsMotionBlurTarget(Time time)
         {
+            var layerTime = time - SourceStartPoint;
+
             return IsEnableMotionBlur &&
                 ((TransformProperties?.IsChangeableByTime() ?? false) ||
                 (LayerOptionProperties?.IsChangeableByTime() ?? false) ||
                 (TextProperties?.IsChangeableByTime() ?? false) ||
                 (ShapeProperties?.IsChangeableByTime() ?? false) ||
                 (SourceOptionProperties?.IsChangeableByTime() ?? false) ||
-                Effects.Any(e => e.IsRenderEveryFrame || e.PropertyIsChangeableByTime())) ||
+                Effects.Any(e => e.IsNeedRenderFrame(layerTime) || e.PropertyIsChangeableByTime())) ||
                 Masks.Any(m => m.PropertyIsChangeableByTime());
         }
 
@@ -3155,7 +3155,6 @@ namespace NiVE3.Model
         {
             HasEffect = Effects.Count > 0;
             HasNonDummyEffect = Effects.Any(e => !e.IsDummyEffect);
-            HasRenderEveryFrameEffect = Effects.Any(e => e.IsRenderEveryFrame);
 
             foreach (var oldEffect in (e.OldItems?.Cast<EffectModel>() ?? []))
             {

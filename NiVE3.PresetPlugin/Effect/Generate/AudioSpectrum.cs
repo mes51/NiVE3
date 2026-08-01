@@ -35,7 +35,7 @@ using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.PresetPlugin.Effect.Generate
 {
-    [EffectMetadata(LanguageResourceDictionary.Generate_AudioSpectrum_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Generate, LanguageResourceDictionary.Generate_AudioSpectrum_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Generate_AudioSpectrum_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Generate, LanguageResourceDictionary.Generate_AudioSpectrum_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     [Export(typeof(IEffect))]
     public sealed class AudioSpectrum : IEffect
     {
@@ -109,6 +109,11 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 new EnumProperty(PropertyBlendModeId, LanguageResourceDictionary.ResourceKeys.Generate_AudioSpectrum_BlendMode, typeof(BlendMode), typeof(LanguageResourceDictionary), BlendMode.Normal),
 
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

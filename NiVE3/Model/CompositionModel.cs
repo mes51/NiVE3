@@ -777,7 +777,7 @@ namespace NiVE3.Model
 
             try
             {
-                if (IsEnableMotionBlur && Layers.Any(l => l.IsMotionBlurTarget()))
+                if (IsEnableMotionBlur && Layers.Any(l => l.IsMotionBlurTarget(time)))
                 {
                     var shatterStartTime = FrameDuration * ShutterPhase / 360.0F;
                     var hash = new XxHash3();

@@ -26,7 +26,7 @@ using NiVE3.Shared.Extension;
 namespace NiVE3.PresetPlugin.Effect.Distortion
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Distortion_DisplacementMap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_DisplacementMap_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Distortion_DisplacementMap_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_DisplacementMap_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class DisplacementMap : IEffect
     {
         static readonly Vector4 Half = Vector4.One * 0.5F;
@@ -66,6 +66,11 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 new EnumProperty(PropertySourceLayerPositionId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_SourceLayerPosition, typeof(SourceLayerPositionType), typeof(LanguageResourceDictionary), SourceLayerPositionType.Center),
                 new CheckBoxProperty(PropertyIsLoopImageId, LanguageResourceDictionary.ResourceKeys.Distortion_DisplacementMap_IsLoopImage, false)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

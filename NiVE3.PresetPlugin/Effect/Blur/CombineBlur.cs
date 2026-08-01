@@ -28,7 +28,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Blur
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Blur_CombineBlur_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Blur, LanguageResourceDictionary.Blur_CombineBlur_Description, ID, IsRenderEveryFrame = true, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Blur_CombineBlur_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Blur, LanguageResourceDictionary.Blur_CombineBlur_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class CombineBlur : IEffect
     {
         const string ID = "0294992A-875A-4561-B0D7-4D95D1A0EF22";
@@ -63,6 +63,11 @@ namespace NiVE3.PresetPlugin.Effect.Blur
                 new DoubleProperty(PropertyVerticalAmountId, LanguageResourceDictionary.ResourceKeys.Blur_CombineBlur_VerticalAmount, 0.0, 0.0, 10000.0, digit: 2),
                 new EnumProperty(PropertyEdgeRepeatModeId, LanguageResourceDictionary.ResourceKeys.Blur_CombineBlur_EdgeRepeatMode, typeof(EdgeRepeatMode), typeof(LanguageResourceDictionary), EdgeRepeatMode.None, selectBoxWidth: 90.0)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public ROI CalcRoi(ROI baseRoi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer)

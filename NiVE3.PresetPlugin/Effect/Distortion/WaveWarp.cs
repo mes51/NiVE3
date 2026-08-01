@@ -23,7 +23,7 @@ using NiVE3.PresetPlugin.Resource;
 namespace NiVE3.PresetPlugin.Effect.Distortion
 {
     [Export(typeof(IEffect))]
-    [EffectMetadata(LanguageResourceDictionary.Distortion_WaveWarp_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_WaveWarp_Description, ID, IsSupportGpu = true, IsRenderEveryFrame = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
+    [EffectMetadata(LanguageResourceDictionary.Distortion_WaveWarp_Name, "mes51", DefaultLanguageResourceNames.EffectCategory_Distortion, LanguageResourceDictionary.Distortion_WaveWarp_Description, ID, IsSupportGpu = true, LanguageResourceDictionaryType = typeof(LanguageResourceDictionary))]
     public sealed class WaveWarp : IEffect
     {
         const string ID = "CF55D043-4440-418F-A62F-429EA63402B7";
@@ -61,6 +61,11 @@ namespace NiVE3.PresetPlugin.Effect.Distortion
                 new AngleProperty(PropertyPhaseId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_Phase, 0.0),
                 new DoubleProperty(PropertyRandomSeedId, LanguageResourceDictionary.ResourceKeys.Distortion_WaveWarp_RandomSeed, 0.0, 0.0, double.MaxValue, digit: 0)
             ];
+        }
+
+        public bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime)
+        {
+            return true;
         }
 
         public NImage Process(NImage image, ROI roi, double downSamplingRateX, double downSamplingRateY, Time layerTime, IPropertyObject[] properties, ICompositionObject composition, ILayerObject layer, bool useGpu)

@@ -25,6 +25,14 @@ namespace NiVE3.Plugin.Interfaces
         PropertyBase[] GetProperties(Int32Size sourceSize);
 
         /// <summary>
+        /// 現在のレイヤー時間でレンダリングが必要かどうかを確認します。
+        /// </summary>
+        /// <param name="properties">プロパティ</param>
+        /// <param name="layerTime">現在のレイヤーの時間</param>
+        /// <returns>同一プロパティでも時間経過で適用結果が変わる場合はtrue、キャッシュが使用可能な場合はfalse</returns>
+        bool IsNeedRenderFrame(IPropertyObject[] properties, Time layerTime) => false;
+
+        /// <summary>
         /// エフェクトの適用範囲を計算します
         /// </summary>
         /// <param name="baseRoi">このエフェクトの前までで計算されたエフェクトの適用範囲</param>
