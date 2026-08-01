@@ -102,7 +102,7 @@ namespace NiVE3.OpenFX.Bridge
             var label = GetString(param, OfxNames.PropLabel, param.Name);
             var animates = GetInt(param, OfxNames.ParamPropAnimates, 0) != 0;
             var isPersistent = GetInt(param, OfxNames.ParamPropPersistant, 1) != 0;
-            PropertyViewState viewStateFactory(PropertyViewState originalViewState) => binder.CreateState(param, label);
+            PropertyViewState viewStateFactory(PropertyViewState originalViewState) => binder.Customize(param, originalViewState);
 
             switch (param.ParamType)
             {

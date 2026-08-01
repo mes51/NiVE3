@@ -20,14 +20,16 @@ namespace NiVE3.OpenFX.Bridge
         object Lock { get; } = new object();
 
         /// <summary>
-        /// パラメータに連動する PropertyViewState を生成します
+        /// プロパティが生成した PropertyViewState をパラメータに連動するようカスタマイズします
+        /// (PropertyBase.ViewStateCustomizer 用。渡されたステートに初期状態を反映し、実行時の変更に追従させます)
         /// </summary>
         /// <param name="param">対象のパラメータ</param>
-        /// <param name="displayName">表示名</param>
-        /// <returns>生成されたステート</returns>
-        public PropertyViewState CreateState(ParamInstance param, string displayName)
+        /// <param name="state">プロパティが生成したステート</param>
+        /// <returns>カスタマイズされたステート (引数と同じインスタンス)</returns>
+        public PropertyViewState Customize(ParamInstance param, PropertyViewState state)
         {
-            var state = new PropertyViewState(displayName, IsEnabled(param), IsVisible(param));
+            state.IsEnabled = IsEnabled(param);
+            state.IsVisible = IsVisible(param);
             lock (Lock)
             {
                 if (!States.TryGetValue(param, out var list))

@@ -319,12 +319,6 @@ namespace NiVE3.OpenFX.Integration
 
         public string EffectUuid { get; }
 
-        /// <summary>
-        /// 毎フレーム再レンダリングが必要かどうか
-        /// GetClipPreferences の FrameVarying からインスタンス生成時に更新されます
-        /// </summary>
-        public bool IsRenderEveryFrame { get; internal set; }
-
         public bool IsDummyEffect => false;
 
         public bool IsSupportGpu { get; }
