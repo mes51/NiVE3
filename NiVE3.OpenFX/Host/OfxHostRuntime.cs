@@ -49,7 +49,11 @@ namespace NiVE3.OpenFX.Host
             props.SetAll(OfxNames.PropLabel, "NiVE3");
             props.SetAll(OfxNames.PropVersion, 3, 0, 0);
             props.SetAll(OfxNames.PropVersionLabel, "3.0.0");
-            props.SetAll(OfxNames.PropAPIVersion, 1, 4);
+            // 1.5.1 の実装済み機能: GPU レンダリング (OpenCL Buffers/CUDA/GL ContextAttached・Detached)、
+            // StrChoice + ChoiceOrder、CPURenderSupported/ThumbnailRender/NoSpatialAwareness。
+            // Dialog Suite (Sapphire の実装が壊れているため不提供)・DrawSuite (Interact 基盤ごと未対応)・
+            // カラーマネジメント (None を明示宣言) は任意機能のため未提供でも宣言可能
+            props.SetAll(OfxNames.PropAPIVersion, 1, 5, 1);
 
             props.SetAll(OfxNames.ImageEffectHostPropIsBackground, 0);
             props.SetAll(OfxNames.ImageEffectPropSupportsOverlays, 0);
@@ -78,6 +82,8 @@ namespace NiVE3.OpenFX.Host
             props.SetAll(OfxNames.ImageEffectPropOpenCLSupported, "false");
             props.SetAll(OfxNames.ParamHostPropSupportsStrChoice, 1);
             props.SetAll(OfxNames.ParamHostPropSupportsStrChoiceAnimation, 0);
+            // カラーマネジメント (1.5) は非対応を明示する
+            props.SetAll(OfxNames.ImageEffectPropColourManagementStyle, OfxNames.ImageEffectColourManagementNone);
 
             props.SetAll(OfxNames.ParamHostPropSupportsCustomInteract, 0);
             props.SetAll(OfxNames.ParamHostPropSupportsStringAnimation, 0);

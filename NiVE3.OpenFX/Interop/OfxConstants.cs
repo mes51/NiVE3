@@ -253,6 +253,10 @@ namespace NiVE3.OpenFX.Interop
         public const string ParamHostPropSupportsStrChoice = "OfxParamHostPropSupportsStrChoice";
         public const string ParamHostPropSupportsStrChoiceAnimation = "OfxParamHostPropSupportsStrChoiceAnimation";
 
+        // カラーマネジメント (ofxColour.h, 1.5)
+        public const string ImageEffectPropColourManagementStyle = "OfxImageEffectPropColourManagementStyle";
+        public const string ImageEffectColourManagementNone = "OfxImageEffectColourManagementNone";
+
         // インスタンスのプロパティ
         public const string ImageEffectPropProjectSize = "OfxImageEffectPropProjectSize";
         public const string ImageEffectPropProjectOffset = "OfxImageEffectPropProjectOffset";
