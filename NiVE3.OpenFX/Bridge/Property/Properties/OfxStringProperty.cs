@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.OpenFX.Bridge.Property.Control;
+using NiVE3.OpenFX.Bridge.Property.Types;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property;
 using NiVE3.Plugin.Property.Control;
-using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.Resource;
 
-namespace NiVE3.Plugin.Property.Properties
+namespace NiVE3.OpenFX.Bridge.Property.Properties
 {
     /// <summary>
     /// 文字列を入力するプロパティ
     /// </summary>
-    public class StringProperty : PropertyBase
+    public class OfxStringProperty : PropertyBase
     {
         /// <summary>
         /// 読み取り専用 (表示のみ) かどうか
@@ -28,14 +30,14 @@ namespace NiVE3.Plugin.Property.Properties
         /// </summary>
         public bool IsMultiLine { get; }
 
-        public StringProperty(string id, string displayName, string defaultValue, bool isReadOnly = false, double textBoxWidth = 200.0, bool isMultiLine = false) : base(id, displayName, StringPropertyType.Instance, defaultValue, false)
+        public OfxStringProperty(string id, string displayName, string defaultValue, bool isReadOnly = false, double textBoxWidth = 200.0, bool isMultiLine = false) : base(id, displayName, OfxStringPropertyType.Instance, defaultValue, false)
         {
             IsReadOnly = isReadOnly;
             TextBoxWidth = textBoxWidth;
             IsMultiLine = isMultiLine;
         }
 
-        public StringProperty(string id, LanguageResourceKey displayNameKey, string defaultValue, bool isReadOnly = false, double textBoxWidth = 200.0, bool isMultiLine = false) : base(id, displayNameKey, StringPropertyType.Instance, defaultValue, false)
+        public OfxStringProperty(string id, LanguageResourceKey displayNameKey, string defaultValue, bool isReadOnly = false, double textBoxWidth = 200.0, bool isMultiLine = false) : base(id, displayNameKey, OfxStringPropertyType.Instance, defaultValue, false)
         {
             IsReadOnly = isReadOnly;
             TextBoxWidth = textBoxWidth;
@@ -44,7 +46,7 @@ namespace NiVE3.Plugin.Property.Properties
 
         public override PropertyControlBase CreateControl(ICompositionViewModel composition, ILayerViewModel? layer, IEffectViewModel? effect, IPropertyViewModel viewModel)
         {
-            var control = new StringPropertyControl
+            var control = new OfxStringPropertyControl
             {
                 DataContext = viewModel
             };

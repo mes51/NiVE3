@@ -12,23 +12,24 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using NiVE3.Plugin.Property.Properties;
+using NiVE3.OpenFX.Bridge.Property.Properties;
+using NiVE3.Plugin.Property.Control;
 
-namespace NiVE3.Plugin.Property.Control
+namespace NiVE3.OpenFX.Bridge.Property.Control
 {
     /// <summary>
     /// ButtonPropertyControl.xaml の相互作用ロジック
     /// </summary>
-    public partial class ButtonPropertyControl : PropertyControlBase
+    public partial class OfxButtonPropertyControl : PropertyControlBase
     {
-        public ButtonPropertyControl()
+        public OfxButtonPropertyControl()
         {
             InitializeComponent();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            (ViewModel?.Property as ButtonProperty)?.PerformClick();
+            (ViewModel?.Property as OfxButtonProperty)?.PerformClick();
         }
     }
 }

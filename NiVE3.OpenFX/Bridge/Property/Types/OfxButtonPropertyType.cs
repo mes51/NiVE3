@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Property;
+using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.ValueObject;
-using NiVE3.Shared.Extension;
 
-namespace NiVE3.Plugin.Property.Types
+namespace NiVE3.OpenFX.Bridge.Property.Types
 {
     /// <summary>
     /// 値を持たない、クリック操作のみのプロパティの型
     /// </summary>
-    public class ButtonPropertyType : IPropertyType
+    public class OfxButtonPropertyType : IPropertyType
     {
         static readonly byte[] EmptyHashBase = [];
 
-        public static readonly ButtonPropertyType Instance = new ButtonPropertyType();
+        public static readonly OfxButtonPropertyType Instance = new OfxButtonPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
 
@@ -23,7 +24,7 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedGraphEditor => false;
 
-        private ButtonPropertyType() { }
+        private OfxButtonPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {

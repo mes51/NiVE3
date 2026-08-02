@@ -36,6 +36,9 @@ namespace NiVE3.OpenFX.Host
             props.SetAll(OfxNames.ImageEffectPropSupportsMultipleClipPARs, 0);
             props.SetAll(OfxNames.ImageEffectPluginPropOverlayInteractV1, (nint)0);
             props.SetAll(OfxNames.ImageEffectPropOpenGLRenderSupported, "false");
+            // 1.5.1 追加分の既定値 (プラグインが Describe で上書きする)
+            props.SetAll(OfxNames.ImageEffectPropCPURenderSupported, "true");
+            props.SetAll(OfxNames.ImageEffectPropNoSpatialAwareness, "false");
         }
 
         /// <summary>
@@ -79,7 +82,8 @@ namespace NiVE3.OpenFX.Host
             var isValueType = paramType is not (OfxNames.ParamTypeGroup or OfxNames.ParamTypePage or OfxNames.ParamTypePushButton);
             if (isValueType)
             {
-                props.SetAll(OfxNames.ParamPropAnimates, paramType is OfxNames.ParamTypeString or OfxNames.ParamTypeCustom ? 0 : 1);
+                // ホストは String / Custom / StrChoice のアニメーションに対応しない
+                props.SetAll(OfxNames.ParamPropAnimates, paramType is OfxNames.ParamTypeString or OfxNames.ParamTypeCustom or OfxNames.ParamTypeStrChoice ? 0 : 1);
                 props.SetAll(OfxNames.ParamPropIsAnimating, 0);
                 props.SetAll(OfxNames.ParamPropIsAutoKeying, 0);
             }
@@ -121,8 +125,11 @@ namespace NiVE3.OpenFX.Host
                     props.SetAll(OfxNames.ParamPropDefault, 0);
                     break;
                 case OfxNames.ParamTypeChoice:
-                case OfxNames.ParamTypeStrChoice:
                     props.SetAll(OfxNames.ParamPropDefault, 0);
+                    break;
+                case OfxNames.ParamTypeStrChoice:
+                    // 値は文字列 (ChoiceEnum のいずれか)。未設定の場合はインスタンス生成時に先頭の列挙値へ解決される
+                    props.SetAll(OfxNames.ParamPropDefault, "");
                     break;
                 case OfxNames.ParamTypeRGB:
                     props.SetAll(OfxNames.ParamPropDefault, 0.0, 0.0, 0.0);

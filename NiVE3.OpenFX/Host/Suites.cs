@@ -540,6 +540,66 @@ namespace NiVE3.OpenFX.Host
                 return (int)OfxStatus.ErrBadHandle;
             }
 
+            // OpenCL レンダリング中は cl_mem バッファの画像を返す
+            if (owner.OutputClImage != null)
+            {
+                if (clipInstance.Name == "Output")
+                {
+                    *image = owner.OutputClImage.Handle;
+                    return (int)OfxStatus.OK;
+                }
+
+                var cl = NiVE3.OpenFX.Host.CL.ClContextManager.Shared;
+                var clFrame = owner.FrameProvider?.GetSourceFrame(clipInstance.Name, time);
+                if (cl == null || clFrame == null)
+                {
+                    OfxLog.Warn($"clipGetImage (OpenCL): {clipInstance.Name} @{time} の画像を取得できませんでした");
+                    return (int)OfxStatus.Failed;
+                }
+                var clImage = NiVE3.OpenFX.Host.CL.OfxClImage.FromBgraTopDown(cl, clFrame.Value.Pixels, clFrame.Value.Width, clFrame.Value.Height, false, $"{clipInstance.Name}@{time}");
+                if (clImage == null)
+                {
+                    return (int)OfxStatus.Failed;
+                }
+                clImage.Properties.SetAll(OfxNames.ImageEffectPropRenderScale, owner.CurrentRenderScale.X, owner.CurrentRenderScale.Y);
+                lock (owner.FetchedClImages)
+                {
+                    owner.FetchedClImages.Add(clImage);
+                }
+                *image = clImage.Handle;
+                return (int)OfxStatus.OK;
+            }
+
+            // CUDA レンダリング中は CUDA デバイスポインタの画像を返す
+            if (owner.OutputCudaImage != null)
+            {
+                if (clipInstance.Name == "Output")
+                {
+                    *image = owner.OutputCudaImage.Handle;
+                    return (int)OfxStatus.OK;
+                }
+
+                var cuda = NiVE3.OpenFX.Host.Cuda.CudaContextManager.Shared;
+                var cudaFrame = owner.FrameProvider?.GetSourceFrame(clipInstance.Name, time);
+                if (cuda == null || cudaFrame == null)
+                {
+                    OfxLog.Warn($"clipGetImage (CUDA): {clipInstance.Name} @{time} の画像を取得できませんでした");
+                    return (int)OfxStatus.Failed;
+                }
+                var cudaImage = NiVE3.OpenFX.Host.Cuda.OfxCudaImage.FromBgraTopDown(cuda, cudaFrame.Value.Pixels, cudaFrame.Value.Width, cudaFrame.Value.Height, false, $"{clipInstance.Name}@{time}");
+                if (cudaImage == null)
+                {
+                    return (int)OfxStatus.Failed;
+                }
+                cudaImage.Properties.SetAll(OfxNames.ImageEffectPropRenderScale, owner.CurrentRenderScale.X, owner.CurrentRenderScale.Y);
+                lock (owner.FetchedCudaImages)
+                {
+                    owner.FetchedCudaImages.Add(cudaImage);
+                }
+                *image = cudaImage.Handle;
+                return (int)OfxStatus.OK;
+            }
+
             // Output クリップはホストが用意したレンダリング先を返す
             if (owner.OutputImage != null && clipInstance.Name == "Output")
             {
@@ -569,15 +629,36 @@ namespace NiVE3.OpenFX.Host
         static int ClipReleaseImage(nint image)
         {
             var ofxImage = OfxImage.Resolve(image);
-            if (ofxImage == null)
+            if (ofxImage != null)
             {
-                return (int)OfxStatus.ErrBadHandle;
+                if (!ofxImage.HostOwned)
+                {
+                    ofxImage.Dispose();
+                }
+                return (int)OfxStatus.OK;
             }
-            if (!ofxImage.HostOwned)
+
+            var clImage = NiVE3.OpenFX.Host.CL.OfxClImage.Resolve(image);
+            if (clImage != null)
             {
-                ofxImage.Dispose();
+                if (!clImage.HostOwned)
+                {
+                    clImage.Dispose();
+                }
+                return (int)OfxStatus.OK;
             }
-            return (int)OfxStatus.OK;
+
+            var cudaImage = NiVE3.OpenFX.Host.Cuda.OfxCudaImage.Resolve(image);
+            if (cudaImage != null)
+            {
+                if (!cudaImage.HostOwned)
+                {
+                    cudaImage.Dispose();
+                }
+                return (int)OfxStatus.OK;
+            }
+
+            return (int)OfxStatus.ErrBadHandle;
         }
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]

@@ -200,6 +200,9 @@ namespace NiVE3.OpenFX.Interop
         public const string ParamPropDefaultCoordinateSystem = "OfxParamPropDefaultCoordinateSystem";
         public const string ParamPropDimensionLabel = "OfxParamPropDimensionLabel";
         public const string ParamPropChoiceOption = "OfxParamPropChoiceOption";
+        // StrChoice の値の一覧と Choice/StrChoice の表示順 (1.5)
+        public const string ParamPropChoiceEnum = "OfxParamPropChoiceEnum";
+        public const string ParamPropChoiceOrder = "OfxParamPropChoiceOrder";
         public const string ParamPropGroupOpen = "OfxParamPropGroupOpen";
         public const string ParamPropStringMode = "OfxParamPropStringMode";
         public const string ParamPropStringFilePathExists = "OfxParamPropStringFilePathExists";
@@ -233,6 +236,20 @@ namespace NiVE3.OpenFX.Interop
         public const string ImageEffectPropOpenGLTextureIndex = "OfxImageEffectPropOpenGLTextureIndex";
         public const string ImageEffectPropOpenGLTextureTarget = "OfxImageEffectPropOpenGLTextureTarget";
         public const string ImageEffectPropOpenCLCommandQueue = "OfxImageEffectPropOpenCLCommandQueue";
+        // OpenCL Images 方式 (1.5) の対応宣言と画像ハンドル (Buffers 方式は OpenCLRenderSupported / ImagePropData)
+        public const string ImageEffectPropOpenCLSupported = "OfxImageEffectPropOpenCLSupported";
+        public const string ImageEffectPropOpenCLImage = "OfxImageEffectPropOpenCLImage";
+
+        // 1.5.1 で追加されたプロパティ
+        public const string ImageEffectPropCPURenderSupported = "OfxImageEffectPropCPURenderSupported";
+        public const string ImageEffectPropThumbnailRender = "OfxImageEffectPropThumbnailRender";
+        public const string ImageEffectPropNoSpatialAwareness = "OfxImageEffectPropNoSpatialAwareness";
+
+        // OpenGL コンテキストのライフサイクル通知アクション (1.5)。
+        // Detached の文字列リテラルが "k" で始まるのはヘッダ (ofxGPURender.h) 通り
+        public const string ActionOpenGLContextAttached = "OfxActionOpenGLContextAttached";
+        public const string ActionOpenGLContextDetached = "kOfxActionOpenGLContextDetached";
+
         public const string ParamHostPropSupportsStrChoice = "OfxParamHostPropSupportsStrChoice";
         public const string ParamHostPropSupportsStrChoiceAnimation = "OfxParamHostPropSupportsStrChoiceAnimation";
 

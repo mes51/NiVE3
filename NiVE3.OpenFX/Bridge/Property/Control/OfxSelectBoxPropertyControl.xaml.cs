@@ -13,20 +13,22 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.OpenFX.Bridge.Property.Properties;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property.Control;
 using NiVE3.Plugin.Property.Properties;
 
-namespace NiVE3.Plugin.Property.Control
+namespace NiVE3.OpenFX.Bridge.Property.Control
 {
     /// <summary>
     /// SelectBoxPropertyControl.xaml の相互作用ロジック
     /// </summary>
-    public partial class SelectBoxPropertyControl : PropertyControlBase
+    public partial class OfxSelectBoxPropertyControl : PropertyControlBase
     {
         public static readonly DependencyProperty SelectedOptionProperty = DependencyProperty.Register(
             nameof(SelectedOption),
             typeof(object),
-            typeof(SelectBoxPropertyControl),
+            typeof(OfxSelectBoxPropertyControl),
             new FrameworkPropertyMetadata(null)
         );
 
@@ -36,9 +38,9 @@ namespace NiVE3.Plugin.Property.Control
             set { SetValue(SelectedOptionProperty, value); }
         }
 
-        SelectBoxProperty? Property => ViewModel?.Property as SelectBoxProperty;
+        OfxSelectBoxProperty? Property => ViewModel?.Property as OfxSelectBoxProperty;
 
-        public SelectBoxPropertyControl()
+        public OfxSelectBoxPropertyControl()
         {
             InitializeComponent();
         }

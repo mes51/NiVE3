@@ -29,6 +29,12 @@ namespace NiVE3.OpenFX.Host
             HostProperties = BuildHostProperties();
             // GL コンテキストが作成できない環境では OpenGL レンダリング非対応を宣言する
             HostProperties.SetAll(OfxNames.ImageEffectPropOpenGLRenderSupported, GlContextManager.Shared != null ? "true" : "false");
+            // OpenCL (Buffers) レンダリング対応 (OFX 1.5)。デバイスが使用できない環境では非対応を宣言する
+            HostProperties.SetAll(OfxNames.ImageEffectPropOpenCLRenderSupported, CL.ClContextManager.Shared != null ? "true" : "false");
+            // CUDA レンダリング対応 (OFX 1.5)。NVIDIA デバイスが使用できない環境では非対応を宣言する
+            var cudaSupported = Cuda.CudaContextManager.Shared != null ? "true" : "false";
+            HostProperties.SetAll(OfxNames.ImageEffectPropCudaRenderSupported, cudaSupported);
+            HostProperties.SetAll(OfxNames.ImageEffectPropCudaStreamSupported, cudaSupported);
             HostStruct = (OfxHostNative*)NativeMemory.Alloc((nuint)sizeof(OfxHostNative));
             HostStruct->HostProps = HostProperties.Handle;
             HostStruct->FetchSuite = SuiteRegistry.FetchSuitePointer;
@@ -64,12 +70,13 @@ namespace NiVE3.OpenFX.Host
             props.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
             props.SetAll(OfxNames.PropHostOSHandle, (nint)0);
 
-            // 1.5 系 GPU レンダリングは非対応であることを明示 (機能検出の読み取りに応答するため)
+            // 1.5 系 GPU レンダリングの対応状況 (OpenCL Buffers はコンストラクタでデバイス検出後に上書きされる)
             props.SetAll(OfxNames.ImageEffectPropCudaRenderSupported, "false");
             props.SetAll(OfxNames.ImageEffectPropCudaStreamSupported, "false");
             props.SetAll(OfxNames.ImageEffectPropMetalRenderSupported, "false");
             props.SetAll(OfxNames.ImageEffectPropOpenCLRenderSupported, "false");
-            props.SetAll(OfxNames.ParamHostPropSupportsStrChoice, 0);
+            props.SetAll(OfxNames.ImageEffectPropOpenCLSupported, "false");
+            props.SetAll(OfxNames.ParamHostPropSupportsStrChoice, 1);
             props.SetAll(OfxNames.ParamHostPropSupportsStrChoiceAnimation, 0);
 
             props.SetAll(OfxNames.ParamHostPropSupportsCustomInteract, 0);
@@ -157,6 +164,13 @@ namespace NiVE3.OpenFX.Host
         /// <returns>アクションのステータス</returns>
         public OfxStatus DestroyInstance(OfxPluginInfo plugin, EffectInstance instance)
         {
+            // OpenGLContextAttached を送っている場合は、破棄前に対になる Detached を GL スレッドで送る
+            if (instance.GlContextAttached && GlContextManager.Shared is { } gl)
+            {
+                gl.Invoke(() => plugin.CallAction(OfxNames.ActionOpenGLContextDetached, instance.Handle, 0, 0));
+                instance.GlContextAttached = false;
+            }
+
             var status = plugin.CallAction(OfxNames.ActionDestroyInstance, instance.Handle, 0, 0);
             instance.Dispose();
             return status;
@@ -315,6 +329,7 @@ namespace NiVE3.OpenFX.Host
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
                 ApplyGpuDisabledArgs(sequenceArgs);
                 plugin.CallAction(OfxNames.ImageEffectActionBeginSequenceRender, instance.Handle, sequenceArgs.Handle, 0);
 
@@ -326,6 +341,7 @@ namespace NiVE3.OpenFX.Host
                 renderArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
                 renderArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
                 renderArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
                 ApplyGpuDisabledArgs(renderArgs);
                 var status = plugin.CallAction(OfxNames.ImageEffectActionRender, instance.Handle, renderArgs.Handle, 0);
 
@@ -360,6 +376,246 @@ namespace NiVE3.OpenFX.Host
         }
 
         /// <summary>
+        /// 1 フレームを OpenCL (Buffers) でレンダリングします (OFX 1.5)
+        /// 入出力画像を cl_mem バッファとして渡し、プラグインはホストのコマンドキューへ処理を投入します
+        /// 単一のキューを共有するため、レンダリングは直列化されます
+        /// </summary>
+        /// <param name="plugin">対象のプラグイン</param>
+        /// <param name="instance">対象のインスタンス</param>
+        /// <param name="time">時間 (フレーム)</param>
+        /// <param name="width">出力画像の幅</param>
+        /// <param name="height">出力画像の高さ</param>
+        /// <param name="frameProvider">クリップ画像のプロバイダ</param>
+        /// <returns>レンダリング結果 (BGRA・上から下) とステータス。OpenCL が使用できない場合は ErrMissingHostFeature</returns>
+        public (Vector4[]? Output, OfxStatus Status) RenderFrameCL(OfxPluginInfo plugin, EffectInstance instance, double time, int width, int height, IOfxFrameProvider frameProvider, double renderScaleX = 1.0, double renderScaleY = 1.0)
+        {
+            var cl = CL.ClContextManager.Shared;
+            if (cl == null)
+            {
+                return (null, OfxStatus.ErrMissingHostFeature);
+            }
+
+            return RenderFrameCLCore(instance, time, width, height, frameProvider, renderScaleX, renderScaleY, () =>
+            {
+                using var sequenceArgs = new PropertySet("SequenceRenderCL.InArgs");
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropFrameRange, time, time);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropFrameStep, 1.0);
+                sequenceArgs.SetAll(OfxNames.PropIsInteractive, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropRenderScale, renderScaleX, renderScaleY);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
+                ApplyGpuDisabledArgs(sequenceArgs);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropOpenCLEnabled, 1);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropOpenCLCommandQueue, cl.Queue);
+                plugin.CallAction(OfxNames.ImageEffectActionBeginSequenceRender, instance.Handle, sequenceArgs.Handle, 0);
+
+                using var renderArgs = new PropertySet("RenderCL.InArgs");
+                renderArgs.SetAll(OfxNames.PropTime, time);
+                renderArgs.SetAll(OfxNames.ImageEffectPropFieldToRender, OfxNames.ImageFieldNone);
+                renderArgs.SetAll(OfxNames.ImageEffectPropRenderWindow, 0, 0, width, height);
+                renderArgs.SetAll(OfxNames.ImageEffectPropRenderScale, renderScaleX, renderScaleY);
+                renderArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
+                ApplyGpuDisabledArgs(renderArgs);
+                renderArgs.SetAll(OfxNames.ImageEffectPropOpenCLEnabled, 1);
+                renderArgs.SetAll(OfxNames.ImageEffectPropOpenCLCommandQueue, cl.Queue);
+                var status = plugin.CallAction(OfxNames.ImageEffectActionRender, instance.Handle, renderArgs.Handle, 0);
+
+                plugin.CallAction(OfxNames.ImageEffectActionEndSequenceRender, instance.Handle, sequenceArgs.Handle, 0);
+                return status;
+            });
+        }
+
+        /// <summary>
+        /// OpenCL レンダリングの共通処理 (バッファ準備 → renderBody 実行 → 完了待ち → 読み戻し)
+        /// renderBody は検証用に差し替え可能です
+        /// </summary>
+        public (Vector4[]? Output, OfxStatus Status) RenderFrameCLCore(EffectInstance instance, double time, int width, int height, IOfxFrameProvider frameProvider, double renderScaleX, double renderScaleY, Func<OfxStatus> renderBody)
+        {
+            var cl = CL.ClContextManager.Shared;
+            if (cl == null)
+            {
+                return (null, OfxStatus.ErrMissingHostFeature);
+            }
+
+            lock (cl.RenderLock)
+            {
+                instance.CurrentTime = time;
+                instance.FrameProvider = frameProvider;
+                instance.CurrentRenderScale = (renderScaleX, renderScaleY);
+                instance.OutputClImage = CL.OfxClImage.CreateEmpty(cl, width, height, true, "Output");
+                if (instance.OutputClImage == null)
+                {
+                    return (null, OfxStatus.Failed);
+                }
+                instance.OutputClImage.Properties.SetAll(OfxNames.ImageEffectPropRenderScale, renderScaleX, renderScaleY);
+                try
+                {
+                    var status = renderBody();
+
+                    Vector4[]? output = null;
+                    if (status is OfxStatus.OK or OfxStatus.ReplyDefault)
+                    {
+                        // プラグインは非同期のままキューへ投入して戻ってよい仕様のため、完了を待ってから読み戻す
+                        CL.ClNative.clFinish(cl.Queue);
+                        output = instance.OutputClImage.ToBgraTopDown(cl);
+                        if (output == null)
+                        {
+                            status = OfxStatus.Failed;
+                        }
+                    }
+                    return (output, status);
+                }
+                finally
+                {
+                    lock (instance.FetchedClImages)
+                    {
+                        var leaked = instance.FetchedClImages.Count(i => !i.Disposed);
+                        if (leaked > 0)
+                        {
+                            OfxLog.Warn($"プラグインが {leaked} 枚の OpenCL 入力画像を clipReleaseImage していません (ホスト側で解放します)");
+                            foreach (var image in instance.FetchedClImages.Where(i => !i.Disposed))
+                            {
+                                image.Dispose();
+                            }
+                        }
+                        instance.FetchedClImages.Clear();
+                    }
+                    instance.OutputClImage?.Dispose();
+                    instance.OutputClImage = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 1 フレームを CUDA でレンダリングします (OFX 1.5)
+        /// 入出力画像は CUDA デバイスポインタとして渡し、レンダリング後にホストメモリへ読み戻します
+        /// </summary>
+        /// <param name="plugin">対象のプラグイン</param>
+        /// <param name="instance">対象のインスタンス</param>
+        /// <param name="time">時間 (フレーム)</param>
+        /// <param name="width">出力画像の幅</param>
+        /// <param name="height">出力画像の高さ</param>
+        /// <param name="frameProvider">クリップ画像のプロバイダ</param>
+        /// <param name="useStream">プラグインが CudaStreamSupported を宣言している場合 true (仕様上、両者が対応する場合のみ CudaStream を渡す)</param>
+        /// <returns>レンダリング結果 (BGRA・上から下) とステータス。CUDA が使用できない場合は ErrMissingHostFeature</returns>
+        public (Vector4[]? Output, OfxStatus Status) RenderFrameCuda(OfxPluginInfo plugin, EffectInstance instance, double time, int width, int height, IOfxFrameProvider frameProvider, double renderScaleX = 1.0, double renderScaleY = 1.0, bool useStream = false)
+        {
+            var cuda = Cuda.CudaContextManager.Shared;
+            if (cuda == null)
+            {
+                return (null, OfxStatus.ErrMissingHostFeature);
+            }
+
+            return RenderFrameCudaCore(instance, time, width, height, frameProvider, renderScaleX, renderScaleY, () =>
+            {
+                using var sequenceArgs = new PropertySet("SequenceRenderCuda.InArgs");
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropFrameRange, time, time);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropFrameStep, 1.0);
+                sequenceArgs.SetAll(OfxNames.PropIsInteractive, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropRenderScale, renderScaleX, renderScaleY);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
+                ApplyGpuDisabledArgs(sequenceArgs);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropCudaEnabled, 1);
+                if (useStream)
+                {
+                    sequenceArgs.SetAll(OfxNames.ImageEffectPropCudaStream, cuda.Stream);
+                }
+                plugin.CallAction(OfxNames.ImageEffectActionBeginSequenceRender, instance.Handle, sequenceArgs.Handle, 0);
+
+                using var renderArgs = new PropertySet("RenderCuda.InArgs");
+                renderArgs.SetAll(OfxNames.PropTime, time);
+                renderArgs.SetAll(OfxNames.ImageEffectPropFieldToRender, OfxNames.ImageFieldNone);
+                renderArgs.SetAll(OfxNames.ImageEffectPropRenderWindow, 0, 0, width, height);
+                renderArgs.SetAll(OfxNames.ImageEffectPropRenderScale, renderScaleX, renderScaleY);
+                renderArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
+                ApplyGpuDisabledArgs(renderArgs);
+                renderArgs.SetAll(OfxNames.ImageEffectPropCudaEnabled, 1);
+                if (useStream)
+                {
+                    renderArgs.SetAll(OfxNames.ImageEffectPropCudaStream, cuda.Stream);
+                }
+                var status = plugin.CallAction(OfxNames.ImageEffectActionRender, instance.Handle, renderArgs.Handle, 0);
+
+                plugin.CallAction(OfxNames.ImageEffectActionEndSequenceRender, instance.Handle, sequenceArgs.Handle, 0);
+                return status;
+            });
+        }
+
+        /// <summary>
+        /// CUDA レンダリングの共通処理 (デバイスメモリ準備 → renderBody 実行 → 完了待ち → 読み戻し)
+        /// renderBody は検証用に差し替え可能です
+        /// </summary>
+        public (Vector4[]? Output, OfxStatus Status) RenderFrameCudaCore(EffectInstance instance, double time, int width, int height, IOfxFrameProvider frameProvider, double renderScaleX, double renderScaleY, Func<OfxStatus> renderBody)
+        {
+            var cuda = Cuda.CudaContextManager.Shared;
+            if (cuda == null)
+            {
+                return (null, OfxStatus.ErrMissingHostFeature);
+            }
+
+            lock (cuda.RenderLock)
+            {
+                // コンテキストはスレッドごとの状態のため、レンダリングスレッド上で毎回設定する
+                cuda.MakeCurrent();
+                instance.CurrentTime = time;
+                instance.FrameProvider = frameProvider;
+                instance.CurrentRenderScale = (renderScaleX, renderScaleY);
+                instance.OutputCudaImage = Cuda.OfxCudaImage.CreateEmpty(cuda, width, height, true, "Output");
+                if (instance.OutputCudaImage == null)
+                {
+                    return (null, OfxStatus.Failed);
+                }
+                instance.OutputCudaImage.Properties.SetAll(OfxNames.ImageEffectPropRenderScale, renderScaleX, renderScaleY);
+                try
+                {
+                    var status = renderBody();
+
+                    Vector4[]? output = null;
+                    if (status is OfxStatus.OK or OfxStatus.ReplyDefault)
+                    {
+                        // プラグインは非同期のままストリームへ投入して戻ってよい仕様のため、完了を待ってから読み戻す
+                        Cuda.CudaNative.cuStreamSynchronize(cuda.Stream);
+                        output = instance.OutputCudaImage.ToBgraTopDown(cuda);
+                        if (output == null)
+                        {
+                            status = OfxStatus.Failed;
+                        }
+                    }
+                    return (output, status);
+                }
+                finally
+                {
+                    lock (instance.FetchedCudaImages)
+                    {
+                        var leaked = instance.FetchedCudaImages.Count(i => !i.Disposed);
+                        if (leaked > 0)
+                        {
+                            OfxLog.Warn($"プラグインが {leaked} 枚の CUDA 入力画像を clipReleaseImage していません (ホスト側で解放します)");
+                            foreach (var image in instance.FetchedCudaImages.Where(i => !i.Disposed))
+                            {
+                                image.Dispose();
+                            }
+                        }
+                        instance.FetchedCudaImages.Clear();
+                    }
+                    instance.OutputCudaImage?.Dispose();
+                    instance.OutputCudaImage = null;
+                }
+            }
+        }
+
+        /// <summary>
         /// 1 フレームを OpenGL でレンダリングします
         /// アクション呼び出しを含む全処理が GL スレッド上で実行されます
         /// </summary>
@@ -374,6 +630,18 @@ namespace NiVE3.OpenFX.Host
         {
             return RenderFrameGLCore(instance, time, width, height, frameProvider, renderScaleX, renderScaleY, () =>
             {
+                // 初回の GL レンダリング前に OpenGLContextAttached を通知する (1.5。対応する Detached は DestroyInstance で送る)
+                if (!instance.GlContextAttached)
+                {
+                    var attachStatus = plugin.CallAction(OfxNames.ActionOpenGLContextAttached, instance.Handle, 0, 0);
+                    if (attachStatus is not (OfxStatus.OK or OfxStatus.ReplyDefault))
+                    {
+                        OfxLog.Warn($"OpenGLContextAttached が失敗したため GL レンダリングを中止します: {attachStatus}");
+                        return OfxStatus.Failed;
+                    }
+                    instance.GlContextAttached = true;
+                }
+
                 using var sequenceArgs = new PropertySet("SequenceRenderGL.InArgs");
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropFrameRange, time, time);
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropFrameStep, 1.0);
@@ -382,6 +650,7 @@ namespace NiVE3.OpenFX.Host
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                sequenceArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
                 ApplyGpuDisabledArgs(sequenceArgs);
                 sequenceArgs.SetAll(OfxNames.ImageEffectPropOpenGLEnabled, 1);
                 plugin.CallAction(OfxNames.ImageEffectActionBeginSequenceRender, instance.Handle, sequenceArgs.Handle, 0);
@@ -394,6 +663,7 @@ namespace NiVE3.OpenFX.Host
                 renderArgs.SetAll(OfxNames.ImageEffectPropSequentialRenderStatus, 0);
                 renderArgs.SetAll(OfxNames.ImageEffectPropInteractiveRenderStatus, 0);
                 renderArgs.SetAll(OfxNames.ImageEffectPropRenderQualityDraft, 0);
+                renderArgs.SetAll(OfxNames.ImageEffectPropThumbnailRender, "false");
                 ApplyGpuDisabledArgs(renderArgs);
                 renderArgs.SetAll(OfxNames.ImageEffectPropOpenGLEnabled, 1);
                 var status = plugin.CallAction(OfxNames.ImageEffectActionRender, instance.Handle, renderArgs.Handle, 0);

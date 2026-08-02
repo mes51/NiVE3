@@ -475,14 +475,37 @@ namespace NiVE3.OpenFX.Integration
 
         (Vector4[]? Output, OfxStatus Status) RenderOnce(EffectInstance instance, double ofxTime, int width, int height, IOfxFrameProvider provider, bool useGpu, double renderScaleX, double renderScaleY)
         {
-            if (useGpu && Definition.Metadata.IsSupportGpu)
+            if (useGpu)
             {
-                var (glOutput, glStatus) = Runtime.RenderFrameGL(Definition.Plugin, instance, ofxTime, width, height, provider, renderScaleX, renderScaleY);
-                if (glOutput != null)
+                // NVIDIA 環境では CUDA が最速パスのため最優先する
+                if (Definition.Metadata.IsSupportCudaRender)
                 {
-                    return (glOutput, glStatus);
+                    var (cudaOutput, cudaStatus) = Runtime.RenderFrameCuda(Definition.Plugin, instance, ofxTime, width, height, provider, renderScaleX, renderScaleY, Definition.Metadata.IsSupportCudaStream);
+                    if (cudaOutput != null)
+                    {
+                        return (cudaOutput, cudaStatus);
+                    }
+                    OfxLog.Warn($"CUDA レンダリングに失敗しました: {Definition.Plugin.Identifier}: {cudaStatus}");
                 }
-                OfxLog.Warn($"OpenGL レンダリングに失敗したため CPU で再実行します: {Definition.Plugin.Identifier}: {glStatus}");
+                // OpenCL (Buffers) を優先する (Risograph 等、CPU パスがパススルー実装のプラグインがあるため)
+                if (Definition.Metadata.IsSupportOpenCLRender)
+                {
+                    var (clOutput, clStatus) = Runtime.RenderFrameCL(Definition.Plugin, instance, ofxTime, width, height, provider, renderScaleX, renderScaleY);
+                    if (clOutput != null)
+                    {
+                        return (clOutput, clStatus);
+                    }
+                    OfxLog.Warn($"OpenCL レンダリングに失敗しました: {Definition.Plugin.Identifier}: {clStatus}");
+                }
+                if (Definition.Metadata.IsSupportOpenGLRender)
+                {
+                    var (glOutput, glStatus) = Runtime.RenderFrameGL(Definition.Plugin, instance, ofxTime, width, height, provider, renderScaleX, renderScaleY);
+                    if (glOutput != null)
+                    {
+                        return (glOutput, glStatus);
+                    }
+                    OfxLog.Warn($"OpenGL レンダリングに失敗しました: {Definition.Plugin.Identifier}: {glStatus}");
+                }
             }
             return Runtime.RenderFrame(Definition.Plugin, instance, ofxTime, width, height, provider, renderScaleX, renderScaleY);
         }

@@ -166,6 +166,20 @@ namespace NiVE3.OpenFX.Host
                     };
                 }
             }
+
+            // StrChoice の既定値が列挙値 (ChoiceEnum) にない場合は先頭の列挙値を使う (スペック推奨の動作)
+            if (ParamType == OfxNames.ParamTypeStrChoice)
+            {
+                var enumCount = Properties.GetDimension(OfxNames.ParamPropChoiceEnum);
+                if (enumCount > 0)
+                {
+                    var enums = Enumerable.Range(0, enumCount).Select(i => Properties.GetOrDefault(OfxNames.ParamPropChoiceEnum, i) as string).ToArray();
+                    if (Values[0] is not string current || !enums.Contains(current))
+                    {
+                        Values[0] = enums[0] ?? "";
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -460,10 +474,38 @@ namespace NiVE3.OpenFX.Host
         internal List<GL.OfxGlTexture> LoadedGlTextures { get; } = new List<GL.OfxGlTexture>();
 
         /// <summary>
+        /// 現在の OpenCL レンダリングの出力先画像。OpenCL の Render アクションの間だけ設定されます
+        /// (設定されている間、clipGetImage は cl_mem バッファの画像を返します)
+        /// </summary>
+        public CL.OfxClImage? OutputClImage { get; set; }
+
+        /// <summary>
+        /// プラグインが clipGetImage で取得した OpenCL 入力画像の一覧 (後始末用)
+        /// </summary>
+        internal List<CL.OfxClImage> FetchedClImages { get; } = new List<CL.OfxClImage>();
+
+        /// <summary>
+        /// 現在の CUDA レンダリングの出力先画像。CUDA の Render アクションの間だけ設定されます
+        /// (設定されている間、clipGetImage は CUDA デバイスポインタの画像を返します)
+        /// </summary>
+        public Cuda.OfxCudaImage? OutputCudaImage { get; set; }
+
+        /// <summary>
+        /// プラグインが clipGetImage で取得した CUDA 入力画像の一覧 (後始末用)
+        /// </summary>
+        internal List<Cuda.OfxCudaImage> FetchedCudaImages { get; } = new List<Cuda.OfxCudaImage>();
+
+        /// <summary>
         /// 現在の GL レンダリングの出力先テクスチャ。GL Render アクションの間だけ設定されます
         /// (openfx-misc 系プラグインは clipLoadTexture(Output) でこれを取得し、自前の FBO で描画する)
         /// </summary>
         public GL.OfxGlTexture? OutputGlTexture { get; set; }
+
+        /// <summary>
+        /// OpenGLContextAttached アクションを通知済みかどうか
+        /// (attach/detach は対で呼ぶ必要があるため、インスタンス破棄時に Detached を送るのに使用します)
+        /// </summary>
+        public bool GlContextAttached { get; set; }
 
         public EffectInstance(string name, EffectDescriptor contextDescriptor, string context, OfxProjectSettings settings)
         {
@@ -506,6 +548,20 @@ namespace NiVE3.OpenFX.Host
             FetchedImages.Clear();
             OutputImage?.Dispose();
             OutputImage = null;
+            foreach (var image in FetchedClImages.Where(i => !i.Disposed))
+            {
+                image.Dispose();
+            }
+            FetchedClImages.Clear();
+            OutputClImage?.Dispose();
+            OutputClImage = null;
+            foreach (var image in FetchedCudaImages.Where(i => !i.Disposed))
+            {
+                image.Dispose();
+            }
+            FetchedCudaImages.Clear();
+            OutputCudaImage?.Dispose();
+            OutputCudaImage = null;
 
             Properties.Dispose();
             Params.Dispose();

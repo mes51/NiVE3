@@ -14,15 +14,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.Plugin.Property.Control;
 
-namespace NiVE3.Plugin.Property.Control
+namespace NiVE3.OpenFX.Bridge.Property.Control
 {
     /// <summary>
     /// StringPropertyControl.xaml の相互作用ロジック
     /// </summary>
-    public partial class StringPropertyControl : PropertyControlBase
+    public partial class OfxStringPropertyControl : PropertyControlBase
     {
-        public StringPropertyControl()
+        public OfxStringPropertyControl()
         {
             InitializeComponent();
         }

@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Numerics;
+using NiVE3.OpenFX.Bridge.Property.Properties;
 using NiVE3.OpenFX.Host;
 using NiVE3.OpenFX.Interop;
 using NiVE3.Plugin.Interfaces;
@@ -173,17 +174,42 @@ namespace NiVE3.OpenFX.Bridge
                     {
                         return null;
                     }
-                    var options = Enumerable.Range(0, optionCount)
-                        .Select(i => param.Properties.TryGet(OfxNames.ParamPropChoiceOption, i, out var v) ? v as string ?? $"({i})" : $"({i})")
+                    var options = GetChoiceOptions(param, optionCount);
+                    return new OfxSelectBoxProperty(param.Name, label, options, GetInt(param, OfxNames.ParamPropDefault, 0), animates)
+                    { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent, DisplayOrder = GetChoiceOrder(param, optionCount) };
+                }
+
+                case OfxNames.ParamTypeStrChoice:
+                {
+                    // 値は選択肢ごとの列挙文字列 (ChoiceEnum)。Option と Enum は同数が仕様
+                    var optionCount = Math.Min(
+                        param.Properties.GetDimension(OfxNames.ParamPropChoiceOption),
+                        param.Properties.GetDimension(OfxNames.ParamPropChoiceEnum));
+                    if (optionCount < 1)
+                    {
+                        OfxLog.Warn($"StrChoice の選択肢が不正のためスキップします: {param.Name}");
+                        return null;
+                    }
+                    var options = GetChoiceOptions(param, optionCount);
+                    var values = Enumerable.Range(0, optionCount)
+                        .Select(i => param.Properties.GetOrDefault(OfxNames.ParamPropChoiceEnum, i) as string ?? "")
                         .ToArray();
-                    return new SelectBoxProperty(param.Name, label, options, GetInt(param, OfxNames.ParamPropDefault, 0), animates)
+
+                    // 値が列挙文字列のため表示順の並べ替えで対応が壊れることはなく、ChoiceOrder はここで適用する
+                    if (GetChoiceOrder(param, optionCount) is IReadOnlyList<int> order)
+                    {
+                        var sorted = Enumerable.Range(0, optionCount).OrderBy(i => order[i]).ToArray();
+                        options = [.. sorted.Select(i => options[i])];
+                        values = [.. sorted.Select(i => values[i])];
+                    }
+                    return new OfxStrChoiceProperty(param.Name, label, options, values, param.Values.ElementAtOrDefault(0) as string ?? values[0])
                     { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                 }
 
                 case OfxNames.ParamTypeString:
                 {
                     var isMultiLine = param.Properties.GetOrDefault(OfxNames.ParamPropStringMode, 0) as string == OfxNames.ParamStringIsMultiLine;
-                    return new StringProperty(param.Name, label, param.Values.ElementAtOrDefault(0) as string ?? "",
+                    return new OfxStringProperty(param.Name, label, param.Values.ElementAtOrDefault(0) as string ?? "",
                         isReadOnly: GetInt(param, OfxNames.ParamPropEnabled, 1) == 0,
                         textBoxWidth: isMultiLine ? 300.0 : 200.0,
                         isMultiLine: isMultiLine)
@@ -192,7 +218,7 @@ namespace NiVE3.OpenFX.Bridge
 
                 case OfxNames.ParamTypePushButton:
                 {
-                    var button = new ButtonProperty(param.Name, label) { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
+                    var button = new OfxButtonProperty(param.Name, label) { ViewStateCustomizer = viewStateFactory, IsPersistent = isPersistent };
                     if (buttonClicked != null)
                     {
                         var paramName = param.Name;
@@ -277,6 +303,7 @@ namespace NiVE3.OpenFX.Bridge
                         param.SetValue(0, OfxParamTypes.ToInt(value ?? 0));
                         break;
                     case OfxNames.ParamTypeString:
+                    case OfxNames.ParamTypeStrChoice:
                         param.SetValue(0, value as string ?? "");
                         break;
                 }
@@ -315,10 +342,29 @@ namespace NiVE3.OpenFX.Bridge
                     return OfxParamTypes.ToInt(param.Values[0] ?? 0);
                 case OfxNames.ParamTypeString:
                 case OfxNames.ParamTypeCustom:
+                case OfxNames.ParamTypeStrChoice:
                     return param.Values[0] as string ?? "";
                 default:
                     return null;
             }
+        }
+
+        static string[] GetChoiceOptions(ParamInstance param, int optionCount)
+        {
+            return [.. Enumerable.Range(0, optionCount)
+                .Select(i => param.Properties.TryGet(OfxNames.ParamPropChoiceOption, i, out var v) ? v as string ?? $"({i})" : $"({i})")];
+        }
+
+        static IReadOnlyList<int>? GetChoiceOrder(ParamInstance param, int optionCount)
+        {
+            // ChoiceOrder は表示順のみを変更する任意プロパティ (選択肢と同数の並び順キー)。
+            // 値 (インデックス / 列挙文字列) には影響しない
+            if (param.Properties.GetDimension(OfxNames.ParamPropChoiceOrder) < optionCount)
+            {
+                return null;
+            }
+            return [.. Enumerable.Range(0, optionCount)
+                .Select(i => OfxParamTypes.ToInt(param.Properties.GetOrDefault(OfxNames.ParamPropChoiceOrder, i)))];
         }
 
         static void Flatten(IReadOnlyCollection<IPropertyObject> properties, Dictionary<string, IPropertyObject> result)

@@ -3,16 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Plugin.Property;
+using NiVE3.Plugin.Property.Types;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Shared.Extension;
 
-namespace NiVE3.Plugin.Property.Types
+namespace NiVE3.OpenFX.Bridge.Property.Types
 {
-    public class StringPropertyType : IPropertyType
+    /// <summary>
+    /// 実行時に決まる選択肢一覧からインデックス (int) で選択するプロパティの型
+    /// </summary>
+    public class OfxSelectBoxPropertyType : IPropertyType
     {
-        static readonly byte[] EmptyHashBase = [];
+        static readonly byte[] ZeroHashBase = [.. Enumerable.Repeat((byte)0, sizeof(int))];
 
-        public static readonly StringPropertyType Instance = new StringPropertyType();
+        public static readonly OfxSelectBoxPropertyType Instance = new OfxSelectBoxPropertyType();
 
         public InterpolationType SupportedInterpolationTypes => InterpolationType.None;
 
@@ -20,7 +25,7 @@ namespace NiVE3.Plugin.Property.Types
 
         public bool IsSupportedGraphEditor => false;
 
-        private StringPropertyType() { }
+        private OfxSelectBoxPropertyType() { }
 
         public object? Interpolate(IReadOnlyList<KeyFrame> keyFrames, Time time)
         {
@@ -39,25 +44,30 @@ namespace NiVE3.Plugin.Property.Types
 
         public object? DeserializeValue(object? serializedValue)
         {
-            return serializedValue as string ?? serializedValue?.ToString() ?? "";
+            return serializedValue == null ? 0 : Convert.ToInt32(serializedValue);
         }
 
         public Span<byte> ConvertToHashBase(object? value)
         {
-            return value is string s && s.Length > 0 ? Encoding.UTF8.GetBytes(s) : EmptyHashBase;
+            return value is int v ? BitConverter.GetBytes(v) : ZeroHashBase;
         }
 
         public bool TryConvertFromExpressionValue(object? expressionValue, object? rawValue, out object? value)
         {
-            if (expressionValue is string s)
+            switch (expressionValue)
             {
-                value = s;
-                return true;
-            }
-            else
-            {
-                value = null;
-                return false;
+                case int v:
+                    value = v;
+                    return true;
+                case long v:
+                    value = (int)v;
+                    return true;
+                case double v:
+                    value = (int)Math.Round(v);
+                    return true;
+                default:
+                    value = 0;
+                    return false;
             }
         }
 

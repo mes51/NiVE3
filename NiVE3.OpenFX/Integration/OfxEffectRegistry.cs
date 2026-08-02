@@ -123,13 +123,32 @@ namespace NiVE3.OpenFX.Integration
             }
 
             var glSupport = descriptor.Properties.GetOrDefault(OfxNames.ImageEffectPropOpenGLRenderSupported, 0) as string;
+            var clSupport = descriptor.Properties.GetOrDefault(OfxNames.ImageEffectPropOpenCLRenderSupported, 0) as string;
+            var cudaSupport = descriptor.Properties.GetOrDefault(OfxNames.ImageEffectPropCudaRenderSupported, 0) as string;
+            var cudaStreamSupport = descriptor.Properties.GetOrDefault(OfxNames.ImageEffectPropCudaStreamSupported, 0) as string;
+            var supportsGl = glSupport is "true" or "needed" && GlContextManager.Shared != null;
+            var supportsCl = clSupport is "true" && Host.CL.ClContextManager.Shared != null;
+            var supportsCuda = cudaSupport is "true" && Host.Cuda.CudaContextManager.Shared != null;
+
+            // CPU レンダリング不可 (1.5.1) を宣言していて、使用可能な GPU API もないプラグインは除外する
+            var cpuSupport = descriptor.Properties.GetOrDefault(OfxNames.ImageEffectPropCPURenderSupported, 0) as string;
+            if (cpuSupport == "false" && !supportsGl && !supportsCl && !supportsCuda)
+            {
+                OfxLog.Info($"CPU レンダリング不可を宣言しており、使用可能な GPU レンダリング API もないためスキップします: {plugin.Identifier}");
+                descriptor.Dispose();
+                return;
+            }
+
             var metadata = new OfxEffectMetadata(
                 name: descriptor.Properties.GetOrDefault(OfxNames.PropLabel, 0) as string is { Length: > 0 } label ? label : plugin.Identifier,
                 author: plugin.Identifier,
                 category: descriptor.Properties.GetOrDefault(OfxNames.ImageEffectPluginPropGrouping, 0) as string is { Length: > 0 } grouping ? grouping : "OpenFX",
                 description: descriptor.Properties.GetOrDefault(OfxNames.PropPluginDescription, 0) as string ?? "",
                 effectUuid: CreateDeterministicGuid(plugin).ToString(),
-                isSupportGpu: glSupport is "true" or "needed" && GlContextManager.Shared != null);
+                isSupportOpenGLRender: supportsGl,
+                isSupportOpenCLRender: supportsCl,
+                isSupportCudaRender: supportsCuda,
+                isSupportCudaStream: supportsCuda && cudaStreamSupport is "true");
 
             var definition = new OfxEffectDefinition(this, plugin, descriptor, context, contexts, metadata);
             DefinitionList.Add(definition);
@@ -321,20 +340,43 @@ namespace NiVE3.OpenFX.Integration
 
         public bool IsDummyEffect => false;
 
-        public bool IsSupportGpu { get; }
+        /// <summary>
+        /// OpenGL レンダリングに対応しているかどうか (プラグインの宣言 + GL コンテキストの有無)
+        /// </summary>
+        public bool IsSupportOpenGLRender { get; }
+
+        /// <summary>
+        /// OpenCL (Buffers) レンダリングに対応しているかどうか (プラグインの宣言 + CL デバイスの有無)
+        /// </summary>
+        public bool IsSupportOpenCLRender { get; }
+
+        /// <summary>
+        /// CUDA レンダリングに対応しているかどうか (プラグインの宣言 + CUDA デバイスの有無)
+        /// </summary>
+        public bool IsSupportCudaRender { get; }
+
+        /// <summary>
+        /// CUDA ストリームに対応しているかどうか (仕様上、両者が対応する場合のみ CudaStream を渡す)
+        /// </summary>
+        public bool IsSupportCudaStream { get; }
+
+        public bool IsSupportGpu => IsSupportOpenGLRender || IsSupportOpenCLRender || IsSupportCudaRender;
 
         public bool UseCompositionCamera => false;
 
         public EffectSupportedSource SupportedSource => EffectSupportedSource.Image;
 
-        internal OfxEffectMetadata(string name, string author, string category, string description, string effectUuid, bool isSupportGpu)
+        internal OfxEffectMetadata(string name, string author, string category, string description, string effectUuid, bool isSupportOpenGLRender, bool isSupportOpenCLRender, bool isSupportCudaRender, bool isSupportCudaStream)
         {
             Name = name;
             Author = author;
             Category = category;
             Description = description;
             EffectUuid = effectUuid;
-            IsSupportGpu = isSupportGpu;
+            IsSupportOpenGLRender = isSupportOpenGLRender;
+            IsSupportOpenCLRender = isSupportOpenCLRender;
+            IsSupportCudaRender = isSupportCudaRender;
+            IsSupportCudaStream = isSupportCudaStream;
         }
     }
 }
