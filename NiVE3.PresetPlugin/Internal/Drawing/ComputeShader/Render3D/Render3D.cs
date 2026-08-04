@@ -236,7 +236,8 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
 #pragma warning disable IDE0017 // NOTE: ComputeSharpのSourceGeneratorでは非対応
                 var result = new GPURasterizedPixel();
                 result.Color = color * texturing.MultiplyColor;
-                result.E = (e * texturing.W) / tw;
+                result.E = e;
+                result.PerspectiveE = (e * texturing.W) / tw;
                 result.TriangleIndex = ti + 1;
 #pragma warning restore IDE0017 // オブジェクトの初期化を簡略化します
                 renderImage[p] = result;
@@ -408,7 +409,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 return;
             }
             var lighting = triangleLighting[rasterizedPixel.TriangleIndex - 1];
-            var e = rasterizedPixel.E;
 
             var color = rasterizedPixel.Color;
             var a = color.W;
@@ -416,7 +416,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var shadowProjectionPos = Float4.Zero;
             if (hasShadow)
             {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, rasterizedPixel.E);
             }
 
             if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
@@ -440,7 +440,7 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 }
 
 
-                var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
+                var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, rasterizedPixel.PerspectiveE);
                 var n = lighting.IsFrontFace ? -lighting.FloatNormal : lighting.FloatNormal;
                 var lightDiff = (position - l.Position).XYZ;
                 var light = Hlsl.Normalize(lightDiff);
@@ -750,7 +750,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 return;
             }
             var lighting = triangleLighting[rasterizedPixel.TriangleIndex - 1];
-            var e = rasterizedPixel.E;
 
             var color = rasterizedPixel.Color;
             var a = color.W;
@@ -758,10 +757,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var shadowProjectionPos = Float4.Zero;
             if (hasShadow)
             {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, rasterizedPixel.E);
             }
 
-            var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
+            var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, rasterizedPixel.PerspectiveE);
             var lightColor = l.Color;
             var lightDiff = (position - l.Position).XYZ;
             var light = Hlsl.Normalize(lightDiff);
@@ -963,7 +962,6 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
                 return;
             }
             var lighting = triangleLighting[rasterizedPixel.TriangleIndex - 1];
-            var e = rasterizedPixel.E;
 
             var color = rasterizedPixel.Color;
             var a = color.W;
@@ -971,10 +969,10 @@ namespace NiVE3.PresetPlugin.Internal.Drawing.ComputeShader.Render3D
             var shadowProjectionPos = Float4.Zero;
             if (hasShadow)
             {
-                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, e);
+                shadowProjectionPos = ShaderUtil.CalcBarycentricCoord(lighting.SVVX, lighting.SVVY, lighting.SVVZ, rasterizedPixel.E);
             }
 
-            var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, e);
+            var position = ShaderUtil.CalcBarycentricCoord(lighting.VVX, lighting.VVY, lighting.VVZ, rasterizedPixel.PerspectiveE);
 
             if (hasShadow & !lighting.IsAcceptLight & lighting.IsAcceptShadow)
             {
