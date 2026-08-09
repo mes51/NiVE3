@@ -14,24 +14,32 @@ namespace NiVE3.Shared.Extension
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color FromHex(string hex)
         {
-            var colorCode = hex.StartsWith('#') ? hex[1..] : hex;
-            var colors = colorCode.Chunk(2).Select(c => (byte)Convert.ToInt32(new string(c.ToArray()), 16)).ToArray();
-            if (colors.Length > 3)
+            try
             {
-                return Color.FromArgb(
-                    colors.FirstOrDefault(),
-                    colors.Skip(1).FirstOrDefault(),
-                    colors.Skip(2).FirstOrDefault(),
-                    colors.Skip(3).FirstOrDefault()
-                );
+                var colorCode = hex.StartsWith('#') ? hex[1..] : hex;
+                var colors = colorCode.Chunk(2).Select(c => (byte)Convert.ToInt32(new string([..c]), 16)).ToArray();
+                if (colors.Length > 3)
+                {
+                    return Color.FromArgb(
+                        colors.FirstOrDefault(),
+                        colors.Skip(1).FirstOrDefault(),
+                        colors.Skip(2).FirstOrDefault(),
+                        colors.Skip(3).FirstOrDefault()
+                    );
+                }
+                else
+                {
+                    return Color.FromRgb(
+                        colors.FirstOrDefault(),
+                        colors.Skip(1).FirstOrDefault(),
+                        colors.Skip(2).FirstOrDefault()
+                    );
+                }
             }
-            else
+            catch
             {
-                return Color.FromRgb(
-                    colors.FirstOrDefault(),
-                    colors.Skip(1).FirstOrDefault(),
-                    colors.Skip(2).FirstOrDefault()
-                );
+                // Hex 以外
+                return Colors.White;
             }
         }
 
