@@ -16,7 +16,7 @@ namespace NiVE3.Plugin.ValueObject
 {
     public class BezierPath
     {
-        public static readonly BezierPath Empty = new BezierPath(new Vector2d(double.NaN), ImmutableArray<BezierPoint>.Empty, false);
+        public static readonly BezierPath Empty = new BezierPath(BezierPoint.Empty, ImmutableArray<BezierPoint>.Empty, false);
 
         public BezierPoint BeginPoint { get; }
 
@@ -119,6 +119,10 @@ namespace NiVE3.Plugin.ValueObject
 
     public record BezierPoint(Vector2d PrevControlPoint, Vector2d NextControlPoint, Vector2d EndPoint, bool IsLinear, bool IsFreeControlPoint)
     {
+        const string IsNaNKey = "IsNaN";
+
+        public static readonly BezierPoint Empty = new BezierPoint(Vector2d.Zero, Vector2d.Zero, new Vector2d(double.NaN), true, false);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2d GetAbsolutePrevControlPoint()
         {
@@ -155,14 +159,24 @@ namespace NiVE3.Plugin.ValueObject
 
         public object Serialize()
         {
-            return new Dictionary<string, object>
+            if (EndPoint.IsNaN())
             {
-                { nameof(PrevControlPoint), VectorSerializer.Serialize(PrevControlPoint) },
-                { nameof(NextControlPoint), VectorSerializer.Serialize(NextControlPoint) },
-                { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
-                { nameof(IsLinear), IsLinear },
-                { nameof(IsFreeControlPoint), IsFreeControlPoint }
-            };
+                return new Dictionary<string, object>
+                {
+                    { IsNaNKey, true }
+                };
+            }
+            else
+            {
+                return new Dictionary<string, object>
+                {
+                    { nameof(PrevControlPoint), VectorSerializer.Serialize(PrevControlPoint) },
+                    { nameof(NextControlPoint), VectorSerializer.Serialize(NextControlPoint) },
+                    { nameof(EndPoint), VectorSerializer.Serialize(EndPoint) },
+                    { nameof(IsLinear), IsLinear },
+                    { nameof(IsFreeControlPoint), IsFreeControlPoint }
+                };
+            }
         }
 
         public static BezierPoint? Deserialize(object? serializedValue)
@@ -171,8 +185,15 @@ namespace NiVE3.Plugin.ValueObject
             {
                 return point;
             }
-            else if (serializedValue is IDictionary<string, object?> dictionary &&
-                     dictionary.TryGetValue(nameof(PrevControlPoint), out var controlPoint1Value) &&
+            else if (serializedValue is not IDictionary<string, object?> dictionary)
+            {
+                return null;
+            }
+            else if (dictionary.TryGetValue(IsNaNKey, out var isNanValue))
+            {
+                return Empty;
+            }
+            else if (dictionary.TryGetValue(nameof(PrevControlPoint), out var controlPoint1Value) &&
                      dictionary.TryGetValue(nameof(NextControlPoint), out var controlPoint2Value) &&
                      dictionary.TryGetValue(nameof(EndPoint), out var endPointValue) &&
                      dictionary.TryGetValue(nameof(IsLinear), out var isLinearValue) &&
