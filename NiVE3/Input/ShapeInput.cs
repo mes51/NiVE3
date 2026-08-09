@@ -803,27 +803,30 @@ namespace NiVE3.Input
                 }
                 else if (property.TryGetValue(CombineTypeId, out var combineType))
                 {
-                    var operation = (BooleanOperation)(combineType ?? BooleanOperation.Intersection);
-                    var paths = tree.GetAllPaths();
-                    ShapePath newShape;
-                    if (operation != BooleanOperation.Intersection)
+                    if (!tree.IsEmpty())
                     {
-                        var path = paths.First().AsClosedPath();
-                        var option = new ShapeOptions
+                        var operation = (BooleanOperation)(combineType ?? BooleanOperation.Intersection);
+                        var paths = tree.GetAllPaths();
+                        ShapePath newShape;
+                        if (operation != BooleanOperation.Intersection)
                         {
-                            IntersectionRule = IntersectionRule.NonZero,
-                            BooleanOperation = operation
-                        };
+                            var path = paths.First().AsClosedPath();
+                            var option = new ShapeOptions
+                            {
+                                IntersectionRule = IntersectionRule.NonZero,
+                                BooleanOperation = operation
+                            };
 
-                        newShape = new ShapePath(path.Clip(option, paths.Skip(1).Select(p => p.AsClosedPath())));
-                    }
-                    else
-                    {
-                        newShape = new ShapePath(new PathCollection(paths));
-                    }
+                            newShape = new ShapePath(path.Clip(option, paths.Skip(1).Select(p => p.AsClosedPath())));
+                        }
+                        else
+                        {
+                            newShape = new ShapePath(new PathCollection(paths));
+                        }
 
-                    tree = new ShapeGroupTree();
-                    tree.AddNode(newShape);
+                        tree = new ShapeGroupTree();
+                        tree.AddNode(newShape);
+                    }
                 }
                 else if (property.TryGetValue(TrimmingBeginId, out var trimmingBegin))
                 {
@@ -916,6 +919,11 @@ namespace NiVE3.Input
     class ShapeGroupTree : ShapeTreeBase
     {
         List<ShapeTreeBase> Nodes { get; } = [];
+
+        public bool IsEmpty()
+        {
+            return Nodes.Count <= 0;
+        }
 
         public void AddNode(ShapeTreeBase node)
         {
