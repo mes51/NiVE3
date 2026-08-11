@@ -301,7 +301,7 @@ namespace NiVE3.Model
                 {
                     if (useGpu)
                     {
-                        return new LayerMaskImage(new GPURasterizedMaskImage(width, height, AcceleratorModel.CurrentDevice, 1.0F) { Origin = imageOrigin }, opacity, blendMode, isInvert);
+                        return new LayerMaskImage(new GPURasterizedMaskImage(width, height, AcceleratorModel.CurrentDevice, 0.0F) { Origin = imageOrigin }, opacity, blendMode, isInvert);
                     }
                     else
                     {
