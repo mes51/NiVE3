@@ -51,9 +51,32 @@ namespace NiVE3.PresetPlugin.Effect.Util.General
             });
         }
 
+        public static void SameSizeMultiplyCpu(NManagedImage image, ManagedRasterizedMaskImage mask, ROI roi)
+        {
+            var imageWidth = image.Width;
+            var imageData = image.Data;
+            var maskData = mask.Data;
+
+            Parallel.For(roi.Top, roi.Bottom, y =>
+            {
+                var imageDataSpan = imageData.AsSpan(y * imageWidth, imageWidth);
+                var maskDataSpan = maskData.AsSpan(y * imageWidth, imageWidth);
+
+                for (var x = roi.Left; x < roi.Right; x++)
+                {
+                    Unsafe.AsRef(ref imageDataSpan[x]).W *= maskDataSpan[x];
+                }
+            });
+        }
+
         public static void SameSizeMaskGpu(GraphicsDevice device, NGPUImage image, GPURasterizedMaskImage mask, ROI roi)
         {
             device.For(roi.Width, roi.Height, new MaskSameSizeApplyProcess(image.Data, image.Width, mask.Data, roi.Left, roi.Top));
+        }
+
+        public static void SameSizeMultiplyGpu(GraphicsDevice device, NGPUImage image, GPURasterizedMaskImage mask, ROI roi)
+        {
+            device.For(roi.Width, roi.Height, new MaskSameSizeMultiplyProcess(image.Data, image.Width, mask.Data, roi.Left, roi.Top));
         }
     }
 
@@ -76,6 +99,18 @@ namespace NiVE3.PresetPlugin.Effect.Util.General
             var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
 
             image[pos].W = mask[pos];
+        }
+    }
+
+    [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+    [GeneratedComputeShaderDescriptor]
+    readonly partial struct MaskSameSizeMultiplyProcess(ReadWriteBuffer<Float4> image, int width, ReadWriteBuffer<float> mask, int startX, int startY) : IComputeShader
+    {
+        public void Execute()
+        {
+            var pos = (ThreadIds.Y + startY) * width + ThreadIds.X + startX;
+
+            image[pos].W *= mask[pos];
         }
     }
 }

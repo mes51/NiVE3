@@ -135,7 +135,7 @@ namespace NiVE3.PresetPlugin.Effect.Transition
                 MaskBoxBlurProcessor.ProcessCpu(mask, roi, blur, blur, 3, EdgeRepeatMode.Wrap);
             }
 
-            ImageMaskProcessor.SameSizeMaskCpu(managedImage, mask, roi);
+            ImageMaskProcessor.SameSizeMultiplyCpu(managedImage, mask, roi);
             
             return managedImage;
         }
@@ -173,7 +173,7 @@ namespace NiVE3.PresetPlugin.Effect.Transition
                 MaskBoxBlurProcessor.ProcessGpu(device, mask, roi, blur, blur, 3, EdgeRepeatMode.Wrap);
             }
 
-            ImageMaskProcessor.SameSizeMaskGpu(device, gpuImage, mask, roi);
+            ImageMaskProcessor.SameSizeMultiplyGpu(device, gpuImage, mask, roi);
 
             return gpuImage;
         }
