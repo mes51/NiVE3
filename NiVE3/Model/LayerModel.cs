@@ -2175,6 +2175,7 @@ namespace NiVE3.Model
                                 var currentTimeDecomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
                                 if (currentTimeDecomposedTransform == null)
                                 {
+                                    HistoryModel.EndGroup();
                                     return;
                                 }
 
@@ -2217,6 +2218,7 @@ namespace NiVE3.Model
                                 var currentTimeDecomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
                                 if (currentTimeDecomposedTransform == null)
                                 {
+                                    HistoryModel.EndGroup();
                                     return;
                                 }
 
@@ -2318,6 +2320,7 @@ namespace NiVE3.Model
                                 var currentTimeDecomposedTransform = transformer.CalcNewParentBaseTransformDifference(IsEnable3D, GetTransform(globalTime), newParentTransform);
                                 if (currentTimeDecomposedTransform == null)
                                 {
+                                    HistoryModel.EndGroup();
                                     return;
                                 }
 
@@ -2360,6 +2363,7 @@ namespace NiVE3.Model
                                 var currentTimeDecomposedTransform = transformer.CalcNewParentLocalTransform(IsEnable3D, GetTransform(globalTime), oldParentTransform, newParentTransform);
                                 if (currentTimeDecomposedTransform == null)
                                 {
+                                    HistoryModel.EndGroup();
                                     return;
                                 }
 
