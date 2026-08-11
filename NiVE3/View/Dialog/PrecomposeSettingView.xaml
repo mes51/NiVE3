@@ -80,10 +80,9 @@
         </GroupBox>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Margin="0,0,10,0" Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Style="{StaticResource DialogDefaultCancelButton}" Command="{Binding CancelCommand}"/>
-            <Button Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Command="{Binding OKCommand}">
+            <Button Margin="0,0,10,0" Content="{gm:LanguageResource ResourceKey=Dialog_OK}" Command="{Binding OKCommand}">
                 <Button.Style>
-                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource DialogDefaultOKButton}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=NewCompositionNameTextBox, Path=(Validation.HasError)}" Value="True">
                                 <Setter Property="IsEnabled" Value="False"/>
@@ -92,6 +91,7 @@
                     </Style>
                 </Button.Style>
             </Button>
+            <Button Content="{gm:LanguageResource ResourceKey=Dialog_Cancel}" Style="{StaticResource DialogCancelButton}" Command="{Binding CancelCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

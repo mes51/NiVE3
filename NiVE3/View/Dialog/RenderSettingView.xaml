@@ -95,7 +95,7 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
 
-        <Style x:Key="OKButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource DialogOKButton}">
+        <Style x:Key="OKButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource DialogDefaultOKButton}">
             <Setter Property="IsDefault" Value="True"/>
             <Setter Property="Content" Value="{gm:LanguageResource ResourceKey=RenderSettingView_Button_Enqueue, ReturnDynamicResource=True}"/>
 
