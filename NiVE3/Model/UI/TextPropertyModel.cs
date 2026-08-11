@@ -12,6 +12,7 @@ using NiVE3.Text;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using Prism.Mvvm;
 using SixLabors.Fonts;
+using NiVE3.Util;
 
 namespace NiVE3.Model.UI
 {
@@ -109,7 +110,11 @@ namespace NiVE3.Model.UI
 
         public void UpdateTextProperty(LayerModel targetLayer, Time layerTime, object? prevValue)
         {
-            var currentText = prevValue as StyledText ?? (targetLayer.GetTextProperties(layerTime)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty);
+            var currentText = StyledText.Empty;
+            using (var checker = CycleChecker.StartCheck())
+            {
+                currentText = prevValue as StyledText ?? (targetLayer.GetTextProperties(layerTime)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty);
+            }
             var newStyle = GetStyle();
             targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, newStyle), currentText, layerTime);
         }
