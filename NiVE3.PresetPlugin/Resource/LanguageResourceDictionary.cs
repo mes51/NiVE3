@@ -857,6 +857,9 @@ namespace NiVE3.PresetPlugin.Resource
         [LanguageKey, DefaultValue("境界線のみ表示")]
         public const string Stylize_Outline_OutlineOnly = nameof(Stylize_Outline_OutlineOnly);
 
+        [LanguageKey, DefaultValue("境界線にアンチエイリアスを適用する")]
+        public const string Stylize_Outline_ApplyAntiAlias = nameof(Stylize_Outline_ApplyAntiAlias);
+
         // ToNormalMap
 
         [DefaultValue("法線マップ化")]

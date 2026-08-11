@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Xps.Packaging;
 using ComputeSharp;
 using NiVE3.Image;
 using NiVE3.Image.Drawing;
@@ -17,6 +18,7 @@ using NiVE3.Plugin.Resource;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.PresetPlugin.Effect.Util.Blur;
 using NiVE3.PresetPlugin.Effect.Util.General;
+using NiVE3.PresetPlugin.Effect.Util.Stylize;
 using NiVE3.PresetPlugin.Extension;
 using NiVE3.PresetPlugin.Resource;
 
@@ -38,6 +40,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         const string PropertyOnlyOutlineId = nameof(PropertyOnlyOutlineId);
 
+        const string PropertyApplyAntiAliasId = nameof(PropertyApplyAntiAliasId);
+
         IAcceleratorObject? AcceleratorObject { get; set; }
 
         public void SetupAccelerator(IAcceleratorObject accelerator)
@@ -53,7 +57,8 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 new DoubleProperty(PropertyWidthId, LanguageResourceDictionary.ResourceKeys.Stylize_Outline_Width, 5.0, double.MinValue, double.MaxValue, digit: 2),
                 new ColorProperty(PropertyColorId, LanguageResourceDictionary.ResourceKeys.Stylize_Outline_Color, LanguageResourceDictionary.ResourceKeys.Dialog_ColorDialog_Title_Color, LanguageResourceDictionary.ResourceKeys.Dialog_OK, LanguageResourceDictionary.ResourceKeys.Dialog_Cancel, new Vector4(0.0F, 0.0F, 1.0F, 1.0F)),
                 new DoubleProperty(PropertyOpacityId, LanguageResourceDictionary.ResourceKeys.Stylize_Outline_Opacity, 100.0, 0.0, 100.0, digit: 2, unitKey: LanguageResourceDictionary.ResourceKeys.Unit_Percent),
-                new CheckBoxProperty(PropertyOnlyOutlineId, LanguageResourceDictionary.ResourceKeys.Stylize_Outline_OutlineOnly, false)
+                new CheckBoxProperty(PropertyOnlyOutlineId, LanguageResourceDictionary.ResourceKeys.Stylize_Outline_OutlineOnly, false),
+                new CheckBoxProperty(PropertyApplyAntiAliasId, LanguageResourceDictionary.ResourceKeys.Stylize_Outline_ApplyAntiAlias, false)
             ];
         }
 
@@ -89,15 +94,16 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var threshold = (float)properties.GetValue(PropertyThresholdId, layerTime, 0.0);
             var outlineWidth = (Vector2)(new Vector2d(properties.GetValue(PropertyWidthId, layerTime, 0.0)) / new Vector2d(downSamplingRateX, downSamplingRateY));
             var color = properties.GetValue(PropertyColorId, layerTime, Vector4.Zero);
+            var applyAntiAlias = properties.GetValue(PropertyApplyAntiAliasId, layerTime, false);
             color.W = opacity;
 
             if (useGpu && AcceleratorObject != null)
             {
-                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, threshold, outlineWidth, color, outlineOnly);
+                return ProcessGpu(AcceleratorObject.CurrentDevice, image, roi, threshold, outlineWidth, color, outlineOnly, applyAntiAlias);
             }
             else
             {
-                return ProcessCpu(image, roi, threshold, outlineWidth, color, outlineOnly);
+                return ProcessCpu(image, roi, threshold, outlineWidth, color, outlineOnly, applyAntiAlias);
             }
         }
 
@@ -108,7 +114,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
 
         public void Dispose() { }
 
-        static NManagedImage ProcessCpu(NImage image, ROI roi, float threshold, Vector2 outlineWidth, Vector4 color, bool outlineOnly)
+        static NManagedImage ProcessCpu(NImage image, ROI roi, float threshold, Vector2 outlineWidth, Vector4 color, bool outlineOnly, bool applyAntiAlias)
         {
             var managedImage = image.ToManaged();
             var isInvert = outlineWidth.X < 0.0F;
@@ -198,6 +204,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
                 });
             }
 
+            if (applyAntiAlias)
+            {
+                FxaaProcessor.ProcessCpu(outlineImage, roi);
+            }
+
             if (outlineOnly)
             {
                 ImageBlendProcessor.TransferSameSizeCpu(managedImage, outlineImage, roi);
@@ -208,6 +219,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             else
             {
                 ImageBlendProcessor.SameSizeCpu(outlineImage, managedImage, roi, BlendMode.Normal);
+                outlineImage.Origin = managedImage.Origin;
                 if (managedImage != image)
                 {
                     managedImage.Dispose();
@@ -217,7 +229,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             }
         }
 
-        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float threshold, Vector2 outlineWidth, Vector4 color, bool outlineOnly)
+        static NGPUImage ProcessGpu(GraphicsDevice device, NImage image, ROI roi, float threshold, Vector2 outlineWidth, Vector4 color, bool outlineOnly, bool applyAntiAlias)
         {
             var gpuImage = image.ToGpu(device);
             var isInvert = outlineWidth.X < 0.0F;
@@ -237,6 +249,11 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             var outlineImage = new NGPUImage(gpuImage.Width, gpuImage.Height, device);
             var outlineThreshold = 1.0F / ((outlineWidth.X * 2.0F + 1) * (outlineWidth.Y * 2.0F + 1.0F));
             device.For(roi.Width, roi.Height, new OutlineGenerateOutlineProcess(blurredMask.Data, outlineImage.Width, outlineImage.Data, outlineThreshold, isInvert, color, roi.Left, roi.Top));
+
+            if (applyAntiAlias)
+            {
+                FxaaProcessor.ProcessGpu(device, outlineImage, roi);
+            }
 
             if (outlineOnly)
             {
