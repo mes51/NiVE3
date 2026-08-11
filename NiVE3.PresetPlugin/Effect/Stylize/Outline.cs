@@ -248,6 +248,7 @@ namespace NiVE3.PresetPlugin.Effect.Stylize
             else
             {
                 ImageBlendProcessor.SameSizeGpu(device, outlineImage, gpuImage, roi, BlendMode.Normal);
+                outlineImage.Origin = gpuImage.Origin;
                 if (gpuImage != image)
                 {
                     gpuImage.Dispose();
