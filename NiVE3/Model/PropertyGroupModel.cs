@@ -108,7 +108,7 @@ namespace NiVE3.Model
 
             var objectIdHash = new XxHash3();
             objectIdHash.Append(parentPropertyModel?.ObjectId ?? parentObjectId);
-            objectIdHash.Append(instanceId ?? Guid.Empty);
+            objectIdHash.Append(InstanceId);
             objectIdHash.Append(property.Id);
             ObjectId = objectIdHash.ToInt128();
 

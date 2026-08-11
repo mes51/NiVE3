@@ -389,7 +389,7 @@ namespace NiVE3.Model
                     continue;
                 }
 
-                AddChildInternal(item, childData.InstanceId).LoadData(childData);
+                AddChildInternal(item, null).LoadData(childData);
             }
         }
 
