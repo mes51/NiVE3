@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="NiVE3.View.Pane.TextPropertyView"
+﻿<pr:PaneViewBase x:Class="NiVE3.View.Pane.TextPropertyView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -12,10 +12,11 @@
              xmlns:ugm="clr-namespace:NiVE3.UI.Resources.Wpf.GeneratedMarkup;assembly=NiVE3.UI"
              xmlns:cv="clr-namespace:NiVE3.View.Converter"
              xmlns:mk="clr-namespace:NiVE3.Shared.Wpf.Markup;assembly=NiVE3.Shared"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
+    <pr:PaneViewBase.Resources>
         <Thickness x:Key="VerticalStackMargin">10,5,10,0</Thickness>
         <cv:EnumToLocalizedNameConverter x:Key="EnumToLocalizedNameConverter"/>
         <cv:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
@@ -176,7 +177,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </UserControl.Resources>
+    </pr:PaneViewBase.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -421,4 +422,4 @@
             </Grid>
         </UniformGrid>
     </Grid>
-</UserControl>
+</pr:PaneViewBase>

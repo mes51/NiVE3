@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="NiVE3.View.Pane.RenderQueueView"
+﻿<pr:PaneViewBase x:Class="NiVE3.View.Pane.RenderQueueView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -9,9 +9,10 @@
              xmlns:r="clr-namespace:NiVE3.View.Resource"
              xmlns:vm="clr-namespace:NiVE3.ViewModel"
              xmlns:pt="clr-namespace:NiVE3.View.Part"
+             xmlns:pr="clr-namespace:NiVE3.View.Primitive"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
+    <pr:PaneViewBase.Resources>
         <cv:LocalizationConverter x:Key="RenderedFrameCountLocalizationConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=RenderQueueView_RenderedFrameCount}"/>
         <cv:LocalizationConverter x:Key="EtaLocalizationConverter" LocalizeFormat="{gm:LanguageResource ResourceKey=RenderQueueView_Eta}"/>
 
@@ -63,7 +64,7 @@
         <DataTemplate x:Key="RenderQueueItemTemplate" DataType="{x:Type vm:RenderQueueItemViewModel}">
             <pt:RenderQueueItemView IsLocked="{Binding Source={StaticResource DataContextProxy}, Path=Data.IsRendering}"/>
         </DataTemplate>
-    </UserControl.Resources>
+    </pr:PaneViewBase.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -118,4 +119,4 @@
                   ItemContainerStyle="{StaticResource RenderQueueItemContainerStyle}"
                   VirtualizingPanel.ScrollUnit="Pixel"/>
     </Grid>
-</UserControl>
+</pr:PaneViewBase>

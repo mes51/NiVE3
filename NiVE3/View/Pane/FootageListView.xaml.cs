@@ -25,7 +25,7 @@ namespace NiVE3.View.Pane
     /// <summary>
     /// FootageView.xaml の相互作用ロジック
     /// </summary>
-    public partial class FootageListView : UserControl
+    public partial class FootageListView : PaneViewBase
     {
         // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
         public static readonly SourceType HasImageSourceType = SourceType.Image | SourceType.Video;

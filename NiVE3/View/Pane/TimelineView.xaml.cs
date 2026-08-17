@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
 using NiVE3.Wpf.Behavior;
 
@@ -22,7 +23,7 @@ namespace NiVE3.View.Pane
     /// <summary>
     /// TimelineView.xaml の相互作用ロジック
     /// </summary>
-    public partial class TimelineView : UserControl
+    public partial class TimelineView : PaneViewBase
     {
         // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
         public static readonly SourceType CompositionDisplayableSourceType = SourceType.Image | SourceType.Video;

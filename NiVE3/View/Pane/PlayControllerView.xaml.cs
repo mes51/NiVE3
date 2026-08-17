@@ -12,13 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Primitive;
 
 namespace NiVE3.View.Pane
 {
     /// <summary>
     /// PlayControllerView.xaml の相互作用ロジック
     /// </summary>
-    public partial class PlayControllerView : UserControl
+    public partial class PlayControllerView : PaneViewBase
     {
         public PlayControllerView()
         {

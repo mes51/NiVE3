@@ -12,13 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Primitive;
 
 namespace NiVE3.View.Pane
 {
     /// <summary>
     /// RenderQueueView.xaml の相互作用ロジック
     /// </summary>
-    public partial class RenderQueueView : UserControl
+    public partial class RenderQueueView : PaneViewBase
     {
         public RenderQueueView()
         {

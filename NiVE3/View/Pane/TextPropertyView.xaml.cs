@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Data;
 using NiVE3.UI.Dialog;
+using NiVE3.View.Primitive;
 using NiVE3.View.Resource;
 using NiVE3.ViewModel;
 using NiVE3.ViewModel.Input;
@@ -23,7 +24,7 @@ namespace NiVE3.View.Pane
     /// <summary>
     /// TextPropertyView.xaml の相互作用ロジック
     /// </summary>
-    public partial class TextPropertyView : UserControl
+    public partial class TextPropertyView : PaneViewBase
     {
         public TextPropertyView()
         {

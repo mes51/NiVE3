@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
@@ -19,7 +20,7 @@ namespace NiVE3.View.Pane
     /// <summary>
     /// HistoryView.xaml の相互作用ロジック
     /// </summary>
-    public partial class HistoryView : UserControl
+    public partial class HistoryView : PaneViewBase
     {
         public HistoryView()
         {

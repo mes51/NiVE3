@@ -13,13 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NiVE3.Plugin.Interfaces;
+using NiVE3.View.Primitive;
 
 namespace NiVE3.View.Pane
 {
     /// <summary>
     /// LayerPropertyControllerView.xaml の相互作用ロジック
     /// </summary>
-    public partial class LayerPropertyControllerView : UserControl
+    public partial class LayerPropertyControllerView : PaneViewBase
     {
         // NOTE: なぜかTypeConverterをSourceTypeにつけてもNREが出てXAML上でリソースとして定義出来ないため、定数として定義する
         public static readonly SourceType CompositionDisplayableSourceType = SourceType.Image | SourceType.Video;

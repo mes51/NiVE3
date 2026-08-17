@@ -20,6 +20,7 @@ using NiVE3.Shared.Extension;
 using NiVE3.ValueObject;
 using NiVE3.View.Converter;
 using NiVE3.View.Part;
+using NiVE3.View.Primitive;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
@@ -27,7 +28,7 @@ namespace NiVE3.View.Pane
     /// <summary>
     /// PreviewView.xaml の相互作用ロジック
     /// </summary>
-    public partial class PreviewView : UserControl
+    public partial class PreviewView : PaneViewBase
     {
         public const double StretchPreview = -2.0;
 
