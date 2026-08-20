@@ -1346,6 +1346,8 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
+                using var checker = CycleChecker.StartCheck();
+
                 using var image = CompositionModel.RenderFrame(CurrentTime, 1.0F, true, ApplicationModel.UseGpu);
                 var managedImage = image.ToManaged();
                 var imageBuffer = ArrayPool<int>.Shared.Rent(managedImage.DataLength);
