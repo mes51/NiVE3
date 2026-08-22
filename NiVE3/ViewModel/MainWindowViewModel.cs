@@ -476,13 +476,10 @@ namespace NiVE3.ViewModel
             var viewModel = ViewModels.OfType<TimelineViewModel>().FirstOrDefault(vm => vm.CompositionModel == e.Composition);
             if (viewModel != null)
             {
+                viewModel.CompositionModel = null;
                 if (viewModels.Length > 1)
                 {
                     MainRegion.Remove(viewModel);
-                }
-                else
-                {
-                    viewModel.CompositionModel = null;
                 }
             }
         }
