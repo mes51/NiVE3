@@ -942,7 +942,11 @@ namespace NiVE3.Input
             var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
             var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
-            var textOption = new TextOptions(font);
+            var textOption = new TextOptions(font)
+            {
+                FallbackFontFamilies = FontInfo.DefaultFallbackFontFamilies,
+                ColorFontSupport = ColorFontSupport.None
+            };
             var wrappingSize = (Vector3d)(moreOptions[TextBoxSizeId] ?? new Vector3d());
             var verticalMode = (bool)(moreOptions[TextIsEnableVerticalModeId] ?? false);
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
@@ -957,7 +961,7 @@ namespace NiVE3.Input
             textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
             var glyphBuilder = new StyledGlyphBuilder((float)wrappingSize.X, (float)wrappingSize.Y, downSamplingRate, baseAnchorPointRate, path != null ? new TextLayoutPath(path, isInvert, notRotateCharacter, beginOffset) : null);
-            TextRenderer.RenderTextTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
+            TextRenderer.RenderTo(glyphBuilder, structuredExtendedTextRun.SourceText, textOption);
             var glyphPolygons = new List<BuildedTextGlyphs>();
             foreach (var glyph in glyphBuilder.GetRenderableGlyhps())
             {

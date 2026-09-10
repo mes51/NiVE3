@@ -129,6 +129,7 @@ namespace NiVE3.Shape
 
             var contour = new LinearContour
             {
+                Bounds = Bounds,
                 PointCount = points.Length,
                 PointStart = 0,
                 SegmentCount = 1,
@@ -140,8 +141,6 @@ namespace NiVE3.Shape
             {
                 Bounds = Bounds,
                 ContourCount = 1,
-                NonHorizontalSegmentCountPixelBoundary = 0,
-                NonHorizontalSegmentCountPixelCenter = 0,
                 PointCount = points.Length,
                 SegmentCount = 1
             };
@@ -152,6 +151,36 @@ namespace NiVE3.Shape
         public IPath Transform(Matrix4x4 matrix)
         {
             return new BezierEllipsePolygon(this, matrix);
+        }
+
+        public float ComputeLength(Vector2 scale)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float ComputeArea(Vector2 scale)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(PointF point, IntersectionRule intersectionRule, Vector2 scale)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetPathPointAtDistance(float distance, Vector2 scale, out PathPoint pathPoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetPathPointAtDistanceUnbounded(float distance, Vector2 scale, out PathPoint pathPoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetSegment(float startDistance, float stopDistance, bool startOnBeginFigure, Vector2 scale, out IPath path)
+        {
+            throw new NotImplementedException();
         }
 
         PointF[] FlattenInternal(Vector2 scale)

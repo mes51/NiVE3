@@ -73,9 +73,9 @@ namespace NiVE3.PresetPlugin.Internal.Audio
             resampler.SetRates(baseSamplingRate, targetSamplingRate);
 
             var resampledAudio = new float[(int)(audio.Length / channel / (double)baseSamplingRate * targetSamplingRate) * channel];
-            var needed = resampler.ResamplePrepare(resampledAudio.Length / channel, channel, out var buffer, out var offset);
-            audio.AsSpan(0, Math.Min(audio.Length, needed * channel)).CopyTo(buffer.AsSpan(offset));
-            resampler.ResampleOut(resampledAudio, 0, needed, resampledAudio.Length / channel, channel);
+            var needed = resampler.ResamplePrepare(resampledAudio.Length / channel, channel, out var buffer);
+            audio.AsSpan(0, Math.Min(audio.Length, needed * channel)).CopyTo(buffer);
+            resampler.ResampleOut(resampledAudio, needed, resampledAudio.Length / channel, channel);
             return resampledAudio;
         }
 

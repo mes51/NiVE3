@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using NAudio.Wave;
@@ -45,25 +46,23 @@ namespace NiVE3.Audio
             }
         }
 
-        public int Read(byte[] buffer, int offset, int count)
+        public int Read(Span<byte> buffer)
         {
-            if (count < 1)
-            {
-                return 0;
-            }
+            var count = buffer.Length;
 
-            using var ms = new MemoryStream(buffer, offset, count);
+            var bufferCursor = 0;
             var lastSample = EmptyRemainSample;
             if (RemainSample.length - RemainSample.offset > 0)
             {
-                var writeSampleCount = WriteSample(ms, RemainSample.sample.AsSpan(RemainSample.offset, RemainSample.length - RemainSample.offset));
+                var writeSampleCount = WriteSample(buffer, RemainSample.sample.AsSpan(RemainSample.offset, RemainSample.length - RemainSample.offset));
+                bufferCursor += writeSampleCount * sizeof(float);
                 lastSample = (RemainSample.sample, RemainSample.offset + writeSampleCount, RemainSample.length);
             }
             else
             {
-                while (ms.Position < ms.Length)
+                while (bufferCursor < buffer.Length)
                 {
-                    lock(SampleQueue)
+                    lock (SampleQueue)
                     {
                         if (SampleQueue.Count < 1)
                         {
@@ -73,7 +72,8 @@ namespace NiVE3.Audio
 
                         var sample = SampleQueue.Dequeue();
 
-                        var writeSampleCount = WriteSample(ms, sample.sample.AsSpan(0, sample.length));
+                        var writeSampleCount = WriteSample(buffer[bufferCursor..], sample.sample.AsSpan(0, sample.length));
+                        bufferCursor += writeSampleCount * sizeof(float);
                         if (lastSample.length > 0)
                         {
                             ArrayPool<float>.Shared.Return(lastSample.sample);
@@ -96,28 +96,21 @@ namespace NiVE3.Audio
                 RemainSample = lastSample;
             }
 
-            if (ms.Position < ms.Length)
+            if (bufferCursor < buffer.Length)
             {
-                buffer.AsSpan((int)ms.Position).Clear();
+                buffer[bufferCursor..].Clear();
             }
 
             return count;
         }
 
-        static int WriteSample(MemoryStream ms, Span<float> samples)
+        static int WriteSample(Span<byte> buffer, Span<float> samples)
         {
-            for (var i = 0; i < samples.Length; i++)
-            {
-                var sampleData = BitConverter.GetBytes(samples[i]);
-                ms.Write(sampleData, 0, sampleData.Length);
+            var count = Math.Min(buffer.Length / sizeof(float), samples.Length);
 
-                if (ms.Position >= ms.Length)
-                {
-                    return i + 1;
-                }
-            }
+            MemoryMarshal.Cast<float, byte>(samples[..count]).CopyTo(buffer);
 
-            return samples.Length;
+            return count;
         }
 
         static float GetSampleWindow(int sampleCount, int index)

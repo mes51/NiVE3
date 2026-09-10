@@ -811,13 +811,8 @@ namespace NiVE3.Input
                         if (operation != BooleanOperation.Intersection)
                         {
                             var path = paths.First().AsClosedPath();
-                            var option = new ShapeOptions
-                            {
-                                IntersectionRule = IntersectionRule.NonZero,
-                                BooleanOperation = operation
-                            };
 
-                            newShape = new ShapePath(path.Clip(option, paths.Skip(1).Select(p => p.AsClosedPath())));
+                            newShape = new ShapePath(path.Clip(operation, IntersectionRule.NonZero, paths.Skip(1).Select(p => p.AsClosedPath())));
                         }
                         else
                         {

@@ -179,7 +179,7 @@ namespace NiVE3.PresetPlugin.Effect.Generate
                 case AudioSpectrumWindowFunctionType.BlackmannHarris:
                     for (int i = 0, m = 0; m < audioSampleLimit; i += 2, m++)
                     {
-                        input[m] = (audio[i] + audio[i + 1]) * 0.5 * FastFourierTransform.BlackmannHarrisWindow(m, audioLength);
+                        input[m] = (audio[i] + audio[i + 1]) * 0.5 * FastFourierTransform.BlackmanHarrisWindow(m, audioLength);
                     }
                     break;
             }

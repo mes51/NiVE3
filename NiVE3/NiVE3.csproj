@@ -53,13 +53,13 @@
     <PackageReference Include="ComputeSharp" Version="3.2.0" />
     <PackageReference Include="Dirkster.AvalonDock" Version="4.74.1" />
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
-    <PackageReference Include="Jint" Version="4.13.0" />
+    <PackageReference Include="Jint" Version="4.16.2" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
-    <PackageReference Include="NAudio.Wasapi" Version="2.3.0" />
+    <PackageReference Include="NAudio.Wasapi" Version="3.1.0" />
     <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
     <PackageReference Include="Prism.Wpf" Version="9.0.537" />
-    <PackageReference Include="SixLabors.Fonts" Version="3.0.0" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="3.0.0" />
+    <PackageReference Include="SixLabors.Fonts" Version="3.1.1" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="3.1.0" />
     <PackageReference Include="System.ComponentModel.Composition" Version="10.0.10" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.10" />
     <PackageReference Include="System.Management" Version="10.0.10" />

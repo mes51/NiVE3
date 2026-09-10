@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NCalcSync" Version="6.4.0" />
+    <PackageReference Include="NCalcSync" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>

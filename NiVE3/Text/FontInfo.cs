@@ -12,6 +12,8 @@ namespace NiVE3.Text
 {
     class FontInfo
     {
+        static readonly string[] FallbackFontNames = ["Yu Gothic UI", "Meiryo", "MS Gothic", "Segoe UI", "Segoe UI Emoji"];
+
         static readonly string[] FontExtensions = ["*.ttf", "*.ttc", "*.otf"];
 
         static readonly string UserFontFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft\\Windows\\Fonts");
@@ -19,6 +21,8 @@ namespace NiVE3.Text
         static readonly string[] AdobeFontsFolders = [..new string[] { "r", "e", "s", "w" }.Select(dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe\\CoreSync\\plugins\\livetype", dir))];
 
         public static FontInfo[] LoadedFonts { get; }
+
+        public static FontFamily[] DefaultFallbackFontFamilies { get; }
 
         public static FontInfo FallbackFont => LoadedFonts[0];
 
@@ -92,6 +96,8 @@ namespace NiVE3.Text
             }
 
             LoadedFonts = [..fontInfo];
+
+            DefaultFallbackFontFamilies = [..LoadedFonts.Where(f => FallbackFontNames.Contains(f.Name)).Select(f => f.FontFamily)];
         }
 
         private FontInfo(FontFamily fontFamily, FontDescription description)

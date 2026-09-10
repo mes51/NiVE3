@@ -896,11 +896,11 @@ namespace NiVE3.Model
                 resampler.SetRates(virtualSamplingRate, Const.AudioSamplingRate);
 
                 var requestFrameCount = audio.Length / Const.AudioChannelCount;
-                var resamplerNeeded = resampler.ResamplePrepare(requestFrameCount, Const.AudioChannelCount, out var inBuffer, out var inBufferOffset) * Const.AudioChannelCount;
+                var resamplerNeeded = resampler.ResamplePrepare(requestFrameCount, Const.AudioChannelCount, out var inBuffer) * Const.AudioChannelCount;
                 if (resamplerNeeded > 0)
                 {
-                    audio.AsSpan(0, Math.Min(audio.Length, inBuffer.Length - inBufferOffset)).CopyTo(inBuffer.AsSpan(inBufferOffset));
-                    var outCount = resampler.ResampleOut(audio, 0, resamplerNeeded, requestFrameCount, Const.AudioChannelCount) * Const.AudioChannelCount;
+                    audio.AsSpan(0, Math.Min(audio.Length, inBuffer.Length)).CopyTo(inBuffer);
+                    var outCount = resampler.ResampleOut(audio, resamplerNeeded, requestFrameCount, Const.AudioChannelCount) * Const.AudioChannelCount;
 
                     if (audio.Length > outCount)
                     {

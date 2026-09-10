@@ -115,7 +115,7 @@ namespace NiVE3.Text
             return true;
         }
 
-        public void BeginLayer(Paint? paint, FillRule fillRule, ClipQuad? clipBounds) { }
+        public void BeginLayer(Paint? paint, FillRule fillRule) { }
 
         public void BeginText(in FontRectangle bounds)
         {
@@ -219,7 +219,7 @@ namespace NiVE3.Text
             CurrentPoint = point;
         }
 
-        public void SetDecoration(TextDecorations textDecorations, Vector2 start, Vector2 end, float thickness)
+        public void SetDecoration(TextDecorations textDecorations, Vector2 start, Vector2 end, float thickness, ReadOnlyMemory<float> intersections)
         {
             if (CurrentIsDiscardGlyph)
             {
@@ -229,6 +229,10 @@ namespace NiVE3.Text
             // NOTE: 今のところ非対応
             //       対応するのであればTextRunごとに分割して適用する(多分Glyphsに混ぜると困るので別にする必要も有)
         }
+
+        public void BeginGroup(CompositeMode mode) { }
+
+        public void EndGroup() { }
 
         public GlyphPath[] GetGlyphs()
         {

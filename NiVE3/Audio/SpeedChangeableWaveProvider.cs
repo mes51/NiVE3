@@ -86,8 +86,10 @@ namespace NiVE3.Audio
             return actualPosition;
         }
 
-        public int Read(byte[] buffer, int offset, int count)
+        public int Read(Span<byte> buffer)
         {
+            var count = buffer.Length;
+
             if (Audio.Length < Const.AudioChannelCount || LoopStart >= LoopEnd)
             {
                 return 0;
@@ -99,10 +101,10 @@ namespace NiVE3.Audio
                 return count;
             }
 
-            buffer.AsSpan(offset, count).Clear();
+            buffer.Clear();
 
             var requestFrameCount = count / sizeof(float) / Const.AudioChannelCount;
-            var resamplerNeeded = Resampler.ResamplePrepare(requestFrameCount, Const.AudioChannelCount, out var inBuffer, out var inBufferOffset) * Const.AudioChannelCount;
+            var resamplerNeeded = Resampler.ResamplePrepare(requestFrameCount, Const.AudioChannelCount, out var inBuffer) * Const.AudioChannelCount;
 
             var positionStart = Position;
             if (resamplerNeeded > 0)
@@ -112,7 +114,7 @@ namespace NiVE3.Audio
                 while (bufferFilledCount < resamplerNeeded)
                 {
                     var copyCount = Math.Min(resamplerNeeded - bufferFilledCount, LoopEnd - Position);
-                    Audio.AsSpan(Position, copyCount).CopyTo(inBuffer.AsSpan(inBufferOffset + bufferFilledCount));
+                    Audio.AsSpan(Position, copyCount).CopyTo(inBuffer.Slice(bufferFilledCount));
                     bufferFilledCount += copyCount;
 
                     Position += copyCount;
@@ -124,16 +126,16 @@ namespace NiVE3.Audio
 
                 var floatOutputBuffer = ArrayPool<float>.Shared.Rent(count / sizeof(float));
                 floatOutputBuffer.AsSpan().Clear();
-                var outCount = Resampler.ResampleOut(floatOutputBuffer, 0, resamplerNeeded, requestFrameCount, Const.AudioChannelCount) * Const.AudioChannelCount;
+                var outCount = Resampler.ResampleOut(floatOutputBuffer, resamplerNeeded, requestFrameCount, Const.AudioChannelCount) * Const.AudioChannelCount;
 
-                floatOutputBuffer.AsSpan(0, outCount).CopyTo(MemoryMarshal.Cast<byte, float>(buffer.AsSpan(offset)));
+                floatOutputBuffer.AsSpan(0, outCount).CopyTo(MemoryMarshal.Cast<byte, float>(buffer));
                 ArrayPool<float>.Shared.Return(floatOutputBuffer);
 
                 PositionHistory.Append((TotalReadBytes, TotalReadBytes + count, positionStart, resamplerNeeded / Const.AudioChannelCount));
             }
             else
             {
-                var floatBuffer = MemoryMarshal.Cast<byte, float>(buffer.AsSpan(offset, count));
+                var floatBuffer = MemoryMarshal.Cast<byte, float>(buffer);
                 var filledCount = -Math.Min(Position, 0);
                 Position = Math.Max(Position, 0);
                 while (filledCount < floatBuffer.Length)
