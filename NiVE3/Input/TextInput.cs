@@ -22,10 +22,12 @@ using NiVE3.Property;
 using NiVE3.Shape;
 using NiVE3.Shared.Util;
 using NiVE3.Text;
+using NiVE3.View.Primitive.PreviewText;
 using NiVE3.View.Resource;
 using SixLabors.Fonts;
 using SixLabors.Fonts.Rendering;
 using SixLabors.ImageSharp;
+using static System.Net.Mime.MediaTypeNames;
 using Polygon = NiVE3.Shape.Polygon;
 
 namespace NiVE3.Input
@@ -58,6 +60,11 @@ namespace NiVE3.Input
         public void SetupAccelerator(IAcceleratorObject accelerator) { }
 
         public void Dispose() { }
+
+        public static (string, CharacterGeometry[], CharacterGeometry) CalcCharacterGeometry(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, PreviewTextCoordTransformer transformer)
+        {
+            return TextFootageSource.CalcCharacterGeometry(globalTime, layer, properties, transformer);
+        }
     }
 
     class TextFootageSource : ICustomizableFootageSource
@@ -461,6 +468,74 @@ namespace NiVE3.Input
             }
 
             return image;
+        }
+
+        public static (string, CharacterGeometry[], CharacterGeometry) CalcCharacterGeometry(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, PreviewTextCoordTransformer transformer)
+        {
+            var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
+            var emptyCaretGeometry = new CharacterGeometry("", new System.Windows.Rect(0.0, 0.0, 0.0, sourceText.DefaultStyle.FontSize), Matrix3x2.Identity, transformer);
+            var text = sourceText.Text;
+            if (string.IsNullOrEmpty(text))
+            {
+                return ("", [], emptyCaretGeometry);
+            }
+
+            var structuredExtendedTextRun = new StructuredExtendedTextRun(text, sourceText.DefaultStyle, sourceText.Styles);
+            foreach (var animator in ((PropertyValueGroup[])(properties[TextAnimatorsId] ?? Array.Empty<PropertyValueGroup>())))
+            {
+                ApplyAnimator(structuredExtendedTextRun, animator);
+            }
+            structuredExtendedTextRun = structuredExtendedTextRun.ReconstructTextRunWithOffset();
+
+            var pathOptions = (PropertyValueGroup)(properties[TextPathOptionsGroupId] ?? PropertyValueGroup.Empty);
+            var targetMaskId = (UseMaskPathTarget)(pathOptions[TextPathTargetMaskId] ?? UseMaskPathTarget.Empty);
+            var isInvert = (bool)(pathOptions[TextPathIsInvertId] ?? false);
+            var notRotateCharacter = (bool)(pathOptions[TextPathNotRotateCharacterId] ?? false);
+            var beginOffset = (double)(pathOptions[TextPathBeginMarginId] ?? 0.0) * 0.01;
+            var mask = layer.GetMask(targetMaskId.MaskId)?.GetPath(globalTime, 1.0) ?? BezierPath.Empty;
+            var path = mask.BuildPath()?.Flatten()?.First();
+
+            var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
+            var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
+            var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
+            var textOption = new TextOptions(font);
+            var wrappingSize = (Vector3d)(moreOptions[TextBoxSizeId] ?? new Vector3d());
+            var verticalMode = (bool)(moreOptions[TextIsEnableVerticalModeId] ?? false);
+            textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
+            textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
+            textOption.TextRuns = structuredExtendedTextRun.Flatten();
+            textOption.TextAlignment = sourceText.DefaultStyle.TextAlign switch
+            {
+                TextAlign.Center => TextAlignment.Center,
+                TextAlign.Right => TextAlignment.End,
+                _ => TextAlignment.Start,
+            };
+            textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
+            var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
+
+            var metrics = TextMeasurer.GetGraphemeMetrics(text.AsSpan(), textOption).Span;
+            var clusters = new List<GraphemeCluster>();
+            for (var i = 0; i < metrics.Length; i++)
+            {
+                var beginIndex = metrics[i].StringIndex;
+                var endIndex = i + 1 >= metrics.Length ? text.Length : metrics[i + 1].StringIndex;
+                var newLineIndex = text.IndexOf('\n', beginIndex);
+                if (newLineIndex > -1)
+                {
+                    endIndex = Math.Min(endIndex, newLineIndex);
+                }
+                if (endIndex <= beginIndex)
+                {
+                    continue;
+                }
+
+                clusters.Add(new GraphemeCluster(text[beginIndex..endIndex], metrics[i].GraphemeIndex));
+            }
+
+            var geometryBuilder = new CharacterGeometryBuilder([..clusters], (float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate, path != null ? new TextLayoutPath(path, isInvert, notRotateCharacter, beginOffset) : null);
+            TextRenderer.RenderTo(geometryBuilder, structuredExtendedTextRun.SourceText, textOption);
+
+            return (text, [..geometryBuilder.GetGeometries(transformer)], emptyCaretGeometry);
         }
 
         static void ApplyAnimator(StructuredExtendedTextRun structuredExtendedTextRun, PropertyValueGroup animatorPropertyValue)

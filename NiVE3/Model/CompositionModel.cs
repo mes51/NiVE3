@@ -37,6 +37,7 @@ using NiVE3.Model.UI;
 using NiVE3.Image.Color;
 using NiVE3.InternalShader.Mask;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
+using NiVE3.View.Primitive.PreviewText;
 
 namespace NiVE3.Model
 {
@@ -1924,6 +1925,24 @@ namespace NiVE3.Model
         public void CalcCacheKeyHash(XxHash3 hash, Time time)
         {
             CalcCacheKeyHash(hash, time, time, false);
+        }
+
+        public Tuple<string, TextLayerPreviewText>? GetPreviewText(Guid layerId, Time time)
+        {
+            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+            if (layer == null)
+            {
+                return null;
+            }
+
+            if (Transformer == null)
+            {
+                Transformer = RendererListModel.CreateTransfomer(RendererPluginId);
+                Transformer.SetSize(Width, Height);
+            }
+            var transformer = new PreviewTextCoordTransformer(Transformer, this, layer, time);
+
+            return layer.GetPreviewText(time, transformer);
         }
 
         NImage RenderFrameInternal(Time time, Time shutterTime, bool isSubFrame, double downSamplingRate, bool applyToneMapping, bool useGpu)

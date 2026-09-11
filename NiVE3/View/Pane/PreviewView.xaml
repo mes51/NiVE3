@@ -501,6 +501,7 @@
                             </Style>
                         </pr:MultiItemRadioButton.Style>
                     </pr:MultiItemRadioButton>
+                    <RadioButton GroupName="Tool" Margin="{StaticResource LeftToolBarMargin}" VerticalAlignment="Center" Style="{StaticResource IBeamRadioButton}" IsChecked="{Binding ToolType, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static vm:ToolType.Text}}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_ScaleTool}"/>
                     <Button Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewCaptureSnapShotButton}" Command="{Binding CaptureSnapShotCommand}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_CaptureSnapShot}"/>
                     <Button x:Name="ShowSnapShotButton" Margin="{StaticResource LeftToolBarMargin}" Visibility="{Binding IsFootage, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" Style="{StaticResource PreviewShowSnapShotButton}" ToolTip="{gm:LanguageResource ResourceKey=PreviewView_ToolTip_ShowSnapShot}"/>
                     <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=ShowSnapShotButton, Path=IsPressed}" Sender="{Binding IsShowSnapShotImage}"/>

@@ -184,6 +184,14 @@ namespace NiVE3.ViewModel
         [NeedWire(nameof(ViewState))]
         public partial int LastSelectedObjectHashCode { get; set; }
 
+        [ReactiveProperty]
+        [NeedWire(nameof(ViewState))]
+        public partial string SelectedTextLayerText { get; set; } = "";
+
+        [ReactiveProperty]
+        [NeedWire(nameof(ViewState))]
+        public partial TextLayerPreviewText? SelectedTextLayerPreviewTextData { get; set; }
+
         public CompositionModel? CompositionModel
         {
             get;

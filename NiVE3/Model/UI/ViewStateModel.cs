@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
+using NiVE3.ValueObject;
 using Prism.Mvvm;
 
 namespace NiVE3.Model.UI
@@ -68,6 +69,12 @@ namespace NiVE3.Model.UI
 
         [ReactiveProperty]
         public partial ObservableCollection<Guid>? SelectedLayerIds { get; set; }
+
+        [ReactiveProperty]
+        public partial string SelectedTextLayerText { get; set; }
+
+        [ReactiveProperty]
+        public partial TextLayerPreviewText SelectedTextLayerPreviewTextData { get; set; }
 
         [ReactiveProperty]
         public partial Guid? CurrentEditingCompositionId { get; set; }

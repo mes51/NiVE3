@@ -31,7 +31,10 @@ sealed class UseReactivePropertyAttribute : Attribute { }
 using System;
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-sealed class ReactivePropertyAttribute : Attribute { }
+sealed class ReactivePropertyAttribute : Attribute
+{
+    public bool UseValueChangedEventArgs { get; set; }
+}
 """);
         }
 
@@ -71,7 +74,7 @@ sealed class ReactivePropertyAttribute : Attribute { }
             context.CancellationToken.ThrowIfCancellationRequested();
 
             var useReactivePropertySymbol = EmitterUtil.GetTypeSymbol(compilation, UseReactivePropertyFullName);
-            var ReactivePropertySymbol = EmitterUtil.GetTypeSymbol(compilation, ReactivePropertyFullName);
+            var reactivePropertySymbol = EmitterUtil.GetTypeSymbol(compilation, ReactivePropertyFullName);
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -90,9 +93,15 @@ sealed class ReactivePropertyAttribute : Attribute { }
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            var properties = new List<(IPropertySymbol, Accessibility, Accessibility)>();
-            foreach (var property in typeSymbol.GetMembers().OfType<IPropertySymbol>().Where(p => p.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, ReactivePropertySymbol))))
+            var properties = new List<(IPropertySymbol, bool, Accessibility, Accessibility)>();
+            var anyUseValueChangedEventArgs = false;
+            foreach (var (property, attribute) in typeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => (p, p.GetAttributes().FirstOrDefault(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, reactivePropertySymbol)))))
             {
+                if (attribute == null)
+                {
+                    continue;
+                }
+
                 if (!property.IsPartialDefinition)
                 {
                     context.ReportDiagnostic(
@@ -107,7 +116,10 @@ sealed class ReactivePropertyAttribute : Attribute { }
                     );
                     return;
                 }
-                properties.Add((property, property.GetMethod.DeclaredAccessibility, property.SetMethod.DeclaredAccessibility));
+
+                var useValueChangedEventArgs = (bool)(attribute.NamedArguments.FirstOrDefault(n => n.Key == "UseValueChangedEventArgs").Value.Value ?? false);
+                properties.Add((property, useValueChangedEventArgs, property.GetMethod.DeclaredAccessibility, property.SetMethod.DeclaredAccessibility));
+                anyUseValueChangedEventArgs |= useValueChangedEventArgs;
             }
 
             context.CancellationToken.ThrowIfCancellationRequested();
@@ -127,30 +139,93 @@ sealed class ReactivePropertyAttribute : Attribute { }
 #pragma warning disable CS8604
 
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using NiVE3.Plugin.Resource;
 
 namespace {{typeSymbol.ContainingNamespace}};
 
-partial class {{typeSymbol.Name}}
+partial class {{typeSymbol.Name}}{{(anyUseValueChangedEventArgs ? ": ISetPropertyValueChanged" : "")}}
 {
 
 """);
-
-            foreach (var (property, getterAccessibility, setterAccessibility) in properties)
+            
+            if (anyUseValueChangedEventArgs)
             {
-                code.AppendLine($$"""
+                foreach (var (property, useValueChangedEventArgs, getterAccessibility, setterAccessibility) in properties)
+                {
+                    code.AppendLine($$"""
+    {{GetAccessibilityKeyword(property.DeclaredAccessibility)}} partial {{property.Type}} {{property.Name}}
+    {
+        {{(getterAccessibility != property.DeclaredAccessibility ? $"{GetAccessibilityKeyword(getterAccessibility)} " : "")}}get;
+        {{(setterAccessibility != property.DeclaredAccessibility ? $"{GetAccessibilityKeyword(setterAccessibility)} " : "")}}set { SetProperty(ref field, value, {{(useValueChangedEventArgs ? "true" : "false")}}); }
+    }
+""");
+                }
+
+                code.AppendLine("""
+
+    public event EventHandler<PropertyValueChangedEventArgs>? PropertyValueChanged;
+
+    public void SetProperty<T>(ref T storage, T value, bool useValueChangedEventArgs, [CallerMemberName] string? propertyName = null)
+    {
+        if (useValueChangedEventArgs)
+        {
+            if (EqualityComparer<T>.Default.Equals(storage, value))
+            {
+                return;
+            }
+
+            var oldValue = storage;
+            storage = value;
+            if (!string.IsNullOrEmpty(propertyName))
+            {
+                PropertyValueChanged?.Invoke(this, new PropertyValueChangedEventArgs(propertyName, oldValue));
+            }
+        }
+        else
+        {
+            SetProperty(ref storage, value, propertyName);
+        }
+    }
+
+    public class PropertyValueChangedEventArgs : EventArgs
+    {
+        public PropertyValueChangedEventArgs(string? propertyName, object? oldValue)
+        {
+            PropertyName = propertyName;
+            OldValue = oldValue;
+        }
+
+        public virtual string? PropertyName { get; }
+
+        public object? OldValue { get; }
+    }
+}
+
+file interface ISetPropertyValueChanged
+{
+    void SetProperty<T>(ref T storage, T value, bool useValueChangedEventArgs, string? propertyName);
+}
+""");
+            }
+            else
+            {
+                foreach (var (property, useValueChangedEventArgs, getterAccessibility, setterAccessibility) in properties)
+                {
+                    code.AppendLine($$"""
                     {{GetAccessibilityKeyword(property.DeclaredAccessibility)}} partial {{property.Type}} {{property.Name}}
                     {
                         {{(getterAccessibility != property.DeclaredAccessibility ? $"{GetAccessibilityKeyword(getterAccessibility)} " : "")}}get;
                         {{(setterAccessibility != property.DeclaredAccessibility ? $"{GetAccessibilityKeyword(setterAccessibility)} " : "")}}set { SetProperty(ref field, value); }
                     }
                 """);
+                }
+
+                code.AppendLine("}");
             }
 
-            code.AppendLine("""
-}
-""");
 
             context.AddSource(fileName, code.ToString());
         }

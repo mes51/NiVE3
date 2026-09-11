@@ -28,6 +28,9 @@ namespace NiVE3.Util
         [DllImport("user32.dll", SetLastError = true)]
         public static extern uint GetDoubleClickTime();
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern uint GetCaretBlinkTime();
+
         #endregion user32.dll
 
         #region shell32.dll

@@ -144,6 +144,14 @@ namespace NiVE3.ViewModel
         public partial NManagedImage? SnapShotImage { get; set; }
 
         [ReactiveProperty]
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public partial string SelectedTextLayerText { get; set; } = "";
+
+        [ReactiveProperty]
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public partial TextLayerPreviewText? SelectedTextLayerPreviewTextData { get; set; }
+
+        [ReactiveProperty]
         public partial double RealFrameRate { get; set; }
 
         [ReactiveProperty]
@@ -852,6 +860,19 @@ namespace NiVE3.ViewModel
             {
                 using var checker = CycleChecker.StartCheck();
                 BoundingBoxesBuffer = compositionPreviewModel.Composition.GetBoundingBoxes([..SelectedLayerIds], CurrentTime);
+                if (SelectedLayerIds.Count == 1)
+                {
+                    var t = compositionPreviewModel.Composition.GetPreviewText(SelectedLayerIds[0], CurrentTime);
+                    if (t != null)
+                    {
+                        (SelectedTextLayerText, SelectedTextLayerPreviewTextData) = t;
+                    }
+                    else
+                    {
+                        SelectedTextLayerText = "";
+                        SelectedTextLayerPreviewTextData = null;
+                    }
+                }
             }
             IsDirtyBoundingBoxesBuffer = true;
         }
@@ -1292,7 +1313,8 @@ namespace NiVE3.ViewModel
         Scale = LayerSelectableTool | 6,
         CameraOrbit = 7,
         CameraPan = 8,
-        CameraDolly = 9
+        CameraDolly = 9,
+        Text = LayerSelectableTool | 10
     }
 
     class PreviewSelectArgs

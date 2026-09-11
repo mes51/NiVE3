@@ -113,4 +113,8 @@
   <PropertyGroup>
      <SixLaborsLicenseFile>Resources\sixlabors.lic</SixLaborsLicenseFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDiagnostics|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NIVE3_PREVIEW_TEXT_DIAGNOSTICS</DefineConstants>
+  </PropertyGroup>
 </Project>

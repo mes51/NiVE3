@@ -113,6 +113,9 @@ namespace NiVE3.View.Resource
         [ShowInMarkup, Icon("", Size = 12)]
         public static readonly string Camera = nameof(Camera);
 
+        [ShowInMarkup, Icon("", Size = 12)]
+        public static readonly string IBeam = nameof(IBeam);
+
         public FontawesomeResourceDictionary()
         {
             var keys = typeof(FontawesomeResourceDictionary).GetFields(BindingFlags.Static | BindingFlags.Public)

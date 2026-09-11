@@ -556,6 +556,18 @@
         </Setter>
     </Style>
 
+    <Style x:Key="IBeamRadioButton" TargetType="{x:Type RadioButton}" BasedOn="{StaticResource IconRadioButtonBase}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RadioButton}">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1">
+                        <Path Fill="{TemplateBinding Foreground}" Data="{gm:FontawesomeResource ResourceKey=IBeam, ReturnDynamicResource=True}" Style="{StaticResource IconBase}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="IconMultiRadioButtonBase" TargetType="{x:Type pr:MultiItemRadioButton}">
         <Setter Property="Width" Value="24"/>
         <Setter Property="Height" Value="24"/>

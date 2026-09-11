@@ -39,9 +39,11 @@ using NiVE3.Plugin.Property.Properties;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Property;
 using NiVE3.Shared.Extension;
-using NiVE3.Util;
-using NiVE3.View.Resource;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
+using NiVE3.Util;
+using NiVE3.ValueObject;
+using NiVE3.View.Primitive.PreviewText;
+using NiVE3.View.Resource;
 
 namespace NiVE3.Model
 {
@@ -2462,6 +2464,22 @@ namespace NiVE3.Model
                 return;
             }
             TransformProperties.ResetAllChildren();
+        }
+
+        public Tuple<string, TextLayerPreviewText>? GetPreviewText(Time globalTime, PreviewTextCoordTransformer transformer)
+        {
+            if (!IsText || !IsContainsTime(globalTime) || TextProperties == null)
+            {
+                return null;
+            }
+
+            var sourceTime = CalcSourceTime(globalTime - SourceStartPoint);
+            var layerTime = globalTime - SourceStartPoint;
+            var sourceOptionProperties = TextProperties.GetValues(sourceTime, globalTime, true);
+
+            var (text, geometries, emptyCaretGeometry) = TextInput.CalcCharacterGeometry(globalTime, this, sourceOptionProperties, transformer);
+
+            return Tuple.Create(text, new TextLayerPreviewText(LayerId, geometries, emptyCaretGeometry));
         }
 
         void DeleteEffectInternal(Guid[] effectIds, bool isCut)
