@@ -14,10 +14,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Xml;
 using AvalonDock;
+using AvalonDock.Core;
 using AvalonDock.Layout;
-using AvalonDock.Layout.Serialization;
+using AvalonDock.Serializer.Xml;
 using NiVE3.Config;
 using NiVE3.View.Dock;
 using NiVE3.ViewModel;
@@ -42,7 +42,7 @@ namespace NiVE3.Windows
 
         void SaveLayout()
         {
-            var serializedLayoutXml = SerializeLayout();
+            var serializedLayoutJson = SerializeLayout();
 
             if (WindowState == WindowState.Maximized)
             {
@@ -55,7 +55,9 @@ namespace NiVE3.Windows
                 WindowLayoutSetting.Setting.Size = new Size(Width, Height);
             }
             WindowLayoutSetting.Setting.WindowState = WindowState;
-            WindowLayoutSetting.Setting.DockingLayout = serializedLayoutXml;
+            WindowLayoutSetting.Setting.DockingLayoutJson = serializedLayoutJson;
+            // NOTE: JSON 形式で保存した後は AvalonDock 4 系の XML レイアウトは不要になるため破棄する
+            WindowLayoutSetting.Setting.DockingLayout = "";
             WindowLayoutSetting.Setting.Save();
         }
 
@@ -74,20 +76,24 @@ namespace NiVE3.Windows
             }
             WindowState = WindowLayoutSetting.Setting.WindowState;
 
-            if (!string.IsNullOrEmpty(WindowLayoutSetting.Setting.DockingLayout))
+            if (!string.IsNullOrEmpty(WindowLayoutSetting.Setting.DockingLayoutJson))
             {
-                RestoreDockingWindowLayout(WindowLayoutSetting.Setting.DockingLayout);
+                RestoreDockingWindowLayout(new DockingLayoutJsonSerializer(Manager), WindowLayoutSetting.Setting.DockingLayoutJson);
+            }
+            else if (!string.IsNullOrEmpty(WindowLayoutSetting.Setting.DockingLayout))
+            {
+                // NOTE: AvalonDock 4 系で保存された XML 形式のレイアウトを読み込む
+                RestoreDockingWindowLayout(new XmlLayoutSerializer(Manager), WindowLayoutSetting.Setting.DockingLayout);
             }
 
             IsLoadingLayout = false;
         }
 
-        void RestoreDockingWindowLayout(string layout)
+        void RestoreDockingWindowLayout(LayoutSerializerBase serializer, string layout)
         {
             try
             {
                 using var reader = new StringReader(layout);
-                var serializer = new XmlLayoutSerializer(Manager);
                 // NOTE: レイアウトのデシリアライズ時にAnchorableやDocumentを再生成され、LayoutInitializerで設定したイベントハンドラが消えるので再設定する
                 //       また、Documentは起動時には存在しないため、レイアウト復元時にはパネル自体表示しないようにする
                 serializer.LayoutSerializationCallback += (sender, e) =>
@@ -96,9 +102,9 @@ namespace NiVE3.Windows
                     {
                         e.Cancel = true;
                     }
-                    else if (e.Content is not SingletonePaneViewModelBase)
+                    else if (e.Content is not SingletonePaneViewModelBase && e.Model is LayoutContent layoutContent)
                     {
-                        LayoutInitializer.BindClosed(() => DataContext as MainWindowViewModel, e.Model);
+                        LayoutInitializer.BindClosed(() => DataContext as MainWindowViewModel, layoutContent);
                     }
                 };
                 serializer.Deserialize(reader);
@@ -108,41 +114,11 @@ namespace NiVE3.Windows
 
         string SerializeLayout()
         {
-            var serializer = new XmlLayoutSerializer(Manager);
+            var serializer = new DockingLayoutJsonSerializer(Manager);
             using var writer = new StringWriter();
             serializer.Serialize(writer);
 
-            var serializedLayoutXml = writer.ToString();
-            var serializedLayoutDoc = new XmlDocument();
-            serializedLayoutDoc.LoadXml(serializedLayoutXml);
-            var timelinePanels = serializedLayoutDoc.SelectNodes($"//*[@ContentId=\"{typeof(TimelineViewModel).Name}\"]");
-            if (timelinePanels != null && timelinePanels.Count > 1)
-            {
-                foreach (var node in timelinePanels.OfType<XmlNode>().Skip(1))
-                {
-                    var currentParent = node.ParentNode;
-                    var currentChild = node;
-                    while (currentParent != null)
-                    {
-                        currentParent.RemoveChild(currentChild);
-                        if (!currentParent.HasChildNodes)
-                        {
-                            currentChild = currentParent;
-                            currentParent = currentParent.ParentNode;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                using var editedWriter = new StringWriter();
-                serializedLayoutDoc.Save(editedWriter);
-                serializedLayoutXml = editedWriter.ToString();
-            }
-
-            return serializedLayoutXml;
+            return writer.ToString();
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -210,7 +186,7 @@ namespace NiVE3.Windows
             {
                 IsLoadingLayout = true;
 
-                RestoreDockingWindowLayout(viewModel.InitialLayout);
+                RestoreDockingWindowLayout(new DockingLayoutJsonSerializer(Manager), viewModel.InitialLayout);
 
                 IsLoadingLayout = false;
             }

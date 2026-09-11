@@ -29,6 +29,8 @@ namespace NiVE3.Config
 
         public string DockingLayout { get; set; } = "";
 
+        public string DockingLayoutJson { get; set; } = "";
+
         static WindowLayoutSetting()
         {
             Setting = new WindowLayoutSetting();
@@ -44,7 +46,8 @@ namespace NiVE3.Config
                 Location = Location,
                 Size = Size,
                 WindowState = WindowState,
-                DockingLayout = DockingLayout
+                DockingLayout = DockingLayout,
+                DockingLayoutJson = DockingLayoutJson
             };
 
             var json = JsonSerializer.Serialize(data);
@@ -68,6 +71,7 @@ namespace NiVE3.Config
             Size = data.Size;
             WindowState = data.WindowState;
             DockingLayout = data.DockingLayout;
+            DockingLayoutJson = data.DockingLayoutJson;
         }
     }
 }

@@ -15,6 +15,14 @@ namespace NiVE3.Data.Config
 
         public WindowState WindowState { get; set; }
 
+        /// <summary>
+        /// AvalonDock 4 系で保存された XML 形式のドッキングレイアウト (読み込み専用、保存時は空になる)
+        /// </summary>
         public string DockingLayout { get; set; } = "";
+
+        /// <summary>
+        /// JSON 形式のドッキングレイアウト
+        /// </summary>
+        public string DockingLayoutJson { get; set; } = "";
     }
 }
