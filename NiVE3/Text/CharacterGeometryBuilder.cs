@@ -14,7 +14,7 @@ namespace NiVE3.Text
 {
     class CharacterGeometryBuilder : IGlyphRenderer
     {
-        List<(string, Rect, Matrix3x2)> CharacterGeometries { get; } = [];
+        Dictionary<int, (string, Matrix3x2, List<Rect>)> CharacterGeometries { get; } = [];
 
         Vector2 BaseAnchorPointRate { get; }
 
@@ -83,7 +83,12 @@ namespace NiVE3.Text
 
             if (GraphemeClusters.TryGetValue(parameters.GraphemeIndex, out var gc))
             {
-                CharacterGeometries.Add((gc.Cluster, new Rect(bounds.Left, bounds.Top, bounds.Width, bounds.Height), transform));
+                if (!CharacterGeometries.TryGetValue(parameters.GraphemeIndex, out var geometry))
+                {
+                    geometry = (gc.Cluster, transform, []);
+                    CharacterGeometries.Add(parameters.GraphemeIndex, geometry);
+                }
+                geometry.Item3.Add(new Rect(bounds.Left, bounds.Top, bounds.Width, bounds.Height));
                 return true;
             }
             else
@@ -132,7 +137,11 @@ namespace NiVE3.Text
 
         public IEnumerable<CharacterGeometry> GetGeometries(PreviewTextCoordTransformer transfomer)
         {
-            return CharacterGeometries.Select(t => new CharacterGeometry(t.Item1, t.Item2, t.Item3, transfomer));
+            return CharacterGeometries.Values.Select(t => new CharacterGeometry(t.Item1, t.Item3.Aggregate(Rect.Empty, (m, r) =>
+            {
+                m.Union(r);
+                return m;
+            }), t.Item2, transfomer));
         }
     }
 

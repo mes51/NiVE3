@@ -26,7 +26,7 @@ namespace NiVE3.View.Primitive.PreviewText
             CurrentTime = currentTime;
         }
 
-        public Vector2d LocalCoordToScreenCoord(Vector3d localCoord)
+        public virtual Vector2d LocalCoordToScreenCoord(Vector3d localCoord)
         {
             var layerSkeleton = LayerModel.GetLayerSkeletonWithoutContainsTime(CurrentTime);
             var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
@@ -41,7 +41,7 @@ namespace NiVE3.View.Primitive.PreviewText
             }
         }
 
-        public Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition, Vector2d scale, Vector2d origin)
+        public virtual Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition, Vector2d scale, Vector2d origin)
         {
             var layerSkeleton = LayerModel.GetLayerSkeletonWithoutContainsTime(CurrentTime);
             if (layerSkeleton == null)
