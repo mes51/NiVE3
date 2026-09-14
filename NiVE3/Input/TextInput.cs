@@ -517,6 +517,11 @@ namespace NiVE3.Input
             var clusters = new List<GraphemeCluster>();
             for (var i = 0; i < metrics.Length; i++)
             {
+                if (metrics[i].IsLineBreak)
+                {
+                    continue;
+                }
+
                 var beginIndex = metrics[i].StringIndex;
                 var endIndex = i + 1 >= metrics.Length ? text.Length : metrics[i + 1].StringIndex;
                 var newLineIndex = text.IndexOf('\n', beginIndex);
@@ -529,10 +534,10 @@ namespace NiVE3.Input
                     continue;
                 }
 
-                clusters.Add(new GraphemeCluster(text[beginIndex..endIndex], metrics[i].GraphemeIndex));
+                clusters.Add(new GraphemeCluster(text[beginIndex..endIndex], metrics[i].GraphemeIndex, metrics[i].Advance));
             }
 
-            var geometryBuilder = new CharacterGeometryBuilder([..clusters], (float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate, path != null ? new TextLayoutPath(path, isInvert, notRotateCharacter, beginOffset) : null);
+            var geometryBuilder = new CharacterGeometryBuilder(clusters.ToDictionary(c => c.GraphemeIndex), (float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate, path != null ? new TextLayoutPath(path, isInvert, notRotateCharacter, beginOffset) : null);
             TextRenderer.RenderTo(geometryBuilder, structuredExtendedTextRun.SourceText, textOption);
 
             return (text, [..geometryBuilder.GetGeometries(transformer)], emptyCaretGeometry);

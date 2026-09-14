@@ -28,9 +28,9 @@ namespace NiVE3.Text
 
         float ShiftedLetterSpacing { get; set; }
 
-        GraphemeCluster[] GraphemeClusters { get; }
+        IReadOnlyDictionary<int, GraphemeCluster> GraphemeClusters { get; }
 
-        public CharacterGeometryBuilder(GraphemeCluster[] clusters, float textBoxWidth, float textBoxHeight, Vector2 baseAnchorPointRate, TextLayoutPath? textPath = null)
+        public CharacterGeometryBuilder(IReadOnlyDictionary<int, GraphemeCluster> clusters, float textBoxWidth, float textBoxHeight, Vector2 baseAnchorPointRate, TextLayoutPath? textPath = null)
         {
             TextBoxWidth = textBoxWidth;
             TextBoxHeight = textBoxHeight;
@@ -81,9 +81,15 @@ namespace NiVE3.Text
                 transform *= Matrix3x2.CreateTranslation(ShiftedLetterSpacing, 0.0F);
             }
 
-            CharacterGeometries.Add((GraphemeClusters[parameters.GraphemeIndex].Cluster, new Rect(bounds.Left, bounds.Top, bounds.Width, bounds.Height), transform));
-
-            return true;
+            if (GraphemeClusters.TryGetValue(parameters.GraphemeIndex, out var gc))
+            {
+                CharacterGeometries.Add((gc.Cluster, new Rect(bounds.Left, bounds.Top, bounds.Width, bounds.Height), transform));
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void BeginText(in FontRectangle bounds)
@@ -130,5 +136,5 @@ namespace NiVE3.Text
         }
     }
 
-    record GraphemeCluster(string Cluster, int GraphemeIndex);
+    record GraphemeCluster(string Cluster, int GraphemeIndex, FontRectangle Advance);
 }
