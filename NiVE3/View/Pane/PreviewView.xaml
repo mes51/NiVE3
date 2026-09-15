@@ -360,7 +360,8 @@
                                     PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"
                                     Text="{Binding SelectedTextLayerText}"
                                     CharacterGeometries="{Binding SelectedTextLayerPreviewTextData.CharacterGeometries}"
-                                    EmptyTextCaretGeometry="{Binding SelectedTextLayerPreviewTextData.EmptyTextCaretGeometry}">
+                                    EmptyTextCaretGeometry="{Binding SelectedTextLayerPreviewTextData.EmptyTextCaretGeometry}"
+                                    IsVerticalText="{Binding SelectedTextLayerPreviewTextData.IsVertical}">
                     <prt:PreviewTextBox.Style>
                         <Style TargetType="{x:Type prt:PreviewTextBox}">
                             <Setter Property="Visibility" Value="Collapsed"/>

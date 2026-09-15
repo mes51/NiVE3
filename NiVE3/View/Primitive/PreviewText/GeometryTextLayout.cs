@@ -22,15 +22,19 @@ namespace NiVE3.View.Primitive.PreviewText
     ///
     /// Bounds は文字のパス (インク) のバウンディングボックスであり、文字送り幅や行の高さは含まない前提。
     /// そのため、隣接するグリフのインク同士の隙間の中点を境界とする「セル」を行ごとに導出し、
-    /// キャレット位置・選択範囲・ヒットテストにはセルを使う。行の縦幅は行内のインクの union から求める。
+    /// キャレット位置・選択範囲・ヒットテストにはセルを使う。行の太さは行内のインクの union から求める。
+    ///
+    /// 横書き・縦書きの両方に対応する。文字が進む方向を「流れ方向 (flow)」、行が積まれる方向を
+    /// 「直交方向 (cross)」と呼び、横書きでは flow = X / cross = Y (行は下へ)、
+    /// 縦書きでは flow = Y / cross = X (列は左へ) として同じ処理を共有する。
     ///
     /// テキスト本体はレンダリング済み画像として外部に表示されている前提で、
     /// このレイアウトはヒットテスト・キャレット・選択範囲・バウンディングボックスの
     /// 計算のみを担当する (DrawsText = false)。
     ///
     /// ジオメトリとテキストの対応付けは、各エントリの Grapheme 文字列を表示テキストと
-    /// 順に照合して行う。改行や、レンダラが省略した空白などはジオメトリなしの「穴」として
-    /// 扱い、前後のグリフの端から位置を補間する。
+    /// 順に照合して行う (ジオメトリは文字列順に並んでいる必要がある)。改行や、レンダラが省略した
+    /// 空白などはジオメトリなしの「穴」として扱い、前後のグリフの端から位置を補間する。
     /// </summary>
     sealed class GeometryTextLayout : ITextLayout
     {
@@ -48,39 +52,64 @@ namespace NiVE3.View.Primitive.PreviewText
             public Rect LocalBounds { get; set; }
 
             /// <summary>
-            /// セルの左端 (平面レイアウト空間)。行内で前のグリフとのインクの隙間の中点。行頭ではインクの左端。
+            /// インクの流れ方向の開始位置
             /// </summary>
-            public double CellLeft { get; set; }
+            public double InkStart { get; set; }
 
             /// <summary>
-            /// セルの右端 (平面レイアウト空間)。行内で次のグリフとのインクの隙間の中点。行末ではインクの右端。
+            /// インクの流れ方向の終了位置
             /// </summary>
-            public double CellRight { get; set; }
+            public double InkEnd { get; set; }
+
+            /// <summary>
+            /// インクの直交方向の開始位置
+            /// </summary>
+            public double InkCrossStart { get; set; }
+
+            /// <summary>
+            /// インクの直交方向の終了位置
+            /// </summary>
+            public double InkCrossEnd { get; set; }
+
+            /// <summary>
+            /// セルの流れ方向の開始位置。行内で前のグリフとのインクの隙間の中点。行頭ではインクの開始位置。
+            /// </summary>
+            public double CellStart { get; set; }
+
+            /// <summary>
+            /// セルの流れ方向の終了位置。行内で次のグリフとのインクの隙間の中点。行末ではインクの終了位置。
+            /// </summary>
+            public double CellEnd { get; set; }
 
             public Matrix3x2 CharTransform { get; set; }
 
             public required PreviewTextCoordTransformer Transformer { get; set; }
 
             /// <summary>
-            /// 文字列順の並び方向とローカル +X の写像方向が逆 (パスの逆順レイアウトなど)。
-            /// true の場合、このグリフの「文字列順で手前」の境界はローカル Right 側になる。
+            /// 文字列順の並び方向とローカルの流れ方向 (+flow) の写像方向が逆 (パスの逆順レイアウトなど)。
+            /// true の場合、このグリフの「文字列順で手前」の境界はセルの終了側になる。
             /// </summary>
             public bool FlowReversed { get; set; }
 
             /// <summary>
-            /// インクの中心 X。ヒットテストでキャレットをグリフの前後どちらに置くかの判定に使う。
+            /// インクの流れ方向の中心。ヒットテストでキャレットをグリフの前後どちらに置くかの判定に使う。
             /// </summary>
-            public double InkCenterX => (LocalBounds.Left + LocalBounds.Right) / 2;
+            public double InkCenter => (InkStart + InkEnd) / 2;
 
             /// <summary>
-            /// 文字列順で「手前」のキャレット境界 (平面レイアウト空間)
+            /// インクの直交方向の中心
             /// </summary>
-            public double CaretBefore => FlowReversed ? CellRight : CellLeft;
+            public double InkCrossCenter => (InkCrossStart + InkCrossEnd) / 2;
 
             /// <summary>
-            /// 文字列順で「奥」のキャレット境界 (平面レイアウト空間)
+            /// 文字列順で「手前」のキャレット境界 (流れ方向の位置)
             /// </summary>
-            public double CaretAfter => FlowReversed ? CellLeft : CellRight;
+            public double CaretBefore => FlowReversed ? CellEnd : CellStart;
+
+            /// <summary>
+            /// 文字列順で「奥」のキャレット境界 (流れ方向の位置)
+            /// </summary>
+            public double CaretAfter => FlowReversed ? CellStart : CellEnd;
         }
 
         sealed class LineInfo
@@ -96,22 +125,36 @@ namespace NiVE3.View.Primitive.PreviewText
 
             // 行ボックス (平面レイアウト空間)。グリフのない行は前後の行から補間する。
 
-            public double LocalTop { get; set; }
+            /// <summary>
+            /// 行の直交方向の開始位置 (横書きでは上端、縦書きでは左端)
+            /// </summary>
+            public double CrossStart { get; set; }
 
-            public double LocalBottom { get; set; }
+            /// <summary>
+            /// 行の直交方向の終了位置 (横書きでは下端、縦書きでは右端)
+            /// </summary>
+            public double CrossEnd { get; set; }
 
-            public double LocalLeft { get; set; }
+            /// <summary>
+            /// 行頭の流れ方向の位置 (グリフのない行のキャレット位置に使う)
+            /// </summary>
+            public double FlowStart { get; set; }
 
             public Matrix3x2 CharTransform { get; set; } = Matrix3x2.Identity;
 
             public PreviewTextCoordTransformer? Transformer { get; set; }
 
             /// <summary>
-            /// 行ボックスの縦方向が確定しているか
+            /// 行ボックスの直交方向が確定しているか
             /// </summary>
             public bool Resolved { get; set; }
 
-            public double LocalHeight => LocalBottom - LocalTop;
+            /// <summary>
+            /// 行の太さ (横書きでは高さ、縦書きでは幅)
+            /// </summary>
+            public double CrossSize => CrossEnd - CrossStart;
+
+            public double CrossCenter => (CrossStart + CrossEnd) / 2;
         }
 
         /// <summary>
@@ -120,14 +163,14 @@ namespace NiVE3.View.Primitive.PreviewText
         const double BoundingBoxPadding = 2.0;
 
         /// <summary>
-        /// 折り返し判定 (ローカル X が行頭側へ戻ったか) の許容差
+        /// 折り返し判定 (流れ方向の位置が行頭側へ戻ったか) の許容差
         /// </summary>
         const double WrapDetectionEpsilon = 0.5;
 
         /// <summary>
-        /// 行の縦幅として有効とみなす最小値。これ未満の行 (空白だけの行など) は前後の行から補間する。
+        /// 行の太さとして有効とみなす最小値。これ未満の行 (空白だけの行など) は前後の行から補間する。
         /// </summary>
-        const double MinLineHeight = 1E-3;
+        const double MinLineCrossSize = 1E-3;
 
         List<LineInfo> Lines { get; } = [];
 
@@ -136,6 +179,16 @@ namespace NiVE3.View.Primitive.PreviewText
         CharacterGeometry? EmptyCaret { get; }
 
         bool IsUniformTransform { get; }
+
+        /// <summary>
+        /// 縦書き (文字は下へ進み、列は左へ積まれる) か
+        /// </summary>
+        public bool IsVertical { get; }
+
+        /// <summary>
+        /// 行が積まれる直交方向の符号。横書きは +1 (下へ)、縦書きは -1 (左へ)。
+        /// </summary>
+        int LineProgression => IsVertical ? -1 : 1;
 
         public Size Extent { get; private set; }
 
@@ -162,14 +215,16 @@ namespace NiVE3.View.Primitive.PreviewText
         public Vector2d ViewScale { get; set; } = Vector2d.One;
 
         /// <param name="text">表示テキスト</param>
-        /// <param name="geometries">レンダラが生成したグリフごとのジオメトリ</param>
+        /// <param name="geometries">レンダラが生成したグリフごとのジオメトリ (文字列順)</param>
         /// <param name="emptyCaretGeometry">
         /// テキストが空 (ジオメトリなし) のときに使うキャレット位置。
-        /// Bounds はローカル空間でのキャレット矩形 (幅 0 でよい)。
+        /// Bounds はローカル空間でのキャレット矩形 (横書きは幅 0 で高さを、縦書きは高さ 0 で幅を使う)。
         /// </param>
-        public GeometryTextLayout(string text, IReadOnlyList<CharacterGeometry> geometries, CharacterGeometry? emptyCaretGeometry = null)
+        /// <param name="isVertical">縦書きか</param>
+        public GeometryTextLayout(string text, IReadOnlyList<CharacterGeometry> geometries, CharacterGeometry? emptyCaretGeometry = null, bool isVertical = false)
         {
             EmptyCaret = emptyCaretGeometry;
+            IsVertical = isVertical;
             AssignGlyphs(text, geometries);
             BuildVisualLines(text);
             ComputeCells();
@@ -182,6 +237,66 @@ namespace NiVE3.View.Primitive.PreviewText
         public void Dispose()
         {
         }
+
+        #region 座標軸
+
+        /// <summary>
+        /// 平面レイアウト空間の点の流れ方向の成分
+        /// </summary>
+        double Flow(Point point)
+        {
+            return IsVertical ? point.Y : point.X;
+        }
+
+        /// <summary>
+        /// 平面レイアウト空間の点の直交方向の成分
+        /// </summary>
+        double Cross(Point point)
+        {
+            return IsVertical ? point.X : point.Y;
+        }
+
+        /// <summary>
+        /// 流れ方向・直交方向の成分から平面レイアウト空間の点を作る
+        /// </summary>
+        Point MakePoint(double flow, double cross)
+        {
+            return IsVertical ? new Point(cross, flow) : new Point(flow, cross);
+        }
+
+        /// <summary>
+        /// 流れ方向・直交方向の範囲から平面レイアウト空間の矩形を作る
+        /// </summary>
+        Rect MakeRect(double flowStart, double flowEnd, double crossStart, double crossEnd)
+        {
+            var flowSize = Math.Max(0, flowEnd - flowStart);
+            var crossSize = Math.Max(0, crossEnd - crossStart);
+            return IsVertical
+                ? new Rect(crossStart, flowStart, crossSize, flowSize)
+                : new Rect(flowStart, crossStart, flowSize, crossSize);
+        }
+
+        double FlowStart(Rect rect)
+        {
+            return IsVertical ? rect.Top : rect.Left;
+        }
+
+        double FlowEnd(Rect rect)
+        {
+            return IsVertical ? rect.Bottom : rect.Right;
+        }
+
+        double CrossStart(Rect rect)
+        {
+            return IsVertical ? rect.Left : rect.Top;
+        }
+
+        double CrossEnd(Rect rect)
+        {
+            return IsVertical ? rect.Right : rect.Bottom;
+        }
+
+        #endregion 座標軸
 
         #region 構築
 
@@ -225,6 +340,10 @@ namespace NiVE3.View.Primitive.PreviewText
                         Offset = position,
                         Length = cluster.Length,
                         LocalBounds = geometry.Bounds,
+                        InkStart = FlowStart(geometry.Bounds),
+                        InkEnd = FlowEnd(geometry.Bounds),
+                        InkCrossStart = CrossStart(geometry.Bounds),
+                        InkCrossEnd = CrossEnd(geometry.Bounds),
                         CharTransform = geometry.GraphemeTransform,
                         Transformer = geometry.Transformer,
                     });
@@ -271,9 +390,8 @@ namespace NiVE3.View.Primitive.PreviewText
         /// <summary>
         /// 視覚行を構築する。改行 ('\n') に加えて、WrappingLength による折り返し
         /// (1 論理行が複数の視覚行になる) を検出して行を区切る。
-        /// Bounds はインクのバウンディングボックスで文字ごとに上下端が異なるため、Y の変化では判定できない。
-        /// 代わりに「ローカル X が直前のグリフより行頭側へ戻り、かつ下に移動した」ことを折り返しとみなす
-        /// (横書き・左から右への配置を前提とする)。
+        /// Bounds はインクのバウンディングボックスで文字ごとに端の位置が異なるため、直交方向の変化では判定できない。
+        /// 代わりに「流れ方向の位置が直前のグリフより行頭側へ戻り、かつ次の行の側へ移動した」ことを折り返しとみなす。
         /// パスに沿ったレイアウトでもローカル Bounds はパス適用前の平面レイアウトのため、この判定が機能する。
         /// </summary>
         void BuildVisualLines(string text)
@@ -333,18 +451,17 @@ namespace NiVE3.View.Primitive.PreviewText
         /// <summary>
         /// 文字列順で連続する 2 つのグリフの間で折り返しが起きているかを判定する
         /// </summary>
-        static bool IsWrappedLineStart(GlyphInfo previous, GlyphInfo next)
+        bool IsWrappedLineStart(GlyphInfo previous, GlyphInfo next)
         {
-            var movedBack = next.LocalBounds.Left < previous.LocalBounds.Left - WrapDetectionEpsilon;
-            var previousCenterY = (previous.LocalBounds.Top + previous.LocalBounds.Bottom) / 2;
-            var nextCenterY = (next.LocalBounds.Top + next.LocalBounds.Bottom) / 2;
-            return movedBack && nextCenterY > previousCenterY;
+            var movedBack = next.InkStart < previous.InkStart - WrapDetectionEpsilon;
+            var movedToNextLine = ((next.InkCrossCenter - previous.InkCrossCenter) * LineProgression) > 0;
+            return movedBack && movedToNextLine;
         }
 
         /// <summary>
         /// 行ごとにセル (キャレット境界) を求める。隣接するグリフの間ではインクの隙間の中点を境界とし、
         /// 行頭・行末ではインクの端をそのまま使う。
-        /// 空白のように幅 0 のインクしか無いグリフも、前後との中点で幅のあるセルになる。
+        /// 空白のように流れ方向の幅が 0 のインクしか無いグリフも、前後との中点で幅のあるセルになる。
         /// </summary>
         void ComputeCells()
         {
@@ -354,18 +471,18 @@ namespace NiVE3.View.Primitive.PreviewText
                 for (var i = 0; i < glyphs.Count; i++)
                 {
                     var glyph = glyphs[i];
-                    glyph.CellLeft = i == 0
-                        ? glyph.LocalBounds.Left
-                        : glyphs[i - 1].CellRight;
+                    glyph.CellStart = i == 0
+                        ? glyph.InkStart
+                        : glyphs[i - 1].CellEnd;
                     if (i + 1 < glyphs.Count)
                     {
                         // カーニングなどでインクが重なる場合も中点を採用し、セルが逆転しないようにする
-                        var boundary = (glyph.LocalBounds.Right + glyphs[i + 1].LocalBounds.Left) / 2;
-                        glyph.CellRight = Math.Max(boundary, glyph.CellLeft);
+                        var boundary = (glyph.InkEnd + glyphs[i + 1].InkStart) / 2;
+                        glyph.CellEnd = Math.Max(boundary, glyph.CellStart);
                     }
                     else
                     {
-                        glyph.CellRight = Math.Max(glyph.LocalBounds.Right, glyph.CellLeft);
+                        glyph.CellEnd = Math.Max(glyph.InkEnd, glyph.CellStart);
                     }
                 }
             }
@@ -380,20 +497,20 @@ namespace NiVE3.View.Primitive.PreviewText
                 {
                     continue;
                 }
-                var top = double.MaxValue;
-                var bottom = double.MinValue;
+                var crossStart = double.MaxValue;
+                var crossEnd = double.MinValue;
                 foreach (var glyph in line.Glyphs)
                 {
-                    top = Math.Min(top, glyph.LocalBounds.Top);
-                    bottom = Math.Max(bottom, glyph.LocalBounds.Bottom);
+                    crossStart = Math.Min(crossStart, glyph.InkCrossStart);
+                    crossEnd = Math.Max(crossEnd, glyph.InkCrossEnd);
                 }
-                line.LocalTop = top;
-                line.LocalBottom = bottom;
-                line.LocalLeft = line.Glyphs[0].CellLeft;
+                line.CrossStart = crossStart;
+                line.CrossEnd = crossEnd;
+                line.FlowStart = line.Glyphs[0].CellStart;
                 line.CharTransform = line.Glyphs[0].CharTransform;
                 line.Transformer = line.Glyphs[0].Transformer;
-                // 幅 0 のインクしか無い行 (空白のみなど) は縦幅を前後の行から補間する
-                line.Resolved = line.LocalHeight >= MinLineHeight;
+                // 太さ 0 のインクしか無い行 (空白のみなど) は太さを前後の行から補間する
+                line.Resolved = line.CrossSize >= MinLineCrossSize;
             }
 
             if (!Lines.Any(line => line.Resolved))
@@ -401,23 +518,25 @@ namespace NiVE3.View.Primitive.PreviewText
                 return;
             }
 
-            // 前方パス: 縦幅が未確定の行を直前の行の下に積む
-            var lastHeight = Lines.First(line => line.Resolved).LocalHeight;
+            // 前方パス: 未確定の行を直前の行の次に積む
+            var lastSize = Lines.First(line => line.Resolved).CrossSize;
             for (var i = 0; i < Lines.Count; i++)
             {
                 var line = Lines[i];
                 if (line.Resolved)
                 {
-                    lastHeight = line.LocalHeight;
+                    lastSize = line.CrossSize;
                     continue;
                 }
                 if (i > 0 && Lines[i - 1].Resolved)
                 {
-                    InheritLineMetrics(line, Lines[i - 1], Lines[i - 1].LocalBottom, lastHeight);
+                    var previous = Lines[i - 1];
+                    var crossStart = LineProgression > 0 ? previous.CrossEnd : previous.CrossStart - lastSize;
+                    InheritLineMetrics(line, previous, crossStart, lastSize);
                 }
             }
 
-            // 後方パス: 先頭側に残った未確定の行を次の行の上に積む
+            // 後方パス: 先頭側に残った未確定の行を次の行の手前に積む
             for (var i = Lines.Count - 2; i >= 0; i--)
             {
                 var line = Lines[i];
@@ -430,21 +549,22 @@ namespace NiVE3.View.Primitive.PreviewText
                 {
                     continue;
                 }
-                InheritLineMetrics(line, next, next.LocalTop - next.LocalHeight, next.LocalHeight);
+                var crossStart = LineProgression > 0 ? next.CrossStart - next.CrossSize : next.CrossEnd;
+                InheritLineMetrics(line, next, crossStart, next.CrossSize);
             }
         }
 
         /// <summary>
-        /// 縦幅が未確定の行に、隣接する行から縦方向の位置と高さを引き継ぐ。
-        /// グリフを持たない行は左端とトランスフォームも引き継ぐ。
+        /// 未確定の行に、隣接する行から直交方向の位置と太さを引き継ぐ。
+        /// グリフを持たない行は行頭位置とトランスフォームも引き継ぐ。
         /// </summary>
-        static void InheritLineMetrics(LineInfo line, LineInfo source, double top, double height)
+        static void InheritLineMetrics(LineInfo line, LineInfo source, double crossStart, double crossSize)
         {
-            line.LocalTop = top;
-            line.LocalBottom = top + height;
+            line.CrossStart = crossStart;
+            line.CrossEnd = crossStart + crossSize;
             if (line.Glyphs.Count == 0)
             {
-                line.LocalLeft = source.LocalLeft;
+                line.FlowStart = source.FlowStart;
                 line.CharTransform = source.CharTransform;
                 line.Transformer = source.Transformer;
             }
@@ -452,10 +572,10 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
-        /// グリフごとに、文字列順の並び方向とローカル +X の写像方向が一致しているかを判定する。
+        /// グリフごとに、文字列順の並び方向とローカルの流れ方向の写像方向が一致しているかを判定する。
         /// パスの逆順レイアウト (isInvert) では、配置はパスを逆走する一方でグリフは正立のままのため、
-        /// 文字列順で「次」のグリフがローカル +X の反対側に並ぶ。この場合、キャレット境界や
-        /// ヒットテストの左右判定を反転させる必要がある。
+        /// 文字列順で「次」のグリフが流れ方向の反対側に並ぶ。この場合、キャレット境界や
+        /// ヒットテストの前後判定を反転させる必要がある。
         /// </summary>
         void ComputeFlowDirections()
         {
@@ -482,16 +602,15 @@ namespace NiVE3.View.Primitive.PreviewText
                         continue;
                     }
 
-                    var centerY = (line.LocalTop + line.LocalBottom) / 2;
-                    var glyphCenter = ProjectPoint(glyph.CharTransform, glyph.Transformer, glyph.InkCenterX, centerY);
-                    var neighborCenter = ProjectPoint(neighbor.CharTransform, neighbor.Transformer, neighbor.InkCenterX, centerY);
+                    var glyphCenter = ProjectPoint(glyph.CharTransform, glyph.Transformer, MakePoint(glyph.InkCenter, line.CrossCenter));
+                    var neighborCenter = ProjectPoint(neighbor.CharTransform, neighbor.Transformer, MakePoint(neighbor.InkCenter, line.CrossCenter));
                     var deltaX = (neighborCenter.X - glyphCenter.X) * sign;
                     var deltaY = (neighborCenter.Y - glyphCenter.Y) * sign;
 
-                    // ローカル +X 方向のスクリーン写像 (有限差分)
-                    var unitX = ProjectPoint(glyph.CharTransform, glyph.Transformer, glyph.InkCenterX + 1, centerY);
-                    var directionX = unitX.X - glyphCenter.X;
-                    var directionY = unitX.Y - glyphCenter.Y;
+                    // 流れ方向のスクリーン写像 (有限差分)
+                    var unitFlow = ProjectPoint(glyph.CharTransform, glyph.Transformer, MakePoint(glyph.InkCenter + 1, line.CrossCenter));
+                    var directionX = unitFlow.X - glyphCenter.X;
+                    var directionY = unitFlow.Y - glyphCenter.Y;
 
                     glyph.FlowReversed = (directionX * deltaX) + (directionY * deltaY) < 0;
                 }
@@ -540,9 +659,9 @@ namespace NiVE3.View.Primitive.PreviewText
         /// <summary>
         /// 平面レイアウト空間の点をスクリーン座標へ写像する
         /// </summary>
-        static Point ProjectPoint(in Matrix3x2 charTransform, PreviewTextCoordTransformer transformer, double x, double y)
+        static Point ProjectPoint(in Matrix3x2 charTransform, PreviewTextCoordTransformer transformer, Point local)
         {
-            var layerLocal = Vector2.Transform(new Vector2((float)x, (float)y), charTransform);
+            var layerLocal = Vector2.Transform(new Vector2((float)local.X, (float)local.Y), charTransform);
             var screen = transformer.LocalCoordToScreenCoord(new Vector3d(layerLocal.X, layerLocal.Y, 0.0));
             return new Point(screen.X, screen.Y);
         }
@@ -550,19 +669,28 @@ namespace NiVE3.View.Primitive.PreviewText
         static TextQuad ProjectRect(in Matrix3x2 charTransform, PreviewTextCoordTransformer transformer, Rect rect)
         {
             return new TextQuad(
-                ProjectPoint(charTransform, transformer, rect.Left, rect.Top),
-                ProjectPoint(charTransform, transformer, rect.Right, rect.Top),
-                ProjectPoint(charTransform, transformer, rect.Right, rect.Bottom),
-                ProjectPoint(charTransform, transformer, rect.Left, rect.Bottom));
+                ProjectPoint(charTransform, transformer, rect.TopLeft),
+                ProjectPoint(charTransform, transformer, rect.TopRight),
+                ProjectPoint(charTransform, transformer, rect.BottomRight),
+                ProjectPoint(charTransform, transformer, rect.BottomLeft));
         }
 
         /// <summary>
-        /// グリフのセル (行の縦幅 × セル幅) を平面レイアウト空間の矩形として返す
+        /// グリフのセル (行の太さ × セルの長さ) を平面レイアウト空間の矩形として返す
         /// </summary>
         Rect GetCellRect(GlyphInfo glyph)
         {
             var line = Lines[glyph.LineIndex];
-            return new Rect(glyph.CellLeft, line.LocalTop, Math.Max(0, glyph.CellRight - glyph.CellLeft), line.LocalHeight);
+            return MakeRect(glyph.CellStart, glyph.CellEnd, line.CrossStart, line.CrossEnd);
+        }
+
+        /// <summary>
+        /// グリフのインクの流れ方向の範囲 × 行の太さ を平面レイアウト空間の矩形として返す
+        /// </summary>
+        Rect GetInkLineRect(GlyphInfo glyph)
+        {
+            var line = Lines[glyph.LineIndex];
+            return MakeRect(glyph.InkStart, glyph.InkEnd, line.CrossStart, line.CrossEnd);
         }
 
         /// <summary>
@@ -587,19 +715,19 @@ namespace NiVE3.View.Primitive.PreviewText
         /// <summary>
         /// 指定点周りの有限差分による、平面レイアウト空間→スクリーンのアフィン近似
         /// </summary>
-        static Matrix ApproximateScreenTransform(in Matrix3x2 charTransform, PreviewTextCoordTransformer transformer, double originX, double originY)
+        static Matrix ApproximateScreenTransform(in Matrix3x2 charTransform, PreviewTextCoordTransformer transformer, Point local)
         {
-            var origin = ProjectPoint(charTransform, transformer, originX, originY);
-            var unitX = ProjectPoint(charTransform, transformer, originX + 1, originY);
-            var unitY = ProjectPoint(charTransform, transformer, originX, originY + 1);
+            var origin = ProjectPoint(charTransform, transformer, local);
+            var unitX = ProjectPoint(charTransform, transformer, new Point(local.X + 1, local.Y));
+            var unitY = ProjectPoint(charTransform, transformer, new Point(local.X, local.Y + 1));
             var jacobianXX = unitX.X - origin.X;
             var jacobianXY = unitX.Y - origin.Y;
             var jacobianYX = unitY.X - origin.X;
             var jacobianYY = unitY.Y - origin.Y;
             return new Matrix(
                 jacobianXX, jacobianXY, jacobianYX, jacobianYY,
-                origin.X - (jacobianXX * originX) - (jacobianYX * originY),
-                origin.Y - (jacobianXY * originX) - (jacobianYY * originY));
+                origin.X - (jacobianXX * local.X) - (jacobianYX * local.Y),
+                origin.Y - (jacobianXY * local.X) - (jacobianYY * local.Y));
         }
 
         #endregion 座標変換
@@ -632,15 +760,15 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
-        /// キャレットのローカル座標 (X・行・使用するトランスフォーム) を求める
+        /// キャレットのローカル位置 (流れ方向の位置・行・使用するトランスフォーム) を求める
         /// </summary>
-        (double X, LineInfo Line, Matrix3x2 CharTransform, PreviewTextCoordTransformer? Transformer) GetCaretLocal(int offset)
+        (double Flow, LineInfo Line, Matrix3x2 CharTransform, PreviewTextCoordTransformer? Transformer) GetCaretLocal(int offset)
         {
             var line = Lines[GetLineIndexFromOffset(offset)];
 
             if (line.Glyphs.Count == 0)
             {
-                return (line.LocalLeft, line, line.CharTransform, line.Transformer);
+                return (line.FlowStart, line, line.CharTransform, line.Transformer);
             }
 
             foreach (var glyph in line.Glyphs)
@@ -656,45 +784,53 @@ namespace NiVE3.View.Primitive.PreviewText
             return (last.CaretAfter, line, last.CharTransform, last.Transformer);
         }
 
-        public double GetCaretLocalX(int offset)
+        /// <summary>
+        /// 空テキスト用のキャレットが有効 (直交方向の太さを持つ) か
+        /// </summary>
+        bool HasEmptyCaret => EmptyCaret != null && CrossEnd(EmptyCaret.Bounds) - CrossStart(EmptyCaret.Bounds) > 0;
+
+        public double GetCaretFlowPosition(int offset)
         {
             if (IsEmpty)
             {
-                return EmptyCaret?.Bounds.X ?? 0;
+                return EmptyCaret != null ? FlowStart(EmptyCaret.Bounds) : 0;
             }
-            return GetCaretLocal(offset).X;
+            return GetCaretLocal(offset).Flow;
         }
 
         public (Point Top, Point Bottom) GetCaretLine(int offset)
         {
             if (IsEmpty)
             {
-                if (EmptyCaret != null && EmptyCaret.Bounds.Height > 0)
+                if (HasEmptyCaret)
                 {
-                    return (ProjectPoint(EmptyCaret.GraphemeTransform, EmptyCaret.Transformer, EmptyCaret.Bounds.X, EmptyCaret.Bounds.Top),
-                            ProjectPoint(EmptyCaret.GraphemeTransform, EmptyCaret.Transformer, EmptyCaret.Bounds.X, EmptyCaret.Bounds.Bottom));
+                    var caret = EmptyCaret!;
+                    var flow = FlowStart(caret.Bounds);
+                    return (ProjectPoint(caret.GraphemeTransform, caret.Transformer, MakePoint(flow, CrossStart(caret.Bounds))),
+                            ProjectPoint(caret.GraphemeTransform, caret.Transformer, MakePoint(flow, CrossEnd(caret.Bounds))));
                 }
                 return (default, default);
             }
 
-            var (x, line, charTransform, transformer) = GetCaretLocal(offset);
+            var (flowPosition, line, charTransform, transformer) = GetCaretLocal(offset);
             if (transformer == null)
             {
                 return (default, default);
             }
-            return (ProjectPoint(charTransform, transformer, x, line.LocalTop),
-                    ProjectPoint(charTransform, transformer, x, line.LocalBottom));
+            return (ProjectPoint(charTransform, transformer, MakePoint(flowPosition, line.CrossStart)),
+                    ProjectPoint(charTransform, transformer, MakePoint(flowPosition, line.CrossEnd)));
         }
 
         public bool TryGetCaretLocalFrame(int offset, out Point localPosition, out double localHeight, out Matrix transform)
         {
             if (IsEmpty)
             {
-                if (EmptyCaret != null && EmptyCaret.Bounds.Height > 0)
+                if (HasEmptyCaret)
                 {
-                    localPosition = new Point(EmptyCaret.Bounds.X, EmptyCaret.Bounds.Y);
-                    localHeight = EmptyCaret.Bounds.Height;
-                    transform = ApproximateScreenTransform(EmptyCaret.GraphemeTransform, EmptyCaret.Transformer, EmptyCaret.Bounds.X, EmptyCaret.Bounds.Y);
+                    var caret = EmptyCaret!;
+                    localPosition = MakePoint(FlowStart(caret.Bounds), CrossStart(caret.Bounds));
+                    localHeight = CrossEnd(caret.Bounds) - CrossStart(caret.Bounds);
+                    transform = ApproximateScreenTransform(caret.GraphemeTransform, caret.Transformer, localPosition);
                     return true;
                 }
                 localPosition = default;
@@ -703,7 +839,7 @@ namespace NiVE3.View.Primitive.PreviewText
                 return false;
             }
 
-            var (x, line, charTransform, transformer) = GetCaretLocal(offset);
+            var (flowPosition, line, charTransform, transformer) = GetCaretLocal(offset);
             if (transformer == null)
             {
                 localPosition = default;
@@ -711,18 +847,18 @@ namespace NiVE3.View.Primitive.PreviewText
                 transform = Matrix.Identity;
                 return false;
             }
-            localPosition = new Point(x, line.LocalTop);
-            localHeight = line.LocalHeight;
-            transform = ApproximateScreenTransform(charTransform, transformer, x, line.LocalTop);
+            localPosition = MakePoint(flowPosition, line.CrossStart);
+            localHeight = line.CrossSize;
+            transform = ApproximateScreenTransform(charTransform, transformer, localPosition);
             return true;
         }
 
-        public int GetOffsetAtLineDistance(int lineIndex, double localX)
+        public int GetOffsetAtFlowPosition(int lineIndex, double flowPosition)
         {
             var line = Lines[Math.Clamp(lineIndex, 0, Lines.Count - 1)];
             foreach (var glyph in line.Glyphs)
             {
-                if (localX < glyph.InkCenterX)
+                if (flowPosition < glyph.InkCenter)
                 {
                     return glyph.Offset;
                 }
@@ -774,6 +910,7 @@ namespace NiVE3.View.Primitive.PreviewText
                     return 0;
                 }
 
+                var cross = Cross(local);
                 LineInfo? bestLine = null;
                 var bestDistance = double.MaxValue;
                 foreach (var line in Lines)
@@ -783,9 +920,9 @@ namespace NiVE3.View.Primitive.PreviewText
                         continue;
                     }
 
-                    var distance = local.Y < line.LocalTop
-                        ? line.LocalTop - local.Y
-                        : local.Y > line.LocalBottom ? local.Y - line.LocalBottom : 0.0;
+                    var distance = cross < line.CrossStart
+                        ? line.CrossStart - cross
+                        : cross > line.CrossEnd ? cross - line.CrossEnd : 0.0;
 
                     if (distance < bestDistance)
                     {
@@ -798,11 +935,11 @@ namespace NiVE3.View.Primitive.PreviewText
                 {
                     return 0;
                 }
-                return GetOffsetAtLineDistance(Lines.IndexOf(bestLine), local.X);
+                return GetOffsetAtFlowPosition(Lines.IndexOf(bestLine), Flow(local));
             }
 
             // パスに沿ったレイアウトなど、グリフごとにトランスフォームが異なる場合は
-            // スクリーン空間で最も近いグリフを探し、そのローカル空間で左右を判定する
+            // スクリーン空間で最も近いグリフを探し、そのローカル空間で前後を判定する
             GlyphInfo? bestGlyph = null;
             var bestGlyphDistance = double.MaxValue;
             foreach (var glyph in Glyphs)
@@ -838,7 +975,7 @@ namespace NiVE3.View.Primitive.PreviewText
             var line = Lines[glyph.LineIndex];
             if (TryUnproject(glyph.CharTransform, glyph.Transformer, point, out var local))
             {
-                var before = local.X < glyph.InkCenterX;
+                var before = Flow(local) < glyph.InkCenter;
                 if (glyph.FlowReversed)
                 {
                     before = !before;
@@ -892,8 +1029,7 @@ namespace NiVE3.View.Primitive.PreviewText
                     {
                         return;
                     }
-                    quads.Add(ProjectRect(runCharTransform, runTransformer,
-                        new Rect(runStart, line.LocalTop, Math.Max(0, runEnd - runStart), line.LocalHeight)));
+                    quads.Add(ProjectRect(runCharTransform, runTransformer, MakeRect(runStart, runEnd, line.CrossStart, line.CrossEnd)));
                     runOpen = false;
                 }
 
@@ -910,14 +1046,14 @@ namespace NiVE3.View.Primitive.PreviewText
 
                     if (runOpen && glyph.CharTransform == runCharTransform && Equals(glyph.Transformer, runTransformer))
                     {
-                        runStart = Math.Min(runStart, glyph.CellLeft);
-                        runEnd = Math.Max(runEnd, glyph.CellRight);
+                        runStart = Math.Min(runStart, glyph.CellStart);
+                        runEnd = Math.Max(runEnd, glyph.CellEnd);
                     }
                     else
                     {
                         Flush();
-                        runStart = glyph.CellLeft;
-                        runEnd = glyph.CellRight;
+                        runStart = glyph.CellStart;
+                        runEnd = glyph.CellEnd;
                         runCharTransform = glyph.CharTransform;
                         runTransformer = glyph.Transformer;
                         runOpen = true;
@@ -927,8 +1063,8 @@ namespace NiVE3.View.Primitive.PreviewText
                 // 選択が改行を越えて続く場合のマーカー (行末のグリフと同じトランスフォームで描く)
                 if (end > lineEnd && start <= lineEnd)
                 {
-                    var markerWidth = line.LocalHeight * 0.35;
-                    var markerStart = line.LocalLeft;
+                    var markerLength = line.CrossSize * 0.35;
+                    var markerStart = line.FlowStart;
                     var markerCharTransform = line.CharTransform;
                     var markerTransformer = line.Transformer;
                     if (line.Glyphs.Count > 0)
@@ -936,10 +1072,10 @@ namespace NiVE3.View.Primitive.PreviewText
                         var lastGlyph = line.Glyphs[^1];
                         markerCharTransform = lastGlyph.CharTransform;
                         markerTransformer = lastGlyph.Transformer;
-                        // フロー反転時は行末の視覚的な「続き」はローカル Left 側
+                        // フロー反転時は行末の視覚的な「続き」はセルの開始側
                         markerStart = lastGlyph.FlowReversed
-                            ? lastGlyph.CellLeft - markerWidth
-                            : lastGlyph.CellRight;
+                            ? lastGlyph.CellStart - markerLength
+                            : lastGlyph.CellEnd;
                     }
 
                     if (markerTransformer != null)
@@ -947,13 +1083,13 @@ namespace NiVE3.View.Primitive.PreviewText
                         if (runOpen && runCharTransform == markerCharTransform && Equals(runTransformer, markerTransformer))
                         {
                             runStart = Math.Min(runStart, markerStart);
-                            runEnd = Math.Max(runEnd, markerStart + markerWidth);
+                            runEnd = Math.Max(runEnd, markerStart + markerLength);
                         }
                         else
                         {
                             Flush();
                             quads.Add(ProjectRect(markerCharTransform, markerTransformer,
-                                new Rect(markerStart, line.LocalTop, markerWidth, line.LocalHeight)));
+                                MakeRect(markerStart, markerStart + markerLength, line.CrossStart, line.CrossEnd)));
                         }
                     }
                 }
@@ -973,29 +1109,29 @@ namespace NiVE3.View.Primitive.PreviewText
             // 全グリフが同一トランスフォームなら、平面レイアウト空間の union を 1 つの Quad として返す
             if (IsUniformTransform)
             {
-                var left = double.MaxValue;
-                var top = double.MaxValue;
-                var right = double.MinValue;
-                var bottom = double.MinValue;
+                var flowStart = double.MaxValue;
+                var flowEnd = double.MinValue;
+                var crossStart = double.MaxValue;
+                var crossEnd = double.MinValue;
                 foreach (var line in Lines)
                 {
                     if (!line.Resolved || line.Glyphs.Count == 0)
                     {
                         continue;
                     }
-                    top = Math.Min(top, line.LocalTop);
-                    bottom = Math.Max(bottom, line.LocalBottom);
+                    crossStart = Math.Min(crossStart, line.CrossStart);
+                    crossEnd = Math.Max(crossEnd, line.CrossEnd);
                     foreach (var glyph in line.Glyphs)
                     {
-                        left = Math.Min(left, glyph.LocalBounds.Left);
-                        right = Math.Max(right, glyph.LocalBounds.Right);
+                        flowStart = Math.Min(flowStart, glyph.InkStart);
+                        flowEnd = Math.Max(flowEnd, glyph.InkEnd);
                     }
                 }
-                if (left == double.MaxValue)
+                if (flowStart == double.MaxValue)
                 {
                     return Array.Empty<TextQuad>();
                 }
-                var union = new Rect(left - BoundingBoxPadding, top - BoundingBoxPadding, right - left + (BoundingBoxPadding * 2), bottom - top + (BoundingBoxPadding * 2));
+                var union = MakeRect(flowStart - BoundingBoxPadding, flowEnd + BoundingBoxPadding, crossStart - BoundingBoxPadding, crossEnd + BoundingBoxPadding);
                 var representative = Glyphs[0];
                 return [ProjectRect(representative.CharTransform, representative.Transformer, union)];
             }
@@ -1004,9 +1140,7 @@ namespace NiVE3.View.Primitive.PreviewText
             var aabb = Rect.Empty;
             foreach (var glyph in Glyphs)
             {
-                var line = Lines[glyph.LineIndex];
-                var localRect = new Rect(glyph.LocalBounds.X, line.LocalTop, glyph.LocalBounds.Width, line.LocalHeight);
-                aabb.Union(ProjectRect(glyph.CharTransform, glyph.Transformer, localRect).GetBounds());
+                aabb.Union(ProjectRect(glyph.CharTransform, glyph.Transformer, GetInkLineRect(glyph)).GetBounds());
             }
             aabb.Inflate(BoundingBoxPadding, BoundingBoxPadding);
             return [new TextQuad(aabb.TopLeft, aabb.TopRight, aabb.BottomRight, aabb.BottomLeft)];

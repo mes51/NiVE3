@@ -49,14 +49,15 @@ namespace NiVE3.View.Primitive.PreviewText
         (int Start, int Length) GetLineRange(int lineIndex);
 
         /// <summary>
-        /// キャレットのローカル X 座標 (上下移動の preferred X 用)
+        /// キャレットの流れ方向 (横書きでは X、縦書きでは Y) のローカル位置。
+        /// 隣の行へ移動するときに維持する位置として使う。
         /// </summary>
-        double GetCaretLocalX(int offset);
+        double GetCaretFlowPosition(int offset);
 
         /// <summary>
-        /// 指定行内でローカル X 座標に最も近いオフセットを返す (上下キー移動用)
+        /// 指定行内で流れ方向のローカル位置に最も近いオフセットを返す (隣の行への移動用)
         /// </summary>
-        int GetOffsetAtLineDistance(int lineIndex, double localX);
+        int GetOffsetAtFlowPosition(int lineIndex, double flowPosition);
 
         /// <summary>
         /// レイアウト空間の座標に最も近い文字オフセットを返す

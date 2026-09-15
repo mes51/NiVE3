@@ -128,7 +128,7 @@ namespace NiVE3.View.Primitive.PreviewText
             return (rect.TopLeft, rect.BottomLeft);
         }
 
-        public double GetCaretLocalX(int offset)
+        public double GetCaretFlowPosition(int offset)
         {
             return GetCaretRect(offset).X;
         }
@@ -156,22 +156,22 @@ namespace NiVE3.View.Primitive.PreviewText
 
         public int GetOffsetAt(Point point)
         {
-            return GetOffsetAtLineDistance(GetLineIndexFromY(point.Y), point.X);
+            return GetOffsetAtFlowPosition(GetLineIndexFromY(point.Y), point.X);
         }
 
-        public int GetOffsetAtLineDistance(int lineIndex, double localX)
+        public int GetOffsetAtFlowPosition(int lineIndex, double flowPosition)
         {
             var lineInfo = Lines[Math.Clamp(lineIndex, 0, Lines.Count - 1)];
-            if (localX <= 0)
+            if (flowPosition <= 0)
             {
                 return lineInfo.Start;
             }
-            if (localX >= lineInfo.Line.WidthIncludingTrailingWhitespace)
+            if (flowPosition >= lineInfo.Line.WidthIncludingTrailingWhitespace)
             {
                 return lineInfo.Start + lineInfo.Length;
             }
 
-            var hit = lineInfo.Line.GetCharacterHitFromDistance(localX);
+            var hit = lineInfo.Line.GetCharacterHitFromDistance(flowPosition);
             var offset = hit.FirstCharacterIndex + hit.TrailingLength;
             return Math.Clamp(offset, lineInfo.Start, lineInfo.Start + lineInfo.Length);
         }

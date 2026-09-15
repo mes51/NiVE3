@@ -77,16 +77,16 @@ namespace NiVE3.Test.View.Primitive.PreviewText
             Assert.Multiple(() =>
             {
                 // 行頭はインクの左端
-                Assert.That(layout.GetCaretLocalX(0), Is.EqualTo(10.0));
+                Assert.That(layout.GetCaretFlowPosition(0), Is.EqualTo(10.0));
                 // a と b の隙間 [20,24] の中点
-                Assert.That(layout.GetCaretLocalX(1), Is.EqualTo(22.0));
+                Assert.That(layout.GetCaretFlowPosition(1), Is.EqualTo(22.0));
                 // b と空白の隙間 [34,36] の中点
-                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(35.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(35.0));
                 // 空白と c の隙間 [36,40] の中点
-                Assert.That(layout.GetCaretLocalX(3), Is.EqualTo(38.0));
-                Assert.That(layout.GetCaretLocalX(4), Is.EqualTo(52.0));
+                Assert.That(layout.GetCaretFlowPosition(3), Is.EqualTo(38.0));
+                Assert.That(layout.GetCaretFlowPosition(4), Is.EqualTo(52.0));
                 // 行末はインクの右端
-                Assert.That(layout.GetCaretLocalX(5), Is.EqualTo(64.0));
+                Assert.That(layout.GetCaretFlowPosition(5), Is.EqualTo(64.0));
             });
         }
 
@@ -212,7 +212,7 @@ namespace NiVE3.Test.View.Primitive.PreviewText
                 Assert.That(layout.GetLineRange(0), Is.EqualTo((0, 2)));
                 Assert.That(layout.GetLineRange(1), Is.EqualTo((2, 2)));
                 // 上下移動: 1 行目の b の手前 (X=12) から 2 行目へ
-                Assert.That(layout.GetOffsetAtLineDistance(1, layout.GetCaretLocalX(1)), Is.EqualTo(3));
+                Assert.That(layout.GetOffsetAtFlowPosition(1, layout.GetCaretFlowPosition(1)), Is.EqualTo(3));
                 Assert.That(layout.GetOffsetAt(new Point(3, 36)), Is.EqualTo(2));
                 Assert.That(layout.GetOffsetAt(new Point(30, 36)), Is.EqualTo(4));
             });
@@ -269,7 +269,7 @@ namespace NiVE3.Test.View.Primitive.PreviewText
             {
                 Assert.That(layout.LineCount, Is.EqualTo(1));
                 // 空白のジオメトリは無いものとして扱い、a と b の隙間の中点が境界になる
-                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(20.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(20.0));
                 Assert.That(layout.GetOffsetAt(new Point(15, 5)), Is.EqualTo(1));
                 Assert.That(layout.GetOffsetAt(new Point(25, 5)), Is.EqualTo(2));
             });
@@ -288,9 +288,9 @@ namespace NiVE3.Test.View.Primitive.PreviewText
 
             Assert.Multiple(() =>
             {
-                Assert.That(layout.GetCaretLocalX(0), Is.EqualTo(0.0));
-                Assert.That(layout.GetCaretLocalX(1), Is.EqualTo(10.0));
-                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(20.0));
+                Assert.That(layout.GetCaretFlowPosition(0), Is.EqualTo(0.0));
+                Assert.That(layout.GetCaretFlowPosition(1), Is.EqualTo(10.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(20.0));
             });
         }
 
@@ -311,8 +311,8 @@ namespace NiVE3.Test.View.Primitive.PreviewText
             Assert.Multiple(() =>
             {
                 Assert.That(layout.LineCount, Is.EqualTo(2));
-                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(24.0));
-                Assert.That(layout.GetCaretLocalX(5), Is.EqualTo(24.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(24.0));
+                Assert.That(layout.GetCaretFlowPosition(5), Is.EqualTo(24.0));
                 Assert.That(bounds.Right, Is.EqualTo(26.0));
                 Assert.That(bounds.Bottom, Is.EqualTo(42.0));
                 Assert.That(layout.GetOffsetAt(new Point(20, 35)), Is.EqualTo(5));
@@ -333,8 +333,8 @@ namespace NiVE3.Test.View.Primitive.PreviewText
 
             Assert.Multiple(() =>
             {
-                Assert.That(layout.GetCaretLocalX(1), Is.EqualTo(19.0));
-                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(38.0));
+                Assert.That(layout.GetCaretFlowPosition(1), Is.EqualTo(19.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(38.0));
             });
         }
 
@@ -354,11 +354,155 @@ namespace NiVE3.Test.View.Primitive.PreviewText
             Assert.Multiple(() =>
             {
                 Assert.That(layout.LineCount, Is.EqualTo(1));
-                Assert.That(layout.GetCaretLocalX(1), Is.EqualTo(11.0));
-                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(21.0));
+                Assert.That(layout.GetCaretFlowPosition(1), Is.EqualTo(11.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(21.0));
                 Assert.That(top.Y, Is.EqualTo(0.0));
                 Assert.That(bottom.Y, Is.EqualTo(20.0));
             });
+        }
+
+        /// <summary>
+        /// 縦書き "あい\nうえ" のインク矩形 (文字列順)。1 列目 (あ, い) が右 (X 40〜60)、2 列目 (う, え) が左 (X 0〜20)。
+        /// </summary>
+        static CharacterGeometry[] CreateVerticalGeometries()
+        {
+            return
+            [
+                Glyph("あ", 40, 0, 20, 20),
+                Glyph("い", 42, 30, 16, 20),
+                Glyph("う", 4, 0, 12, 24),
+                Glyph("え", 0, 30, 20, 20),
+            ];
+        }
+
+        [Test]
+        public void TestVerticalColumnsAndCaretPositions()
+        {
+            var layout = new GeometryTextLayout("あい\nうえ", CreateVerticalGeometries(), null, isVertical: true);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(2));
+                Assert.That(layout.GetLineRange(0), Is.EqualTo((0, 2)));
+                Assert.That(layout.GetLineRange(1), Is.EqualTo((3, 2)));
+                // 流れ方向 (Y) の位置: 列頭はインクの上端、文字間はインクの隙間の中点、列末はインクの下端
+                Assert.That(layout.GetCaretFlowPosition(0), Is.EqualTo(0.0));
+                Assert.That(layout.GetCaretFlowPosition(1), Is.EqualTo(25.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(50.0));
+                Assert.That(layout.GetCaretFlowPosition(3), Is.EqualTo(0.0));
+                // キャレットは列の幅の水平な線分
+                Assert.That(layout.GetCaretLine(0), Is.EqualTo((new Point(40.0, 0.0), new Point(60.0, 0.0))));
+                Assert.That(layout.GetCaretLine(1), Is.EqualTo((new Point(40.0, 25.0), new Point(60.0, 25.0))));
+                Assert.That(layout.GetCaretLine(3), Is.EqualTo((new Point(0.0, 0.0), new Point(20.0, 0.0))));
+            });
+        }
+
+        [Test]
+        public void TestVerticalHitTest()
+        {
+            var layout = new GeometryTextLayout("あい\nうえ", CreateVerticalGeometries(), null, isVertical: true);
+
+            Assert.Multiple(() =>
+            {
+                // 1 列目: あ の中心 (Y=10) より上は あ の手前
+                Assert.That(layout.GetOffsetAt(new Point(50, 5)), Is.EqualTo(0));
+                // あ の中心より下、い の中心 (Y=40) より上は あ と い の間
+                Assert.That(layout.GetOffsetAt(new Point(50, 22)), Is.EqualTo(1));
+                Assert.That(layout.GetOffsetAt(new Point(50, 45)), Is.EqualTo(2));
+                // 2 列目
+                Assert.That(layout.GetOffsetAt(new Point(10, 5)), Is.EqualTo(3));
+                Assert.That(layout.GetOffsetAt(new Point(10, 45)), Is.EqualTo(5));
+                // 列の隙間は最も近い列で判定する
+                Assert.That(layout.GetOffsetAt(new Point(33, 22)), Is.EqualTo(1));
+                Assert.That(layout.GetOffsetAt(new Point(25, 5)), Is.EqualTo(3));
+                // 列移動: 1 列目の あ と い の間 (Y=25) から 2 列目へ
+                Assert.That(layout.GetOffsetAtFlowPosition(1, layout.GetCaretFlowPosition(1)), Is.EqualTo(4));
+            });
+        }
+
+        [Test]
+        public void TestVerticalRangeAndBoundingQuads()
+        {
+            var layout = new GeometryTextLayout("あい\nうえ", CreateVerticalGeometries(), null, isVertical: true);
+            var rangeQuads = layout.GetRangeQuads(0, 2);
+            var boundingQuads = layout.GetBoundingQuads();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(rangeQuads, Has.Count.EqualTo(1));
+                Assert.That(rangeQuads[0].GetBounds(), Is.EqualTo(new Rect(40, 0, 20, 50)));
+                Assert.That(boundingQuads, Has.Count.EqualTo(1));
+                Assert.That(boundingQuads[0].GetBounds(), Is.EqualTo(new Rect(-2, -2, 64, 54)));
+            });
+        }
+
+        [Test]
+        public void TestVerticalWrappedColumnIsDetectedByYMovingBack()
+        {
+            // 改行文字なしで、う 以降が左の列 (Y が戻り、X が左へ移動) に折り返している
+            CharacterGeometry[] geometries =
+            [
+                Glyph("あ", 40, 0, 20, 20),
+                Glyph("い", 40, 30, 20, 20),
+                Glyph("う", 0, 0, 20, 20),
+                Glyph("え", 0, 30, 20, 20),
+            ];
+            var layout = new GeometryTextLayout("あいうえ", geometries, null, isVertical: true);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(2));
+                Assert.That(layout.GetLineRange(0), Is.EqualTo((0, 2)));
+                Assert.That(layout.GetLineRange(1), Is.EqualTo((2, 2)));
+            });
+        }
+
+        [Test]
+        public void TestVerticalEmptyColumnIsPlacedLeftOfPreviousColumn()
+        {
+            CharacterGeometry[] geometries =
+            [
+                Glyph("あ", 40, 0, 20, 20),
+                Glyph("い", 0, 0, 20, 20),
+            ];
+            var layout = new GeometryTextLayout("あ\n\nい", geometries, null, isVertical: true);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(3));
+                // 空の列は 1 列目の左に、1 列目と同じ幅で置かれる
+                Assert.That(layout.GetCaretLine(2), Is.EqualTo((new Point(20.0, 0.0), new Point(40.0, 0.0))));
+            });
+        }
+
+        [Test]
+        public void TestVerticalSpaceWithZeroWidthAndAdvanceHeight()
+        {
+            // 縦書きの空白は「幅 0、高さ = 文字送り」の矩形になる
+            CharacterGeometry[] geometries =
+            [
+                Glyph("あ", 40, 0, 20, 20),
+                Glyph(" ", 50, 24, 0, 8),
+                Glyph("い", 40, 36, 20, 20),
+            ];
+            var layout = new GeometryTextLayout("あ い", geometries, null, isVertical: true);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(1));
+                Assert.That(layout.GetCaretFlowPosition(1), Is.EqualTo(22.0));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(34.0));
+                Assert.That(layout.GetCaretLine(1), Is.EqualTo((new Point(40.0, 22.0), new Point(60.0, 22.0))));
+            });
+        }
+
+        [Test]
+        public void TestVerticalEmptyTextCaretUsesWidth()
+        {
+            var emptyCaret = new CharacterGeometry("", new Rect(0, 0, 32, 0), Matrix3x2.Identity, Transformer);
+            var layout = new GeometryTextLayout("", [], emptyCaret, isVertical: true);
+
+            Assert.That(layout.GetCaretLine(0), Is.EqualTo((new Point(0.0, 0.0), new Point(32.0, 0.0))));
         }
 
         [Test]

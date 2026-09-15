@@ -61,7 +61,7 @@ namespace NiVE3.Input
 
         public void Dispose() { }
 
-        public static (string, CharacterGeometry[], CharacterGeometry) CalcCharacterGeometry(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, PreviewTextCoordTransformer transformer)
+        public static (string, CharacterGeometry[], CharacterGeometry, bool) CalcCharacterGeometry(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, PreviewTextCoordTransformer transformer)
         {
             return TextFootageSource.CalcCharacterGeometry(globalTime, layer, properties, transformer);
         }
@@ -470,14 +470,24 @@ namespace NiVE3.Input
             return image;
         }
 
-        public static (string, CharacterGeometry[], CharacterGeometry) CalcCharacterGeometry(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, PreviewTextCoordTransformer transformer)
+        /// <summary>
+        /// プレビューパネルでのテキスト編集用に、書記素ごとのジオメトリを計算する
+        /// </summary>
+        /// <returns>表示テキスト、書記素ごとのジオメトリ (文字列順)、空テキスト時のキャレット、縦書きか</returns>
+        public static (string, CharacterGeometry[], CharacterGeometry, bool) CalcCharacterGeometry(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, PreviewTextCoordTransformer transformer)
         {
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
-            var emptyCaretGeometry = new CharacterGeometry("", new System.Windows.Rect(0.0, 0.0, 0.0, sourceText.DefaultStyle.FontSize), Matrix3x2.Identity, transformer);
+            var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
+            var verticalMode = (bool)(moreOptions[TextIsEnableVerticalModeId] ?? false);
+            // 空テキスト時のキャレット: 横書きは高さ、縦書きは幅をフォントサイズにした線分
+            var emptyCaretRect = verticalMode
+                ? new System.Windows.Rect(0.0, 0.0, sourceText.DefaultStyle.FontSize, 0.0)
+                : new System.Windows.Rect(0.0, 0.0, 0.0, sourceText.DefaultStyle.FontSize);
+            var emptyCaretGeometry = new CharacterGeometry("", emptyCaretRect, Matrix3x2.Identity, transformer);
             var text = sourceText.Text;
             if (string.IsNullOrEmpty(text))
             {
-                return ("", [], emptyCaretGeometry);
+                return ("", [], emptyCaretGeometry, verticalMode);
             }
 
             var structuredExtendedTextRun = new StructuredExtendedTextRun(text, sourceText.DefaultStyle, sourceText.Styles);
@@ -495,12 +505,10 @@ namespace NiVE3.Input
             var mask = layer.GetMask(targetMaskId.MaskId)?.GetPath(globalTime, 1.0) ?? BezierPath.Empty;
             var path = mask.BuildPath()?.Flatten()?.First();
 
-            var moreOptions = (PropertyValueGroup)(properties[TextMoreOptionsGroupId] ?? PropertyValueGroup.Empty);
             var fontInfo = FontInfo.FindByUniqueId(sourceText.DefaultStyle.FontUniqueId) ?? FontInfo.FallbackFont;
             var font = fontInfo.FontFamily.CreateFont((float)sourceText.DefaultStyle.FontSize);
             var textOption = new TextOptions(font);
             var wrappingSize = (Vector3d)(moreOptions[TextBoxSizeId] ?? new Vector3d());
-            var verticalMode = (bool)(moreOptions[TextIsEnableVerticalModeId] ?? false);
             textOption.WrappingLength = wrappingSize.X > 0.0 ? (float)wrappingSize.X : -1.0F;
             textOption.WordBreaking = wrappingSize.X > 0.0 ? WordBreaking.BreakAll : WordBreaking.Standard;
             textOption.TextRuns = structuredExtendedTextRun.Flatten();
@@ -513,7 +521,9 @@ namespace NiVE3.Input
             textOption.LayoutMode = verticalMode ? LayoutMode.VerticalMixedRightLeft : LayoutMode.HorizontalTopBottom;
             var baseAnchorPointRate = (Vector2)(Vector3d)(moreOptions[TextBaseAnchorPointRateId] ?? new Vector3d(50.0)) * 0.01F;
 
-            var metrics = TextMeasurer.GetGraphemeMetrics(text.AsSpan(), textOption).Span;
+            // 縦書きでは列が左 (文字列の後ろの行) から列挙されるなど、GetGraphemeMetrics の並びは文字列順とは限らない。
+            // 次の書記素の StringIndex を終端として使うため、StringIndex 順に並べ替えてから走査する。
+            var metrics = TextMeasurer.GetGraphemeMetrics(text.AsSpan(), textOption).ToArray().OrderBy(m => m.StringIndex).ToArray();
             var clusters = new List<GraphemeCluster>();
             for (var i = 0; i < metrics.Length; i++)
             {
@@ -541,7 +551,7 @@ namespace NiVE3.Input
             var geometryBuilder = new CharacterGeometryBuilder(clusters.ToDictionary(c => c.GraphemeIndex), (float)wrappingSize.X, (float)wrappingSize.Y, baseAnchorPointRate, path != null ? new TextLayoutPath(path, isInvert, notRotateCharacter, beginOffset) : null);
             TextRenderer.RenderTo(geometryBuilder, structuredExtendedTextRun.SourceText, textOption);
 
-            return (text, [..geometryBuilder.GetGeometries(transformer)], emptyCaretGeometry);
+            return (text, [..geometryBuilder.GetGeometries(transformer)], emptyCaretGeometry, verticalMode);
         }
 
         static void ApplyAnimator(StructuredExtendedTextRun structuredExtendedTextRun, PropertyValueGroup animatorPropertyValue)

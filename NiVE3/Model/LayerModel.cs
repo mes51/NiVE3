@@ -2477,9 +2477,9 @@ namespace NiVE3.Model
             var layerTime = globalTime - SourceStartPoint;
             var sourceOptionProperties = TextProperties.GetValues(sourceTime, globalTime, true);
 
-            var (text, geometries, emptyCaretGeometry) = TextInput.CalcCharacterGeometry(globalTime, this, sourceOptionProperties, transformer);
+            var (text, geometries, emptyCaretGeometry, isVertical) = TextInput.CalcCharacterGeometry(globalTime, this, sourceOptionProperties, transformer);
 
-            return Tuple.Create(text, new TextLayerPreviewText(LayerId, geometries, emptyCaretGeometry));
+            return Tuple.Create(text, new TextLayerPreviewText(LayerId, geometries, emptyCaretGeometry, isVertical));
         }
 
         void DeleteEffectInternal(Guid[] effectIds, bool isCut)

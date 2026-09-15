@@ -137,7 +137,9 @@ namespace NiVE3.Text
 
         public IEnumerable<CharacterGeometry> GetGeometries(PreviewTextCoordTransformer transfomer)
         {
-            return CharacterGeometries.Values.Select(t => new CharacterGeometry(t.Item1, t.Item3.Aggregate(Rect.Empty, (m, r) =>
+            // 縦書きでは列が左 (文字列の後ろの行) から描画されるなど、描画順は文字列順とは限らない。
+            // PreviewTextBox は文字列順のジオメトリを前提とするため、書記素インデックス順に並べる。
+            return CharacterGeometries.OrderBy(pair => pair.Key).Select(pair => pair.Value).Select(t => new CharacterGeometry(t.Item1, t.Item3.Aggregate(Rect.Empty, (m, r) =>
             {
                 m.Union(r);
                 return m;

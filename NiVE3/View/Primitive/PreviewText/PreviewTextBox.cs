@@ -147,6 +147,17 @@ namespace NiVE3.View.Primitive.PreviewText
             )
         );
 
+        public static readonly DependencyProperty IsVerticalTextProperty = DependencyProperty.Register(
+            nameof(IsVerticalText),
+            typeof(bool),
+            typeof(PreviewTextBox),
+            new FrameworkPropertyMetadata(
+                false,
+                FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender,
+                static (d, _) => ((PreviewTextBox)d).InvalidateTextLayout()
+            )
+        );
+
         public static readonly DependencyProperty OriginProperty = DependencyProperty.Register(
             nameof(Origin),
             typeof(Vector2d),
@@ -304,6 +315,17 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
+        /// 縦書きか (オーバーレイモードのみ)。
+        /// true のとき CharacterGeometries は文字が下へ進み、列が右から左へ積まれる配置として解釈され、
+        /// 上下キーで文字送り、左右キーで列の移動を行う。
+        /// </summary>
+        public bool IsVerticalText
+        {
+            get { return (bool)GetValue(IsVerticalTextProperty); }
+            set { SetValue(IsVerticalTextProperty, value); }
+        }
+
+        /// <summary>
         /// プレビュー (レンダリング結果) の拡大縮小の中心 (オーバーレイモードのみ)。
         /// 仮想スクリーン座標 screen は control = Origin + (screen − Origin) × Scale + Offset で
         /// コントロール座標へ写像される (Scale = 1、Offset = 0 のとき仮想スクリーン座標 = コントロール座標)。
@@ -393,9 +415,9 @@ namespace NiVE3.View.Primitive.PreviewText
         int Caret { get; set; }
 
         /// <summary>
-        /// 上下移動時に維持する X 座標
+        /// 隣の行へ移動するときに維持する流れ方向の位置
         /// </summary>
-        double? PreferredX { get; set; }
+        double? PreferredFlowPosition { get; set; }
 
         bool IsCaretBlinkVisible { get; set; } = true;
 
@@ -435,6 +457,8 @@ namespace NiVE3.View.Primitive.PreviewText
         IReadOnlyList<CharacterGeometry>? LayoutGeometries { get; set; }
 
         CharacterGeometry? LayoutEmptyCaret { get; set; }
+
+        bool LayoutIsVertical { get; set; }
 
         string? LastNotifiedDisplayText { get; set; }
 
@@ -561,7 +585,7 @@ namespace NiVE3.View.Primitive.PreviewText
             var end = Math.Clamp(start + Math.Max(0, length), 0, Document.Length);
             Anchor = start;
             Caret = end;
-            PreferredX = null;
+            PreferredFlowPosition = null;
             RestartCaretBlink();
             InvalidateVisual();
             RaiseSelectionChangedIfNeeded();
@@ -698,17 +722,20 @@ namespace NiVE3.View.Primitive.PreviewText
             if (geometries != null)
             {
                 var emptyCaret = EmptyTextCaretGeometry;
+                var isVertical = IsVerticalText;
                 if (Layout is not GeometryTextLayout cached ||
                     LayoutText != display ||
                     !ReferenceEquals(LayoutGeometries, geometries) ||
-                    !Equals(LayoutEmptyCaret, emptyCaret))
+                    !Equals(LayoutEmptyCaret, emptyCaret) ||
+                    LayoutIsVertical != isVertical)
                 {
                     Layout?.Dispose();
-                    cached = new GeometryTextLayout(display, geometries, emptyCaret);
+                    cached = new GeometryTextLayout(display, geometries, emptyCaret, isVertical);
                     Layout = cached;
                     LayoutText = display;
                     LayoutGeometries = geometries;
                     LayoutEmptyCaret = emptyCaret;
+                    LayoutIsVertical = isVertical;
                 }
                 // 表示配置 (Origin/Scale) はレイアウトの再構築なしに反映する
                 cached.ViewOrigin = Origin;
@@ -950,34 +977,72 @@ namespace NiVE3.View.Primitive.PreviewText
                 return;
             }
 
-            var formattedText = CreateCompositionFormattedText(localHeight);
-
             drawingContext.PushTransform(new MatrixTransform(view));
             drawingContext.PushTransform(new MatrixTransform(transform));
 
-            // FormattedText の行高とローカル行高の差を吸収するため垂直方向はセンタリング
-            var textY = localPosition.Y + ((localHeight - formattedText.Height) / 2);
-            drawingContext.DrawText(formattedText, new Point(localPosition.X, textY));
-
-            // 未確定範囲の下線
             var pen = new Pen(Foreground ?? Brushes.Black, Math.Max(1, localHeight / 24));
-            var underlineY = localPosition.Y + localHeight;
-            drawingContext.DrawLine(pen,
-                new Point(localPosition.X, underlineY),
-                new Point(localPosition.X + formattedText.WidthIncludingTrailingWhitespace, underlineY));
+            if (IsVerticalText)
+            {
+                // 縦書き: 列の上から下へ 1 文字ずつ並べ、未確定範囲の目印は列の右側に引く
+                var length = DrawVerticalCompositionText(drawingContext, localPosition, localHeight);
+                var lineX = localPosition.X + localHeight;
+                drawingContext.DrawLine(pen,
+                    new Point(lineX, localPosition.Y),
+                    new Point(lineX, localPosition.Y + length));
+            }
+            else
+            {
+                var formattedText = CreateCompositionFormattedText(localHeight);
+
+                // FormattedText の行高とローカル行高の差を吸収するため垂直方向はセンタリング
+                var textY = localPosition.Y + ((localHeight - formattedText.Height) / 2);
+                drawingContext.DrawText(formattedText, new Point(localPosition.X, textY));
+
+                // 未確定範囲の下線
+                var underlineY = localPosition.Y + localHeight;
+                drawingContext.DrawLine(pen,
+                    new Point(localPosition.X, underlineY),
+                    new Point(localPosition.X + formattedText.WidthIncludingTrailingWhitespace, underlineY));
+            }
 
             drawingContext.Pop();
             drawingContext.Pop();
         }
 
+        /// <summary>
+        /// 縦書き用に未確定文字列を 1 テキスト要素ずつ列の上から下へ並べて描く (drawingContext が null なら計測のみ)。
+        /// 戻り値は並べた文字列全体の流れ方向の長さ。
+        /// </summary>
+        /// <param name="columnStart">列の左上 (レイアウトローカル空間)</param>
+        /// <param name="columnWidth">列の幅 (文字サイズとして使う)</param>
+        double DrawVerticalCompositionText(DrawingContext? drawingContext, Point columnStart, double columnWidth)
+        {
+            var y = columnStart.Y;
+            var enumerator = StringInfo.GetTextElementEnumerator(CompositionText);
+            while (enumerator.MoveNext())
+            {
+                var formattedText = CreateFormattedText(enumerator.GetTextElement(), columnWidth);
+                // 列の中央に寄せる
+                var x = columnStart.X + ((columnWidth - formattedText.WidthIncludingTrailingWhitespace) / 2);
+                drawingContext?.DrawText(formattedText, new Point(x, y));
+                y += formattedText.Height;
+            }
+            return y - columnStart.Y;
+        }
+
         FormattedText CreateCompositionFormattedText(double localHeight)
         {
+            return CreateFormattedText(CompositionText, localHeight);
+        }
+
+        FormattedText CreateFormattedText(string text, double fontSize)
+        {
             return new FormattedText(
-                CompositionText,
+                text,
                 CultureInfo.CurrentUICulture,
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
-                Math.Max(1.0, localHeight),
+                Math.Max(1.0, fontSize),
                 Foreground ?? Brushes.Black,
                 GetPixelsPerDip());
         }
@@ -992,6 +1057,13 @@ namespace NiVE3.View.Primitive.PreviewText
                 layout.TryGetCaretLocalFrame(Caret, out var localPosition, out var localHeight, out var transform) &&
                 localHeight > 0)
             {
+                if (IsVerticalText)
+                {
+                    // 縦書き: 未確定文字列の下端に、列の幅の水平なキャレットを置く
+                    var y = localPosition.Y + DrawVerticalCompositionText(null, localPosition, localHeight);
+                    return (transform.Transform(new Point(localPosition.X, y)),
+                            transform.Transform(new Point(localPosition.X + localHeight, y)));
+                }
                 var x = localPosition.X + CreateCompositionFormattedText(localHeight).WidthIncludingTrailingWhitespace;
                 return (transform.Transform(new Point(x, localPosition.Y)),
                         transform.Transform(new Point(x, localPosition.Y + localHeight)));
@@ -1140,37 +1212,53 @@ namespace NiVE3.View.Primitive.PreviewText
 
             switch (e.Key)
             {
+                // 横書き: 左右で文字送り、上下で行移動。
+                // 縦書き: 上下で文字送り、左右で列移動 (列は右から左へ積まれるため、左が次の列)。
                 case Key.Left:
-                    if (!shift && !ctrl && HasSelection)
+                    if (IsVerticalText)
                     {
-                        MoveCaretTo(SelectionStart, extendSelection: false);
+                        MoveCaretToAdjacentLine(+1, shift);
                     }
                     else
                     {
-                        MoveCaretTo(ctrl ? TextNavigation.PrevWord(text, Caret) : TextNavigation.PrevElement(text, Caret), shift);
+                        MoveCaretBackward(text, ctrl, shift);
                     }
                     e.Handled = true;
                     break;
 
                 case Key.Right:
-                    if (!shift && !ctrl && HasSelection)
+                    if (IsVerticalText)
                     {
-                        MoveCaretTo(SelectionStart + SelectionLength, extendSelection: false);
+                        MoveCaretToAdjacentLine(-1, shift);
                     }
                     else
                     {
-                        MoveCaretTo(ctrl ? TextNavigation.NextWord(text, Caret) : TextNavigation.NextElement(text, Caret), shift);
+                        MoveCaretForward(text, ctrl, shift);
                     }
                     e.Handled = true;
                     break;
 
                 case Key.Up:
-                    MoveCaretVertical(-1, shift);
+                    if (IsVerticalText)
+                    {
+                        MoveCaretBackward(text, ctrl, shift);
+                    }
+                    else
+                    {
+                        MoveCaretToAdjacentLine(-1, shift);
+                    }
                     e.Handled = true;
                     break;
 
                 case Key.Down:
-                    MoveCaretVertical(+1, shift);
+                    if (IsVerticalText)
+                    {
+                        MoveCaretForward(text, ctrl, shift);
+                    }
+                    else
+                    {
+                        MoveCaretToAdjacentLine(+1, shift);
+                    }
                     e.Handled = true;
                     break;
 
@@ -1281,27 +1369,63 @@ namespace NiVE3.View.Primitive.PreviewText
             PerformEdit(Caret, end - Caret, "", Caret, word ? EditKind.Other : EditKind.DeleteForward);
         }
 
-        void MoveCaretVertical(int direction, bool extendSelection)
+        /// <summary>
+        /// 文字列順で 1 つ手前 (Ctrl で 1 単語手前) へキャレットを移動する。
+        /// 選択がある状態で Shift なしの場合は選択の先頭へ寄せる (TextBox と同じ)。
+        /// </summary>
+        void MoveCaretBackward(string text, bool word, bool extendSelection)
+        {
+            if (!extendSelection && !word && HasSelection)
+            {
+                MoveCaretTo(SelectionStart, extendSelection: false);
+            }
+            else
+            {
+                MoveCaretTo(word ? TextNavigation.PrevWord(text, Caret) : TextNavigation.PrevElement(text, Caret), extendSelection);
+            }
+        }
+
+        /// <summary>
+        /// 文字列順で 1 つ奥 (Ctrl で 1 単語奥) へキャレットを移動する。
+        /// 選択がある状態で Shift なしの場合は選択の末尾へ寄せる (TextBox と同じ)。
+        /// </summary>
+        void MoveCaretForward(string text, bool word, bool extendSelection)
+        {
+            if (!extendSelection && !word && HasSelection)
+            {
+                MoveCaretTo(SelectionStart + SelectionLength, extendSelection: false);
+            }
+            else
+            {
+                MoveCaretTo(word ? TextNavigation.NextWord(text, Caret) : TextNavigation.NextElement(text, Caret), extendSelection);
+            }
+        }
+
+        /// <summary>
+        /// 隣の行 (縦書きでは隣の列) へ、流れ方向の位置を維持してキャレットを移動する
+        /// </summary>
+        /// <param name="direction">+1 で文字列順で次の行、-1 で前の行</param>
+        void MoveCaretToAdjacentLine(int direction, bool extendSelection)
         {
             var layout = EnsureLayout();
 
-            // 選択がある状態で Shift なしの上下は、選択の端へ寄せてから移動する (TextBox と同じ)
+            // 選択がある状態で Shift なしの行移動は、選択の端へ寄せてから移動する (TextBox と同じ)
             var baseOffset = extendSelection
                 ? Caret
                 : HasSelection ? (direction < 0 ? SelectionStart : SelectionStart + SelectionLength) : Caret;
 
             var line = layout.GetLineIndexFromOffset(baseOffset);
-            PreferredX ??= layout.GetCaretLocalX(baseOffset);
+            PreferredFlowPosition ??= layout.GetCaretFlowPosition(baseOffset);
 
             var targetLine = line + direction;
             var target = targetLine < 0
                 ? 0
-                : targetLine >= layout.LineCount ? Document.Length : layout.GetOffsetAtLineDistance(targetLine, PreferredX.Value);
+                : targetLine >= layout.LineCount ? Document.Length : layout.GetOffsetAtFlowPosition(targetLine, PreferredFlowPosition.Value);
 
-            MoveCaretTo(target, extendSelection, keepPreferredX: true);
+            MoveCaretTo(target, extendSelection, keepPreferredFlowPosition: true);
         }
 
-        void MoveCaretTo(int offset, bool extendSelection, bool keepPreferredX = false)
+        void MoveCaretTo(int offset, bool extendSelection, bool keepPreferredFlowPosition = false)
         {
             offset = Math.Clamp(offset, 0, Document.Length);
             Caret = offset;
@@ -1309,9 +1433,9 @@ namespace NiVE3.View.Primitive.PreviewText
             {
                 Anchor = offset;
             }
-            if (!keepPreferredX)
+            if (!keepPreferredFlowPosition)
             {
-                PreferredX = null;
+                PreferredFlowPosition = null;
             }
             RestartCaretBlink();
             InvalidateVisual();
@@ -1604,7 +1728,7 @@ namespace NiVE3.View.Primitive.PreviewText
         void AfterEditApplied(TextEditedEventArgs edit)
         {
             SyncTextToDependencyProperty();
-            PreferredX = null;
+            PreferredFlowPosition = null;
             // 編集詳細を先に通知し (ホストがスタイル範囲などを追従させる)、
             // その後レンダラに再レンダリングさせてから (同期的に CharacterGeometries が
             // 更新される想定) レイアウトを無効化する
@@ -1651,7 +1775,7 @@ namespace NiVE3.View.Primitive.PreviewText
             editor.UndoStack.Clear();
             editor.Anchor = 0;
             editor.Caret = 0;
-            editor.PreferredX = null;
+            editor.PreferredFlowPosition = null;
 
             // 正規化した値を DP へ反映 (再入は IsSyncingTextDp で防止)
             if (newText != (string?)e.NewValue)
@@ -1874,7 +1998,7 @@ namespace NiVE3.View.Primitive.PreviewText
         {
             Anchor = Math.Clamp(anchor, 0, Document.Length);
             Caret = Math.Clamp(caret, 0, Document.Length);
-            PreferredX = null;
+            PreferredFlowPosition = null;
             RestartCaretBlink();
             InvalidateVisual();
             // IME プロキシをキャレット位置へ追従させる
