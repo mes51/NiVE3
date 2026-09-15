@@ -1099,7 +1099,17 @@ namespace NiVE3.View.Primitive.PreviewText
             return quads;
         }
 
+        /// <summary>
+        /// バウンディングボックスのキャッシュ。ヒットテスト (マウス移動のたび) に使われるため、レイアウト構築後は不変であることを利用して 1 度だけ計算する。
+        /// </summary>
+        IReadOnlyList<TextQuad>? BoundingQuadsCache { get; set; }
+
         public IReadOnlyList<TextQuad> GetBoundingQuads()
+        {
+            return BoundingQuadsCache ??= ComputeBoundingQuads();
+        }
+
+        IReadOnlyList<TextQuad> ComputeBoundingQuads()
         {
             if (IsEmpty)
             {

@@ -475,6 +475,10 @@ namespace NiVE3.View.Primitive.PreviewText
             Cursor = Cursors.IBeam;
             FocusVisualStyle = null;
 
+            // 外側クリックの検出はルート要素で行うため、ビジュアルツリーへの接続に合わせて付け外しする
+            Loaded += (_, _) => AttachOutsideClickHandler();
+            Unloaded += (_, _) => DetachOutsideClickHandler();
+
             CaretTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(GetCaretBlinkInterval()) };
             CaretTimer.Tick += (_, _) =>
             {
@@ -1848,6 +1852,68 @@ namespace NiVE3.View.Primitive.PreviewText
             return false;
         }
 
+        /// <summary>
+        /// オーバーレイモードではテキストのバウンディングボックス内だけをヒットさせ、
+        /// 外側のマウスイベント (各ボタンのクリック・ホイール・移動など) がこのコントロールに捕まらず、
+        /// 下に重なっているコントロールへ届くようにする。
+        /// </summary>
+        protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters)
+        {
+            var layout = EnsureLayout();
+            if (!layout.DrawsText && !IsPointInTextBounds(layout, hitTestParameters.HitPoint))
+            {
+                return null;
+            }
+            return base.HitTestCore(hitTestParameters);
+        }
+
+        /// <summary>
+        /// 外側クリックの監視先 (ルート要素)。バウンディングボックス外のクリックはヒットテストで
+        /// このコントロールに届かないため、ルート要素の PreviewMouseDown で検出する。
+        /// </summary>
+        UIElement? OutsideClickSource { get; set; }
+
+        void AttachOutsideClickHandler()
+        {
+            var root = PresentationSource.FromVisual(this)?.RootVisual as UIElement;
+            if (root == null || ReferenceEquals(root, OutsideClickSource))
+            {
+                return;
+            }
+            DetachOutsideClickHandler();
+            root.AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(OnRootPreviewMouseDown), handledEventsToo: true);
+            OutsideClickSource = root;
+        }
+
+        void DetachOutsideClickHandler()
+        {
+            OutsideClickSource?.RemoveHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(OnRootPreviewMouseDown));
+            OutsideClickSource = null;
+        }
+
+        /// <summary>
+        /// 編集中にバウンディングボックス外を左クリックしたら、変換を確定し、選択を解除してフォーカスを外す。
+        /// e.Handled は設定せず、クリック先のコントロールがそのまま処理できるようにする。
+        /// </summary>
+        void OnRootPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left || !IsKeyboardFocusWithin || IsMouseCaptured || !IsVisible)
+            {
+                return;
+            }
+            var layout = EnsureLayout();
+            if (layout.DrawsText || IsPointInTextBounds(layout, e.GetPosition(this)))
+            {
+                // 内側のクリックは OnMouseLeftButtonDown で処理する
+                return;
+            }
+
+            CompleteComposition();
+            // 選択解除
+            MoveCaretTo(Caret, extendSelection: false);
+            Keyboard.ClearFocus();
+        }
+
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
@@ -1861,18 +1927,10 @@ namespace NiVE3.View.Primitive.PreviewText
                             $"originScreen=({originScreen.X:F0},{originScreen.Y:F0})");
 #endif
 
-            // バウンディングボックス外のクリック: フォーカスを取得しない。
-            // 編集中であれば変換を確定し、選択を解除してフォーカスを外す。
-            // e.Handled は設定せず、親要素 (ホスト) 側で処理できるようにする。
+            // バウンディングボックス外は HitTestCore でヒットしないため、ここには届かない
+            // (外側のクリックによるフォーカス解除は OnRootPreviewMouseDown で行う)
             if (!IsPointInTextBounds(EnsureLayout(), e.GetPosition(this)))
             {
-                if (IsKeyboardFocusWithin)
-                {
-                    CompleteComposition();
-                    // 選択解除
-                    MoveCaretTo(Caret, extendSelection: false);
-                    Keyboard.ClearFocus();
-                }
                 return;
             }
 
@@ -1910,12 +1968,7 @@ namespace NiVE3.View.Primitive.PreviewText
         {
             base.OnMouseMove(e);
 
-            // ドラッグ中以外は、バウンディングボックス内外でカーソル形状を切り替える
-            if (DragMode == DragSelectionMode.None)
-            {
-                Cursor = IsPointInTextBounds(EnsureLayout(), e.GetPosition(this)) ? Cursors.IBeam : Cursors.Arrow;
-            }
-
+            // バウンディングボックス外は HitTestCore でヒットしないため、ドラッグ中以外にここへ届くのは内側の移動だけ
             if (DragMode == DragSelectionMode.None || !IsMouseCaptured)
             {
                 return;
