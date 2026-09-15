@@ -295,6 +295,73 @@ namespace NiVE3.Test.View.Primitive.PreviewText
         }
 
         [Test]
+        public void TestGraphemeWithCarriageReturnMatchesNormalizedText()
+        {
+            // 本文が "\r\n" 改行だと行末の書記素に '\r' が付くが、表示テキストは '\n' に正規化されている
+            CharacterGeometry[] geometries =
+            [
+                Glyph("a", 0, 0, 10, 10),
+                Glyph("b\r", 14, 0, 10, 10),
+                Glyph("c", 0, 30, 10, 10),
+                Glyph("d", 14, 30, 10, 10),
+            ];
+            var layout = new GeometryTextLayout("ab\ncd", geometries);
+            var bounds = layout.GetBoundingQuads()[0].GetBounds();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(2));
+                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(24.0));
+                Assert.That(layout.GetCaretLocalX(5), Is.EqualTo(24.0));
+                Assert.That(bounds.Right, Is.EqualTo(26.0));
+                Assert.That(bounds.Bottom, Is.EqualTo(42.0));
+                Assert.That(layout.GetOffsetAt(new Point(20, 35)), Is.EqualTo(5));
+            });
+        }
+
+        [Test]
+        public void TestUnmatchedGeometryIsSkippedWithoutLosingFollowingGlyphs()
+        {
+            // テキストに対応しないエントリが混ざっていても、以降のグリフは照合できる
+            CharacterGeometry[] geometries =
+            [
+                Glyph("a", 0, 0, 10, 10),
+                Glyph("x", 14, 0, 10, 10),
+                Glyph("b", 28, 0, 10, 10),
+            ];
+            var layout = new GeometryTextLayout("ab", geometries);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.GetCaretLocalX(1), Is.EqualTo(19.0));
+                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(38.0));
+            });
+        }
+
+        [Test]
+        public void TestSpaceWithAdvanceWidthAndZeroHeight()
+        {
+            // SixLabors.Fonts は空白に「幅 = 文字送り、高さ 0」の矩形を返す
+            CharacterGeometry[] geometries =
+            [
+                Glyph("a", 0, 0, 10, 20),
+                Glyph(" ", 12, 18, 8, 0),
+                Glyph("b", 22, 0, 10, 20),
+            ];
+            var layout = new GeometryTextLayout("a b", geometries);
+            var (top, bottom) = layout.GetCaretLine(1);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(1));
+                Assert.That(layout.GetCaretLocalX(1), Is.EqualTo(11.0));
+                Assert.That(layout.GetCaretLocalX(2), Is.EqualTo(21.0));
+                Assert.That(top.Y, Is.EqualTo(0.0));
+                Assert.That(bottom.Y, Is.EqualTo(20.0));
+            });
+        }
+
+        [Test]
         public void TestBoundingQuadsUseInkUnion()
         {
             var layout = new GeometryTextLayout("ab cd", CreateSingleLineGeometries());

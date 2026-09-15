@@ -189,7 +189,7 @@ namespace NiVE3.View.Primitive.PreviewText
         {
             var geometryIndex = 0;
             var position = 0;
-            while (position < text.Length)
+            while (position < text.Length && geometryIndex < geometries.Count)
             {
                 if (text[position] == '\n')
                 {
@@ -197,45 +197,75 @@ namespace NiVE3.View.Primitive.PreviewText
                     continue;
                 }
 
-                // 改行だけのエントリ (レンダラが含めた場合) は読み飛ばす
-                while (geometryIndex < geometries.Count && geometries[geometryIndex].Grapheme is "\n" or "\r\n" or "\r")
+                var geometry = geometries[geometryIndex];
+                var cluster = NormalizeCluster(geometry.Grapheme);
+                if (cluster.Length == 0)
                 {
+                    // 改行だけのエントリ (レンダラが含めた場合) は読み飛ばす
                     geometryIndex++;
+                    continue;
                 }
 
-                var elementLength = Math.Max(1, StringInfo.GetNextTextElementLength(text, position));
-
-                if (geometryIndex < geometries.Count)
+                var matchIndex = FindClusterInLine(text, position, cluster);
+                if (matchIndex < 0)
                 {
-                    var geometry = geometries[geometryIndex];
-                    var cluster = geometry.Grapheme ?? "";
-                    var matches = cluster.Length > 0 &&
-                        position + cluster.Length <= text.Length &&
-                        !cluster.Contains('\n') &&
-                        string.CompareOrdinal(text, position, cluster, 0, cluster.Length) == 0;
-                    if (matches)
-                    {
-                        // Rect.Empty (パスを持たないグリフ) は位置情報が無いため、ジオメトリなしとして扱う
-                        if (!geometry.Bounds.IsEmpty)
-                        {
-                            Glyphs.Add(new GlyphInfo
-                            {
-                                Offset = position,
-                                Length = cluster.Length,
-                                LocalBounds = geometry.Bounds,
-                                CharTransform = geometry.GraphemeTransform,
-                                Transformer = geometry.Transformer,
-                            });
-                        }
-                        geometryIndex++;
-                        position += cluster.Length;
-                        continue;
-                    }
+                    // 現在の行にこの書記素が無い (テキストと対応しないエントリ)。
+                    // ここで止まると以降のジオメトリがすべて失われるため、ジオメトリ側を読み飛ばして再同期する
+                    geometryIndex++;
+                    continue;
                 }
 
-                // このテキスト要素に対応するジオメトリが無い (空白の省略など)
-                position += elementLength;
+                // matchIndex までのテキスト要素はジオメトリなし (空白の省略など) として扱う
+                position = matchIndex;
+                // Rect.Empty (パスを持たないグリフ) は位置情報が無いため、ジオメトリなしとして扱う
+                if (!geometry.Bounds.IsEmpty)
+                {
+                    Glyphs.Add(new GlyphInfo
+                    {
+                        Offset = position,
+                        Length = cluster.Length,
+                        LocalBounds = geometry.Bounds,
+                        CharTransform = geometry.GraphemeTransform,
+                        Transformer = geometry.Transformer,
+                    });
+                }
+                geometryIndex++;
+                position += cluster.Length;
             }
+        }
+
+        /// <summary>
+        /// レンダラ側の書記素から改行文字を取り除く。
+        /// テキストレイヤーの本文が "\r\n" 改行のとき、行末の書記素に '\r' が含まれることがあるが、
+        /// 表示テキスト側は '\n' に正規化されているため、そのままでは照合できない。
+        /// </summary>
+        static string NormalizeCluster(string? grapheme)
+        {
+            if (string.IsNullOrEmpty(grapheme))
+            {
+                return "";
+            }
+            return grapheme.Replace("\r", "").Replace("\n", "");
+        }
+
+        /// <summary>
+        /// position 以降の同じ行 (次の '\n' の手前まで) から、テキスト要素境界に一致する cluster の位置を探す。
+        /// 見つからなければ -1。
+        /// </summary>
+        static int FindClusterInLine(string text, int position, string cluster)
+        {
+            var newlineIndex = text.IndexOf('\n', position);
+            var lineEnd = newlineIndex < 0 ? text.Length : newlineIndex;
+            var index = position;
+            while (index < lineEnd)
+            {
+                if (index + cluster.Length <= lineEnd && string.CompareOrdinal(text, index, cluster, 0, cluster.Length) == 0)
+                {
+                    return index;
+                }
+                index += Math.Max(1, StringInfo.GetNextTextElementLength(text, index));
+            }
+            return -1;
         }
 
         /// <summary>

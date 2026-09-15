@@ -524,7 +524,8 @@ namespace NiVE3.Input
 
                 var beginIndex = metrics[i].StringIndex;
                 var endIndex = i + 1 >= metrics.Length ? text.Length : metrics[i + 1].StringIndex;
-                var newLineIndex = text.IndexOf('\n', beginIndex);
+                // 改行は "\r\n" の場合もあるため、'\r' も書記素に含めない
+                var newLineIndex = text.IndexOfAny(['\r', '\n'], beginIndex);
                 if (newLineIndex > -1)
                 {
                     endIndex = Math.Min(endIndex, newLineIndex);
