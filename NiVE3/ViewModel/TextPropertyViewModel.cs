@@ -99,6 +99,10 @@ namespace NiVE3.ViewModel
         public partial Guid? LastSelectedLayerId { get; set; }
 
         [ReactiveProperty]
+        [NeedWire(nameof(ViewState))]
+        public partial Color DefaultTextColor { get; set; }
+
+        [ReactiveProperty]
         [ManualWire(nameof(Composition), IsOneWay = true)]
         public partial Time CurrentTime { get; set; }
 
@@ -288,6 +292,7 @@ namespace NiVE3.ViewModel
             if (style != null)
             {
                 TextPropertyModel.SetStyle(style);
+                DefaultTextColor = style.FillColor.ToColor();
             }
 
             IsFontChanging = false;

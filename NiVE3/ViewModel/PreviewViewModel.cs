@@ -152,6 +152,10 @@ namespace NiVE3.ViewModel
         public partial TextLayerPreviewText? SelectedTextLayerPreviewTextData { get; set; }
 
         [ReactiveProperty]
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public partial Color DefaultTextColor { get; set; }
+
+        [ReactiveProperty]
         public partial double RealFrameRate { get; set; }
 
         [ReactiveProperty]
@@ -207,6 +211,9 @@ namespace NiVE3.ViewModel
 
         [ReactiveProperty]
         public partial bool IsShowSnapShotImage { get; set; }
+
+        [ReactiveProperty]
+        public partial Brush PreviewTextCaretBrush { get; set; } = Brushes.White;
 
         public PreviewModelBase PreviewModel { get; }
 
@@ -1126,6 +1133,9 @@ namespace NiVE3.ViewModel
                         SnapShotFrame.WritePixels(new Int32Rect(0, 0, SnapShotImage.Width, SnapShotImage.Height), temp, SnapShotImage.Width * 4, 0);
                         ArrayPool<int>.Shared.Return(temp);
                     }
+                    break;
+                case nameof(DefaultTextColor):
+                    PreviewTextCaretBrush = new SolidColorBrush(DefaultTextColor);
                     break;
             }
         }

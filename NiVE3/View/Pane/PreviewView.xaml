@@ -359,6 +359,7 @@
                                     PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}"
                                     PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"
                                     Text="{Binding SelectedTextLayerText}"
+                                    CaretBrush="{Binding PreviewTextCaretBrush}"
                                     CharacterGeometries="{Binding SelectedTextLayerPreviewTextData.CharacterGeometries}"
                                     EmptyTextCaretGeometry="{Binding SelectedTextLayerPreviewTextData.EmptyTextCaretGeometry}"
                                     IsVerticalText="{Binding SelectedTextLayerPreviewTextData.IsVertical}">

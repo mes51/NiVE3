@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
 using NiVE3.ValueObject;
 using Prism.Mvvm;
@@ -75,6 +76,9 @@ namespace NiVE3.Model.UI
 
         [ReactiveProperty]
         public partial TextLayerPreviewText SelectedTextLayerPreviewTextData { get; set; }
+
+        [ReactiveProperty]
+        public partial Color DefaultTextColor { get; set; }
 
         [ReactiveProperty]
         public partial Guid? CurrentEditingCompositionId { get; set; }
