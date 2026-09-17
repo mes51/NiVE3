@@ -21,6 +21,7 @@ using NiVE3.ValueObject;
 using NiVE3.View.Converter;
 using NiVE3.View.Part;
 using NiVE3.View.Primitive;
+using NiVE3.View.Primitive.PreviewText;
 using NiVE3.ViewModel;
 
 namespace NiVE3.View.Pane
@@ -661,6 +662,26 @@ namespace NiVE3.View.Pane
             }
         }
 
+        private void TimeLocatorView_CurrentTimeChangeByUser(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
+        }
+
+        private void PreviewTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.BeginTextEditCommand?.Execute(null);
+        }
+
+        private void PreviewTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.EndTextEditCommand?.Execute(null);
+        }
+
+        private void PreviewTextBox_TextEdited(object sender, TextEditedEventArgs e)
+        {
+            ViewModel?.TextEditCommand.Execute(Tuple.Create(e.Offset, e.RemovedText, e.InsertedText));
+        }
+
         static void SelectedScaleChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)
         {
             if (d is PreviewView preview)
@@ -704,11 +725,6 @@ namespace NiVE3.View.Pane
             {
                 viewModel.DownScaleRate = DownScaleList[preview.SelectedDownScaleRateIndex];
             }
-        }
-
-        private void TimeLocatorView_CurrentTimeChangeByUser(object sender, RoutedEventArgs e)
-        {
-            ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
         }
     }
 }

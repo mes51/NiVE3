@@ -6,38 +6,55 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using NiVE3.Extension;
+using NiVE3.Input;
 using NiVE3.Model;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Property.Types;
 using NiVE3.View.Resource;
 
 namespace NiVE3.ViewModel.TimelineEditing
 {
     abstract class PreviewManipulationStateBase
     {
-        protected const double ChangeRate = 0.2;
-
         protected abstract PropertyViewModel[] Properties { get; }
 
         protected Time Time { get; }
 
         protected CompositionModel CompositionModel { get; }
 
+        protected HistoryModel HistoryModel { get; }
+
+        protected PreviewManipulationStateBase(Time time, CompositionModel compositionModel, HistoryModel historyModel)
+        {
+            Time = time;
+            CompositionModel = compositionModel;
+            HistoryModel = historyModel;
+        }
+
+        public virtual void Abort()
+        {
+            foreach (var property in Properties)
+            {
+                property.AbortEditCommand.Execute(null);
+            }
+        }
+    }
+
+    abstract class PreviewMouseManipulationStateBase : PreviewManipulationStateBase
+    {
+        protected const double ChangeRate = 0.2;
+
         protected CameraSetting CameraSetting { get; }
 
         protected Vector2d StartScreenPosition { get; }
 
-        protected HistoryModel HistoryModel { get; }
-
-        protected PreviewManipulationStateBase(Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel)
+        protected PreviewMouseManipulationStateBase(Time time, CompositionModel compositionModel, CameraSetting cameraSetting, Vector2d startScreenPosition, HistoryModel historyModel) : base(time, compositionModel, historyModel)
         {
-            Time = time;
-            CompositionModel = compositionModel;
             CameraSetting = cameraSetting;
             StartScreenPosition = startScreenPosition;
-            HistoryModel = historyModel;
         }
 
         public abstract void Update(Vector2d screenPos);
@@ -52,14 +69,6 @@ namespace NiVE3.ViewModel.TimelineEditing
                 property.EndEditCommand.Execute(null);
             }
             HistoryModel.EndGroup();
-        }
-
-        public virtual void Abort()
-        {
-            foreach (var property in Properties)
-            {
-                property.AbortEditCommand.Execute(null);
-            }
         }
 
         protected Vector2d AlignScreenPosition(in Vector2d screenPos)
@@ -83,7 +92,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class PositionPreviewManipulationState : PreviewManipulationStateBase
+    class PositionPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         (bool isEnable3d, PropertyViewModel property)[] PositionProperties { get; }
 
@@ -143,7 +152,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class RotateAllPreviewManipulationState : PreviewManipulationStateBase
+    class RotateAllPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -187,7 +196,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class RotateXPreviewManipulationState : PreviewManipulationStateBase
+    class RotateXPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -222,7 +231,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class RotateYPreviewManipulationState : PreviewManipulationStateBase
+    class RotateYPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -257,7 +266,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class RotateZPreviewManipulationState : PreviewManipulationStateBase
+    class RotateZPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -314,7 +323,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class ScalePreviewManipulationState : PreviewManipulationStateBase
+    class ScalePreviewManipulationState : PreviewMouseManipulationStateBase
     {
         const double DefaultInvalidScale = 1000000.0;
 
@@ -380,7 +389,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class CameraOrbitPreviewManipulationState : PreviewManipulationStateBase
+    class CameraOrbitPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -427,7 +436,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class CameraPanPreviewManipulationState : PreviewManipulationStateBase
+    class CameraPanPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -480,7 +489,7 @@ namespace NiVE3.ViewModel.TimelineEditing
         }
     }
 
-    class CameraDollyPreviewManipulationState : PreviewManipulationStateBase
+    class CameraDollyPreviewManipulationState : PreviewMouseManipulationStateBase
     {
         protected override PropertyViewModel[] Properties { get; }
 
@@ -527,6 +536,46 @@ namespace NiVE3.ViewModel.TimelineEditing
             var move = CameraDirection * (screenPos.Y - StartScreenPosition.Y);
             PositionProperty.CurrentTimeRawValue = StartCameraPosition + move;
             PointOfInterestProperty.CurrentTimeRawValue = StartCameraPointOfInterest + move;
+        }
+    }
+
+    class TextLayerPreviewManipulationState : PreviewManipulationStateBase
+    {
+        protected override PropertyViewModel[] Properties { get; }
+
+        PropertyViewModel? SourceTextProperty { get; }
+
+        public TextLayerPreviewManipulationState(Time time, CompositionModel compositionModel, HistoryModel historyModel, LayerViewModel targetLayer) : base(time, compositionModel, historyModel)
+        {
+            var sourceTextProperty = targetLayer.TextProperties?.Children?.FirstOrDefault(p => p.Property.Id == TextFootageSource.SourceTextId) as PropertyViewModel;
+            if (sourceTextProperty != null)
+            {
+                sourceTextProperty.BeginEditCommand.Execute(null);
+                Properties = [sourceTextProperty];
+                SourceTextProperty = sourceTextProperty;
+            }
+            else
+            {
+                Properties = [];
+            }
+        }
+
+        public void UpdateText(int offset, string removedText, string insertedText)
+        {
+            if (SourceTextProperty != null)
+            {
+                SourceTextProperty.CurrentTimeRawValue = SourceTextPropertyType.UpdateText(SourceTextProperty.CurrentTimeRawValue, offset, removedText, insertedText);
+            }
+        }
+
+        public void Commit()
+        {
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+            foreach (var property in Properties)
+            {
+                property.EndEditCommand.Execute(null);
+            }
+            HistoryModel.EndGroup();
         }
     }
 }

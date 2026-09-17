@@ -81,5 +81,75 @@ namespace NiVE3.Text
 
             return hashCode.ToHashCode();
         }
+
+        public static StyledText ApplyEdit(StyledText baseStyledText, int offset, string removedText, string insertedText)
+        {
+            var baseText = baseStyledText.Text;
+            var newText = string.Concat(baseText.AsSpan(0, offset), insertedText, baseText.AsSpan(offset + removedText.Length));
+
+            if (baseStyledText.Styles.Length < 1)
+            {
+                return new StyledText(newText, baseStyledText.DefaultStyle, []);
+            }
+
+            var removedLength = removedText.Length;
+            var insertedLength = insertedText.Length;
+            var removeEnd = offset + removedText.Length;
+            var newStyleRuns = new List<TextStyleRun>(baseStyledText.Styles.Length);
+            foreach (var textRun in baseStyledText.Styles)
+            {
+                var s = textRun.Start;
+                var e = textRun.End;
+                if (s > offset)
+                {
+                    if (textRun.Start >= removeEnd)
+                    {
+                        s = textRun.Start - removedLength;
+                    }
+                    else
+                    {
+                        s = offset;
+                    }
+                }
+                if (e > offset)
+                {
+                    if (textRun.End >= removeEnd)
+                    {
+                        e = textRun.End - removedLength;
+                    }
+                    else
+                    {
+                        e = offset;
+                    }
+                }
+
+                if (insertedLength > 0 && e >= offset)
+                {
+                    if (e == offset)
+                    {
+                        if (s < offset)
+                        {
+                            e += insertedLength;
+                        }
+                    }
+                    else if (s <= offset)
+                    {
+                        e += insertedLength;
+                    }
+                    else
+                    {
+                        s += insertedLength;
+                        e += insertedLength;
+                    }
+                }
+
+                if (e > s)
+                {
+                    newStyleRuns.Add(new TextStyleRun(s, e, textRun.Style));
+                }
+            }
+
+            return new StyledText(newText, baseStyledText.DefaultStyle, TextStyleRun.Merge(newStyleRuns));
+        }
     }
 }

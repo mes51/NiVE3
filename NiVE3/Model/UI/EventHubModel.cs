@@ -115,6 +115,27 @@ namespace NiVE3.Model.UI
             remove { RenderPreviewInteractionRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<TextEditEventArgs> BeginTextEditPublisher { get; } = new WeakEventPublisher<TextEditEventArgs>();
+        public event EventHandler<TextEditEventArgs> BeginTextEdit
+        {
+            add { BeginTextEditPublisher.Subscribe(value); }
+            remove { BeginTextEditPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<TextEditEventArgs> EndTextEditPublisher { get; } = new WeakEventPublisher<TextEditEventArgs>();
+        public event EventHandler<TextEditEventArgs> EndTextEdit
+        {
+            add { EndTextEditPublisher.Subscribe(value); }
+            remove { EndTextEditPublisher.Unsubscribe(value); }
+        }
+
+        WeakEventPublisher<TextEditingEventArgs> TextEditingPublisher { get; } = new WeakEventPublisher<TextEditingEventArgs>();
+        public event EventHandler<TextEditingEventArgs> TextEditing
+        {
+            add { TextEditingPublisher.Subscribe(value); }
+            remove { TextEditingPublisher.Unsubscribe(value); }
+        }
+
         public SelectPreviewResult NotifySelectLayer(Guid compositionId, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
         {
             var eventArgs = new SelectLayerEventArgs(compositionId, screenPos, previewImageScale, currentTime);
@@ -189,6 +210,21 @@ namespace NiVE3.Model.UI
         public void NotifyRenderPreviewInteractionRequest(Guid compositionId, Time currentTime, DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale)
         {
             RenderPreviewInteractionRequestPublisher.Publish(this, new RenderPreviewInteractionEventArgs(compositionId, currentTime, drawingContext, previewImagePosition, previewImageScale));
+        }
+
+        public void NotifyBeginTextEdit(Guid compositionId, Guid layerId, Time time)
+        {
+            BeginTextEditPublisher.Publish(this, new TextEditEventArgs(compositionId, layerId, time));
+        }
+
+        public void NotifyEndTextEdit(Guid compositionId, Guid layerId, Time time)
+        {
+            EndTextEditPublisher.Publish(this, new TextEditEventArgs(compositionId, layerId, time));
+        }
+
+        public void NotifyTextEditing(Guid compositionId, Guid layerId, Time time, int offset, string removeText, string insertText)
+        {
+            TextEditingPublisher.Publish(this, new TextEditingEventArgs(compositionId, layerId, time, offset, removeText, insertText));
         }
     }
 }

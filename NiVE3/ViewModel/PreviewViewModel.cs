@@ -41,6 +41,7 @@ using NiVE3.View.Dialog;
 using NiVE3.Cache;
 using System.Numerics;
 using NiVE3.Shared.Extension;
+using NiVE3.View.Primitive.PreviewText;
 
 namespace NiVE3.ViewModel
 {
@@ -215,6 +216,9 @@ namespace NiVE3.ViewModel
         [ReactiveProperty]
         public partial Brush PreviewTextCaretBrush { get; set; } = Brushes.White;
 
+        [ReactiveProperty]
+        public partial SelectionRange PreviewTextSelectionRange { get; set; }
+
         public PreviewModelBase PreviewModel { get; }
 
         public ICommand ChangeCurrentTimeCommand { get; }
@@ -261,6 +265,12 @@ namespace NiVE3.ViewModel
         public ICommand CompositionSettingCommand { get; }
 
         public ICommand CaptureSnapShotCommand { get; }
+
+        public ICommand BeginTextEditCommand { get; }
+
+        public ICommand EndTextEditCommand { get; }
+
+        public ICommand TextEditCommand { get; }
 
         // TODO: 描画をコマンドにするべき?
         public ICommand RenderPropertyInteractionCommand { get; }
@@ -397,6 +407,7 @@ namespace NiVE3.ViewModel
                     ToolType.CameraOrbit => BeginUseToolEventArgs.PropertyType.CameraOrbit,
                     ToolType.CameraPan => BeginUseToolEventArgs.PropertyType.CameraPan,
                     ToolType.CameraDolly => BeginUseToolEventArgs.PropertyType.CameraDolly,
+                    ToolType.Text => BeginUseToolEventArgs.PropertyType.None,
                     _ => throw new Exception() // bug
                 };
                 IsUsingTool = true;
@@ -637,6 +648,45 @@ namespace NiVE3.ViewModel
                 EventHubModel.NotifyRenderPreviewInteractionRequest(compositionId.Value, CurrentTime, drawingContext, previewImagePosition, previewImageScale);
             }, _ => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
                 .ObservesProperty(() => PreviewModel);
+
+            BeginTextEditCommand = new DelegateCommand(() =>
+            {
+                var compositionId = (PreviewModel as CompositionPreviewModel)?.Composition?.CompositionId;
+                if (!compositionId.HasValue || SelectedTextLayerPreviewTextData == null)
+                {
+                    return;
+                }
+
+                EventHubModel.NotifyBeginTextEdit(compositionId.Value, SelectedTextLayerPreviewTextData.LayerId, CurrentTime);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null && SelectedTextLayerPreviewTextData != null)
+                .ObservesProperty(() => PreviewModel)
+                .ObservesProperty(() => SelectedTextLayerPreviewTextData);
+
+            EndTextEditCommand = new DelegateCommand(() =>
+            {
+                var compositionId = (PreviewModel as CompositionPreviewModel)?.Composition?.CompositionId;
+                if (!compositionId.HasValue || SelectedTextLayerPreviewTextData == null)
+                {
+                    return;
+                }
+
+                EventHubModel.NotifyEndTextEdit(compositionId.Value, SelectedTextLayerPreviewTextData.LayerId, CurrentTime);
+            }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null && SelectedTextLayerPreviewTextData != null)
+                .ObservesProperty(() => PreviewModel)
+                .ObservesProperty(() => SelectedTextLayerPreviewTextData);
+
+            TextEditCommand = new DelegateCommand<Tuple<int, string, string>>(t =>
+            {
+                var compositionId = (PreviewModel as CompositionPreviewModel)?.Composition?.CompositionId;
+                if (!compositionId.HasValue || SelectedTextLayerPreviewTextData == null)
+                {
+                    return;
+                }
+
+                EventHubModel.NotifyTextEditing(compositionId.Value, SelectedTextLayerPreviewTextData.LayerId, CurrentTime, t.Item1, t.Item2, t.Item3);
+            }, _ => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null && SelectedTextLayerPreviewTextData != null)
+                .ObservesProperty(() => PreviewModel)
+                .ObservesProperty(() => SelectedTextLayerPreviewTextData);
 
             WiringModel();
 

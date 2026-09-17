@@ -547,6 +547,9 @@ namespace NiVE3.ViewModel
             eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
             eventHubModel.TextStyleChangeRequest += EventHubModel_TextStyleChangeRequest;
             eventHubModel.RenderPreviewInteractionRequest += EventHubModel_RenderPreviewInteractionRequest;
+            eventHubModel.BeginTextEdit += EventHubModel_BeginTextEdit;
+            eventHubModel.EndTextEdit += EventHubModel_EndTextEdit;
+            eventHubModel.TextEditing += EventHubModel_TextEditing;
             historyModel.HistoryChanged += HistoryModel_HistoryChanged;
             PropertyChanged += TimelineViewModel_PropertyChanged;
             PaneSelected += TimelineViewModel_PaneSelected;
@@ -1729,20 +1732,20 @@ namespace NiVE3.ViewModel
                 }
                 return;
             }
-            else if (!IsUsingTool || PreviewManipulation == null)
+            if (!IsUsingTool || PreviewManipulation is not PreviewMouseManipulationStateBase mouseManipulation)
             {
                 return;
             }
 
             if (e.IsCommit)
             {
-                PreviewManipulation.Commit(e.NextScreenPos);
+                mouseManipulation.Commit(e.NextScreenPos);
                 IsUsingTool = false;
                 PreviewManipulation = null;
             }
             else
             {
-                PreviewManipulation.Update(e.NextScreenPos);
+                mouseManipulation.Update(e.NextScreenPos);
             }
         }
 
@@ -1871,6 +1874,47 @@ namespace NiVE3.ViewModel
                 using var checker = CycleChecker.StartCheck();
                 LayerTranslateVisualizer.Render(e.DrawingContext, e.PreviewImagePosition, e.PreviewImageScale, selectedLayer, e.CurrentTime, FrameRate, selectedLayer.TagColor, CompositionModel.GetCoordTransformer(e.CurrentTime, selectedLayer.LayerId));
             }
+        }
+
+        private void EventHubModel_BeginTextEdit(object? sender, TextEditEventArgs e)
+        {
+            if (IsEditingAny || CompositionModel == null || e.CompositionId != CompositionId || Layers?.FirstOrDefault(l => l.LayerId == e.TargetLayerId) is not LayerViewModel layer || !layer.IsText)
+            {
+                return;
+            }
+
+            PreviewManipulation = new TextLayerPreviewManipulationState(CurrentTime, CompositionModel, HistoryModel, layer);
+            IsUsingTool = true;
+        }
+
+        private void EventHubModel_EndTextEdit(object? sender, TextEditEventArgs e)
+        {
+            if (CompositionModel == null || e.CompositionId != CompositionId || Layers?.FirstOrDefault(l => l.LayerId == e.TargetLayerId) is not LayerViewModel layer || !layer.IsText)
+            {
+                return;
+            }
+            if (!IsUsingTool || PreviewManipulation is not TextLayerPreviewManipulationState textLayerManipulation)
+            {
+                return;
+            }
+
+            textLayerManipulation.Commit();
+            PreviewManipulation = null;
+            IsUsingTool = false;
+        }
+
+        private void EventHubModel_TextEditing(object? sender, TextEditingEventArgs e)
+        {
+            if (CompositionModel == null || e.CompositionId != CompositionId || Layers?.FirstOrDefault(l => l.LayerId == e.TargetLayerId) is not LayerViewModel layer || !layer.IsText)
+            {
+                return;
+            }
+            if (!IsUsingTool || PreviewManipulation is not TextLayerPreviewManipulationState textLayerManipulation)
+            {
+                return;
+            }
+
+            textLayerManipulation.UpdateText(e.Offset, e.RemovedText, e.InsertedText);
         }
 
         private void HistoryModel_HistoryChanged(object? sender, EventArgs e)

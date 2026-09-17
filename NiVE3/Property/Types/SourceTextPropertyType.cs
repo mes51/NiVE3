@@ -81,6 +81,16 @@ namespace NiVE3.Property.Types
             return styledText.DefaultStyle;
         }
 
+        public static object? UpdateText(object? value, int offset, string removedText, string insertedText)
+        {
+            if (value is not StyledText styledText)
+            {
+                return null;
+            }
+
+            return StyledText.ApplyEdit(styledText, offset, removedText, insertedText);
+        }
+
         public Span<byte> ConvertToHashBase(object? value)
         {
             if (value is not StyledText styledText)

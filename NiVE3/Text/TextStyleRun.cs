@@ -55,5 +55,23 @@ namespace NiVE3.Text
                 TextLineColor = Style.TextLineColor
             };
         }
+
+        public static TextStyleRun[] Merge(IReadOnlyCollection<TextStyleRun> textStyleRuns)
+        {
+            var merged = new List<TextStyleRun>(textStyleRuns.Count);
+            foreach (var run in textStyleRuns.Where(r => r.End > r.Start).OrderBy(r => r.Start))
+            {
+                if (merged.Count > 0 && merged[^1].End == run.Start && merged[^1].Style == run.Style)
+                {
+                    merged[^1] = merged[^1] with { End = run.End };
+                }
+                else
+                {
+                    merged.Add(run);
+                }
+            }
+
+            return [..merged];
+        }
     }
 }

@@ -354,6 +354,7 @@
                                               PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}"
                                               PreviewImageScaleY="{Binding ElementName=Root, Path=PreviewAreaImageScaleY}"/>
                 <prt:PreviewTextBox x:Name="PreviewTextBox"
+                                    IsInactiveSelectionHighlightEnabled="True"
                                     PreviewImageLeft="{Binding ScreenX}"
                                     PreviewImageTop="{Binding ScreenY}"
                                     PreviewImageScaleX="{Binding ElementName=Root, Path=PreviewAreaImageScaleX}"
@@ -362,7 +363,10 @@
                                     CaretBrush="{Binding PreviewTextCaretBrush}"
                                     CharacterGeometries="{Binding SelectedTextLayerPreviewTextData.CharacterGeometries}"
                                     EmptyTextCaretGeometry="{Binding SelectedTextLayerPreviewTextData.EmptyTextCaretGeometry}"
-                                    IsVerticalText="{Binding SelectedTextLayerPreviewTextData.IsVertical}">
+                                    IsVerticalText="{Binding SelectedTextLayerPreviewTextData.IsVertical}"
+                                    GotFocus="PreviewTextBox_GotFocus"
+                                    LostFocus="PreviewTextBox_LostFocus"
+                                    TextEdited="PreviewTextBox_TextEdited">
                     <prt:PreviewTextBox.Style>
                         <Style TargetType="{x:Type prt:PreviewTextBox}">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -380,6 +384,7 @@
                         </Style>
                     </prt:PreviewTextBox.Style>
                 </prt:PreviewTextBox>
+                <r:ReadOnlyPropertyWire Reciever="{Binding ElementName=PreviewTextBox, Path=SelectionRange}" Sender="{Binding PreviewTextSelectionRange}"/>
             </Grid>
         </Border>
 

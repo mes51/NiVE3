@@ -196,6 +196,21 @@ namespace NiVE3.View.Primitive.PreviewText
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsMeasure | FrameworkPropertyMetadataOptions.AffectsRender)
         );
 
+        private static readonly DependencyPropertyKey SelectionRangePropertyKey = DependencyProperty.RegisterReadOnly(
+            nameof(SelectionRange),
+            typeof(SelectionRange),
+            typeof(PreviewTextBox),
+            new FrameworkPropertyMetadata(new SelectionRange())
+        );
+
+        public static readonly DependencyProperty SelectionRangeProperty = SelectionRangePropertyKey.DependencyProperty;
+
+        public SelectionRange SelectionRange
+        {
+            get { return (SelectionRange)GetValue(SelectionRangeProperty); }
+            private set { SetValue(SelectionRangePropertyKey, value); }
+        }
+
         public double PreviewImageTop
         {
             get { return (double)GetValue(PreviewImageTopProperty); }
@@ -407,12 +422,28 @@ namespace NiVE3.View.Primitive.PreviewText
         /// <summary>
         /// 選択の起点
         /// </summary>
-        int Anchor { get; set; }
+        int Anchor
+        {
+            get;
+            set
+            {
+                field = value;
+                SelectionRange = new SelectionRange(Math.Min(value, Caret), Math.Abs(value - Caret));
+            }
+        }
 
         /// <summary>
         /// キャレット位置 (選択の可動端)
         /// </summary>
-        int Caret { get; set; }
+        int Caret
+        {
+            get;
+            set
+            {
+                field = value;
+                SelectionRange = new SelectionRange(Math.Min(Anchor, value), Math.Abs(Anchor - value));
+            }
+        }
 
         /// <summary>
         /// 隣の行へ移動するときに維持する流れ方向の位置
@@ -2201,4 +2232,6 @@ namespace NiVE3.View.Primitive.PreviewText
 
         #endregion クリップボード・コマンド
     }
+
+    readonly record struct SelectionRange(int Start, int Length);
 }

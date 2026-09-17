@@ -283,6 +283,47 @@ namespace NiVE3.Model
         }
     }
 
+    class TextEditEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid TargetLayerId { get; }
+
+        public Time Time { get; }
+
+        public TextEditEventArgs(Guid compositionId, Guid targetLayerId, Time time)
+        {
+            CompositionId = compositionId;
+            TargetLayerId = targetLayerId;
+            Time = time;
+        }
+    }
+
+    class TextEditingEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid TargetLayerId { get; }
+
+        public Time Time { get; }
+
+        public int Offset { get; }
+
+        public string RemovedText { get; }
+
+        public string InsertedText { get; }
+
+        public TextEditingEventArgs(Guid compositionId, Guid targetLayerId, Time time, int offset, string removeText, string insertText)
+        {
+            CompositionId = compositionId;
+            TargetLayerId = targetLayerId;
+            Time = time;
+            Offset = offset;
+            RemovedText = removeText;
+            InsertedText = insertText;
+        }
+    }
+
     class RenderPreviewInteractionEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
