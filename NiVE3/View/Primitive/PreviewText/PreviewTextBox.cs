@@ -147,6 +147,27 @@ namespace NiVE3.View.Primitive.PreviewText
             )
         );
 
+        /// <summary>
+        /// この添付プロパティが true の要素 (とその子孫) をクリックしても、編集中のテキストの選択解除とフォーカス解除を行わない。
+        /// 選択範囲に対してフォントなどを変更するパネルのルート要素に指定する。
+        /// </summary>
+        public static readonly DependencyProperty KeepsSelectionOnClickProperty = DependencyProperty.RegisterAttached(
+            "KeepsSelectionOnClick",
+            typeof(bool),
+            typeof(PreviewTextBox),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits)
+        );
+
+        public static bool GetKeepsSelectionOnClick(DependencyObject element)
+        {
+            return (bool)element.GetValue(KeepsSelectionOnClickProperty);
+        }
+
+        public static void SetKeepsSelectionOnClick(DependencyObject element, bool value)
+        {
+            element.SetValue(KeepsSelectionOnClickProperty, value);
+        }
+
         public static readonly DependencyProperty IsVerticalTextProperty = DependencyProperty.Register(
             nameof(IsVerticalText),
             typeof(bool),
@@ -509,6 +530,15 @@ namespace NiVE3.View.Primitive.PreviewText
             // 外側クリックの検出はルート要素で行うため、ビジュアルツリーへの接続に合わせて付け外しする
             Loaded += (_, _) => AttachOutsideClickHandler();
             Unloaded += (_, _) => DetachOutsideClickHandler();
+            // 非表示になったとき (ツールの切り替えなど) は、WPF がキーボードフォーカスだけを他へ移して論理フォーカスが残るため、
+            // 論理フォーカスも外して LostFocus を発生させる
+            IsVisibleChanged += (_, e) =>
+            {
+                if (!(bool)e.NewValue)
+                {
+                    ClearLogicalFocus();
+                }
+            };
 
             CaretTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(GetCaretBlinkInterval()) };
             CaretTimer.Tick += (_, _) =>
@@ -1928,7 +1958,19 @@ namespace NiVE3.View.Primitive.PreviewText
         /// </summary>
         void OnRootPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton != MouseButton.Left || !IsKeyboardFocusWithin || IsMouseCaptured || !IsVisible)
+            if (e.ChangedButton != MouseButton.Left || IsMouseCaptured || !IsVisible)
+            {
+                return;
+            }
+            // KeepsSelectionOnClick のパネルを操作するとフォーカスはそちらへ移るが、選択範囲は残る。
+            // その後に別の場所をクリックしたときにも選択を解除できるよう、フォーカスが無くても選択が残っていれば処理する。
+            if (!IsKeyboardFocusWithin && !HasSelection)
+            {
+                return;
+            }
+            // 選択範囲を対象に操作するパネル (KeepsSelectionOnClick) 内のクリックでは、選択もフォーカスもそのままにする。
+            // クリック先がフォーカスを取る場合は通常通りフォーカスが移るが、選択範囲は保持される。
+            if (e.OriginalSource is DependencyObject source && GetKeepsSelectionOnClick(source))
             {
                 return;
             }
@@ -1942,7 +1984,39 @@ namespace NiVE3.View.Primitive.PreviewText
             CompleteComposition();
             // 選択解除
             MoveCaretTo(Caret, extendSelection: false);
-            Keyboard.ClearFocus();
+            ReleaseFocus();
+        }
+
+        /// <summary>
+        /// 編集を終えるためにフォーカスを手放す。
+        /// Keyboard.ClearFocus() だけでは論理フォーカスが IME プロキシに残るため、LostFocus が発生せず、
+        /// フォーカススコープ (ウィンドウなど) がキーボードフォーカスを受け取り直したときに IME プロキシへ戻されてしまう。
+        /// そのため、フォーカススコープの論理フォーカスも外す。
+        /// </summary>
+        void ReleaseFocus()
+        {
+            ClearLogicalFocus();
+            if (IsKeyboardFocusWithin)
+            {
+                Keyboard.ClearFocus();
+            }
+        }
+
+        /// <summary>
+        /// フォーカススコープの論理フォーカスがこのコントロール (IME プロキシ) にあれば外す。LostFocus が発生する。
+        /// </summary>
+        void ClearLogicalFocus()
+        {
+            var scope = FocusManager.GetFocusScope(this);
+            if (scope == null)
+            {
+                return;
+            }
+            var focused = FocusManager.GetFocusedElement(scope);
+            if (ReferenceEquals(focused, this) || ReferenceEquals(focused, ImeProxy))
+            {
+                FocusManager.SetFocusedElement(scope, null);
+            }
         }
 
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
