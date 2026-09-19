@@ -930,6 +930,11 @@ namespace NiVE3.ViewModel
                         SelectedTextLayerPreviewTextData = null;
                     }
                 }
+                else
+                {
+                    SelectedTextLayerText = "";
+                    SelectedTextLayerPreviewTextData = null;
+                }
             }
             IsDirtyBoundingBoxesBuffer = true;
         }
