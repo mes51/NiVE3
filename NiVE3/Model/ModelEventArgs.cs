@@ -10,6 +10,7 @@ using NiVE3.Exceptions;
 using NiVE3.Numerics;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
+using NiVE3.ValueObject;
 using NiVE3.ViewModel;
 
 namespace NiVE3.Model
@@ -273,12 +274,30 @@ namespace NiVE3.Model
 
         public Guid? TargetLayerId { get; }
 
+        public SelectionRange ChangeRange { get; }
+
+        public string TargetValueName { get; } = "";
+
+        public bool IsChangeDefault { get; }
+
         public object? TargetLayerPrevValue { get; }
 
-        public TextStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, object? targetLayerPrevValue)
+        public TextStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, string targetValueName, object? targetLayerPrevValue)
         {
             CompositionId = compositionId;
             TargetLayerId = targetLayerId;
+            TargetValueName = targetValueName;
+            IsChangeDefault = true;
+            TargetLayerPrevValue = targetLayerPrevValue;
+        }
+
+        public TextStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, SelectionRange changeRange, string targetValueName, object? targetLayerPrevValue)
+        {
+            CompositionId = compositionId;
+            TargetLayerId = targetLayerId;
+            ChangeRange = changeRange;
+            TargetValueName = targetValueName;
+            IsChangeDefault = false;
             TargetLayerPrevValue = targetLayerPrevValue;
         }
     }

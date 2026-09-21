@@ -8,11 +8,11 @@ using NiVE3.Data;
 using NiVE3.Input;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Property.Types;
-using NiVE3.Text;
 using NiVE3.SourceGenerator.ReactivePropertyGenerator;
+using NiVE3.Text;
+using NiVE3.Util;
 using Prism.Mvvm;
 using SixLabors.Fonts;
-using NiVE3.Util;
 
 namespace NiVE3.Model.UI
 {
@@ -91,6 +91,27 @@ namespace NiVE3.Model.UI
             );
         }
 
+        public Func<TextStyle, TextStyle> GetStyleTransformer(string targetValueName)
+        {
+            return targetValueName switch
+            {
+                nameof(SelectedFont) => s => s with { FontUniqueId = SelectedFont.UniqueId },
+                nameof(FontSize) => s => s with { FontSize = (float)FontSize },
+                nameof(LineHeight) => s => s with { LineHeight = (float)LineHeight },
+                nameof(VerticalScale) => s => s with { VerticalScale = (float)VerticalScale },
+                nameof(HorizontalScale) => s => s with { HorizontalScale = (float)HorizontalScale },
+                nameof(LetterSpacing) => s => s with { LetterSpacing = (float)LetterSpacing },
+                nameof(TextLineWidth) => s => s with { TextLineWidth = (float)TextLineWidth },
+                nameof(TextLineDrawOrder) => s => s with { TextLineDrawOrder = TextLineDrawOrder },
+                nameof(IsEnableBold) => s => s with { IsEnableBold = IsEnableBold },
+                nameof(IsEnableItalic) => s => s with { IsEnableItalic = IsEnableItalic },
+                nameof(TextAlign) => s => s with { TextAlign = TextAlign },
+                nameof(FillColor) => s => s with { FillColor = (Vector4)FillColor },
+                nameof(TextLineColor) => s => s with { TextLineColor = (Vector4)TextLineColor },
+                _ => _ => _
+            };
+        }
+
         public void SetStyle(TextStyle style)
         {
             SelectedFont = FontInfo.FindByUniqueId(style.FontUniqueId) ?? FontInfo.FallbackFont;
@@ -108,7 +129,7 @@ namespace NiVE3.Model.UI
             TextLineColor = (FloatColor)style.TextLineColor;
         }
 
-        public void UpdateTextProperty(LayerModel targetLayer, Time layerTime, object? prevValue)
+        public void UpdateTextDefaultStyle(LayerModel targetLayer, Time layerTime, object? prevValue)
         {
             var currentText = StyledText.Empty;
             using (var checker = CycleChecker.StartCheck())
@@ -117,6 +138,31 @@ namespace NiVE3.Model.UI
             }
             var newStyle = GetStyle();
             targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, newStyle), currentText, layerTime);
+        }
+
+        public void UpdateTextStyle(LayerModel targetLayer, Time layerTime, int start, int length, string targetValueName, object? prevValue)
+        {
+            var currentText = StyledText.Empty;
+            using (var checker = CycleChecker.StartCheck())
+            {
+                currentText = prevValue as StyledText ?? (targetLayer.GetTextProperties(layerTime)?.TryGetValueInTree(TextFootageSource.SourceTextId, out var styledText) ?? false ? styledText as StyledText ?? StyledText.Empty : StyledText.Empty);
+            }
+
+            var transformer = GetStyleTransformer(targetValueName);
+            if (string.IsNullOrEmpty(currentText.Text) || string.IsNullOrEmpty(targetValueName))
+            {
+                targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, SourceTextPropertyType.ReplaceDefaultStyle(currentText, GetStyle()), currentText, layerTime);
+            }
+            else if (length < 1)
+            {
+                var newText = StyledText.ChangeDefaultStyle(currentText, transformer);
+                targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, newText, currentText, layerTime);
+            }
+            else
+            {
+                var newText = StyledText.ApplyStyle(currentText, start, length, transformer);
+                targetLayer.UpdateTextProperty(TextFootageSource.SourceTextId, newText, currentText, layerTime);
+            }
         }
     }
 

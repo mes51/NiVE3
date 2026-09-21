@@ -71,6 +71,23 @@ namespace NiVE3.Property.Types
             return new StyledText(styledText.Text, newStyle, styledText.Styles);
         }
 
+        public static object? ReplaceStyle(object? value, Func<TextStyle, TextStyle> styleTransformer, int start, int length)
+        {
+            if (value is not StyledText styledText)
+            {
+                return null;
+            }
+
+            if (length < 1)
+            {
+                return StyledText.ChangeDefaultStyle(styledText, styleTransformer);
+            }
+            else
+            {
+                return StyledText.ApplyStyle(styledText, start, length, styleTransformer);
+            }
+        }
+
         public static TextStyle? GetDefaultStyle(object? value)
         {
             if (value is not StyledText styledText)
@@ -79,6 +96,16 @@ namespace NiVE3.Property.Types
             }
 
             return styledText.DefaultStyle;
+        }
+
+        public static TextStyle? GetCurrentStyle(object? value, int cursor)
+        {
+            if (value is not StyledText styledText)
+            {
+                return null;
+            }
+
+            return styledText.Styles.FirstOrDefault(s => s.Start <= cursor && s.End >= cursor)?.Style ?? styledText.DefaultStyle;
         }
 
         public static object? UpdateText(object? value, int offset, string removedText, string insertedText)

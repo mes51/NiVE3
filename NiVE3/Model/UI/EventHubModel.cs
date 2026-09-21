@@ -10,6 +10,7 @@ using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces.RendererParams;
 using NiVE3.Plugin.ValueObject;
 using NiVE3.Text;
+using NiVE3.ValueObject;
 using NiVE3.ViewModel;
 using Prism.Mvvm;
 
@@ -202,9 +203,14 @@ namespace NiVE3.Model.UI
             PlayOrStopRequestPublisher.Publish(this, EventArgs.Empty);
         }
 
-        public void NotifyTextStyleChange(Guid compositionId, Guid? targetLayer, object? targetLayerPrevValue)
+        public void NotifyTextDefaultStyleChange(Guid compositionId, Guid? targetLayer, string targetValueName, object? targetLayerPrevValue)
         {
-            TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, targetLayerPrevValue));
+            TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, targetValueName, targetLayerPrevValue));
+        }
+
+        public void NotifyTextStyleChange(Guid compositionId, Guid targetLayer, SelectionRange selectionRange, string targetValueName, object? targetLayerPrevValue)
+        {
+            TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, selectionRange, targetValueName, targetLayerPrevValue));
         }
 
         public void NotifyRenderPreviewInteractionRequest(Guid compositionId, Time currentTime, DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale)

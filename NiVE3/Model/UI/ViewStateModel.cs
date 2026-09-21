@@ -78,6 +78,9 @@ namespace NiVE3.Model.UI
         public partial TextLayerPreviewText SelectedTextLayerPreviewTextData { get; set; }
 
         [ReactiveProperty]
+        public partial SelectionRange PreviewTextSelectionRange { get; set; }
+
+        [ReactiveProperty]
         public partial Color DefaultTextColor { get; set; }
 
         [ReactiveProperty]

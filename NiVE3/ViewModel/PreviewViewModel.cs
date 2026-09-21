@@ -41,7 +41,6 @@ using NiVE3.View.Dialog;
 using NiVE3.Cache;
 using System.Numerics;
 using NiVE3.Shared.Extension;
-using NiVE3.View.Primitive.PreviewText;
 
 namespace NiVE3.ViewModel
 {
@@ -149,12 +148,16 @@ namespace NiVE3.ViewModel
         public partial string SelectedTextLayerText { get; set; } = "";
 
         [ReactiveProperty]
-        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        [NeedWire(nameof(ViewState))]
         public partial TextLayerPreviewText? SelectedTextLayerPreviewTextData { get; set; }
 
         [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
         public partial Color DefaultTextColor { get; set; }
+
+        [ReactiveProperty]
+        [NeedWire(nameof(ViewState))]
+        public partial SelectionRange PreviewTextSelectionRange { get; set; }
 
         [ReactiveProperty]
         public partial double RealFrameRate { get; set; }
@@ -215,9 +218,6 @@ namespace NiVE3.ViewModel
 
         [ReactiveProperty]
         public partial Brush PreviewTextCaretBrush { get; set; } = Brushes.White;
-
-        [ReactiveProperty]
-        public partial SelectionRange PreviewTextSelectionRange { get; set; }
 
         public PreviewModelBase PreviewModel { get; }
 

@@ -27,6 +27,7 @@ using NiVE3.Data;
 using NiVE3.Model.UI;
 using NiVE3.Plugin.ValueObject;
 using SixLabors.ImageSharp.Drawing.Text;
+using NiVE3.ValueObject;
 
 namespace NiVE3.ViewModel
 {
@@ -97,6 +98,10 @@ namespace NiVE3.ViewModel
         [ReactiveProperty]
         [NeedWire(nameof(ViewState), IsOneWay = true)]
         public partial Guid? LastSelectedLayerId { get; set; }
+
+        [ReactiveProperty]
+        [NeedWire(nameof(ViewState), IsOneWay = true)]
+        public partial SelectionRange PreviewTextSelectionRange { get; set; }
 
         [ReactiveProperty]
         [NeedWire(nameof(ViewState))]
@@ -199,13 +204,22 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            EndEditCommand = new DelegateCommand(() =>
+            EndEditCommand = new DelegateCommand<string?>(s =>
             {
                 IsPropertyEditing = false;
-                if (CurrentEditingCompositionId != null && SourceTextPropertyModel != null && TargetLayer != null)
+                if (CurrentEditingCompositionId == null || SourceTextPropertyModel == null || TargetLayer == null)
                 {
-                    SourceTextPropertyModel.UseEditingValue = false;
-                    EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, LastSelectedLayerId, PrevValue);
+                    return;
+                }
+
+                SourceTextPropertyModel.UseEditingValue = false;
+                if (string.IsNullOrEmpty(s) || ViewState.PreviewTextSelectionRange.Length < 1)
+                {
+                    EventHubModel.NotifyTextDefaultStyleChange(CurrentEditingCompositionId.Value, LastSelectedLayerId, ConvertPropertyNameToTextPropertyModelName(s ?? ""), PrevValue);
+                }
+                else
+                {
+                    EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, TargetLayer.LayerId, ViewState.PreviewTextSelectionRange, ConvertPropertyNameToTextPropertyModelName(s), PrevValue);
                 }
             });
 
@@ -288,7 +302,8 @@ namespace NiVE3.ViewModel
 
             IsFontChanging = true;
 
-            var style = SourceTextPropertyType.GetDefaultStyle(SourceTextPropertyModel.GetRawValue(CurrentTime - TargetLayer.SourceStartPoint));
+            var sourceText = SourceTextPropertyModel.GetRawValue(CurrentTime - TargetLayer.SourceStartPoint);
+            var style = ViewState.SelectedTextLayerPreviewTextData != null ? SourceTextPropertyType.GetCurrentStyle(sourceText, ViewState.PreviewTextSelectionRange.Start) : SourceTextPropertyType.GetDefaultStyle(sourceText);
             if (style != null)
             {
                 TextPropertyModel.SetStyle(style);
@@ -300,21 +315,45 @@ namespace NiVE3.ViewModel
             UpdateSelectedFontFromModel();
         }
 
-        void ChangeTextLayerProperty()
+        void ChangeTextLayerProperty(string propertyName)
         {
             if (IsFontChanging || SourceTextPropertyModel == null || TargetLayer == null || CurrentEditingCompositionId == null)
             {
                 return;
             }
 
-            var newStyle = TextPropertyModel.GetStyle();
-            if (IsPropertyEditing)
+            // TODO: TextAlign は行ごとに適用できるようにする
+            var transformTarget = ConvertPropertyNameToTextPropertyModelName(propertyName);
+            if (propertyName == nameof(TextAlign))
             {
-                SourceTextPropertyModel.UpdateUncommitedRawValue(SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle));
+                var newStyle = TextPropertyModel.GetStyle();
+                if (IsPropertyEditing)
+                {
+                    SourceTextPropertyModel.UpdateUncommitedRawValue(SourceTextPropertyType.ReplaceDefaultStyle(PrevValue, newStyle));
+                }
+                else
+                {
+                    EventHubModel.NotifyTextDefaultStyleChange(CurrentEditingCompositionId.Value, null, transformTarget, null);
+                }
             }
             else
             {
-                EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, null, null);
+                if (IsPropertyEditing)
+                {
+                    var styleTransformer = TextPropertyModel.GetStyleTransformer(transformTarget);
+                    SourceTextPropertyModel.UpdateUncommitedRawValue(SourceTextPropertyType.ReplaceStyle(PrevValue, styleTransformer, PreviewTextSelectionRange.Start, PreviewTextSelectionRange.Length));
+                }
+                else
+                {
+                    if (PreviewTextSelectionRange.Length < 1)
+                    {
+                        EventHubModel.NotifyTextDefaultStyleChange(CurrentEditingCompositionId.Value, null, transformTarget, null);
+                    }
+                    else
+                    {
+                        EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, TargetLayer.LayerId, PreviewTextSelectionRange, transformTarget, null);
+                    }
+                }
             }
         }
 
@@ -338,7 +377,7 @@ namespace NiVE3.ViewModel
                     }
                     else
                     {
-                        ChangeTextLayerProperty();
+                        ChangeTextLayerProperty(e.PropertyName);
                     }
                     break;
                 case nameof(SelectedFontSubFamilyIndex) when !IsFontChanging:
@@ -347,7 +386,7 @@ namespace NiVE3.ViewModel
                         IsFontChanging = true;
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
                         IsFontChanging = false;
-                        ChangeTextLayerProperty();
+                        ChangeTextLayerProperty(e.PropertyName);
                     }
                     RaisePropertyChanged(nameof(IsSupportBold));
                     RaisePropertyChanged(nameof(IsSupportItalic));
@@ -371,18 +410,21 @@ namespace NiVE3.ViewModel
                 case nameof(TextLineDrawOrder):
                 case nameof(IsEnableBold):
                 case nameof(IsEnableItalic):
+                    ChangeTextLayerProperty(e.PropertyName);
+                    break;
                 case nameof(TextAlign):
-                    ChangeTextLayerProperty();
+                    ChangeTextLayerProperty(e.PropertyName);
                     break;
                 case nameof(FillColor):
-                    ChangeTextLayerProperty();
+                    ChangeTextLayerProperty(e.PropertyName);
                     FillColorBrush = new SolidColorBrush(FillColor.ToByteColor());
                     break;
                 case nameof(TextLineColor):
                     TextLineColorBrush = new SolidColorBrush(TextLineColor.ToByteColor());
-                    ChangeTextLayerProperty();
+                    ChangeTextLayerProperty(e.PropertyName);
                     break;
                 case nameof(CurrentTime):
+                case nameof(PreviewTextSelectionRange):
                     UpdateTextPropertyFromLayer();
                     break;
             }
@@ -391,6 +433,27 @@ namespace NiVE3.ViewModel
         private void SourceTextPropertyModel_ValueUpdated(object? sender, EventArgs e)
         {
             UpdateTextPropertyFromLayer();
+        }
+
+        static string ConvertPropertyNameToTextPropertyModelName(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(SelectedFontGroupIndex) => nameof(TextPropertyModel.SelectedFont),
+                nameof(SelectedFontSubFamilyIndex) => nameof(TextPropertyModel.SelectedFont),
+                nameof(FontSize) => nameof(TextPropertyModel.FontSize),
+                nameof(LineHeight) => nameof(TextPropertyModel.LineHeight),
+                nameof(VerticalScale) => nameof(TextPropertyModel.VerticalScale),
+                nameof(HorizontalScale) => nameof(TextPropertyModel.HorizontalScale),
+                nameof(LetterSpacing) => nameof(TextPropertyModel.LetterSpacing),
+                nameof(TextLineWidth) => nameof(TextPropertyModel.TextLineWidth),
+                nameof(TextLineDrawOrder) => nameof(TextPropertyModel.TextLineDrawOrder),
+                nameof(IsEnableBold) => nameof(TextPropertyModel.IsEnableBold),
+                nameof(IsEnableItalic) => nameof(TextPropertyModel.IsEnableItalic),
+                nameof(FillColor) => nameof(TextPropertyModel.FillColor),
+                nameof(TextLineColor) => nameof(TextPropertyModel.TextLineColor),
+                _ => ""
+            };
         }
     }
 

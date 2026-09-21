@@ -188,10 +188,6 @@ namespace NiVE3.ViewModel
         [NeedWire(nameof(ViewState))]
         public partial string SelectedTextLayerText { get; set; } = "";
 
-        [ReactiveProperty]
-        [NeedWire(nameof(ViewState))]
-        public partial TextLayerPreviewText? SelectedTextLayerPreviewTextData { get; set; }
-
         public CompositionModel? CompositionModel
         {
             get;
@@ -1845,13 +1841,28 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_TextStyleChangeRequest(object? sender, TextStyleChangeEventArgs e)
         {
-            if (IsUsingTool || CompositionModel == null || e.CompositionId != CompositionId || SelectedLayers == null)
+            if (CompositionModel == null || e.CompositionId != CompositionId || SelectedLayers == null)
             {
                 return;
             }
 
             var selectedTextLayerIds = SelectedLayers.Where(l => l.IsText).Select(l => l.LayerId).ToArray();
-            CompositionModel.ChangeTextStyle(selectedTextLayerIds, e.TargetLayerId, e.TargetLayerPrevValue);
+            if (e.IsChangeDefault || selectedTextLayerIds.Length < 1 || !IsUsingTool || PreviewManipulation is not TextLayerPreviewManipulationState textLayerManipulation)
+            {
+                CompositionModel.ChangeTextDefaultStyle(selectedTextLayerIds, e.TargetLayerId, e.TargetValueName, e.TargetLayerPrevValue);
+            }
+            else
+            {
+                textLayerManipulation.Commit();
+                CompositionModel.ChangeTextStyle(selectedTextLayerIds[0], e.ChangeRange.Start, e.ChangeRange.Length, e.TargetValueName, e.TargetLayerPrevValue);
+
+                // NOTE: SourceText の CommitProperty を呼ぶ関係で PreviewManipulationState がクリアされるため、再登録する
+                if (Layers?.FirstOrDefault(l => l.LayerId == e.TargetLayerId) is LayerViewModel layer && layer.IsText)
+                {
+                    PreviewManipulation = new TextLayerPreviewManipulationState(CurrentTime, CompositionModel, HistoryModel, layer);
+                    IsUsingTool = true;
+                }
+            }
         }
 
         private void EventHubModel_RenderPreviewInteractionRequest(object? sender, RenderPreviewInteractionEventArgs e)

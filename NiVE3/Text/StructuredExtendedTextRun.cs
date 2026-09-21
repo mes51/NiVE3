@@ -49,7 +49,7 @@ namespace NiVE3.Text
                 var stringInfo = new StringInfo(line);
                 var lineElementCount = stringInfo.LengthInTextElements;
 
-                var targetStyles = styles.SkipWhile(s => s.Start < count).TakeWhile(s => s.End > count + lineElementCount).ToArray();
+                var targetStyles = styles.SkipWhile(s => s.Start < count).TakeWhile(s => s.End <= count + lineElementCount).ToArray();
                 lines.Add(new LineExtendedTextRun(line, count, defaultStyle, targetStyles));
 
                 count += lineElementCount + 1;

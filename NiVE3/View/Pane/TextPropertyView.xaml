@@ -211,7 +211,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndSlideEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="FontSize"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -220,7 +220,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndTextEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="FontSize"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortTextEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -241,7 +241,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndSlideEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="LineHeight"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -250,7 +250,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndTextEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="LineHeight"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortTextEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -271,7 +271,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndSlideEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="VerticalScale"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -280,7 +280,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndTextEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="VerticalScale"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortTextEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -301,7 +301,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndSlideEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="HorizontalScale"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -310,7 +310,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndTextEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="HorizontalScale"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortTextEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -331,7 +331,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndSlideEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="LetterSpacing"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -340,7 +340,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndTextEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="LetterSpacing"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortTextEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -372,7 +372,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndSlideEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="TextLineWidth"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortSlideEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>
@@ -381,7 +381,7 @@
                             <i:InvokeCommandAction Command="{Binding BeginEditCommand}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="EndTextEditValue">
-                            <i:InvokeCommandAction Command="{Binding EndEditCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding EndEditCommand}" CommandParameter="TextLineWidth"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="AbortTextEditValue">
                             <i:InvokeCommandAction Command="{Binding AbortEditCommand}"/>

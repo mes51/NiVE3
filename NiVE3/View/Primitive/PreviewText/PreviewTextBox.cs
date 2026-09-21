@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using NiVE3.Numerics;
 using NiVE3.Util;
+using NiVE3.ValueObject;
 
 namespace NiVE3.View.Primitive.PreviewText
 {
@@ -2306,6 +2307,4 @@ namespace NiVE3.View.Primitive.PreviewText
 
         #endregion クリップボード・コマンド
     }
-
-    readonly record struct SelectionRange(int Start, int Length);
 }

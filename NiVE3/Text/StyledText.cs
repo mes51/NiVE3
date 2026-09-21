@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NiVE3.Extension;
 
 namespace NiVE3.Text
 {
@@ -13,7 +14,7 @@ namespace NiVE3.Text
 
         public StyledText ChangeText(string newText)
         {
-            var newLength = StringInfo.GetNextTextElementLength(newText);
+            var newLength = newText.GetGraphemeCount();
             var newStyles = new List<TextStyleRun>();
             foreach (var s in Styles)
             {
@@ -25,6 +26,7 @@ namespace NiVE3.Text
                 if (s.End >= newLength)
                 {
                     newStyles.Add(new TextStyleRun(s.Start, newLength, DefaultStyle));
+                    break;
                 }
                 else
                 {
@@ -150,6 +152,65 @@ namespace NiVE3.Text
             }
 
             return new StyledText(newText, baseStyledText.DefaultStyle, TextStyleRun.Merge(newStyleRuns));
+        }
+
+        public static StyledText ApplyStyle(StyledText baseStyledText, int start, int length, Func<TextStyle, TextStyle> styleTransformer)
+        {
+            if (length < 1)
+            {
+                return baseStyledText;
+            }
+
+            var end = start + length;
+
+            var result = new List<TextStyleRun>();
+            var inside = new List<TextStyleRun>();
+            foreach (var run in baseStyledText.Styles)
+            {
+                if (run.Start < start)
+                {
+                    result.Add(new TextStyleRun(run.Start, Math.Min(run.End, start), run.Style));
+                }
+                if (run.End > end)
+                {
+                    result.Add(new TextStyleRun(Math.Max(run.Start, end), run.End, run.Style));
+                }
+
+                var s = Math.Max(run.Start, start);
+                var e = Math.Min(run.End, end);
+                if (e > s)
+                {
+                    inside.Add(new TextStyleRun(s, e, styleTransformer(run.Style)));
+                }
+            }
+
+            var pos = start;
+            var transformedDefaultStyle = styleTransformer(baseStyledText.DefaultStyle);
+            foreach (var segment in inside.OrderBy(r => r.Start))
+            {
+                if (segment.Start > pos)
+                {
+                    result.Add(new TextStyleRun(pos, segment.Start, transformedDefaultStyle));
+                }
+
+                result.Add(segment);
+                pos = segment.End;
+            }
+            if (pos < end)
+            {
+                result.Add(new TextStyleRun(pos, end, transformedDefaultStyle));
+            }
+
+            result.Sort((a, b) => a.Start.CompareTo(b.Start));
+            return new StyledText(baseStyledText.Text, baseStyledText.DefaultStyle, TextStyleRun.Merge(result));
+        }
+
+        public static StyledText ChangeDefaultStyle(StyledText baseStyledText, Func<TextStyle, TextStyle> styleTransformer)
+        {
+            var newTextStyleRun = baseStyledText.Styles.Select(s => new TextStyleRun(s.Start, s.End, styleTransformer(s.Style)));
+            var newDefaultStyle = styleTransformer(baseStyledText.DefaultStyle);
+
+            return new StyledText(baseStyledText.Text, newDefaultStyle, [..newTextStyleRun]);
         }
     }
 }

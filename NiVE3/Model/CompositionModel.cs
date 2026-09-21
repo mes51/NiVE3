@@ -321,7 +321,7 @@ namespace NiVE3.Model
 
             HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_AddLayers));
 
-            TextPropertyModel.UpdateTextProperty(layer, Time.Zero, null);
+            TextPropertyModel.UpdateTextDefaultStyle(layer, Time.Zero, null);
             InsertLayerInternal([layer], insertIndex);
 
             HistoryModel.EndGroup();
@@ -1568,7 +1568,7 @@ namespace NiVE3.Model
             HistoryModel.EndGroup();
         }
 
-        public void ChangeTextStyle(Guid[] layerIds, Guid? targetLayerId, object? targetLayerPrevValue)
+        public void ChangeTextDefaultStyle(Guid[] layerIds, Guid? targetLayerId, string targetValueName, object? targetLayerPrevValue)
         {
             var layers = Layers.Where(l => l.IsText && layerIds.Contains(l.LayerId)).ToArray();
             if (layers.Length < 1)
@@ -1582,13 +1582,28 @@ namespace NiVE3.Model
             {
                 if (l.LayerId == targetLayerId)
                 {
-                    TextPropertyModel.UpdateTextProperty(l, CurrentTime - l.SourceStartPoint, targetLayerPrevValue);
+                    TextPropertyModel.UpdateTextStyle(l, CurrentTime - l.SourceStartPoint, 0, 0, targetValueName, targetLayerPrevValue);
                 }
                 else
                 {
-                    TextPropertyModel.UpdateTextProperty(l, CurrentTime - l.SourceStartPoint, null);
+                    TextPropertyModel.UpdateTextStyle(l, CurrentTime - l.SourceStartPoint, 0, 0, targetValueName, null);
                 }
             }
+
+            HistoryModel.EndGroup();
+        }
+
+        public void ChangeTextStyle(Guid layerId, int start, int length, string targetValueName, object? targetLayerPrevValue)
+        {
+            var layer = Layers.FirstOrDefault(l => l.LayerId == layerId);
+            if (layer == null)
+            {
+                return;
+            }
+
+            HistoryModel.BeginGroup(LanguageResourceDictionary.Dictionary.GetText(LanguageResourceDictionary.History_ChangePropertyValue));
+
+            TextPropertyModel.UpdateTextStyle(layer, CurrentTime - layer.SourceStartPoint, start, length, targetValueName, targetLayerPrevValue);
 
             HistoryModel.EndGroup();
         }
