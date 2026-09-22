@@ -379,7 +379,7 @@ namespace NiVE3.ViewModel
                     }
                     else
                     {
-                        if (!IsFontChanging)
+                        if (!IsFontChanging && !IsPropertyEditing)
                         {
                             PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
                         }
@@ -418,14 +418,14 @@ namespace NiVE3.ViewModel
                 case nameof(IsEnableBold):
                 case nameof(IsEnableItalic):
                 case nameof(TextAlign):
-                    if (!IsFontChanging)
+                    if (!IsFontChanging && !IsPropertyEditing)
                     {
                         PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
                     }
                     ChangeTextLayerProperty(e.PropertyName);
                     break;
                 case nameof(FillColor):
-                    if (!IsFontChanging)
+                    if (!IsFontChanging && !IsPropertyEditing)
                     {
                         PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
                     }
@@ -433,7 +433,7 @@ namespace NiVE3.ViewModel
                     FillColorBrush = new SolidColorBrush(FillColor.ToByteColor());
                     break;
                 case nameof(TextLineColor):
-                    if (!IsFontChanging)
+                    if (!IsFontChanging && !IsPropertyEditing)
                     {
                         PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
                     }

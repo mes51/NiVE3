@@ -679,7 +679,15 @@ namespace NiVE3.View.Pane
 
         private void PreviewTextBox_TextEdited(object sender, TextEditedEventArgs e)
         {
-            ViewModel?.TextEditCommand.Execute(Tuple.Create(e.Offset, e.RemovedText, e.InsertedText));
+            ViewModel?.TextEditCommand?.Execute(Tuple.Create(e.Offset, e.RemovedText, e.InsertedText));
+        }
+
+        private void PreviewTextBox_IsKeyboardFocusWithinChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is not bool isKeyboardFocused || !isKeyboardFocused)
+            {
+                ViewModel?.EndTextEditCommand?.Execute(null);
+            }
         }
 
         static void SelectedScaleChanged(DependencyObject d,  DependencyPropertyChangedEventArgs e)

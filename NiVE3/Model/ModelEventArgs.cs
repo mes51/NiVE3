@@ -291,7 +291,7 @@ namespace NiVE3.Model
     {
         public Guid CompositionId { get; }
 
-        public Guid TargetLayerId { get; }
+        public Guid? TargetLayerId { get; }
 
         public Time Time { get; }
 

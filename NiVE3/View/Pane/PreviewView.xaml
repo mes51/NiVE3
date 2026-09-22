@@ -368,7 +368,8 @@
                                     IsVerticalText="{Binding SelectedTextLayerPreviewTextData.IsVertical}"
                                     GotFocus="PreviewTextBox_GotFocus"
                                     LostFocus="PreviewTextBox_LostFocus"
-                                    TextEdited="PreviewTextBox_TextEdited">
+                                    TextEdited="PreviewTextBox_TextEdited"
+                                    IsKeyboardFocusWithinChanged="PreviewTextBox_IsKeyboardFocusWithinChanged">
                     <prt:PreviewTextBox.Style>
                         <Style TargetType="{x:Type prt:PreviewTextBox}">
                             <Setter Property="Visibility" Value="Collapsed"/>

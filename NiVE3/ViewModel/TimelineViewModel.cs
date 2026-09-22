@@ -1847,7 +1847,7 @@ namespace NiVE3.ViewModel
             }
 
             var selectedTextLayerIds = SelectedLayers.Where(l => l.IsText).Select(l => l.LayerId).ToArray();
-            if (selectedTextLayerIds.Length < 1 || !IsUsingTool || PreviewManipulation is not TextLayerPreviewManipulationState textLayerManipulation)
+            if (selectedTextLayerIds.Length < 1 || !IsUsingTool)
             {
                 CompositionModel.ChangeTextDefaultStyle(selectedTextLayerIds, e.TargetLayerId, e.TargetValueName, e.TargetLayerPrevValue);
             }
@@ -1888,7 +1888,7 @@ namespace NiVE3.ViewModel
 
         private void EventHubModel_EndTextEdit(object? sender, TextEditEventArgs e)
         {
-            if (CompositionModel == null || e.CompositionId != CompositionId || Layers?.FirstOrDefault(l => l.LayerId == e.TargetLayerId) is not LayerViewModel layer || !layer.IsText)
+            if (CompositionModel == null || e.CompositionId != CompositionId)
             {
                 return;
             }
