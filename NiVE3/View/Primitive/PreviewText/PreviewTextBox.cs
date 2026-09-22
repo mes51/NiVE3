@@ -1046,11 +1046,16 @@ namespace NiVE3.View.Primitive.PreviewText
             drawingContext.PushTransform(new MatrixTransform(view));
             drawingContext.PushTransform(new MatrixTransform(transform));
 
+            // 描画済みテキストの背景は透明で、未確定文字が背景に溶け込んで見えなくなることがあるため、
+            // 文字色の反対色で未確定範囲を塗りつぶしてから文字を描く
+            var background = CreateCompositionBackgroundBrush();
             var pen = new Pen(Foreground ?? Brushes.Black, Math.Max(1, localHeight / 24));
             if (IsVerticalText)
             {
                 // 縦書き: 列の上から下へ 1 文字ずつ並べ、未確定範囲の目印は列の右側に引く
-                var length = DrawVerticalCompositionText(drawingContext, localPosition, localHeight);
+                var length = DrawVerticalCompositionText(null, localPosition, localHeight);
+                drawingContext.DrawRectangle(background, null, new Rect(localPosition.X, localPosition.Y, localHeight, length));
+                DrawVerticalCompositionText(drawingContext, localPosition, localHeight);
                 var lineX = localPosition.X + localHeight;
                 drawingContext.DrawLine(pen,
                     new Point(lineX, localPosition.Y),
@@ -1059,6 +1064,8 @@ namespace NiVE3.View.Primitive.PreviewText
             else
             {
                 var formattedText = CreateCompositionFormattedText(localHeight);
+                drawingContext.DrawRectangle(background, null,
+                    new Rect(localPosition.X, localPosition.Y, formattedText.WidthIncludingTrailingWhitespace, localHeight));
 
                 // FormattedText の行高とローカル行高の差を吸収するため垂直方向はセンタリング
                 var textY = localPosition.Y + ((localHeight - formattedText.Height) / 2);
@@ -1094,6 +1101,20 @@ namespace NiVE3.View.Primitive.PreviewText
                 y += formattedText.Height;
             }
             return y - columnStart.Y;
+        }
+
+        /// <summary>
+        /// 未確定文字の背景用に、文字色 (Foreground) の反対色の不透明なブラシを作る。
+        /// Foreground が単色でない場合は既定の文字色 (黒) の反対色として白を使う。
+        /// </summary>
+        Brush CreateCompositionBackgroundBrush()
+        {
+            if (Foreground is not SolidColorBrush solid)
+            {
+                return Brushes.White;
+            }
+            var color = solid.Color;
+            return CreateFrozenBrush(Color.FromRgb((byte)(255 - color.R), (byte)(255 - color.G), (byte)(255 - color.B)));
         }
 
         FormattedText CreateCompositionFormattedText(double localHeight)
