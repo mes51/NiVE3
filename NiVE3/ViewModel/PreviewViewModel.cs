@@ -250,6 +250,9 @@ namespace NiVE3.ViewModel
         [ShortcutGesture(nameof(ShortcutKeySetting.SelectCameraToolGesture), IsGlobal = true)]
         public ICommand ChangeToCameraToolCommand { get; }
 
+        [ShortcutGesture(nameof(ShortcutKeySetting.SelectTextToolGesture), IsGlobal = true)]
+        public ICommand ChangeToTextToolCommand { get; }
+
         public ICommand AddShapeCommand { get; }
 
         public ICommand AddCameraCommand { get; }
@@ -497,6 +500,9 @@ namespace NiVE3.ViewModel
                 }
                 ToolType = ActiveCameraTool;
             }, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
+                .ObservesProperty(() => PreviewModel);
+
+            ChangeToTextToolCommand = new DelegateCommand(() => ToolType = ToolType.Text, () => PreviewModel is CompositionPreviewModel compositionPreviewModel && compositionPreviewModel.Composition != null)
                 .ObservesProperty(() => PreviewModel);
 
             AddShapeCommand = new DelegateCommand(() =>

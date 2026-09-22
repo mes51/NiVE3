@@ -5,6 +5,7 @@ using NiVE3.Model;
 using NiVE3.Numerics;
 using NiVE3.Plugin.Interfaces;
 using NiVE3.Plugin.ValueObject;
+using NiVE3.Util;
 
 namespace NiVE3.View.Primitive.PreviewText
 {
@@ -28,6 +29,8 @@ namespace NiVE3.View.Primitive.PreviewText
 
         public virtual Vector2d LocalCoordToScreenCoord(Vector3d localCoord)
         {
+            using var checker = CycleChecker.StartCheck();
+
             var layerSkeleton = LayerModel.GetLayerSkeletonWithoutContainsTime(CurrentTime);
             var cameraSetting = CompositionModel.GetActiveCameraSetting(CurrentTime);
 
@@ -43,6 +46,8 @@ namespace NiVE3.View.Primitive.PreviewText
 
         public virtual Vector3d ScreenCoordToLocalCoord(Vector2d screenPosition, Vector2d scale, Vector2d origin)
         {
+            using var checker = CycleChecker.StartCheck();
+
             var layerSkeleton = LayerModel.GetLayerSkeletonWithoutContainsTime(CurrentTime);
             if (layerSkeleton == null)
             {

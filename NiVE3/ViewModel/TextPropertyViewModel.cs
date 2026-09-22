@@ -173,10 +173,6 @@ namespace NiVE3.ViewModel
 
         public ICommand CreateSubFamilySampleGeometryCommaned { get; }
 
-        public ICommand ChangeFillColorCommand { get; }
-
-        public ICommand ChangeTextLineCommand { get; }
-
         object? PrevValue { get; set; }
 
         bool FontSampleCreated { get; set; }
@@ -252,24 +248,6 @@ namespace NiVE3.ViewModel
                 if (SelectedFontSubFamilyIndex > -1)
                 {
                     FontViewModelBase.CreateSampleGeometry(Fonts[SelectedFontGroupIndex].SubFamiles);
-                }
-            });
-
-            ChangeFillColorCommand = new DelegateCommand<FloatColor?>(c =>
-            {
-                if (SourceTextPropertyModel != null && c.HasValue)
-                {
-                    PrevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint);
-                    FillColor = c.Value;
-                }
-            });
-
-            ChangeTextLineCommand = new DelegateCommand<FloatColor?>(c =>
-            {
-                if (SourceTextPropertyModel != null && c.HasValue)
-                {
-                    PrevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint);
-                    TextLineColor = c.Value;
                 }
             });
         }
@@ -401,6 +379,10 @@ namespace NiVE3.ViewModel
                     }
                     else
                     {
+                        if (!IsFontChanging)
+                        {
+                            PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
+                        }
                         ChangeTextLayerProperty(e.PropertyName);
                     }
                     break;
@@ -408,6 +390,7 @@ namespace NiVE3.ViewModel
                     if (SelectedFontSubFamilyIndex > -1)
                     {
                         IsFontChanging = true;
+                        PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
                         TextPropertyModel.SelectedFont = SelectedFontGroup.SubFamiles[SelectedFontSubFamilyIndex].FontInfo;
                         IsFontChanging = false;
                         ChangeTextLayerProperty(e.PropertyName);
@@ -434,16 +417,26 @@ namespace NiVE3.ViewModel
                 case nameof(TextLineDrawOrder):
                 case nameof(IsEnableBold):
                 case nameof(IsEnableItalic):
-                    ChangeTextLayerProperty(e.PropertyName);
-                    break;
                 case nameof(TextAlign):
+                    if (!IsFontChanging)
+                    {
+                        PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
+                    }
                     ChangeTextLayerProperty(e.PropertyName);
                     break;
                 case nameof(FillColor):
+                    if (!IsFontChanging)
+                    {
+                        PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
+                    }
                     ChangeTextLayerProperty(e.PropertyName);
                     FillColorBrush = new SolidColorBrush(FillColor.ToByteColor());
                     break;
                 case nameof(TextLineColor):
+                    if (!IsFontChanging)
+                    {
+                        PrevValue = SourceTextPropertyModel?.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint) ?? PrevValue;
+                    }
                     TextLineColorBrush = new SolidColorBrush(TextLineColor.ToByteColor());
                     ChangeTextLayerProperty(e.PropertyName);
                     break;

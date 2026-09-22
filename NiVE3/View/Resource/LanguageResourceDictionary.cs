@@ -2132,6 +2132,9 @@ namespace NiVE3.View.Resource
         [DefaultValue("全て選択")]
         public static readonly string ShortcutKeyName_SelectAllGesture = nameof(ShortcutKeyName_SelectAllGesture);
 
+        [DefaultValue("テキストツールに切り替え")]
+        public static readonly string ShortcutKeyName_SelectTextToolGesture = nameof(ShortcutKeyName_SelectTextToolGesture);
+
         [DefaultValue("カメラツールに切り替え")]
         public static readonly string ShortcutKeyName_SelectCameraToolGesture = nameof(ShortcutKeyName_SelectCameraToolGesture);
 

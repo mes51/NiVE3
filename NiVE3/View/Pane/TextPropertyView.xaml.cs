@@ -50,7 +50,7 @@ namespace NiVE3.View.Pane
             };
             if (dialog.ShowDialog() ?? false)
             {
-                viewModel.ChangeFillColorCommand.Execute(FloatColor.FromColor(dialog.Color));
+                viewModel.FillColor = FloatColor.FromColor(dialog.Color);
             }
         }
 
@@ -71,7 +71,7 @@ namespace NiVE3.View.Pane
             };
             if (dialog.ShowDialog() ?? false)
             {
-                viewModel.ChangeTextLineCommand.Execute(FloatColor.FromColor(dialog.Color));
+                viewModel.TextLineColor = FloatColor.FromColor(dialog.Color);
             }
         }
 

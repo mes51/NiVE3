@@ -193,6 +193,13 @@ namespace NiVE3.Config
             new PropertyMetadata(new SingleKeyGesture(Key.C))
         );
 
+        public static readonly DependencyProperty SelectTextToolGestureProperty = DependencyProperty.Register(
+            nameof(SelectTextToolGesture),
+            typeof(InputGesture),
+            typeof(ShortcutKeySetting),
+            new PropertyMetadata(new KeyGesture(Key.T, ModifierKeys.Control))
+        );
+
         public static readonly DependencyProperty SelectAllGestureProperty = DependencyProperty.Register(
             nameof(SelectAllGesture),
             typeof(InputGesture),
@@ -866,6 +873,14 @@ namespace NiVE3.Config
         {
             get { return (InputGesture)GetValue(SelectAllGestureProperty); }
             set { SetValue(SelectAllGestureProperty, value); }
+        }
+
+        [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
+        [ShowInMarkup]
+        public InputGesture SelectTextToolGesture
+        {
+            get { return (InputGesture)GetValue(SelectTextToolGestureProperty); }
+            set { SetValue(SelectTextToolGestureProperty, value); }
         }
 
         [ShortcutKeyCategory(ShortcutKeyCategoryType.Edit)]
