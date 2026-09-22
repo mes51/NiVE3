@@ -541,7 +541,7 @@ namespace NiVE3.ViewModel
             eventHubModel.BeginEditDurationRequest += EventHubModel_BeginEditDurationRequest;
             eventHubModel.UpdateDurationRequest += EventHubModel_UpdateDurationRequest;
             eventHubModel.AbortEditDurationRequest += EventHubModel_AbortEditDurationRequest;
-            eventHubModel.TextStyleChangeRequest += EventHubModel_TextStyleChangeRequest;
+            eventHubModel.TextDefaultStyleChangeRequest += EventHubModel_TextDefaultStyleChangeRequest;
             eventHubModel.RenderPreviewInteractionRequest += EventHubModel_RenderPreviewInteractionRequest;
             eventHubModel.BeginTextEdit += EventHubModel_BeginTextEdit;
             eventHubModel.EndTextEdit += EventHubModel_EndTextEdit;
@@ -1839,7 +1839,7 @@ namespace NiVE3.ViewModel
             IsUsingTool = PreviewManipulation != null;
         }
 
-        private void EventHubModel_TextStyleChangeRequest(object? sender, TextStyleChangeEventArgs e)
+        private void EventHubModel_TextDefaultStyleChangeRequest(object? sender, TextDefaultStyleChangeEventArgs e)
         {
             if (CompositionModel == null || e.CompositionId != CompositionId || SelectedLayers == null)
             {
@@ -1847,21 +1847,9 @@ namespace NiVE3.ViewModel
             }
 
             var selectedTextLayerIds = SelectedLayers.Where(l => l.IsText).Select(l => l.LayerId).ToArray();
-            if (e.IsChangeDefault || selectedTextLayerIds.Length < 1 || !IsUsingTool || PreviewManipulation is not TextLayerPreviewManipulationState textLayerManipulation)
+            if (selectedTextLayerIds.Length < 1 || !IsUsingTool || PreviewManipulation is not TextLayerPreviewManipulationState textLayerManipulation)
             {
                 CompositionModel.ChangeTextDefaultStyle(selectedTextLayerIds, e.TargetLayerId, e.TargetValueName, e.TargetLayerPrevValue);
-            }
-            else
-            {
-                textLayerManipulation.Commit();
-                CompositionModel.ChangeTextStyle(selectedTextLayerIds[0], e.ChangeRange.Start, e.ChangeRange.Length, e.TargetValueName, e.TargetLayerPrevValue);
-
-                // NOTE: SourceText の CommitProperty を呼ぶ関係で PreviewManipulationState がクリアされるため、再登録する
-                if (Layers?.FirstOrDefault(l => l.LayerId == e.TargetLayerId) is LayerViewModel layer && layer.IsText)
-                {
-                    PreviewManipulation = new TextLayerPreviewManipulationState(CurrentTime, CompositionModel, HistoryModel, layer);
-                    IsUsingTool = true;
-                }
             }
         }
 

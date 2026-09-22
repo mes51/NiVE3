@@ -173,6 +173,10 @@ namespace NiVE3.ViewModel
 
         public ICommand CreateSubFamilySampleGeometryCommaned { get; }
 
+        public ICommand ChangeFillColorCommand { get; }
+
+        public ICommand ChangeTextLineCommand { get; }
+
         object? PrevValue { get; set; }
 
         bool FontSampleCreated { get; set; }
@@ -213,13 +217,14 @@ namespace NiVE3.ViewModel
                 }
 
                 SourceTextPropertyModel.UseEditingValue = false;
-                if (string.IsNullOrEmpty(s) || ViewState.PreviewTextSelectionRange.Length < 1)
+                if (string.IsNullOrEmpty(s) || ViewState.PreviewTextSelectionRange.Length < 1 || PrevValue == null)
                 {
                     EventHubModel.NotifyTextDefaultStyleChange(CurrentEditingCompositionId.Value, LastSelectedLayerId, ConvertPropertyNameToTextPropertyModelName(s ?? ""), PrevValue);
                 }
                 else
                 {
-                    EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, TargetLayer.LayerId, ViewState.PreviewTextSelectionRange, ConvertPropertyNameToTextPropertyModelName(s), PrevValue);
+                    var styleTransformer = TextPropertyModel.GetStyleTransformer(s);
+                    SourceTextPropertyModel.CommitProperty(SourceTextPropertyType.ReplaceStyle(PrevValue, styleTransformer, PreviewTextSelectionRange.Start, PreviewTextSelectionRange.Length), PrevValue);
                 }
             });
 
@@ -247,6 +252,24 @@ namespace NiVE3.ViewModel
                 if (SelectedFontSubFamilyIndex > -1)
                 {
                     FontViewModelBase.CreateSampleGeometry(Fonts[SelectedFontGroupIndex].SubFamiles);
+                }
+            });
+
+            ChangeFillColorCommand = new DelegateCommand<FloatColor?>(c =>
+            {
+                if (SourceTextPropertyModel != null && c.HasValue)
+                {
+                    PrevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint);
+                    FillColor = c.Value;
+                }
+            });
+
+            ChangeTextLineCommand = new DelegateCommand<FloatColor?>(c =>
+            {
+                if (SourceTextPropertyModel != null && c.HasValue)
+                {
+                    PrevValue = SourceTextPropertyModel.GetRawValue(CurrentTime - SourceTextPropertyModel.SourceStartPoint);
+                    TextLineColor = c.Value;
                 }
             });
         }
@@ -338,20 +361,21 @@ namespace NiVE3.ViewModel
             }
             else
             {
-                if (IsPropertyEditing)
+                if (!IsPropertyEditing && (PreviewTextSelectionRange.Length < 1 || PrevValue == null))
                 {
-                    var styleTransformer = TextPropertyModel.GetStyleTransformer(transformTarget);
-                    SourceTextPropertyModel.UpdateUncommitedRawValue(SourceTextPropertyType.ReplaceStyle(PrevValue, styleTransformer, PreviewTextSelectionRange.Start, PreviewTextSelectionRange.Length));
+                    EventHubModel.NotifyTextDefaultStyleChange(CurrentEditingCompositionId.Value, null, transformTarget, null);
                 }
                 else
                 {
-                    if (PreviewTextSelectionRange.Length < 1)
+                    var styleTransformer = TextPropertyModel.GetStyleTransformer(transformTarget);
+                    var newStyledText = SourceTextPropertyType.ReplaceStyle(PrevValue, styleTransformer, PreviewTextSelectionRange.Start, PreviewTextSelectionRange.Length);
+                    if (IsPropertyEditing)
                     {
-                        EventHubModel.NotifyTextDefaultStyleChange(CurrentEditingCompositionId.Value, null, transformTarget, null);
+                        SourceTextPropertyModel.UpdateUncommitedRawValue(newStyledText);
                     }
                     else
                     {
-                        EventHubModel.NotifyTextStyleChange(CurrentEditingCompositionId.Value, TargetLayer.LayerId, PreviewTextSelectionRange, transformTarget, null);
+                        SourceTextPropertyModel.CommitProperty(newStyledText, PrevValue);
                     }
                 }
             }

@@ -102,11 +102,11 @@ namespace NiVE3.Model.UI
             remove { PlayOrStopRequestPublisher.Unsubscribe(value); }
         }
 
-        WeakEventPublisher<TextStyleChangeEventArgs> TextStyleChangeRequestPublisher { get; } = new WeakEventPublisher<TextStyleChangeEventArgs>();
-        public event EventHandler<TextStyleChangeEventArgs> TextStyleChangeRequest
+        WeakEventPublisher<TextDefaultStyleChangeEventArgs> TextDefaultStyleChangeRequestPublisher { get; } = new WeakEventPublisher<TextDefaultStyleChangeEventArgs>();
+        public event EventHandler<TextDefaultStyleChangeEventArgs> TextDefaultStyleChangeRequest
         {
-            add { TextStyleChangeRequestPublisher.Subscribe(value); }
-            remove { TextStyleChangeRequestPublisher.Unsubscribe(value); }
+            add { TextDefaultStyleChangeRequestPublisher.Subscribe(value); }
+            remove { TextDefaultStyleChangeRequestPublisher.Unsubscribe(value); }
         }
 
         WeakEventPublisher<RenderPreviewInteractionEventArgs> RenderPreviewInteractionRequestPublisher { get; } = new WeakEventPublisher<RenderPreviewInteractionEventArgs>();
@@ -205,12 +205,7 @@ namespace NiVE3.Model.UI
 
         public void NotifyTextDefaultStyleChange(Guid compositionId, Guid? targetLayer, string targetValueName, object? targetLayerPrevValue)
         {
-            TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, targetValueName, targetLayerPrevValue));
-        }
-
-        public void NotifyTextStyleChange(Guid compositionId, Guid targetLayer, SelectionRange selectionRange, string targetValueName, object? targetLayerPrevValue)
-        {
-            TextStyleChangeRequestPublisher.Publish(this, new TextStyleChangeEventArgs(compositionId, targetLayer, selectionRange, targetValueName, targetLayerPrevValue));
+            TextDefaultStyleChangeRequestPublisher.Publish(this, new TextDefaultStyleChangeEventArgs(compositionId, targetLayer, targetValueName, targetLayerPrevValue));
         }
 
         public void NotifyRenderPreviewInteractionRequest(Guid compositionId, Time currentTime, DrawingContext drawingContext, Vector2d previewImagePosition, Vector2d previewImageScale)

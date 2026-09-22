@@ -268,36 +268,21 @@ namespace NiVE3.Model
         }
     }
 
-    class TextStyleChangeEventArgs : EventArgs
+    class TextDefaultStyleChangeEventArgs : EventArgs
     {
         public Guid CompositionId { get; }
 
         public Guid? TargetLayerId { get; }
 
-        public SelectionRange ChangeRange { get; }
-
         public string TargetValueName { get; } = "";
-
-        public bool IsChangeDefault { get; }
 
         public object? TargetLayerPrevValue { get; }
 
-        public TextStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, string targetValueName, object? targetLayerPrevValue)
+        public TextDefaultStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, string targetValueName, object? targetLayerPrevValue)
         {
             CompositionId = compositionId;
             TargetLayerId = targetLayerId;
             TargetValueName = targetValueName;
-            IsChangeDefault = true;
-            TargetLayerPrevValue = targetLayerPrevValue;
-        }
-
-        public TextStyleChangeEventArgs(Guid compositionId, Guid? targetLayerId, SelectionRange changeRange, string targetValueName, object? targetLayerPrevValue)
-        {
-            CompositionId = compositionId;
-            TargetLayerId = targetLayerId;
-            ChangeRange = changeRange;
-            TargetValueName = targetValueName;
-            IsChangeDefault = false;
             TargetLayerPrevValue = targetLayerPrevValue;
         }
     }
