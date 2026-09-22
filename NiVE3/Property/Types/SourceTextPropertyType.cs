@@ -105,7 +105,7 @@ namespace NiVE3.Property.Types
                 return null;
             }
 
-            return styledText.Styles.FirstOrDefault(s => s.Start <= cursor && s.End >= cursor)?.Style ?? styledText.DefaultStyle;
+            return styledText.Styles.LastOrDefault(s => s.Start <= cursor && s.End >= cursor)?.Style ?? styledText.DefaultStyle;
         }
 
         public static object? UpdateText(object? value, int offset, string removedText, string insertedText)
