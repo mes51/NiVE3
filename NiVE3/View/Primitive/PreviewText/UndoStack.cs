@@ -66,7 +66,7 @@ namespace NiVE3.View.Primitive.PreviewText
             if (operation.Kind == EditKind.Typing && last.Kind == EditKind.Typing &&
                 operation.Removed.Length == 0 && last.Removed.Length == 0 &&
                 operation.Offset == last.Offset + last.Inserted.Length &&
-                !operation.Inserted.Contains('\n'))
+                !TextNewLine.Contains(operation.Inserted))
             {
                 last.Inserted += operation.Inserted;
                 last.AnchorAfter = operation.AnchorAfter;

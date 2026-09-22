@@ -22,9 +22,11 @@ namespace NiVE3.View.Primitive.PreviewText
             {
                 return text.Length;
             }
-            if (text[offset] == '\n')
+            // 改行 ("\r\n" は 2 文字) は 1 単位で跨ぐ
+            var newLineLength = TextNewLine.GetLengthAt(text, offset);
+            if (newLineLength > 0)
             {
-                return offset + 1;
+                return offset + newLineLength;
             }
             var length = StringInfo.GetNextTextElementLength(text, offset);
             return offset + Math.Max(1, length);
@@ -39,13 +41,15 @@ namespace NiVE3.View.Primitive.PreviewText
             {
                 return 0;
             }
-            if (text[offset - 1] == '\n')
+            // 改行 ("\r\n" は 2 文字) は 1 単位で跨ぐ
+            var newLineLength = TextNewLine.GetLengthBefore(text, offset);
+            if (newLineLength > 0)
             {
-                return offset - 1;
+                return offset - newLineLength;
             }
 
             // テキスト要素境界は前方からしか列挙できないため、行頭から走査する
-            var lineStart = text.LastIndexOf('\n', offset - 1) + 1;
+            var lineStart = TextNewLine.GetLineStart(text, offset);
             var position = lineStart;
             var previous = lineStart;
             while (position < offset)
@@ -62,7 +66,7 @@ namespace NiVE3.View.Primitive.PreviewText
         /// </summary>
         static int CharClass(char character)
         {
-            if (character == '\n')
+            if (TextNewLine.IsNewLineChar(character))
             {
                 return -1;
             }
@@ -151,9 +155,9 @@ namespace NiVE3.View.Primitive.PreviewText
             {
                 return (0, 0);
             }
-            if (offset >= text.Length || text[offset] == '\n')
+            if (offset >= text.Length || TextNewLine.IsNewLineChar(text[offset]))
             {
-                if (offset == 0 || text[offset - 1] == '\n')
+                if (offset == 0 || TextNewLine.IsNewLineChar(text[offset - 1]))
                 {
                     return (offset, offset);
                 }
@@ -162,12 +166,12 @@ namespace NiVE3.View.Primitive.PreviewText
 
             var charClass = CharClass(text[offset]);
             var start = offset;
-            while (start > 0 && text[start - 1] != '\n' && CharClass(text[start - 1]) == charClass)
+            while (start > 0 && !TextNewLine.IsNewLineChar(text[start - 1]) && CharClass(text[start - 1]) == charClass)
             {
                 start--;
             }
             var end = offset;
-            while (end < text.Length && text[end] != '\n' && CharClass(text[end]) == charClass)
+            while (end < text.Length && !TextNewLine.IsNewLineChar(text[end]) && CharClass(text[end]) == charClass)
             {
                 end++;
             }

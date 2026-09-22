@@ -68,7 +68,7 @@ namespace NiVE3.View.Primitive.PreviewText
             var position = 0;
             while (true)
             {
-                var newlineIndex = text.IndexOf('\n', position);
+                var newlineIndex = TextNewLine.IndexOf(text, position);
                 var lineLength = (newlineIndex < 0 ? text.Length : newlineIndex) - position;
 
                 var line = formatter.FormatLine(source, position, MaxParagraphWidth, paragraphProperties, null);
@@ -81,7 +81,7 @@ namespace NiVE3.View.Primitive.PreviewText
                 {
                     break;
                 }
-                position = newlineIndex + 1;
+                position = newlineIndex + TextNewLine.GetLengthAt(text, newlineIndex);
             }
 
             Width = maxWidth;
@@ -280,12 +280,13 @@ namespace NiVE3.View.Primitive.PreviewText
                 {
                     return new TextEndOfParagraph(1, Properties);
                 }
-                if (Text[textSourceCharacterIndex] == '\n')
+                var newLineLength = TextNewLine.GetLengthAt(Text, textSourceCharacterIndex);
+                if (newLineLength > 0)
                 {
-                    return new TextEndOfParagraph(1, Properties);
+                    return new TextEndOfParagraph(newLineLength, Properties);
                 }
 
-                var end = Text.IndexOf('\n', textSourceCharacterIndex);
+                var end = TextNewLine.IndexOf(Text, textSourceCharacterIndex);
                 if (end < 0)
                 {
                     end = Text.Length;

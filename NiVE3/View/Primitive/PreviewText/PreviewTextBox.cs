@@ -636,7 +636,7 @@ namespace NiVE3.View.Primitive.PreviewText
                     return;
                 }
                 var start = SelectionStart;
-                var inserted = TextDocument.Normalize(value);
+                var inserted = TextNewLine.ConvertTo(value ?? "", Document.NewLine);
                 PerformEdit(start, SelectionLength, inserted, start + inserted.Length, EditKind.Other);
             }
         }
@@ -1390,7 +1390,7 @@ namespace NiVE3.View.Primitive.PreviewText
                 case Key.Return:
                     if (AcceptsReturn && !IsReadOnly)
                     {
-                        InsertText("\n", typing: false);
+                        InsertText(Document.NewLine, typing: false);
                     }
                     e.Handled = true;
                     break;
@@ -1611,7 +1611,7 @@ namespace NiVE3.View.Primitive.PreviewText
                 return;
             }
 
-            text = FilterInputText(TextDocument.Normalize(text));
+            text = FilterInputText(text);
             if (text.Length > 0 && !IsReadOnly)
             {
                 InsertText(text, typing: false);
@@ -1709,7 +1709,7 @@ namespace NiVE3.View.Primitive.PreviewText
 
         static bool IsAcceptableInputChar(char character)
         {
-            return character >= ' ' || character == '\n';
+            return character >= ' ' || TextNewLine.IsNewLineChar(character);
         }
 
         /// <summary>
@@ -1768,7 +1768,7 @@ namespace NiVE3.View.Primitive.PreviewText
             }
             if (!AcceptsReturn)
             {
-                var newline = text.IndexOf('\n');
+                var newline = TextNewLine.IndexOf(text, 0);
                 if (newline >= 0)
                 {
                     text = text[..newline];
@@ -1778,9 +1778,11 @@ namespace NiVE3.View.Primitive.PreviewText
                     return;
                 }
             }
+            // 挿入する改行は本文の改行コードに揃える (Enter・貼り付け)
+            text = TextNewLine.ConvertTo(text, Document.NewLine);
             var start = SelectionStart;
             var length = SelectionLength;
-            var kind = typing && length == 0 && !text.Contains('\n') ? EditKind.Typing : EditKind.Other;
+            var kind = typing && length == 0 && !TextNewLine.Contains(text) ? EditKind.Typing : EditKind.Other;
             PerformEdit(start, length, text, start + text.Length, kind);
         }
 
@@ -1790,7 +1792,6 @@ namespace NiVE3.View.Primitive.PreviewText
             {
                 return;
             }
-            inserted = TextDocument.Normalize(inserted);
 
             var operation = new EditOperation
             {
@@ -1849,8 +1850,9 @@ namespace NiVE3.View.Primitive.PreviewText
                 return;
             }
 
-            // 外部 (バインディング/コード) からの設定: TextBox と同様に Undo 履歴を破棄する
-            var newText = TextDocument.Normalize((string?)e.NewValue);
+            // 外部 (バインディング/コード) からの設定: TextBox と同様に Undo 履歴を破棄する。
+            // 改行は正規化せずそのまま保持する (オフセットと編集通知をホスト側の本文と一致させるため)
+            var newText = (string?)e.NewValue ?? "";
             var oldText = editor.Document.Text;
             if (newText == oldText)
             {
@@ -1863,12 +1865,6 @@ namespace NiVE3.View.Primitive.PreviewText
             editor.Anchor = 0;
             editor.Caret = 0;
             editor.PreferredFlowPosition = null;
-
-            // 正規化した値を DP へ反映 (再入は IsSyncingTextDp で防止)
-            if (newText != (string?)e.NewValue)
-            {
-                editor.SyncTextToDependencyProperty();
-            }
 
             editor.TextEdited?.Invoke(editor, new TextEditedEventArgs(0, oldText, newText));
             editor.NotifyDisplayTextChanged();
@@ -2194,12 +2190,8 @@ namespace NiVE3.View.Primitive.PreviewText
         {
             var line = Document.GetLineIndexFromOffset(offset);
             var start = Document.GetLineStart(line);
-            var end = start + Document.GetLineLength(line);
-            if (end < Document.Length)
-            {
-                // 改行を含める
-                end++;
-            }
+            // 改行 ("\r\n" は 2 文字) を含める
+            var end = start + Document.GetLineLength(line) + Document.GetLineNewLineLength(line);
             return (start, end);
         }
 
@@ -2274,7 +2266,7 @@ namespace NiVE3.View.Primitive.PreviewText
             }
             try
             {
-                Clipboard.SetText(SelectedText.Replace("\n", "\r\n"));
+                Clipboard.SetText(TextNewLine.ConvertTo(SelectedText, "\r\n"));
             }
             catch
             {
@@ -2311,7 +2303,7 @@ namespace NiVE3.View.Primitive.PreviewText
             {
                 return;
             }
-            InsertText(TextDocument.Normalize(text), typing: false);
+            InsertText(text, typing: false);
         }
 
         static bool ClipboardContainsText()

@@ -320,6 +320,35 @@ namespace NiVE3.Test.View.Primitive.PreviewText
         }
 
         [Test]
+        public void TestCrLfTextIsSplitIntoLinesWithoutNormalization()
+        {
+            // 本文の "\r\n" は正規化されず 2 文字のまま保持され、1 つの改行として行を区切る
+            CharacterGeometry[] geometries =
+            [
+                Glyph("a", 0, 0, 10, 10),
+                Glyph("b", 14, 0, 10, 10),
+                Glyph("c", 0, 30, 10, 10),
+                Glyph("d", 14, 30, 10, 10),
+            ];
+            var layout = new GeometryTextLayout("ab\r\ncd", geometries);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(layout.LineCount, Is.EqualTo(2));
+                // 1 行目は改行を含まない [0, 2)、2 行目は [4, 6)
+                Assert.That(layout.GetLineRange(0), Is.EqualTo((0, 2)));
+                Assert.That(layout.GetLineRange(1), Is.EqualTo((4, 2)));
+                Assert.That(layout.GetLineIndexFromOffset(2), Is.EqualTo(0));
+                Assert.That(layout.GetLineIndexFromOffset(4), Is.EqualTo(1));
+                Assert.That(layout.GetCaretFlowPosition(2), Is.EqualTo(24.0));
+                Assert.That(layout.GetCaretFlowPosition(4), Is.EqualTo(0.0));
+                Assert.That(layout.GetOffsetAt(new Point(20, 35)), Is.EqualTo(6));
+                // 改行を跨ぐ選択は 2 行分の矩形になる
+                Assert.That(layout.GetRangeQuads(1, 5), Has.Count.EqualTo(2));
+            });
+        }
+
+        [Test]
         public void TestUnmatchedGeometryIsSkippedWithoutLosingFollowingGlyphs()
         {
             // テキストに対応しないエントリが混ざっていても、以降のグリフは照合できる

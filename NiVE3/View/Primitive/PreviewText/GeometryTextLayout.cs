@@ -306,7 +306,7 @@ namespace NiVE3.View.Primitive.PreviewText
             var position = 0;
             while (position < text.Length && geometryIndex < geometries.Count)
             {
-                if (text[position] == '\n')
+                if (TextNewLine.IsNewLineChar(text[position]))
                 {
                     position++;
                     continue;
@@ -368,12 +368,12 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
-        /// position 以降の同じ行 (次の '\n' の手前まで) から、テキスト要素境界に一致する cluster の位置を探す。
+        /// position 以降の同じ行 (次の改行の手前まで) から、テキスト要素境界に一致する cluster の位置を探す。
         /// 見つからなければ -1。
         /// </summary>
         static int FindClusterInLine(string text, int position, string cluster)
         {
-            var newlineIndex = text.IndexOf('\n', position);
+            var newlineIndex = TextNewLine.IndexOf(text, position);
             var lineEnd = newlineIndex < 0 ? text.Length : newlineIndex;
             var index = position;
             while (index < lineEnd)
@@ -388,7 +388,7 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
-        /// 視覚行を構築する。改行 ('\n') に加えて、WrappingLength による折り返し
+        /// 視覚行を構築する。改行 ("\r\n" / "\n" / "\r") に加えて、WrappingLength による折り返し
         /// (1 論理行が複数の視覚行になる) を検出して行を区切る。
         /// Bounds はインクのバウンディングボックスで文字ごとに端の位置が異なるため、直交方向の変化では判定できない。
         /// 代わりに「流れ方向の位置が直前のグリフより行頭側へ戻り、かつ次の行の側へ移動した」ことを折り返しとみなす。
@@ -410,17 +410,29 @@ namespace NiVE3.View.Primitive.PreviewText
                 current = null;
             }
 
+            // newlineScan 以降 limit の手前までにある改行で行を区切る
+            void ScanNewLines(int limit)
+            {
+                while (newlineScan < limit)
+                {
+                    var newLineLength = TextNewLine.GetLengthAt(text, newlineScan);
+                    if (newLineLength > 0)
+                    {
+                        CloseLine(newlineScan);
+                        newlineScan += newLineLength;
+                        lineStart = newlineScan;
+                    }
+                    else
+                    {
+                        newlineScan++;
+                    }
+                }
+            }
+
             foreach (var glyph in Glyphs)
             {
                 // このグリフより前にある改行で行を区切る
-                for (; newlineScan < glyph.Offset; newlineScan++)
-                {
-                    if (text[newlineScan] == '\n')
-                    {
-                        CloseLine(newlineScan);
-                        lineStart = newlineScan + 1;
-                    }
-                }
+                ScanNewLines(glyph.Offset);
 
                 // 折り返し: 同じ論理行内で行頭側へ戻ったら新しい視覚行
                 if (current != null && IsWrappedLineStart(current.Glyphs[^1], glyph))
@@ -437,14 +449,7 @@ namespace NiVE3.View.Primitive.PreviewText
             }
 
             // 末尾に残った改行と最終行
-            for (; newlineScan < text.Length; newlineScan++)
-            {
-                if (text[newlineScan] == '\n')
-                {
-                    CloseLine(newlineScan);
-                    lineStart = newlineScan + 1;
-                }
-            }
+            ScanNewLines(text.Length);
             CloseLine(text.Length);
         }
 

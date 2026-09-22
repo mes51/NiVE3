@@ -8,7 +8,8 @@ namespace NiVE3.View.Primitive.PreviewText
 {
     /// <summary>
     /// エディタが編集対象とするテキストのモデル。
-    /// 改行は内部的に '\n' へ正規化して保持する (クリップボード入出力時に "\r\n" と相互変換する)。
+    /// 改行は正規化せずそのまま保持する。オフセットや編集通知 (TextEditedEventArgs) をホスト側の本文と
+    /// 一致させるためで、"\r\n"・"\n"・"\r" のいずれも 1 つの改行として扱う (TextNewLine)。
     /// 行頭オフセットのインデックスを保持し、オフセット⇔行番号の変換を提供する。
     /// </summary>
     sealed class TextDocument
@@ -22,24 +23,21 @@ namespace NiVE3.View.Primitive.PreviewText
         public int LineCount => LineStarts.Count;
 
         /// <summary>
+        /// 本文で使われている改行コード。改行の挿入 (Enter・貼り付け) はこれに揃える
+        /// </summary>
+        public string NewLine => TextNewLine.Detect(Text);
+
+        /// <summary>
         /// テキストが変更されるたびに発生する
         /// </summary>
         public event EventHandler? Changed;
-
-        /// <summary>
-        /// 改行コードを '\n' に正規化する
-        /// </summary>
-        public static string Normalize(string? text)
-        {
-            return (text ?? "").Replace("\r\n", "\n").Replace('\r', '\n');
-        }
 
         /// <summary>
         /// テキスト全体を置き換える (プロパティ経由の外部設定用)
         /// </summary>
         public void SetText(string? text)
         {
-            Text = Normalize(text);
+            Text = text ?? "";
             RebuildLineIndex();
             Changed?.Invoke(this, EventArgs.Empty);
         }
@@ -65,7 +63,7 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
-        /// オフセットが属する行番号を返す。行末 ('\n' の直前) はその行に属する。
+        /// オフセットが属する行番号を返す。行末 (改行の直前) はその行に属する。
         /// </summary>
         public int GetLineIndexFromOffset(int offset)
         {
@@ -92,24 +90,41 @@ namespace NiVE3.View.Primitive.PreviewText
         }
 
         /// <summary>
-        /// 行の長さ (末尾の '\n' を含まない)
+        /// 行の長さ (末尾の改行を含まない)
         /// </summary>
         public int GetLineLength(int line)
         {
             var start = LineStarts[line];
-            var end = line + 1 < LineStarts.Count ? LineStarts[line + 1] - 1 : Text.Length;
+            var end = line + 1 < LineStarts.Count
+                ? LineStarts[line + 1] - TextNewLine.GetLengthBefore(Text, LineStarts[line + 1])
+                : Text.Length;
             return end - start;
+        }
+
+        /// <summary>
+        /// 行末の改行の長さ (最終行なら 0)
+        /// </summary>
+        public int GetLineNewLineLength(int line)
+        {
+            return line + 1 < LineStarts.Count ? TextNewLine.GetLengthBefore(Text, LineStarts[line + 1]) : 0;
         }
 
         void RebuildLineIndex()
         {
             LineStarts.Clear();
             LineStarts.Add(0);
-            for (var i = 0; i < Text.Length; i++)
+            var index = 0;
+            while (index < Text.Length)
             {
-                if (Text[i] == '\n')
+                var newLineLength = TextNewLine.GetLengthAt(Text, index);
+                if (newLineLength > 0)
                 {
-                    LineStarts.Add(i + 1);
+                    index += newLineLength;
+                    LineStarts.Add(index);
+                }
+                else
+                {
+                    index++;
                 }
             }
         }
