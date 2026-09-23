@@ -5,12 +5,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NiVE3.Extension;
+using NiVE3.Shared.Extension;
 
 namespace NiVE3.Text
 {
     record StyledText(string Text, TextStyle DefaultStyle, TextStyleRun[] Styles)
     {
         public static StyledText Empty = new StyledText("", TextStyle.Empty, []);
+
+        (int charBeginIndex, int charEndIndex)[] GraphemeRanges
+        {
+            get
+            {
+                if (field == null)
+                {
+                    var graphemeIndices = StringInfo.ParseCombiningCharacters(Text);
+                    field = [..graphemeIndices.Zip(graphemeIndices.Skip(1).Append(Text.Length), (s, e) => (s, e))];
+                }
+
+                return field;
+            }
+        }
 
         public StyledText ChangeText(string newText)
         {
@@ -152,6 +167,21 @@ namespace NiVE3.Text
             }
 
             return new StyledText(newText, baseStyledText.DefaultStyle, TextStyleRun.Merge(newStyleRuns));
+        }
+
+        public static StyledText ApplyStyleByCharCount(StyledText baseStyledText, int charStart, int charLength, Func<TextStyle, TextStyle> styleTransformer)
+        {
+            if (charLength < 1)
+            {
+                return baseStyledText;
+            }
+
+            var charEnd = charStart + charLength;
+            var beginGraphemeIndex = baseStyledText.GraphemeRanges.FindLastIndex(t => t.charBeginIndex <= charStart);
+            var endGraphemeIndex = baseStyledText.GraphemeRanges.FindIndex(t => t.charEndIndex >= charEnd) + 1;
+            var graphemeLength = endGraphemeIndex - beginGraphemeIndex;
+
+            return ApplyStyle(baseStyledText, beginGraphemeIndex, graphemeLength, styleTransformer);
         }
 
         public static StyledText ApplyStyle(StyledText baseStyledText, int start, int length, Func<TextStyle, TextStyle> styleTransformer)

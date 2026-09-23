@@ -71,20 +71,20 @@ namespace NiVE3.Property.Types
             return new StyledText(styledText.Text, newStyle, styledText.Styles);
         }
 
-        public static object? ReplaceStyle(object? value, Func<TextStyle, TextStyle> styleTransformer, int start, int length)
+        public static object? ReplaceStyle(object? value, Func<TextStyle, TextStyle> styleTransformer, int charStart, int charLength)
         {
             if (value is not StyledText styledText)
             {
                 return null;
             }
 
-            if (length < 1)
+            if (charLength < 1)
             {
                 return StyledText.ChangeDefaultStyle(styledText, styleTransformer);
             }
             else
             {
-                return StyledText.ApplyStyle(styledText, start, length, styleTransformer);
+                return StyledText.ApplyStyleByCharCount(styledText, charStart, charLength, styleTransformer);
             }
         }
 
