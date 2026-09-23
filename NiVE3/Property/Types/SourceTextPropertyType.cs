@@ -98,14 +98,14 @@ namespace NiVE3.Property.Types
             return styledText.DefaultStyle;
         }
 
-        public static TextStyle? GetCurrentStyle(object? value, int cursor)
+        public static TextStyle? GetCurrentStyle(object? value, int charIndex)
         {
             if (value is not StyledText styledText)
             {
                 return null;
             }
 
-            return styledText.Styles.LastOrDefault(s => s.Start <= cursor && s.End >= cursor)?.Style ?? styledText.DefaultStyle;
+            return styledText.FindCharacterStyle(charIndex);
         }
 
         public static object? UpdateText(object? value, int offset, string removedText, string insertedText)

@@ -51,6 +51,17 @@ namespace NiVE3.Text
             return new StyledText(newText, DefaultStyle, [..newStyles]);
         }
 
+        public TextStyle? FindCharacterStyle(int charIndex)
+        {
+            var graphemeIndex = GraphemeRanges.FindLastIndex(r => r.charBeginIndex <= charIndex);
+            if (graphemeIndex < 0)
+            {
+                return DefaultStyle;
+            }
+
+            return Styles.LastOrDefault(s => s.Start <= graphemeIndex && s.End >= graphemeIndex)?.Style ?? DefaultStyle;
+        }
+
         public IDictionary<string, object?> Serialize()
         {
             return new Dictionary<string, object?>
