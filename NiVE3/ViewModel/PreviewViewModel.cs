@@ -389,7 +389,7 @@ namespace NiVE3.ViewModel
                     return;
                 }
 
-                args.Selected = EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, args.Position, args.PreviewScale, CurrentTime);
+                args.Selected = EventHubModel.NotifySelectLayer(compositionPreviewModel.Composition.CompositionId, args.Position, args.PreviewScale, ToolType, CurrentTime);
             });
 
             BeginUseToolCommand = new DelegateCommand<Tuple<Vector2d, Vector2d>>(t =>

@@ -137,9 +137,14 @@ namespace NiVE3.Model.UI
             remove { TextEditingPublisher.Unsubscribe(value); }
         }
 
-        public SelectPreviewResult NotifySelectLayer(Guid compositionId, Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public SelectPreviewResult NotifySelectLayer(Guid compositionId, Vector2d screenPos, Vector2d previewImageScale, ToolType currentTool, Time currentTime)
         {
-            var eventArgs = new SelectLayerEventArgs(compositionId, screenPos, previewImageScale, currentTime);
+            var layerFilterType = currentTool switch
+            {
+                ToolType.Text => SelectFilterType.Text,
+                _ => SelectFilterType.All
+            };
+            var eventArgs = new SelectLayerEventArgs(compositionId, screenPos, previewImageScale, layerFilterType, currentTime);
             SelectLayerRequestPublisher.Publish(this, eventArgs);
             return eventArgs.Selected;
         }

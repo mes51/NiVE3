@@ -1447,7 +1447,7 @@ namespace NiVE3.ViewModel
             return SelectedItemType == SelectItemType.Layer;
         }
 
-        public SelectPreviewResult SelectByPreview(Vector2d screenPos, Vector2d previewImageScale, Time currentTime)
+        public SelectPreviewResult SelectByPreview(Vector2d screenPos, Vector2d previewImageScale, Time currentTime, SelectFilterType filterType)
         {
             if (CompositionModel == null || Layers == null)
             {
@@ -1479,6 +1479,23 @@ namespace NiVE3.ViewModel
                 return SelectPreviewResult.None;
             }
             var layer = Layers.First(l => l.LayerId == layerId);
+
+            var isFilterHit = ((filterType & SelectFilterType.Image) != SelectFilterType.None && layer.HasImage && !layer.IsText) ||
+                ((filterType & SelectFilterType.Text) != SelectFilterType.None && layer.IsText) ||
+                ((filterType & SelectFilterType.Audio) != SelectFilterType.None && layer.HasAudio) ||
+                ((filterType & SelectFilterType.Camera) != SelectFilterType.None && layer.IsCamera) ||
+                ((filterType & SelectFilterType.Light) != SelectFilterType.None && layer.IsLight) ||
+                ((filterType & SelectFilterType.NullObject) != SelectFilterType.None && layer.IsNullObject);
+            if (!isFilterHit)
+            {
+                SelectedLayers?.Clear();
+                SelectedItemType = SelectItemType.None;
+                SelectedTargetTree = null;
+                LastSelectedObjectHashCode = 0;
+
+                return SelectPreviewResult.None;
+            }
+
             if (SelectLayer(layer.LayerId, Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl) || Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)))
             {
                 return SelectPreviewResult.Layer;
@@ -2237,5 +2254,19 @@ namespace NiVE3.ViewModel
         None,
         Layer,
         PropertyInteraction
+    }
+
+    public enum SelectFilterType
+    {
+        None = 0,
+        Image = 0b000_0_01,
+        Text = 0b000_0_10,
+        Audio = 0b000_1_00,
+        Camera = 0b001_0_00,
+        Light = 0b010_0_00,
+        NullObject = 0b100_0_00,
+        AllImage = Image | Text,
+        Special = Camera | Light | NullObject,
+        All = AllImage | Audio | Special,
     }
 }

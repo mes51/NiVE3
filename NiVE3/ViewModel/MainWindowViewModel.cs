@@ -619,7 +619,7 @@ namespace NiVE3.ViewModel
             if (viewModel != null)
             {
                 viewModel.OpenPane();
-                e.Selected = viewModel.SelectByPreview(e.ScreenPosition, e.PreviewImageScale, e.CurrentTime);
+                e.Selected = viewModel.SelectByPreview(e.ScreenPosition, e.PreviewImageScale, e.CurrentTime, e.LayerFilterType);
             }
         }
     }

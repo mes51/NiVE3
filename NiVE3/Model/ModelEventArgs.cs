@@ -69,13 +69,16 @@ namespace NiVE3.Model
 
         public Time CurrentTime { get; }
 
+        public SelectFilterType LayerFilterType { get; }
+
         public SelectPreviewResult Selected { get; set; }
 
-        public SelectLayerEventArgs(Guid compositionId, Vector2d screenPosition, Vector2d previewImageScale, Time currentTime)
+        public SelectLayerEventArgs(Guid compositionId, Vector2d screenPosition, Vector2d previewImageScale, SelectFilterType layerFilterType, Time currentTime)
         {
             CompositionId = compositionId;
             ScreenPosition = screenPosition;
             PreviewImageScale = previewImageScale;
+            LayerFilterType = layerFilterType;
             CurrentTime = currentTime;
         }
     }
