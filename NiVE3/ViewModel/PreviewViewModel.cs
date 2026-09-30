@@ -344,6 +344,13 @@ namespace NiVE3.ViewModel
             remove { UpdatePropertyInteractionRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EventArgs> FocusPreviewTextBoxPublisher { get; } = new WeakEventPublisher<EventArgs>();
+        public event EventHandler<EventArgs> FocusPreviewTextBox
+        {
+            add { FocusPreviewTextBoxPublisher.Subscribe(value); }
+            remove { FocusPreviewTextBoxPublisher.Unsubscribe(value); }
+        }
+
         Task? RenderRamPreviewTask { get; set; }
 
         CancellationTokenSource RenderRamPreviewTaskCancellationTokenSource { get; set; } = new CancellationTokenSource();
@@ -720,6 +727,7 @@ namespace NiVE3.ViewModel
             PlayControllerModel.PauseChanged += PlayControllerModel_PauseChanged;
             PlayControllerModel.StartRenderRamPreview += PlayControllerModel_StartRenderRamPreview;
             PlayControllerModel.StopRenderRamPreview += PlayControllerModel_StopRenderRamPreview;
+            EventHubModel.EditTextInPreview += EventHubModel_EditTextInPreview;
             ViewState.PropertyChanged += ViewState_PropertyChanged;
 
             CompositionTarget.Rendering += (_, _) =>
@@ -1351,6 +1359,17 @@ namespace NiVE3.ViewModel
 
                 e.RenderedFrameCount = CachedRamPreviewFrames.Count;
             }
+        }
+
+        private void EventHubModel_EditTextInPreview(object? sender, EditTextInPreviewEventArgs e)
+        {
+            if (PreviewModel is not CompositionPreviewModel compositionPreviewModel || SelectedLayerIds == null || compositionPreviewModel.Composition == null || e.CompositionId != compositionPreviewModel.Composition.CompositionId || !SelectedLayerIds.Contains(e.LayerId) || SelectedLayerIds.Count > 1)
+            {
+                return;
+            }
+
+            ToolType = ToolType.Text;
+            FocusPreviewTextBoxPublisher.Publish(this, EventArgs.Empty);
         }
 
         private void ViewState_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -110,7 +110,7 @@ namespace NiVE3.View.Part
         {
             if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
             {
-                ViewModel?.ShowFootagePreviewCommand?.Execute(null);
+                ViewModel?.FootagePreviewOrTextEditCommand?.Execute(null);
                 e.Handled = true;
                 return;
             }
@@ -136,7 +136,7 @@ namespace NiVE3.View.Part
             }
             if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2 && e.OriginalSource is DependencyObject element && element.IsVisualParent(LayerNameTextBlock))
             {
-                ViewModel?.ShowFootagePreviewCommand?.Execute(null);
+                ViewModel?.FootagePreviewOrTextEditCommand?.Execute(null);
                 e.Handled = true;
                 return;
             }

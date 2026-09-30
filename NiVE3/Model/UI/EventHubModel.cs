@@ -95,6 +95,13 @@ namespace NiVE3.Model.UI
             remove { ShowFootagePreviewRequestPublisher.Unsubscribe(value); }
         }
 
+        WeakEventPublisher<EditTextInPreviewEventArgs> EditTextInPreviewPublisher { get; } = new WeakEventPublisher<EditTextInPreviewEventArgs>();
+        public event EventHandler<EditTextInPreviewEventArgs> EditTextInPreview
+        {
+            add { EditTextInPreviewPublisher.Subscribe(value); }
+            remove { EditTextInPreviewPublisher.Unsubscribe(value); }
+        }
+
         WeakEventPublisher<EventArgs> PlayOrStopRequestPublisher { get; } = new WeakEventPublisher<EventArgs>();
         public event EventHandler<EventArgs> PlayOrStopRequest
         {
@@ -201,6 +208,11 @@ namespace NiVE3.Model.UI
         public void NotifyShowFootagePreview(Guid footageId)
         {
             ShowFootagePreviewRequestPublisher.Publish(this, new ShowFootagePreviewEventArgs(footageId));
+        }
+
+        public void NotifyEditTextInPreview(Guid compositionId, Guid layerId)
+        {
+            EditTextInPreviewPublisher.Publish(this, new EditTextInPreviewEventArgs(compositionId, layerId));
         }
 
         public void NotifyPlayOrStop()

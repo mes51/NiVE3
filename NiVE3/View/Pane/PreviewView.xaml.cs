@@ -624,10 +624,12 @@ namespace NiVE3.View.Pane
             if (e.OldValue is PreviewViewModel oldViewModel)
             {
                 oldViewModel.SourceChanged -= ViewModel_SourceChanged;
+                oldViewModel.FocusPreviewTextBox -= ViewModel_FocusPreviewTextBox;
             }
             if (e.NewValue is PreviewViewModel newViewModel)
             {
                 newViewModel.SourceChanged += ViewModel_SourceChanged;
+                newViewModel.FocusPreviewTextBox += ViewModel_FocusPreviewTextBox;
             }
         }
 
@@ -660,6 +662,11 @@ namespace NiVE3.View.Pane
 
                 SelectedDownScaleRateIndex = Array.IndexOf(DownScaleList, (int)viewModel.DownScaleRate);
             }
+        }
+
+        private void ViewModel_FocusPreviewTextBox(object? sender, EventArgs e)
+        {
+            PreviewTextBox.Focus();
         }
 
         private void TimeLocatorView_CurrentTimeChangeByUser(object sender, RoutedEventArgs e)

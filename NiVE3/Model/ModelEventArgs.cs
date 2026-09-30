@@ -271,6 +271,19 @@ namespace NiVE3.Model
         }
     }
 
+    class EditTextInPreviewEventArgs : EventArgs
+    {
+        public Guid CompositionId { get; }
+
+        public Guid LayerId { get; }
+
+        public EditTextInPreviewEventArgs(Guid compositionId, Guid layerId)
+        {
+            CompositionId = compositionId;
+            LayerId = layerId;
+        }
+    }
+
     class TextDefaultStyleChangeEventArgs : EventArgs
     {
         public Guid CompositionId { get; }

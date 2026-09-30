@@ -420,7 +420,7 @@ namespace NiVE3.ViewModel
 
         public ICommand DeleteMaskCommand { get; }
 
-        public ICommand ShowFootagePreviewCommand { get; }
+        public ICommand FootagePreviewOrTextEditCommand { get; }
 
         public DelegateCommand<SelectItemType?> DeleteCommand { get; }
 
@@ -972,7 +972,17 @@ namespace NiVE3.ViewModel
                 }
             });
 
-            ShowFootagePreviewCommand = new DelegateCommand(() => EventHubModel.NotifyShowFootagePreview(LayerModel.FootageId));
+            FootagePreviewOrTextEditCommand = new DelegateCommand(() =>
+            {
+                if (IsText)
+                {
+                    EventHubModel.NotifyEditTextInPreview(LayerModel.ParentCompositionId, LayerId);
+                }
+                else
+                {
+                    EventHubModel.NotifyShowFootagePreview(LayerModel.FootageId);
+                }
+            });
 
             DeleteCommand = new DelegateCommand<SelectItemType?>(type =>
             {
