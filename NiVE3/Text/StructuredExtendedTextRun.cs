@@ -49,7 +49,7 @@ namespace NiVE3.Text
                 var stringInfo = new StringInfo(line);
                 var lineElementCount = stringInfo.LengthInTextElements;
 
-                var targetStyles = styles.SkipWhile(s => s.Start < count).TakeWhile(s => s.End <= count + lineElementCount).ToArray();
+                var targetStyles = styles.Where(s => s.End > count && s.Start < count + lineElementCount).ToArray();
                 lines.Add(new LineExtendedTextRun(line, count, defaultStyle, targetStyles));
 
                 count += lineElementCount + 1;
@@ -84,7 +84,7 @@ namespace NiVE3.Text
                 var stringInfo = new StringInfo(line);
                 var lineElementCount = stringInfo.LengthInTextElements;
 
-                var targetStyles = styles.SkipWhile(s => s.Start < count).TakeWhile(s => s.End > count + lineElementCount).ToArray();
+                var targetStyles = styles.Where(s => s.End > count && s.Start < count + lineElementCount).ToArray();
                 lines.Add(new LineExtendedTextRun(line, count, defaultStyle, targetStyles));
 
                 count += lineElementCount + 1;
@@ -247,7 +247,8 @@ namespace NiVE3.Text
             var textRuns = new List<ExtendedTextRun>();
             for (var i = 0; i < elementCount; i++)
             {
-                var style = styles.FirstOrDefault(s => s.Start <= i && s.End > i) ?? new TextStyleRun(i + startIndex, i + startIndex + 1, defaultStyle);
+                var currentIndex = i + startIndex;
+                var style = styles.FirstOrDefault(s => s.Start <= currentIndex && s.End > currentIndex) ?? new TextStyleRun(currentIndex, currentIndex + 1, defaultStyle);
                 textRuns.Add(style.ToTextRun());
             }
 
@@ -260,7 +261,8 @@ namespace NiVE3.Text
             var textRuns = new List<ExtendedTextRun>();
             for (var i = 0; i < elementCount; i++)
             {
-                var style = styles.FirstOrDefault(s => s.Start <= i && s.End > i) ?? new TextStyleRun(i + startIndex, i + startIndex + 1, defaultStyle).ToTextRun();
+                var currentIndex = i + startIndex;
+                var style = styles.FirstOrDefault(s => s.Start <= currentIndex && s.End > currentIndex) ?? new TextStyleRun(currentIndex, currentIndex + 1, defaultStyle).ToTextRun();
                 textRuns.Add(style);
             }
 
