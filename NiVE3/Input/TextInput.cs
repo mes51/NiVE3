@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO.Hashing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -22,6 +23,7 @@ using NiVE3.Property;
 using NiVE3.Shape;
 using NiVE3.Shared.Util;
 using NiVE3.Text;
+using NiVE3.Util;
 using NiVE3.View.Primitive.PreviewText;
 using NiVE3.View.Resource;
 using SixLabors.Fonts;
@@ -154,6 +156,10 @@ namespace NiVE3.Input
         const string TextAnimatorValueCharacterOffsetRestrictAsciiCharId = nameof(TextAnimatorValueCharacterOffsetRestrictAsciiCharId);
 
         const string TextAnimatorValueBlurId = nameof(TextAnimatorValueBlurId);
+
+        static LruCache<Int128, (TextOptions? textOption, List<BuildedTextGlyphs> glyphPolygons)> GlyphPolygonCache { get; } = new LruCache<Int128, (TextOptions? textOption, List<BuildedTextGlyphs> glyphPolygons)>(100);
+
+        static LruCache<Int128, SourceFootageRect> SourceFootageRectCache { get; } = new LruCache<Int128, SourceFootageRect>(100);
 
         public static readonly TextFootageSource Instance = new TextFootageSource();
 
@@ -341,6 +347,18 @@ namespace NiVE3.Input
 
         public SourceFootageRect CalcSize(Time time, int compositionWidth, int compositionHeight, bool withInvisible, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties)
         {
+            var hash = new XxHash3();
+            hash.Append(time + layer.SourceStartPoint);
+            hash.Append(compositionWidth);
+            hash.Append(compositionHeight);
+            hash.Append(withInvisible);
+            properties.CalcHash(hash);
+            var cacheKey = hash.ToInt128();
+            if (SourceFootageRectCache.TryGetValue(cacheKey, out var rect))
+            {
+                return rect;
+            }
+
             var (textOption, glyphPolygons) = BuildGlyphPolygons(time + layer.SourceStartPoint, layer, properties, 1.0);
             if (textOption == null || glyphPolygons.Count < 1)
             {
@@ -355,11 +373,14 @@ namespace NiVE3.Input
             var height = max.GetElement(3) - min.GetElement(1);
             if (width < 1 || height < 1)
             {
+                SourceFootageRectCache.Add(cacheKey, SourceFootageRect.Empty);
                 return SourceFootageRect.Empty;
             }
             else
             {
-                return new SourceFootageRect(imageOrigin, width, height);
+                var result = new SourceFootageRect(imageOrigin, width, height);
+                SourceFootageRectCache.Add(cacheKey, result);
+                return result;
             }
         }
 
@@ -1009,6 +1030,16 @@ namespace NiVE3.Input
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static (TextOptions? textOption, List<BuildedTextGlyphs> glyphPolygons) BuildGlyphPolygons(Time globalTime, IFootageSourceUsingLayerObject layer, PropertyValueGroup properties, double downSamplingRate)
         {
+            var hash = new XxHash3();
+            hash.Append(globalTime);
+            properties.CalcHash(hash);
+            hash.Append(downSamplingRate);
+            var cacheKey = hash.ToInt128();
+            if (GlyphPolygonCache.TryGetValue(cacheKey, out var cachedGlyphPolygon))
+            {
+                return cachedGlyphPolygon;
+            }
+
             var sourceText = properties[SourceTextId] as StyledText ?? StyledText.Empty;
             if (string.IsNullOrEmpty(sourceText.Text))
             {
@@ -1078,6 +1109,7 @@ namespace NiVE3.Input
                 glyphPolygons.Add(new BuildedTextGlyphs(fillPolygons, outlinePolygons, glyph.TextRun, rect, blurMargin, origin));
             }
 
+            GlyphPolygonCache.Add(cacheKey, (textOption, glyphPolygons));
             return (textOption, glyphPolygons);
         }
 

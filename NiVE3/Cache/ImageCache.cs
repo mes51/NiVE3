@@ -28,7 +28,7 @@ namespace NiVE3.Cache
 
         private long CachedSize { get; set; }
 
-        private CacheKeyLru KeyLru { get; } = new CacheKeyLru();
+        private ImageCacheKeyLru KeyLru { get; } = new ImageCacheKeyLru();
 
         private ImageCache()
         {

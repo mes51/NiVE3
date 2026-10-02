@@ -7,7 +7,7 @@ using NiVE3.Plugin.ValueObject;
 
 namespace NiVE3.Cache
 {
-    class CacheKeyLru
+    class ImageCacheKeyLru
     {
         Dictionary<(Guid, Int128, Time), LinkedListNode<(Guid, Int128, Time)>> PrimaryKeys { get; } = [];
 
@@ -15,7 +15,7 @@ namespace NiVE3.Cache
 
         LinkedList<(Guid, Int128, Time)> PrimaryKeyLru { get; } = [];
 
-        public CacheKeyLru() { }
+        public ImageCacheKeyLru() { }
 
         public void Add(in Guid objectId, in Int128 key, Time time)
         {
