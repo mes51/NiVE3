@@ -674,16 +674,6 @@ namespace NiVE3.View.Pane
             ViewModel?.ChangeCurrentTimeCommand?.Execute(null);
         }
 
-        private void PreviewTextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            ViewModel?.BeginTextEditCommand?.Execute(null);
-        }
-
-        private void PreviewTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ViewModel?.EndTextEditCommand?.Execute(null);
-        }
-
         private void PreviewTextBox_TextEdited(object sender, TextEditedEventArgs e)
         {
             ViewModel?.TextEditCommand?.Execute(Tuple.Create(e.Offset, e.RemovedText, e.InsertedText));
@@ -694,6 +684,10 @@ namespace NiVE3.View.Pane
             if (e.NewValue is not bool isKeyboardFocused || !isKeyboardFocused)
             {
                 ViewModel?.EndTextEditCommand?.Execute(null);
+            }
+            else
+            {
+                ViewModel?.BeginTextEditCommand?.Execute(null);
             }
         }
 

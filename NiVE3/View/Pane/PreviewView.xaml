@@ -366,8 +366,6 @@
                                     CharacterGeometries="{Binding SelectedTextLayerPreviewTextData.CharacterGeometries}"
                                     EmptyTextCaretGeometry="{Binding SelectedTextLayerPreviewTextData.EmptyTextCaretGeometry}"
                                     IsVerticalText="{Binding SelectedTextLayerPreviewTextData.IsVertical}"
-                                    GotFocus="PreviewTextBox_GotFocus"
-                                    LostFocus="PreviewTextBox_LostFocus"
                                     TextEdited="PreviewTextBox_TextEdited"
                                     IsKeyboardFocusWithinChanged="PreviewTextBox_IsKeyboardFocusWithinChanged">
                     <prt:PreviewTextBox.Style>
