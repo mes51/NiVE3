@@ -23,13 +23,21 @@ namespace NiVE3.Image.Internal
 
         Dictionary<int, List<ReadWriteBuffer<float>>> MaskCache { get; } = [];
 
+        ReadBackBuffer<Float4>? CachedImageReadBackBuffer { get; set; }
+
+        ReadBackBuffer<float>? CachedMaskReadBackBuffer { get; set; }
+
+        UploadBuffer<Float4>? CachedImageUploadBuffer { get; set; }
+
+        UploadBuffer<float>? CachedMaskUploadBuffer { get; set; }
+
         GraphicsDevice Device { get; }
 
         long TotalUsedMemorySize { get; set; }
 
         long CacheLimit { get; }
 
-        readonly object SyncObj = new object();
+        readonly Lock LockObj = new Lock();
 
         private GPUBufferCache(GraphicsDevice device)
         {
@@ -68,7 +76,7 @@ namespace NiVE3.Image.Internal
                 return Device.AllocateReadWriteBuffer<Float4>(size);
             }
 
-            lock (SyncObj)
+            lock (LockObj)
             {
                 if (!ImageCache.TryGetValue(size, out var cacheList))
                 {
@@ -103,7 +111,7 @@ namespace NiVE3.Image.Internal
                 return Device.AllocateReadWriteBuffer<float>(size);
             }
 
-            lock (SyncObj)
+            lock (LockObj)
             {
                 if (!MaskCache.TryGetValue(size, out var cacheList))
                 {
@@ -138,7 +146,7 @@ namespace NiVE3.Image.Internal
                 buffer.Dispose();
             }
 
-            lock (SyncObj)
+            lock (LockObj)
             {
                 if (ImageCache.TryGetValue(buffer.Length, out var cacheList))
                 {
@@ -158,11 +166,195 @@ namespace NiVE3.Image.Internal
                 buffer.Dispose();
             }
 
-            lock (SyncObj)
+            lock (LockObj)
             {
                 if (MaskCache.TryGetValue(buffer.Length, out var cacheList))
                 {
                     cacheList.Add(buffer);
+                }
+                else
+                {
+                    buffer.Dispose();
+                }
+            }
+        }
+
+        public ReadBackBuffer<Float4> RentImageReadBackBuffer(int size)
+        {
+            if (!UseCache || CachedImageReadBackBuffer == null)
+            {
+                return Device.AllocateReadBackBuffer<Float4>(size);
+            }
+
+            lock (LockObj)
+            {
+                if (CachedImageReadBackBuffer.Length >= size)
+                {
+                    var result = CachedImageReadBackBuffer;
+                    CachedImageReadBackBuffer = null;
+                    return result;
+                }
+                else
+                {
+                    CachedImageReadBackBuffer.Dispose();
+                    CachedImageReadBackBuffer = null;
+                    return Device.AllocateReadBackBuffer<Float4>(size);
+                }
+            }
+        }
+
+        public UploadBuffer<Float4> RentImageUploadBuffer(int size)
+        {
+            if (!UseCache || CachedImageUploadBuffer == null)
+            {
+                return Device.AllocateUploadBuffer<Float4>(size);
+            }
+
+            lock (LockObj)
+            {
+                if (CachedImageUploadBuffer.Length >= size)
+                {
+                    var result = CachedImageUploadBuffer;
+                    CachedImageUploadBuffer = null;
+                    return result;
+                }
+                else
+                {
+                    CachedImageUploadBuffer.Dispose();
+                    CachedImageUploadBuffer = null;
+                    return Device.AllocateUploadBuffer<Float4>(size);
+                }
+            }
+        }
+
+        public ReadBackBuffer<float> RentMaskReadBackBuffer(int size)
+        {
+            if (!UseCache || CachedMaskReadBackBuffer == null)
+            {
+                return Device.AllocateReadBackBuffer<float>(size);
+            }
+
+            lock (LockObj)
+            {
+                if (CachedMaskReadBackBuffer.Length >= size)
+                {
+                    var result = CachedMaskReadBackBuffer;
+                    CachedMaskReadBackBuffer = null;
+                    return result;
+                }
+                else
+                {
+                    CachedMaskReadBackBuffer.Dispose();
+                    CachedMaskReadBackBuffer = null;
+                    return Device.AllocateReadBackBuffer<float>(size);
+                }
+            }
+        }
+
+        public UploadBuffer<float> RentMaskUploadBuffer(int size)
+        {
+            if (!UseCache || CachedMaskUploadBuffer == null)
+            {
+                return Device.AllocateUploadBuffer<float>(size);
+            }
+
+            lock (LockObj)
+            {
+                if (CachedMaskUploadBuffer.Length >= size)
+                {
+                    var result = CachedMaskUploadBuffer;
+                    CachedMaskUploadBuffer = null;
+                    return result;
+                }
+                else
+                {
+                    CachedMaskUploadBuffer.Dispose();
+                    CachedMaskUploadBuffer = null;
+                    return Device.AllocateUploadBuffer<float>(size);
+                }
+            }
+        }
+
+        public void ReturnImageReadBackBuffer(ReadBackBuffer<Float4> buffer)
+        {
+            if (!UseCache)
+            {
+                buffer.Dispose();
+                return;
+            }
+
+            lock (LockObj)
+            {
+                if ((CachedImageReadBackBuffer?.Length ?? 0) < buffer.Length)
+                {
+                    CachedImageReadBackBuffer?.Dispose();
+                    CachedImageReadBackBuffer = buffer;
+                }
+                else
+                {
+                    buffer.Dispose();
+                }
+            }
+        }
+
+        public void ReturnImageUploadBuffer(UploadBuffer<Float4> buffer)
+        {
+            if (!UseCache)
+            {
+                buffer.Dispose();
+                return;
+            }
+
+            lock (LockObj)
+            {
+                if ((CachedImageUploadBuffer?.Length ?? 0) < buffer.Length)
+                {
+                    CachedImageUploadBuffer?.Dispose();
+                    CachedImageUploadBuffer = buffer;
+                }
+                else
+                {
+                    buffer.Dispose();
+                }
+            }
+        }
+
+        public void ReturnMaskReadBackBuffer(ReadBackBuffer<float> buffer)
+        {
+            if (!UseCache)
+            {
+                buffer.Dispose();
+                return;
+            }
+
+            lock (LockObj)
+            {
+                if ((CachedMaskReadBackBuffer?.Length ?? 0) < buffer.Length)
+                {
+                    CachedMaskReadBackBuffer?.Dispose();
+                    CachedMaskReadBackBuffer = buffer;
+                }
+                else
+                {
+                    buffer.Dispose();
+                }
+            }
+        }
+
+        public void ReturnMaskUploadBuffer(UploadBuffer<float> buffer)
+        {
+            if (!UseCache)
+            {
+                buffer.Dispose();
+                return;
+            }
+
+            lock (LockObj)
+            {
+                if ((CachedMaskUploadBuffer?.Length ?? 0) < buffer.Length)
+                {
+                    CachedMaskUploadBuffer?.Dispose();
+                    CachedMaskUploadBuffer = buffer;
                 }
                 else
                 {
@@ -229,6 +421,11 @@ namespace NiVE3.Image.Internal
             {
                 buffer.Dispose();
             }
+
+            CachedImageReadBackBuffer?.Dispose();
+            CachedMaskReadBackBuffer?.Dispose();
+            CachedImageUploadBuffer?.Dispose();
+            CachedMaskUploadBuffer?.Dispose();
         }
 
         ~GPUBufferCache()

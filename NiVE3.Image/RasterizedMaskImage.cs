@@ -34,7 +34,7 @@ namespace NiVE3.Image
         /// <summary>
         /// マスク画像データの最小サイズ。GetDataで取得するデータの長さはこれ以上であることが保証されます
         /// </summary>
-        public virtual int DataLength => Width * Height;
+        public virtual int DataLength { get; }
 
         /// <summary>
         /// 画像の(0, 0)となる位置を表す値
@@ -55,6 +55,7 @@ namespace NiVE3.Image
 
             Width = width;
             Height = height;
+            DataLength = width * height;
         }
 
         /// <summary>

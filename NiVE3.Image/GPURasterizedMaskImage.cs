@@ -38,13 +38,18 @@ namespace NiVE3.Image
         /// <exception cref="ArgumentOutOfRangeException">データのサイズが幅*高さ未満です</exception>
         public GPURasterizedMaskImage(int width, int height, GraphicsDevice device, ReadOnlySpan<float> data) : base(width, height)
         {
-            if (data.Length < width * height)
+            var length = width * height;
+            if (data.Length < length)
             {
                 throw new ArgumentOutOfRangeException(nameof(data));
             }
 
-            Data = GPUBufferCache.GetInstance(device).RentMaskBuffer(width * height);
-            Data.CopyFrom(data[..(width * height)]);
+            var cache = GPUBufferCache.GetInstance(device);
+            Data = cache.RentMaskBuffer(length);
+            var buffer = cache.RentMaskUploadBuffer(length);
+            data[..length].CopyTo(buffer.Span);
+            buffer.CopyTo(Data, 0, 0, length);
+            cache.ReturnMaskUploadBuffer(buffer);
         }
 
         /// <summary>
@@ -68,7 +73,13 @@ namespace NiVE3.Image
         public override float[] GetData()
         {
             var data = ArrayPool<float>.Shared.Rent(Data.Length);
-            Data.CopyTo(data[..Data.Length]);
+
+            var cache = GPUBufferCache.GetInstance(Data.GraphicsDevice);
+            var buffer = cache.RentMaskReadBackBuffer(DataLength);
+            Data.CopyTo(buffer, 0, 0, DataLength);
+            buffer.Span[..DataLength].CopyTo(data);
+            cache.ReturnMaskReadBackBuffer(buffer);
+
             return data;
         }
 
@@ -88,7 +99,13 @@ namespace NiVE3.Image
         public ManagedRasterizedMaskImage CopyToCpu()
         {
             var result = new ManagedRasterizedMaskImage(Width, Height, false);
-            Data.CopyTo(result.Data.AsSpan(0, Data.Length));
+
+            var cache = GPUBufferCache.GetInstance(Data.GraphicsDevice);
+            var buffer = cache.RentMaskReadBackBuffer(DataLength);
+            Data.CopyTo(buffer, 0, 0, DataLength);
+            buffer.Span[..DataLength].CopyTo(result.Data);
+            cache.ReturnMaskReadBackBuffer(buffer);
+
             return result;
         }
 

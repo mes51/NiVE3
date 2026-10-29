@@ -40,14 +40,19 @@ namespace NiVE3.Image
         /// <exception cref="ArgumentOutOfRangeException">データのサイズが幅*高さ未満です</exception>
         public NGPUImage(int width, int height, GraphicsDevice device, ReadOnlySpan<Vector4> data) : base(width, height)
         {
-            if (data.Length < width * height)
+            var length = width * height;
+            if (data.Length < length)
             {
                 throw new ArgumentOutOfRangeException(nameof(data));
             }
 
             var float4Data = MemoryMarshal.Cast<Vector4, Float4>(data);
-            Data = GPUBufferCache.GetInstance(device).RentImageBuffer(width * height);
-            Data.CopyFrom(float4Data[..(width * height)]);
+            var cache = GPUBufferCache.GetInstance(device);
+            Data = cache.RentImageBuffer(length);
+            var buffer = cache.RentImageUploadBuffer(length);
+            float4Data[..length].CopyTo(buffer.Span);
+            buffer.CopyTo(Data, 0, 0, length);
+            cache.ReturnImageUploadBuffer(buffer);
         }
 
         /// <summary>
@@ -81,7 +86,12 @@ namespace NiVE3.Image
         {
             var result = ArrayPool<Vector4>.Shared.Rent(DataLength);
             var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result.AsSpan());
-            Data.CopyTo(float4Data[..DataLength]);
+
+            var cache = GPUBufferCache.GetInstance(Data.GraphicsDevice);
+            var buffer = cache.RentImageReadBackBuffer(DataLength);
+            Data.CopyTo(buffer, 0, 0, DataLength);
+            buffer.Span[..DataLength].CopyTo(float4Data);
+            cache.ReturnImageReadBackBuffer(buffer);
 
             return result;
         }
@@ -98,7 +108,12 @@ namespace NiVE3.Image
                 Origin = Origin
             };
             var float4Data = MemoryMarshal.Cast<Vector4, Float4>(result.GetDataSpan());
-            Data.CopyTo(float4Data);
+
+            var cache = GPUBufferCache.GetInstance(Data.GraphicsDevice);
+            var buffer = cache.RentImageReadBackBuffer(DataLength);
+            Data.CopyTo(buffer, 0, 0, DataLength);
+            buffer.Span[..DataLength].CopyTo(float4Data);
+            cache.ReturnImageReadBackBuffer(buffer);
 
             return result;
         }

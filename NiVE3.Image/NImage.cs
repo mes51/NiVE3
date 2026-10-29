@@ -39,7 +39,7 @@ namespace NiVE3.Image
         /// <summary>
         /// 画像データの最小サイズ。GetDataで取得するデータの長さはこれ以上であることが保証されます
         /// </summary>
-        public virtual int DataLength => Width * Height;
+        public virtual int DataLength { get; }
 
         /// <summary>
         /// このインスタンスが破棄済みかどうか
@@ -55,6 +55,7 @@ namespace NiVE3.Image
 
             Width = width;
             Height = height;
+            DataLength = width * height;
         }
 
         /// <summary>
