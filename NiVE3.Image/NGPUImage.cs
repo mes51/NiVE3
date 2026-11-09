@@ -69,6 +69,13 @@ namespace NiVE3.Image
             context.For(width, height, new ClearImage(Data, width, color));
         }
 
+        private NGPUImage(NGPUImage source) : base(source.Width, source.Height)
+        {
+            Origin = source.Origin;
+            Data = GPUBufferCache.GetInstance(source.Data.GraphicsDevice).RentImageBuffer(source.DataLength);
+            source.Data.CopyTo(Data);
+        }
+
         /// <summary>
         /// 画像をCPUにコピーして複製します
         /// </summary>
@@ -145,6 +152,11 @@ namespace NiVE3.Image
                 // NOTE: ファイナライザから呼ばれたときはすでにバッファをDisposeされている可能性があるので、キャッシュには戻さない
                 Data?.Dispose();
             }
+        }
+
+        internal NGPUImage CopyToGpu()
+        {
+            return new NGPUImage(this);
         }
     }
 

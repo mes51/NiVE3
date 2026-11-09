@@ -35,7 +35,7 @@ namespace NiVE3.Image.Internal
 
         long TotalUsedMemorySize { get; set; }
 
-        long CacheLimit { get; }
+        public long CacheLimit { get; }
 
         readonly Lock LockObj = new Lock();
 
@@ -66,6 +66,14 @@ namespace NiVE3.Image.Internal
                     i.Dispose();
                 }
                 Instances.Clear();
+            }
+        }
+
+        public static void ReleaseDevice(GraphicsDevice device)
+        {
+            if (Instances.Remove(device, out var cache))
+            {
+                cache.Dispose();
             }
         }
 

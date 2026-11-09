@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ComputeSharp;
+using NiVE3.Cache;
 using NiVE3.Config;
+using NiVE3.Image.Internal;
 using NiVE3.Plugin.Interfaces;
 using Prism.Mvvm;
 
@@ -56,7 +58,20 @@ namespace NiVE3.Model
 
         public void Dispose()
         {
-            currentDevice?.Dispose();
+            ReleaseDevice(currentDevice);
+            currentDevice = null;
+        }
+
+        static void ReleaseDevice(GraphicsDevice? device)
+        {
+            if (device == null)
+            {
+                return;
+            }
+
+            ImageCache.ReleaseGpuResources();
+            GPUBufferCache.ReleaseDevice(device);
+            device.Dispose();
         }
 
         private void GraphicsDevice_DeviceLost(object? sender, DeviceLostEventArgs e)
@@ -75,7 +90,7 @@ namespace NiVE3.Model
             currentDevice = null;
             if (CurrentDevice != oldDevice && oldDevice != GraphicsDevice.GetDefault())
             {
-                oldDevice.Dispose();
+                ReleaseDevice(oldDevice);
             }
         }
     }

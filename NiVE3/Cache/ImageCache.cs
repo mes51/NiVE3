@@ -18,17 +18,52 @@ namespace NiVE3.Cache
     {
         static readonly int ImageElementSize = Marshal.SizeOf<Vector4>();
 
+        const int MinReuseCountForPromoteOnAdd = 2;
+
+        const long DiscreteGpuMinimumDedicatedMemory = 1024L * Const.MiB;
+
         static ImageCache Instance { get; } = new ImageCache();
 
         static bool IsCompressCache { get; set; }
 
+        public static double GpuTierLimitRate
+        {
+            get => Instance.GpuTierLimitRateValue;
+            set
+            {
+                Instance.ReleaseGpuTier();
+                Instance.GpuTierDevice = null;
+                Instance.GpuTierLimitRateValue = value;
+            }
+        }
+
+        public static long GpuTierBytes => Instance.GpuCachedSize;
+
+        public static long GpuTierLimitBytes => Instance.GpuCacheLimit;
+
         long CacheLimit { get; set; } = Math.Min(16L * 1024 * Const.MiB, SystemInfo.MaxCacheLimit);
 
-        private DualKeyDictionary<Guid, (Time, Int128), (Guid, Int128), (IDisposable, long, ROI)> CachedImages { get; } = [];
+        DualKeyDictionary<Guid, (Time, Int128), (Guid, Int128), CacheEntry> CachedImages { get; } = [];
 
-        private long CachedSize { get; set; }
+        long CachedSize { get; set; }
 
-        private ImageCacheKeyLru KeyLru { get; } = new ImageCacheKeyLru();
+        ImageCacheKeyLru KeyLru { get; } = new ImageCacheKeyLru();
+
+        double GpuTierLimitRateValue { get; set; } = 0.5;
+
+        bool UseGpuTier { get; set; }
+
+        LinkedList<CacheEntry> GpuLru { get; } = [];
+
+        long GpuCachedSize { get; set; }
+
+        long GpuCacheLimit { get; set; }
+
+        GraphicsDevice? GpuTierDevice { get; set; }
+
+        long AccessClock { get; set; }
+
+        Dictionary<Guid, ObjectHistory> Histories { get; } = [];
 
         private ImageCache()
         {
@@ -36,16 +71,17 @@ namespace NiVE3.Cache
             // TODO: GPUのバッファのキャッシュ周りの設定を他に持って行くかどうか検討する
             GPUBufferCache.CacheLimitRate = ApplicationSetting.Setting.GpuCacheLimitRate * 0.01;
             GPUBufferCache.SetUseCache(ApplicationSetting.Setting.UseGpuCache);
+            UseGpuTier = ApplicationSetting.Setting.UseGpuCache;
 
             ApplicationSetting.Setting.UpdateSetting += Setting_UpdateSetting;
         }
 
         private bool TryGetInternal(in Guid objectId, in Int128 key, Time time, GraphicsDevice? device, out (NImage, ROI) image)
         {
-            var result = CachedImages.TryGetValue(objectId, (time, key), out var compressedImage);
-            if (result)
+            var result = CachedImages.TryGetValue(objectId, (time, key), out var entry);
+            if (result && entry != null)
             {
-                image = Decompress(compressedImage, device);
+                image = GetImage(objectId, entry, device, false);
                 KeyLru.Add(objectId, key, time);
             }
             else
@@ -59,7 +95,8 @@ namespace NiVE3.Cache
         {
             if (CachedImages.TryGetValues((objectId, key), out var values))
             {
-                image = Decompress(values[0], device);
+                var entry = values[0];
+                image = GetImage(objectId, entry, device, true);
                 KeyLru.UpdateLastAccessBySecondaryKey(objectId, key);
                 return true;
             }
@@ -72,7 +109,7 @@ namespace NiVE3.Cache
 
         private void AddInternal(Guid objectId, in Int128 key, Time time, NImage image, ROI roi)
         {
-            (IDisposable, int, ROI) compressedImage;
+            CacheEntry entry;
             var managedImage = image.ToManaged();
             // NOTE: 実際に確保したメモリの容量で判定する
             var managedImageSize = managedImage.Data.Length * ImageElementSize;
@@ -82,7 +119,7 @@ namespace NiVE3.Cache
                 var size = qoiImage.GetAllocatedSize();
                 if (size < managedImageSize)
                 {
-                    compressedImage = (qoiImage, size, roi);
+                    entry = new CacheEntry(qoiImage, size, roi);
                     if (image != managedImage)
                     {
                         managedImage.Dispose();
@@ -95,7 +132,7 @@ namespace NiVE3.Cache
                     {
                         managedImage = (NManagedImage)managedImage.Copy();
                     }
-                    compressedImage = (managedImage, managedImageSize, roi);
+                    entry = new CacheEntry(managedImage, managedImageSize, roi);
                 }
             }
             else
@@ -104,7 +141,7 @@ namespace NiVE3.Cache
                 {
                     managedImage = (NManagedImage)managedImage.Copy();
                 }
-                compressedImage = (managedImage, managedImageSize, roi);
+                entry = new CacheEntry(managedImage, managedImageSize, roi);
             }
             if (CachedImages.ContainsUpdateKey(objectId))
             {
@@ -113,22 +150,27 @@ namespace NiVE3.Cache
                 {
                     foreach (var k in oldImageKeys)
                     {
-                        var oldImage = CachedImages[objectId, k];
+                        var oldEntry = CachedImages[objectId, k];
                         CachedImages.Remove(objectId, k);
-                        CachedSize -= oldImage.Item2;
-                        oldImage.Item1.Dispose();
+                        CachedSize -= oldEntry.Size;
+                        DisposeEntry(oldEntry);
                         KeyLru.Remove(objectId, k.Item2, k.Item1);
                     }
                 }
 
-                CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
+                CachedImages.Add(objectId, (time, key), (objectId, key), entry);
             }
             else
             {
-                CachedImages.Add(objectId, (time, key), (objectId, key), compressedImage);
+                CachedImages.Add(objectId, (time, key), (objectId, key), entry);
             }
             KeyLru.Add(objectId, key, time);
-            CachedSize += compressedImage.Item2;
+            CachedSize += entry.Size;
+
+            if (UseGpuTier && image is NGPUImage gpuImage)
+            {
+                PromoteOnAdd(objectId, entry, gpuImage);
+            }
 
             while (CachedSize > CacheLimit)
             {
@@ -138,9 +180,9 @@ namespace NiVE3.Cache
                     break;
                 }
 
-                var oldImage = CachedImages[primaryKey.Item1, (primaryKey.Item3, primaryKey.Item2)];
-                oldImage.Item1.Dispose();
-                CachedSize -= oldImage.Item2;
+                var oldEntry = CachedImages[primaryKey.Item1, (primaryKey.Item3, primaryKey.Item2)];
+                CachedSize -= oldEntry.Size;
+                DisposeEntry(oldEntry);
                 CachedImages.Remove(primaryKey.Item1, (primaryKey.Item3, primaryKey.Item2));
             }
         }
@@ -149,7 +191,7 @@ namespace NiVE3.Cache
         {
             if (CachedImages.ContainsUpdateKey(objectId))
             {
-                return CachedImages.GetUpdateTargetKeys(objectId).Select(t => t.Item1).ToArray();
+                return [..CachedImages.GetUpdateTargetKeys(objectId).Select(t => t.Item1)];
             }
             else
             {
@@ -166,23 +208,205 @@ namespace NiVE3.Cache
 
             foreach (var k in CachedImages.GetUpdateTargetKeys(objectId))
             {
-                var image = CachedImages[objectId, k];
-                image.Item1.Dispose();
-                CachedSize -= image.Item2;
+                var entry = CachedImages[objectId, k];
+                CachedSize -= entry.Size;
+                DisposeEntry(entry);
                 KeyLru.Remove(objectId, k.Item2, k.Item1);
             }
             CachedImages.Remove(objectId);
+            Histories.Remove(objectId);
         }
 
         private void ClearAllInternal()
         {
-            foreach (var image in CachedImages.Values)
+            foreach (var entry in CachedImages.Values)
             {
-                image.Item1.Dispose();
+                DisposeEntry(entry);
             }
             CachedImages.Clear();
             KeyLru.Clear();
+            Histories.Clear();
             CachedSize = 0;
+        }
+
+        private (NImage, ROI) GetImage(in Guid objectId, CacheEntry entry, GraphicsDevice? device, bool isTimeIndependentKey)
+        {
+            if (device == null || !UseGpuTier)
+            {
+                return Decompress(entry, device);
+            }
+
+            BindGpuTierDevice(device);
+
+            var previousAccess = entry.LastAccess;
+            AccessClock++;
+            entry.LastAccess = AccessClock;
+            entry.HitCount++;
+            var history = GetHistory(objectId);
+            history.HitsSinceLastAdd++;
+            history.LastHit = AccessClock;
+
+            if (entry.GpuImage != null)
+            {
+                GpuLru.Remove(entry.GpuNode!);
+                GpuLru.AddFirst(entry.GpuNode!);
+                return (entry.GpuImage.CopyToGpu(), entry.Roi);
+            }
+
+            var (image, roi) = Decompress(entry, device);
+            var gpuImage = image.ToGpu(device);
+            if (gpuImage != image)
+            {
+                image.Dispose();
+            }
+
+            var wantPromote = isTimeIndependentKey || entry.HitCount >= 2;
+            if (!wantPromote || !TryPromote(entry, gpuImage, previousAccess))
+            {
+                return (gpuImage, roi);
+            }
+
+            return (gpuImage.CopyToGpu(), roi);
+        }
+
+        private void PromoteOnAdd(in Guid objectId, CacheEntry entry, NGPUImage gpuImage)
+        {
+            var history = GetHistory(objectId);
+            var previousEntryReuseCount = history.HitsSinceLastAdd;
+            var lastHit = history.LastHit;
+            var previousAdd = history.LastAdd;
+            AccessClock++;
+            history.HitsSinceLastAdd = 0;
+            history.LastAdd = AccessClock;
+
+            for (var i = history.PromotedOnAdd.Count - 1; i >= 0; i--)
+            {
+                var oldEntry = history.PromotedOnAdd[i];
+                if (oldEntry.GpuImage != null && oldEntry.LastAccess >= previousAdd)
+                {
+                    continue;
+                }
+
+                ReleaseGpuImage(oldEntry);
+                history.PromotedOnAdd.RemoveAt(i);
+            }
+
+            if (previousEntryReuseCount < MinReuseCountForPromoteOnAdd)
+            {
+                return;
+            }
+
+            BindGpuTierDevice(gpuImage.Data.GraphicsDevice);
+            entry.LastAccess = AccessClock;
+            var gpuCopy = gpuImage.CopyToGpu();
+            if (!TryPromote(entry, gpuCopy, lastHit))
+            {
+                gpuCopy.Dispose();
+                return;
+            }
+
+            history.PromotedOnAdd.Add(entry);
+        }
+
+        private bool TryPromote(CacheEntry entry, NGPUImage gpuImage, long candidateLastAccess)
+        {
+            var size = (long)gpuImage.DataLength * ImageElementSize;
+            if (size > GpuCacheLimit)
+            {
+                return false;
+            }
+
+            var shortage = GpuCachedSize + size - GpuCacheLimit;
+            for (var node = GpuLru.Last; shortage > 0 && node != null; node = node.Previous)
+            {
+                if (node.Value.LastAccess >= candidateLastAccess)
+                {
+                    return false;
+                }
+                shortage -= node.Value.GpuSize;
+            }
+
+            ReleaseGpuImage(entry);
+            entry.GpuImage = gpuImage;
+            entry.GpuNode = GpuLru.AddFirst(entry);
+            GpuCachedSize += size;
+
+            while (GpuCachedSize > GpuCacheLimit && GpuLru.Last != null && GpuLru.Last.Value != entry)
+            {
+                ReleaseGpuImage(GpuLru.Last.Value);
+            }
+
+            return true;
+        }
+
+        private ObjectHistory GetHistory(in Guid objectId)
+        {
+            if (!Histories.TryGetValue(objectId, out var history))
+            {
+                history = new ObjectHistory();
+                Histories.Add(objectId, history);
+            }
+
+            return history;
+        }
+
+        private void BindGpuTierDevice(GraphicsDevice device)
+        {
+            if (GpuTierDevice == device)
+            {
+                return;
+            }
+
+            ReleaseGpuTier();
+            GpuTierDevice = device;
+            GpuCacheLimit = (long)(CalcGpuTierBudgetBasis(device) * GpuTierLimitRateValue);
+        }
+
+        // TODO: GPUBufferCache と使用量を共有化(ImageCache 優先)する
+        private static long CalcGpuTierBudgetBasis(GraphicsDevice device)
+        {
+            var poolLimit = GPUBufferCache.GetInstance(device).CacheLimit;
+            // NOTE: dGPU かどうかの判定が GraphicsDevice から出来ないので、DedicatedMemorySize のサイズで判定する
+            if (device.DedicatedMemorySize < DiscreteGpuMinimumDedicatedMemory)
+            {
+                return poolLimit;
+            }
+            else
+            {
+                return Math.Min(poolLimit, (long)(device.DedicatedMemorySize * GPUBufferCache.CacheLimitRate));
+            }
+        }
+
+        private void ReleaseGpuImage(CacheEntry entry)
+        {
+            if (entry.GpuImage == null)
+            {
+                return;
+            }
+
+            GpuCachedSize -= entry.GpuSize;
+            if (entry.GpuNode != null)
+            {
+                GpuLru.Remove(entry.GpuNode);
+            }
+            entry.GpuImage.Dispose();
+            entry.GpuImage = null;
+            entry.GpuNode = null;
+        }
+
+        private void ReleaseGpuTier()
+        {
+            while (GpuLru.First != null)
+            {
+                ReleaseGpuImage(GpuLru.First.Value);
+            }
+            GpuCachedSize = 0;
+        }
+
+        private void DisposeEntry(CacheEntry entry)
+        {
+            ReleaseGpuImage(entry);
+            entry.Image.Dispose();
         }
 
         private void Setting_UpdateSetting(object? sender, EventArgs e)
@@ -193,6 +417,10 @@ namespace NiVE3.Cache
                 ClearAllInternal();
                 IsCompressCache = ApplicationSetting.Setting.IsCompressCache;
             }
+
+            ReleaseGpuTier();
+            GpuTierDevice = null;
+            UseGpuTier = ApplicationSetting.Setting.UseGpuCache;
 
             // TODO: GPUのバッファのキャッシュ周りの設定を他に持って行くかどうか検討する
             GPUBufferCache.CacheLimitRate = ApplicationSetting.Setting.GpuCacheLimitRate * 0.01;
@@ -229,24 +457,71 @@ namespace NiVE3.Cache
             Instance.ClearAllInternal();
         }
 
-        static (NImage, ROI) Decompress((IDisposable, long, ROI) compressedImage, GraphicsDevice? device)
+        public static void ReleaseGpuResources()
         {
-            var (image, _, roi) = compressedImage;
-            if (image is NManagedImage notCompressed)
+            Instance.ReleaseGpuTier();
+            Instance.GpuTierDevice = null;
+        }
+
+        public static bool HasGpuCopy(in Guid objectId, in Int128 key)
+        {
+            return Instance.CachedImages.TryGetValues((objectId, key), out var values) && values[0].GpuImage != null;
+        }
+
+        static (NImage, ROI) Decompress(CacheEntry entry, GraphicsDevice? device)
+        {
+            if (entry.Image is NManagedImage notCompressed)
             {
                 if (device != null)
                 {
-                    return (notCompressed.ToGpu(device), roi);
+                    return (notCompressed.ToGpu(device), entry.Roi);
                 }
                 else
                 {
-                    return (notCompressed.Copy(), roi);
+                    return (notCompressed.Copy(), entry.Roi);
                 }
             }
             else
             {
-                return (Qoi.Decode((SlicedQoiImage)image), roi);
+                return (Qoi.Decode((SlicedQoiImage)entry.Image), entry.Roi);
             }
+        }
+
+        sealed class CacheEntry
+        {
+            public IDisposable Image { get; }
+
+            public long Size { get; }
+
+            public ROI Roi { get; }
+
+            public NGPUImage? GpuImage { get; set; }
+
+            public LinkedListNode<CacheEntry>? GpuNode { get; set; }
+
+            public long GpuSize => GpuImage != null ? (long)GpuImage.DataLength * ImageElementSize : 0;
+
+            public int HitCount { get; set; }
+
+            public long LastAccess { get; set; }
+
+            public CacheEntry(IDisposable image, long size, ROI roi)
+            {
+                Image = image;
+                Size = size;
+                Roi = roi;
+            }
+        }
+
+        sealed class ObjectHistory
+        {
+            public int HitsSinceLastAdd { get; set; }
+
+            public long LastHit { get; set; }
+
+            public long LastAdd { get; set; }
+
+            public List<CacheEntry> PromotedOnAdd { get; } = [];
         }
     }
 }
