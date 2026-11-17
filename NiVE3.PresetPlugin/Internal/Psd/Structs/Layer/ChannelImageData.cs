@@ -55,7 +55,7 @@ namespace NiVE3.PresetPlugin.Internal.Psd.Structs.Layer
                 return null;
             }
 
-            var channelIndices = targetChannelIds.Take(Header.ColorChannels).Select(id => ChannelInformations.FindIndex(ci => ci.Id == id)).ToArray();
+            var channelIndices = targetChannelIds.Select(id => ChannelInformations.FindIndex(ci => ci.Id == id)).ToArray();
 
             var compressionMethods = channelIndices.Select(i => i > -1 && DataRanges[i].length > 0 ? CompressionMethods[i] : int.MinValue).ToArray();
             var imageDataBegins = channelIndices.Select(i => i > -1 ? DataRanges[i].begin : 0L).ToArray();
